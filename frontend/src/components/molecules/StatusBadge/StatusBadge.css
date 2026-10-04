@@ -1,0 +1,17 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d7dce5;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  background: #ffffff;
+}
+
+.status-badge--online {
+  border-color: #89c9a5;
+}
+
+.status-badge--offline {
+  border-color: #e6a2a2;
+}

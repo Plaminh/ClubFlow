@@ -1,0 +1,37 @@
+.project-overview {
+  background: #ffffff;
+  border: 1px solid #e2e6ee;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(23, 32, 51, 0.06);
+}
+
+.project-overview__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.project-overview__header h2 {
+  margin: 0.25rem 0 0;
+}
+
+.project-overview__eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-overview__stack {
+  margin: 1.5rem 0 0;
+  padding-left: 1.25rem;
+  line-height: 1.8;
+}
+
+.project-overview__error {
+  margin: 1rem 0 0;
+  color: #9b2c2c;
+}
