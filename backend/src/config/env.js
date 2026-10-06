@@ -16,6 +16,7 @@ const requiredVariables = [
   'DB_NAME',
   'DB_USER',
   'DB_PASSWORD',
+  'JWT_SECRET',
 ];
 
 for (const variable of requiredVariables) {

@@ -13,6 +13,7 @@
     "test": "npm run test:run --workspace frontend && npm run test:run --workspace backend",
     "test:frontend": "npm run test --workspace frontend",
     "test:backend": "npm run test --workspace backend",
+    "verify": "npm run test && npm run build",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
