@@ -54,7 +54,7 @@ describe('Upload Middleware', () => {
       });
 
       // Error handling middleware to catch Multer errors
-      app.use((err, req, res, next) => {
+      app.use((err, _req, res, _next) => {
         if (err.message === 'File too large') {
           return res.status(413).json({ error: err.message });
         }
