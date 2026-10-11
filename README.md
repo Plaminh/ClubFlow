@@ -7,7 +7,7 @@ Course full-stack web application scaffold.
 - Frontend: React + Vite
 - Frontend architecture: Atomic Design
 - Backend: Node.js + Express
-- Backend architecture: Route → Controller → Service → Repository → Model
+- Backend architecture: Route → Validator / Middleware → Controller → Service → Repository → PostgreSQL
 - Database: PostgreSQL (`pg`)
 - Tests: Vitest
 - Environment: Docker Compose for PostgreSQL
@@ -26,6 +26,8 @@ specs/       feature specifications generated during SDD
 ```
 
 The project intentionally uses one local `.env` file at repository root. Frontend Vite, backend Node.js, and Docker Compose all read from that root configuration.
+
+Models represent domain entities and behavior; they are not a mandatory processing layer after repositories. For canonical implementation conventions, see [`AGENTS.md`](AGENTS.md). For an explanatory overview, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Prerequisites
 
@@ -122,6 +124,24 @@ npm run test:backend
 ```
 
 No `.env.test` is used. Vitest's `environment: node` and `environment: jsdom` describe the JavaScript runtime used by tests, not separate environment-variable files.
+
+## Local quality gate
+
+Run individual checks from the repository root:
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+Run the complete local quality gate with:
+
+```bash
+npm run verify
+```
+
+`npm run verify` runs lint → test → build. See [`docs/QUALITY-GATE.md`](docs/QUALITY-GATE.md) for the automated and human checks that define completion.
 
 ## Database workflow
 

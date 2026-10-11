@@ -1,15 +1,12 @@
 # Project Agent Rules
 
-## Technology Stack
+## Project Stack
 
 Use the existing stack:
 
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Database: PostgreSQL
-- Testing: Vitest
-- Containerization: Docker
-- Specification workflow: GitHub Spec Kit
+- Frontend: React, Vite, Atomic Design, Vitest, React Testing Library, and ESLint
+- Backend: Node.js, Express, PostgreSQL, and Vitest
+- Development: Docker, GitHub Spec Kit (Speckit), and Jira
 
 Do NOT replace or introduce alternative frameworks, databases, ORMs, or test frameworks without explicit approval.
 
@@ -42,8 +39,9 @@ Rules:
 
 - Lower-level components MUST NOT import higher-level components.
 - Atoms and molecules MUST NOT perform backend API calls.
-- API access MUST go through frontend services.
-- Shared HTTP configuration MUST go through the shared API client.
+- Reusable API calls MUST go through `frontend/src/services`.
+- Shared HTTP behavior and configuration MUST go through `apiClient`.
+- Components MUST NOT contain unrelated data-access logic.
 - Do NOT introduce Redux or another global state library without an approved requirement.
 
 ---
@@ -58,15 +56,18 @@ Models represent domain entities and domain-specific behavior.
 
 Rules:
 
-- Routes MUST NOT contain business logic or database access.
+- Routes define endpoints and compose middleware and controllers; they MUST NOT contain business logic or database access.
+- Validators and middleware validate or preprocess requests before business logic runs.
 - Controllers MUST handle HTTP concerns only.
 - Controllers MUST NOT contain business logic or access the database directly.
 - Services MUST contain business workflows and MUST NOT execute SQL or access Express `req`/`res`.
 - Repositories MUST own application data-access queries.
 - Repositories MAY map database rows into domain models.
 - Models MUST NOT execute SQL, access the PostgreSQL pool, access Express `req`/`res`, or act as repositories.
+- Models are domain entities, not a mandatory processing layer after repositories.
 - Untrusted API input MUST be validated before reaching business logic.
 - Application data-access SQL MUST remain in repositories.
+- Do NOT introduce an ORM without explicit approval.
 
 Database infrastructure MAY execute SQL required for migrations, initialization, transactions, and infrastructure-level operations.
 
@@ -80,9 +81,11 @@ Do NOT silently rewrite migrations that have already been shared or used by the 
 
 Seeds are for development and demo data only.
 
-Use Vitest only.
+Use Vitest for frontend and backend automated tests. Use React Testing Library for frontend component and interaction tests when applicable. Backend coverage may include unit and integration tests.
 
 New or modified business rules, validators, important API behavior, domain model behavior, and critical UI interactions MUST include relevant automated tests when their observable behavior changes.
+
+Where practical, tests SHOULD verify observable behavior rather than implementation details.
 
 Do NOT create meaningless tests only to increase test count or coverage.
 
@@ -104,6 +107,27 @@ Implementation MUST remain consistent with:
 If these artifacts conflict, report the conflict instead of guessing.
 
 Architecture changes MUST first be justified in `plan.md`.
+
+---
+
+## Team Workflow and Git Conventions
+
+Use short, descriptive branch names:
+
+- `feature/<short-name>`
+- `fix/<short-name>`
+- `docs/<short-name>`
+- `test/<short-name>`
+- `chore/<short-name>`
+
+Use commits in the form `<type>: <brief description>`, for example:
+
+- `feat: add login endpoint`
+- `fix: handle expired token`
+- `test: add upload middleware tests`
+- `docs: update quality gate`
+
+Changes SHOULD be understandable by another team member. Important or non-trivial changes SHOULD be checked against the approved specification and receive human review. AI-generated code MUST be reviewed before acceptance, and the team MUST NOT merge code it cannot explain.
 
 ---
 

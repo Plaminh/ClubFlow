@@ -1,5 +1,7 @@
 # Architecture
 
+This document explains the project structure. For canonical implementation conventions and coding rules, see [`AGENTS.md`](../AGENTS.md).
+
 ## Frontend
 
 The frontend follows Atomic Design for reusable UI composition:

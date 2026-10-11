@@ -9,6 +9,8 @@ Sync Impact Report:
 -->
 # Web Application Development Constitution
 
+This constitution defines high-level project governance. For canonical implementation conventions and coding rules, see [`AGENTS.md`](../../AGENTS.md).
+
 ## Core Principles
 
 ### I. Fixed Technology Stack
