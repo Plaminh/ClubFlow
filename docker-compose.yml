@@ -1,7 +1,9 @@
+name: clubflow
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: webapp_postgres
+    container_name: clubflow_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}

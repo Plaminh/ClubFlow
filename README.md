@@ -61,7 +61,9 @@ Copy-Item .env.example .env
 
 Then update values if needed.
 
-`.env.example` uses `DB_NAME=clubflow` for new setups. If you already have a local PostgreSQL volume created under the earlier scaffold name (`webapp_db`), keep `DB_NAME` in your existing `.env` unchanged: PostgreSQL only creates the database named in `DB_NAME` when the Docker volume is first initialized.
+`.env.example` uses `DB_NAME=clubflow` and `DB_USER=clubflow_user`. Docker Compose pins the project name to `clubflow`, so the container is `clubflow_postgres` and the data volume is `clubflow_postgres_data`, regardless of the directory name.
+
+PostgreSQL only creates the database and role named in `DB_NAME` and `DB_USER` when the Docker volume is first initialized; changing these values later does not rename an existing database or role. If you still have a local volume from the earlier scaffold (`web-application-development_postgres_data`, database `webapp_db`, user `webapp_user`), do not just edit `.env`: back the old database up with `pg_dump`, start the new `clubflow` environment, and restore the backup into it with `pg_restore --no-owner`.
 
 ### 3. Start PostgreSQL
 

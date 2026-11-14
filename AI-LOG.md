@@ -69,3 +69,28 @@ Changed: npm package names (`clubflow`, `clubflow-frontend`, `clubflow-backend`)
 Rejected: Renaming the Docker Compose project, container, or existing local database, and editing the constitution title, because these need a manual migration or team approval.
 
 By hand: The team reviews the diff before committing; repository, directory, remote, and database renames are left as manual follow-up actions.
+
+---
+
+## 2026-11-14 — Phase 0A.2 — Docker & PostgreSQL Migration
+
+Tool: Claude Code
+
+Asked for: Migrate the local Docker Compose project, PostgreSQL container, database, user, and volume from the earlier scaffold names to ClubFlow names without losing data or touching unrelated Docker resources.
+
+Kept: PostgreSQL 16 (`postgres:16-alpine`), the local port, all passwords and secrets, application code, and the old container and volume (stopped, kept as rollback resources).
+
+Changed: `docker-compose.yml` (explicit project name `clubflow`, container `clubflow_postgres`), `DB_USER` in `.env.example`, `DB_NAME` and `DB_USER` in the local `.env`, and the README note about database naming. A new volume `clubflow_postgres_data` was initialized and the old database was restored into it from a verified `pg_dump` backup stored outside the repository.
+
+Rejected: Reusing the old data directory under the new names, and deleting the old container, volume, or network.
+
+By hand: The migration plan was approved by the team before any Docker resource was created; the team reviews the diff before committing and decides when to remove the old rollback resources.
+
+Cleanup follow-up (2026-11-14):
+
+- Legacy container `webapp_postgres` was removed.
+- Legacy volume `web-application-development_postgres_data` and network `web-application-development_default` were removed after verification.
+- The temporary bind-mount stub was removed.
+- The new ClubFlow PostgreSQL environment remains healthy.
+- The verified database backup was retained.
+- Rollback now requires restoring the backup rather than restarting the old container.
