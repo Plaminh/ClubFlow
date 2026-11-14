@@ -1,0 +1,32 @@
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-card);
+  color: var(--color-muted);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.empty-state__title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.empty-state__body {
+  max-width: 60ch;
+}
+
+.empty-state__body > :last-child {
+  margin-bottom: 0;
+}
+
+.empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

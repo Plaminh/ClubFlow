@@ -192,3 +192,27 @@ Verified:
 - Browser (headless Microsoft Edge against the Vite dev server): all six paths rendered the expected `<h1>`; `/` showed the real "API unavailable" state because the backend was not running. Headless Edge cannot shrink its window below 492 px, so widths were tested by loading each route in an iframe of exact width (360, 640, 768, 853, 1024, 1280 CSS px) through a same-origin local proxy: no horizontal overflow on any route. 640/853/1024 approximate a 1280 px window at 200/150/125% zoom; real browser zoom was not tested.
 
 By hand: The team reviews the diff, opens the routes in a browser, and commits; this entry does not mean the phase has been committed.
+
+---
+
+## 2026-11-14 — UI-1.2 — App Shell & Shared Components
+
+Tool: Claude Code
+
+Asked for: Build the shared application shell (layout, header, navigation, demo session for Visitor/Executive/Applicant/Interviewer) and the shared components needed by it, following `specs/001-frontend-ui/`. Part of an autonomous run of UI-1.2…UI-5 with per-phase commits authorized by the team.
+
+Kept: Routes and paths from UI-1.1; the API health check (now shown in the shell footer through the existing `useApiHealth` + `StatusBadge`); `HomePage`/`ClubFlowOverview` still render on `/` until UI-3 replaces it.
+
+Changed:
+
+- `layouts/MainLayout.jsx` renamed to `layouts/AppLayout.jsx` (git mv) and turned into the shell: skip link, `AppHeader`, a single `<main>` that receives focus on navigation, footer, shared `SignInDialog` (opened from the header or by pages via the outlet context).
+- New components: atoms `Badge`, molecules `Alert`, `Card`, `FormField`, `EmptyState`, `StepIndicator`, organisms `AppHeader`, `Modal` (focus trap, Escape, focus return), `SignInDialog`. `Button` gained the PA#2 variants and link rendering; `MainTemplate` became the page heading template (eyebrow, one `<h1>`, actions, campaign context, Executive step strip, `document.title`); `StatusBadge` uses tokens.
+- Demo session: `contexts/DemoSessionContext.jsx` + `contexts/demoSession.js`, `services/demoSessionService.js`, `services/uiError.js`, `mocks/fixtures.js` (demo accounts from the reference), `mocks/store.js` (session only). Labeled everywhere as a demo, not authentication.
+- `routes/navigation.js` (links per role, landing route per role), `styles/layout.css` (PA#2 typography and layout utilities), `index.html` `lang="vi"`, `labels.js` page titles now match the reference `<h1>` texts.
+- Tests: shell/navigation/sign-in/focus tests, Modal tests, Button/Badge tests; shared `tests/helpers/renderApp.jsx`; the health service is mocked globally in `tests/setup.js`.
+
+Rejected: Adding `@testing-library/user-event` (not installed; tests use `fireEvent` instead of a new dependency); a hamburger menu (at most four links, wrapping is enough).
+
+Verified: `npm run lint` 0, frontend tests 43 passed, `npm run build` 0, no React `act()` warnings. Headless Edge (same-origin iframe at exact widths): `/`, `/executive/review`, and a not-found path at 360/768/1280 px have one `<h1>` and no horizontal overflow; screenshots at 360 and 1280 checked against the reference header.
+
+By hand: The team reviews the commit.

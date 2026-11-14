@@ -1,21 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import AppRoutes from '../../routes/AppRoutes.jsx';
+import { screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ROUTES } from '../../routes/paths.js';
 import { getHealth } from '../../services/healthService.js';
-
-vi.mock('../../services/healthService.js', () => ({
-  getHealth: vi.fn(),
-}));
-
-function renderAt(path) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <AppRoutes />
-    </MemoryRouter>,
-  );
-}
+import { renderApp } from '../helpers/renderApp.jsx';
 
 describe('AppRoutes', () => {
   beforeEach(() => {
@@ -23,46 +10,46 @@ describe('AppRoutes', () => {
   });
 
   it.each([
-    [ROUTES.EXECUTIVE_CAMPAIGN, 'Quản lý chiến dịch'],
-    [ROUTES.EXECUTIVE_REVIEW, 'Duyệt hồ sơ'],
-    [`${ROUTES.EXECUTIVE_REVIEW}?tab=results`, 'Duyệt hồ sơ'],
-    [ROUTES.EXECUTIVE_SCHEDULING, 'Xếp lịch phỏng vấn'],
-    [ROUTES.INTERVIEWER, 'Không gian người phỏng vấn'],
-  ])('renders the temporary %s screen', (path, title) => {
-    renderAt(path);
+    [ROUTES.EXECUTIVE_CAMPAIGN, 'Create Recruitment Campaign'],
+    [ROUTES.EXECUTIVE_REVIEW, 'Application Review'],
+    [`${ROUTES.EXECUTIVE_REVIEW}?tab=results`, 'Application Review'],
+    [ROUTES.EXECUTIVE_SCHEDULING, 'Interview Scheduling'],
+    [ROUTES.INTERVIEWER, 'Interviewer Workspace'],
+    [`${ROUTES.HOME}?tab=apply`, 'Applicant Portal'],
+  ])('renders %s inside the app shell with exactly one h1', async (path, title) => {
+    renderApp(path);
 
-    expect(screen.getByRole('heading', { level: 1, name: title })).toBeInTheDocument();
-    expect(screen.getByText(/Trang tạm thời \(UI-1\.1\)/)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getByRole('banner')).toBeInTheDocument();
   });
 
-  it('renders the applicant portal entry at "/" and keeps the API health check', async () => {
-    renderAt(`${ROUTES.HOME}?tab=apply`);
+  it('keeps the API health check in the shell footer', async () => {
+    renderApp(ROUTES.INTERVIEWER);
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Cổng ứng viên' })).toBeInTheDocument();
     expect(await screen.findByText('API connected')).toBeInTheDocument();
-    expect(getHealth).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the API error on "/" when the health check fails', async () => {
+  it('shows the API error state when the health check fails', async () => {
     getHealth.mockRejectedValue(new Error('API request failed with status 503'));
 
-    renderAt(ROUTES.HOME);
+    renderApp(ROUTES.INTERVIEWER);
 
     expect(await screen.findByText('API unavailable')).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('API request failed with status 503');
   });
 
-  it('shows a not-found state with a link home for unknown paths', () => {
-    renderAt('/executive/unknown-page');
+  it('shows a not-found state with a link home for unknown paths', async () => {
+    renderApp('/executive/unknown-page');
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Không tìm thấy trang' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trang' })).toBeInTheDocument();
     expect(screen.getByText(/"\/executive\/unknown-page"/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Về trang chủ' })).toHaveAttribute('href', ROUTES.HOME);
   });
 
-  it('does not treat a tab name as its own route', () => {
-    renderAt('/executive/review/results');
+  it('does not treat a tab name as its own route', async () => {
+    renderApp('/executive/review/results');
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Không tìm thấy trang' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trang' })).toBeInTheDocument();
   });
 });

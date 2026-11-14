@@ -1,22 +1,23 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import Button from '../components/atoms/Button/index.js';
+import EmptyState from '../components/molecules/EmptyState/index.js';
 import MainTemplate from '../components/templates/MainTemplate/index.js';
-import MainLayout from '../layouts/MainLayout.jsx';
 import { SCREEN_LABELS } from '../constants/labels.js';
-import { ROUTES } from '../routes/paths.js';
+import { useDemoSession } from '../contexts/demoSession.js';
+import { HOME_BY_ROLE } from '../routes/navigation.js';
 
 export default function NotFoundPage() {
   const { pathname } = useLocation();
+  const { role } = useDemoSession();
 
   return (
-    <MainLayout>
-      <MainTemplate
-        title={SCREEN_LABELS.notFound}
-        description={`Đường dẫn "${pathname}" không tồn tại trong ClubFlow.`}
+    <MainTemplate title={SCREEN_LABELS.notFound}>
+      <EmptyState
+        title="Đường dẫn không tồn tại"
+        actions={<Button to={HOME_BY_ROLE[role]}>Về trang chủ</Button>}
       >
-        <p>
-          <Link to={ROUTES.HOME}>Về trang chủ</Link>
-        </p>
-      </MainTemplate>
-    </MainLayout>
+        <p>{`Đường dẫn "${pathname}" không tồn tại trong ClubFlow.`}</p>
+      </EmptyState>
+    </MainTemplate>
   );
 }

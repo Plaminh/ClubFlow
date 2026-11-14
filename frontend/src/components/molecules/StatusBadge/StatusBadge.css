@@ -1,17 +1,19 @@
 .status-badge {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #d7dce5;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
-  font-size: 0.85rem;
-  background: #ffffff;
+  font-size: 0.875rem;
+  background: var(--color-surface);
 }
 
 .status-badge--online {
-  border-color: #89c9a5;
+  border-color: var(--color-success-text);
+  color: var(--color-success-text);
 }
 
 .status-badge--offline {
-  border-color: #e6a2a2;
+  border-color: var(--color-danger-text);
+  color: var(--color-danger-text);
 }

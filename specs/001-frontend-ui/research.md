@@ -10,6 +10,7 @@ Each decision records what was chosen, why, and what was rejected. Decisions D-U
 - **Rationale**: All six reference pages are `lang="vi"`; requirements use English status names (`Pending Review`, `Shortlisted`…). Separating identifiers from labels keeps code aligned with the requirements and makes later localization a data change.
 - **Rejected**: English UI (diverges from approved references); an i18n library (unneeded dependency for one language).
 - **Note**: `index.html` is `lang="en"` today; switching it to `vi` is part of UI-1.
+- **Implementation note (UI-1.2)**: The reference screens keep their page titles and a few action names in English ("Create Recruitment Campaign", "Application Review", "Shortlist Candidate", "Sign In"…) and the workflow terms Proposed/Conflict/Unassigned/Confirmed/Pass/Fail. The React UI keeps those exact strings for visual fidelity; all other text is Vietnamese. All of them live in `constants/labels.js` or the page that owns them.
 
 ## D-UI-02 — Routing
 

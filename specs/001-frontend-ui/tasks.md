@@ -35,7 +35,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 **Purpose**: Dependencies and global styling. Requires team approval of D-UI-02 (router).
 
 - [x] T005 Install `react-router-dom` in the `frontend` workspace (`frontend/package.json`, `package-lock.json`) — UI-1.1
-- [ ] T006 [P] Set `lang="vi"` in `frontend/index.html`
+- [x] T006 [P] Set `lang="vi"` in `frontend/index.html` — UI-1.2
 - [x] T007 [P] Create design tokens in `frontend/src/styles/tokens.css` from `docs/reference/ui/assets/css/styles.css` (colors, spacing, radii, focus, content width, breakpoint notes) — UI-1.1
 - [x] T008 Extend `frontend/src/styles/global.css` to import tokens and set base typography, focus-visible, and `overflow-wrap` (no `overflow-x: hidden` on `body`) — UI-1.1
 - [x] T009 [P] Create status and role label mapping in `frontend/src/constants/labels.js` with tests in `frontend/src/tests/constants/labels.test.js` — UI-1.1
@@ -53,16 +53,16 @@ description: "Task list for the ClubFlow UI-first frontend"
 - [ ] T014 Add fixture integrity tests (data-model invariants 1–6) in `frontend/src/tests/mocks/fixtures.test.js`
 - [ ] T015 [P] Create `UiError` helpers in `frontend/src/services/uiError.js`
 - [ ] T016 [P] Create `frontend/src/services/demoSessionService.js`
-- [ ] T017 Create `frontend/src/contexts/DemoSessionContext.jsx` (account + scenario; visible demo labeling)
-- [ ] T018 [P] Add variants (primary, secondary, quiet, danger), 44 px minimum height, and focus style to `frontend/src/components/atoms/Button/`; extend `frontend/src/tests/components/Button.test.jsx`
-- [ ] T019 [P] Create `frontend/src/components/atoms/Badge/` (tone-based, text always visible)
-- [ ] T020 [P] Create `frontend/src/components/molecules/Alert/`
-- [ ] T021 Create `frontend/src/components/organisms/AppHeader/` with role-aware navigation and demo controls
-- [ ] T022 Adapt `frontend/src/components/templates/MainTemplate/` into the page template (title, eyebrow, campaign context, actions slot)
-- [ ] T023 Turn `frontend/src/layouts/MainLayout.jsx` into the app shell (header, main, footer)
+- [ ] T017 Create `frontend/src/contexts/DemoSessionContext.jsx` (account + scenario; visible demo labeling) — *UI-1.2 partial: account selection done; scenario pending UI-1.3*
+- [x] T018 [P] Add variants (primary, secondary, quiet, danger), 44 px minimum height, and focus style to `frontend/src/components/atoms/Button/`; extend `frontend/src/tests/components/Button.test.jsx` — UI-1.2
+- [x] T019 [P] Create `frontend/src/components/atoms/Badge/` (tone-based, text always visible) — UI-1.2
+- [x] T020 [P] Create `frontend/src/components/molecules/Alert/` — UI-1.2
+- [ ] T021 Create `frontend/src/components/organisms/AppHeader/` with role-aware navigation and demo controls — *UI-1.2 partial: role navigation, active state, shared sign-in dialog done; scenario controls pending UI-1.3*
+- [x] T022 Adapt `frontend/src/components/templates/MainTemplate/` into the page template (title, eyebrow, campaign context, actions slot) — UI-1.2
+- [x] T023 Turn `frontend/src/layouts/MainLayout.jsx` into the app shell (header, main, footer) — UI-1.2 (renamed to `AppLayout.jsx`)
 - [x] T024 Add route constants to `frontend/src/routes/paths.js` and create `frontend/src/routes/AppRoutes.jsx` — UI-1.1
 - [ ] T025 Create the six route targets in `frontend/src/pages/` (five screens with correct titles and campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx` — *UI-1.1 partial: `App.jsx` wired, `NotFoundPage.jsx` done, screens use the temporary `RoutePlaceholderPage.jsx` (campaign context pending UI-1.2)*
-- [ ] T026 Add shell tests in `frontend/src/tests/routes/AppRoutes.test.jsx` (titles, role navigation, not-found) — *UI-1.1 partial: titles, not-found, and API health on "/" tested; role navigation pending UI-1.2*
+- [x] T026 Add shell tests in `frontend/src/tests/routes/AppRoutes.test.jsx` (titles, role navigation, not-found) — UI-1.2 (with `frontend/src/tests/layouts/AppLayout.test.jsx`)
 - [ ] T027 Decide with the team whether to retire `ClubFlowOverview`, `StatusBadge`, `HomePage`, and `useApiHealth`; record the decision in `AI-LOG.md`
 
 **Checkpoint**: UI-1 complete — `npm run verify` passes; review and commit.

@@ -11,13 +11,25 @@
 
 export const EMPTY_LABEL = '—';
 
+// Page titles (<h1>) exactly as in the reference screens, which keep the
+// screen names in English inside an otherwise Vietnamese UI.
 export const SCREEN_LABELS = Object.freeze({
-  applicantPortal: 'Cổng ứng viên',
-  campaignManagement: 'Quản lý chiến dịch',
-  applicationReview: 'Duyệt hồ sơ',
-  interviewScheduling: 'Xếp lịch phỏng vấn',
-  interviewerWorkspace: 'Không gian người phỏng vấn',
+  applicantPortal: 'Applicant Portal',
+  campaignManagement: 'Create Recruitment Campaign',
+  applicationReview: 'Application Review',
+  interviewScheduling: 'Interview Scheduling',
+  interviewerWorkspace: 'Interviewer Workspace',
   notFound: 'Không tìm thấy trang',
+});
+
+// Header navigation labels (reference headers).
+export const NAV_LABELS = Object.freeze({
+  campaign: 'Chiến dịch',
+  review: 'Duyệt hồ sơ',
+  scheduling: 'Xếp lịch',
+  applicantPortal: 'Applicant Portal',
+  interviewerWorkspace: 'Interviewer Workspace',
+  publicPortal: 'Trang công khai',
 });
 
 export const ROLE_LABELS = Object.freeze({

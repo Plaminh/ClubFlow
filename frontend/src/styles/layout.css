@@ -1,0 +1,196 @@
+/*
+ * Shared layout utilities and base typography, ported from the PA#2
+ * stylesheet (docs/reference/ui/assets/css/styles.css). Mobile-first:
+ * add columns only inside min-width media queries (48rem / 80rem).
+ */
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-text);
+  line-height: 1.25;
+}
+
+h1 {
+  margin-bottom: var(--space-2);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  margin-bottom: var(--space-4);
+  font-size: 1.375rem;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  margin-bottom: var(--space-2);
+  font-size: 1.125rem;
+}
+
+.container {
+  width: min(100% - (2 * var(--space-4)), var(--content-width));
+  margin-inline: auto;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.stack > * {
+  min-width: 0;
+}
+
+.stack--roomy {
+  gap: var(--space-6);
+}
+
+.stack--tight {
+  gap: var(--space-2);
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.button-row--end {
+  justify-content: flex-end;
+}
+
+.field-grid,
+.two-column,
+.split-layout,
+.sidebar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.section-kicker {
+  margin-bottom: var(--space-1);
+  color: var(--color-muted);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.hint {
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted);
+}
+
+.campaign-context {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border-left: 0.25rem solid var(--color-brand-strong);
+  color: var(--color-muted);
+  background: var(--color-surface);
+}
+
+.summary-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.summary-list > div {
+  min-width: 0;
+}
+
+.summary-list dt {
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.summary-list dd {
+  margin: 0;
+}
+
+.panel-subtle {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-subtle);
+}
+
+.panel-subtle > :last-child {
+  margin-bottom: 0;
+}
+
+.choice-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 48rem) {
+  .container {
+    width: min(100% - (2 * var(--space-8)), var(--content-width));
+  }
+
+  .field-grid,
+  .two-column,
+  .summary-list--columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .split-layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+@media (min-width: 80rem) {
+  .container {
+    width: min(100% - (2 * var(--space-12)), var(--content-width));
+  }
+
+  .split-layout {
+    gap: var(--space-6);
+  }
+
+  .sidebar-layout {
+    grid-template-columns: minmax(0, 1.6fr) minmax(17rem, 0.8fr);
+    gap: var(--space-8);
+  }
+}
