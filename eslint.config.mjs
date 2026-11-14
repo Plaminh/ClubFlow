@@ -20,6 +20,8 @@ export default [
       'backend/dist/**',
       'frontend/coverage/**',
       'backend/coverage/**',
+      // Static HTML UI reference package (browser demo scripts), not application code.
+      'docs/reference/ui/assets/**',
     ],
   },
   
