@@ -112,3 +112,28 @@ Rejected: Fake dashboards or placeholder controls for features that do not exist
 Verified: `npm run lint`, `npm test`, `npm run build`, `npm run verify`, and `git diff --check` passed; no active source file references the old component name.
 
 By hand: A team member confirmed team approval of the constitution title change before it was edited. The team reviews the diff, checks the preview page in a browser, and commits; this entry does not mean the phase has been committed.
+
+---
+
+## 2026-11-14 — Phase 0B — Documentation Integration
+
+Tool: Claude Code
+
+Asked for: Integrate and review the prepared ClubFlow requirements documentation under `docs/` (`docs/requirements/`, `docs/requirements/sources/`, `docs/course/`): check the structure, check for conflicts with `AGENTS.md`, the constitution, `docs/ARCHITECTURE.md`, and `docs/QUALITY-GATE.md`, verify Markdown links, and confirm coverage of BR-01 through BR-14, without rewriting the documentation unless a concrete factual inconsistency was found.
+
+Kept: All prepared documentation as supplied; no wording was changed. Frontend, backend, database, Docker, and dependencies were not touched.
+
+Checked:
+
+- BR-01 to BR-14 in `BUSINESS_RULES.md` match the source Business Description v1.1; each BR has at least one acceptance criterion and one traceability row.
+- Sample claims citing the Final Project Brief and meeting notes (Product Owner channel, PA weights, Cloudinary history) match the source files.
+- No conflict was found with `AGENTS.md`, the constitution, `docs/ARCHITECTURE.md`, or `docs/QUALITY-GATE.md`. The documents leave schema, endpoints, and libraries to later phases and mark all requirements `Not verified`.
+- Markdown links: 31 relative links checked, 1 broken.
+
+Finding (not fixed): `docs/README.md` (the "Documentation Hub") does not exist, but `docs/requirements/README.md` links to it as `../README.md`. Its contents were not invented; the team should add the prepared hub file or remove the link.
+
+Verified: `git diff --check` passed. `npm run verify` passed (lint, frontend 3 tests, backend 18 tests, build) when run from an uppercase `D:` drive path (`D:\nam3\clubflow`). When run from a lowercase `d:` drive path, the frontend Vitest run failed with `Cannot read properties of undefined (reading 'config')`. This is a Windows drive-letter casing issue in the local environment, not a documentation issue.
+
+Rejected: Writing a replacement `docs/README.md` or rewording any prepared document.
+
+By hand: The team reviews the documentation and this entry, resolves the missing hub file, and commits; this entry does not mean the phase has been committed.
