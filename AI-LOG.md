@@ -137,3 +137,28 @@ Verified: `git diff --check` passed. `npm run verify` passed (lint, frontend 3 t
 Rejected: Writing a replacement `docs/README.md` or rewording any prepared document.
 
 By hand: The team reviews the documentation and this entry, resolves the missing hub file, and commits; this entry does not mean the phase has been committed.
+
+---
+
+## 2026-11-14 — UI-0 — Frontend Preparation
+
+Tool: Claude Code
+
+Asked for: Resolve the blockers found in the read-only frontend readiness audit and prepare the repository for UI-first React development, without implementing screens.
+
+Kept: All frontend, backend, database, Docker, and environment files; the scaffold components; the UI reference package (including `reference.js`) unchanged; the official business rules.
+
+Changed:
+
+- `eslint.config.mjs`: added one ignore entry, `docs/reference/ui/assets/**`, because the static reference demo script reported 12 `no-undef` errors and blocked `npm run verify`. No rule was weakened; frontend, backend, and test files are still linted.
+- Added `docs/README.md` as the documentation hub (links only), fixing the broken link from `docs/requirements/README.md`.
+- Created the Spec Kit feature `specs/001-frontend-ui/` with the project's scripts (`spec.md`, `checklists/requirements.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/ui-services.md`, `quickstart.md`, `tasks.md`). The scripts also wrote `.specify/feature.json` (the active-feature pointer).
+- Proposed UI decisions D-UI-01…D-UI-07 in `research.md`: Vietnamese UI with English identifiers, `react-router-dom` (to be installed in UI-1 after approval), one rem-based token system from the original PA#2 CSS, stacked mobile tables, one fixture set with four demo scenarios and fixed demo clocks, a demo session context that is not authentication, and service/hook boundaries without invented API endpoints.
+
+Found: `reference.js` gives CF-030 and CF-031 an unpublished Pass, while `UI_REFERENCE_NOTES.md` and the Final Results preview show them awaiting assessment; the fixtures will follow the notes (recorded in `research.md`).
+
+Rejected: Editing `reference.js` to satisfy lint, ignoring all JavaScript, installing the router in UI-0, placeholder pages, and running the optional Spec Kit agent-context hook (it would edit agent files outside this phase).
+
+Verified: `npm run lint`, `npm test` (frontend 3, backend 18), `npm run build`, `npm run verify`, and `git diff --check` all exited 0 (run from `D:` uppercase path); 49 relative Markdown links in the new and hub documents resolve.
+
+By hand: The team reviews and approves the spec, plan, and the router dependency before UI-1, and commits; this entry does not mean the phase has been committed.
