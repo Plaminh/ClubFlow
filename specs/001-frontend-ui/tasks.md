@@ -47,17 +47,17 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 **Purpose**: Shell, demo session, demo data. ⚠️ No story work before this phase is complete.
 
-- [ ] T011 Create base fixtures in `frontend/src/mocks/fixtures.js` from `docs/reference/ui/UI_REFERENCE_NOTES.md`
-- [ ] T012 Create scenarios and demo clocks in `frontend/src/mocks/scenarios.js` (before-open, accepting, screening, confirmed)
-- [ ] T013 Create the in-memory session store in `frontend/src/mocks/store.js`
-- [ ] T014 Add fixture integrity tests (data-model invariants 1–6) in `frontend/src/tests/mocks/fixtures.test.js`
-- [ ] T015 [P] Create `UiError` helpers in `frontend/src/services/uiError.js`
-- [ ] T016 [P] Create `frontend/src/services/demoSessionService.js`
-- [ ] T017 Create `frontend/src/contexts/DemoSessionContext.jsx` (account + scenario; visible demo labeling) — *UI-1.2 partial: account selection done; scenario pending UI-1.3*
+- [x] T011 Create base fixtures in `frontend/src/mocks/fixtures.js` from `docs/reference/ui/UI_REFERENCE_NOTES.md` — UI-1.3
+- [x] T012 Create scenarios and demo clocks in `frontend/src/mocks/scenarios.js` (before-open, accepting, screening, confirmed) — UI-1.3 (plus a `draft` scenario)
+- [x] T013 Create the in-memory session store in `frontend/src/mocks/store.js` — UI-1.3
+- [x] T014 Add fixture integrity tests (data-model invariants 1–6) in `frontend/src/tests/mocks/fixtures.test.js` — UI-1.3
+- [x] T015 [P] Create `UiError` helpers in `frontend/src/services/uiError.js` — UI-1.2/UI-1.3
+- [x] T016 [P] Create `frontend/src/services/demoSessionService.js` — UI-1.3
+- [x] T017 Create `frontend/src/contexts/DemoSessionContext.jsx` (account + scenario; visible demo labeling) — UI-1.3 (account, scenario, reset, simulated network; `sessionStorage` keeps the selection)
 - [x] T018 [P] Add variants (primary, secondary, quiet, danger), 44 px minimum height, and focus style to `frontend/src/components/atoms/Button/`; extend `frontend/src/tests/components/Button.test.jsx` — UI-1.2
 - [x] T019 [P] Create `frontend/src/components/atoms/Badge/` (tone-based, text always visible) — UI-1.2
 - [x] T020 [P] Create `frontend/src/components/molecules/Alert/` — UI-1.2
-- [ ] T021 Create `frontend/src/components/organisms/AppHeader/` with role-aware navigation and demo controls — *UI-1.2 partial: role navigation, active state, shared sign-in dialog done; scenario controls pending UI-1.3*
+- [x] T021 Create `frontend/src/components/organisms/AppHeader/` with role-aware navigation and demo controls — UI-1.2/UI-1.3 (demo controls in `organisms/DemoBar`)
 - [x] T022 Adapt `frontend/src/components/templates/MainTemplate/` into the page template (title, eyebrow, campaign context, actions slot) — UI-1.2
 - [x] T023 Turn `frontend/src/layouts/MainLayout.jsx` into the app shell (header, main, footer) — UI-1.2 (renamed to `AppLayout.jsx`)
 - [x] T024 Add route constants to `frontend/src/routes/paths.js` and create `frontend/src/routes/AppRoutes.jsx` — UI-1.1
@@ -75,7 +75,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 - [ ] T028 [P] [US1] Create form atoms `TextInput`, `Select`, `Textarea` in `frontend/src/components/atoms/`
 - [ ] T029 [P] [US1] Create `FormField`, `StatCard`, `StepIndicator` in `frontend/src/components/molecules/`
-- [ ] T030 [US1] Create `frontend/src/services/campaignService.js` per contracts
+- [x] T030 [US1] Create `frontend/src/services/campaignService.js` per contracts — UI-1.3 (mock services built with the data foundation; tested in `tests/services/mockServices.test.js`)
 - [ ] T031 [US1] Create `frontend/src/hooks/useCampaign.js`
 - [ ] T032 [US1] Create `CampaignForm` and `PositionEditor` organisms in `frontend/src/components/organisms/`
 - [ ] T033 [US1] Implement `frontend/src/pages/CampaignManagementPage.jsx` (draft, preview, publish, removal blocked, read-only when confirmed)
@@ -87,7 +87,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 - [ ] T035 [P] [US2] Create `Tabs`, `Pagination`, `EmptyState` in `frontend/src/components/molecules/`
 - [ ] T036 [P] [US2] Create `Modal`, `ConfirmDialog`, `DetailPanel`, `DataTable` (stacked rows below 48rem) in `frontend/src/components/organisms/`
-- [ ] T037 [US2] Create `frontend/src/services/applicationService.js` and `frontend/src/services/resultService.js`
+- [x] T037 [US2] Create `frontend/src/services/applicationService.js` and `frontend/src/services/resultService.js` — UI-1.3
 - [ ] T038 [US2] Create `frontend/src/hooks/useApplications.js` and `frontend/src/hooks/useFinalResults.js`
 - [ ] T039 [US2] Create `ApplicationList`, `ApplicationDetail`, `FinalResultsTable` organisms
 - [ ] T040 [US2] Implement the CV Screening tab in `frontend/src/pages/ApplicationReviewPage.jsx`
@@ -99,7 +99,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 ## Phase 5: User Story 3 — Interview Scheduling (UI-2, P1)
 
-- [ ] T044 [US3] Create `frontend/src/services/scheduleService.js` (scenario data and scripted demo transitions only)
+- [x] T044 [US3] Create `frontend/src/services/scheduleService.js` (scenario data and scripted demo transitions only) — UI-1.3
 - [ ] T045 [US3] Create `frontend/src/hooks/useSchedule.js`
 - [ ] T046 [US3] Create `ScheduleSettings`, `InterviewerAssignments`, `ScheduleTable`, `ConfirmationChecklist` organisms
 - [ ] T047 [US3] Implement `frontend/src/pages/InterviewSchedulingPage.jsx` (draft, regenerate confirmation, conditions, confirm, read-only, export)
@@ -112,7 +112,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 ## Phase 6: User Story 4 — Applicant Portal (UI-3, P2)
 
 - [ ] T049 [P] [US4] Create `Checkbox` atom and `FileField` molecule
-- [ ] T050 [US4] Create `frontend/src/services/portalService.js` (submission takes `FormData`)
+- [x] T050 [US4] Create `frontend/src/services/portalService.js` (submission takes `FormData`) — UI-1.3
 - [ ] T051 [US4] Create `frontend/src/hooks/useApplicantPortal.js`
 - [ ] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms; add the SOP word-count helper to `frontend/src/utils/format.js` with tests
 - [ ] T053 [US4] Implement `frontend/src/pages/ApplicantPortalPage.jsx` with URL-synced tabs
@@ -122,7 +122,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 ## Phase 7: User Story 5 — Interviewer Workspace (UI-4, P2)
 
-- [ ] T055 [US5] Create `frontend/src/services/interviewerService.js`
+- [x] T055 [US5] Create `frontend/src/services/interviewerService.js` — UI-1.3
 - [ ] T056 [US5] Create `frontend/src/hooks/useInterviewerWorkspace.js`
 - [ ] T057 [US5] Create `AssignedInterviews`, `InterviewDetail`, `AssessmentForm` organisms
 - [ ] T058 [US5] Implement `frontend/src/pages/InterviewerWorkspacePage.jsx` (empty and restricted states)

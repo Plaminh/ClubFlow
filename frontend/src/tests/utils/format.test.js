@@ -9,6 +9,7 @@ const INTERVIEW_END = '2026-11-05T09:15:00+07:00';
 describe('format utilities', () => {
   it('formats dates as dd/MM/yyyy, not in the browser locale order', () => {
     expect(formatDate(INTERVIEW_START)).toBe('05/11/2026');
+    expect(formatDate('2026-10-30')).toBe('30/10/2026');
     expect(formatDate(new Date('2026-11-05T02:00:00Z'))).toBe('05/11/2026');
   });
 

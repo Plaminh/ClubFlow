@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AppHeader from '../components/organisms/AppHeader/index.js';
+import DemoBar from '../components/organisms/DemoBar/index.js';
 import SignInDialog from '../components/organisms/SignInDialog/index.js';
 import StatusBadge from '../components/molecules/StatusBadge/index.js';
 import { useDemoSession } from '../contexts/demoSession.js';
@@ -16,7 +17,19 @@ import './AppLayout.css';
  * through the outlet context: `useOutletContext().openSignIn()`.
  */
 export default function AppLayout() {
-  const { account, role, accounts, signIn, signOut } = useDemoSession();
+  const {
+    account,
+    role,
+    accounts,
+    signIn,
+    signOut,
+    scenarios,
+    scenarioId,
+    setScenario,
+    simulation,
+    setSimulation,
+    resetDemo,
+  } = useDemoSession();
   const { status: apiStatus } = useApiHealth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -74,6 +87,14 @@ export default function AppLayout() {
         role={role}
         onSignIn={openSignIn}
         onSignOut={handleSignOut}
+      />
+      <DemoBar
+        scenarios={scenarios}
+        scenarioId={scenarioId}
+        onScenarioChange={setScenario}
+        simulation={simulation}
+        onSimulationChange={setSimulation}
+        onReset={resetDemo}
       />
       <main id="main-content" ref={mainRef} className="container app-layout__main" tabIndex={-1}>
         <Outlet context={{ openSignIn }} />

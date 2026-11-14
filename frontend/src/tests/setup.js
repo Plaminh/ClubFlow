@@ -9,4 +9,5 @@ vi.mock('../services/healthService.js', () => ({
 
 afterEach(() => {
   resetMockStore();
+  window.sessionStorage.clear();
 });

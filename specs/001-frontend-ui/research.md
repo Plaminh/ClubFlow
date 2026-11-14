@@ -59,6 +59,12 @@ Each decision records what was chosen, why, and what was rejected. Decisions D-U
 - **Reference conflict resolved**: `assets/reference.js` gives CF-030 and CF-031 an unpublished `Pass`, but `UI_REFERENCE_NOTES.md` and `review-final-results-preview.html` show both as **awaiting assessment with no decision**. The fixtures follow the notes, which also match [WORKFLOWS_AND_STATES §5](../../docs/requirements/WORKFLOWS_AND_STATES.md) (the Executive reviews the assessment before recording Pass/Fail).
 - **Not implemented in the UI**: first-fit scheduling, conflict detection, confirmation-rule evaluation, and authorization. Scenario data carries precomputed statuses and reasons; the UI only displays them and applies scripted demo transitions (for example, "resolve conflict" moves CF-027 to 09:15 as in the reference).
 - **Rejected**: Separate fixtures per page (they drift and contradict each other); a mock HTTP server (adds a dependency and invents endpoints).
+- **Implementation update (UI-1.3)**:
+  - A fifth scenario, `draft` (2026-10-05 09:00, campaign not yet published), was added so Save Draft → Publish and the "drafts are not public" rule (BR-02) can be demonstrated. The spec requires "at least" four scenarios.
+  - Instead of hard-coded transitions, the mock layer (`frontend/src/mocks/derive.js`) re-evaluates Proposed / Conflict / Unassigned after each manual edit, so any edit stays consistent. It is a demo stand-in for backend validation, not a scheduler: "Generate draft" still returns the verified reference draft. The backend remains the source of truth for BR-10…BR-14.
+  - Reference conflict resolved: `scheduling.html` shows CF-031's availability as 09:00–09:15, but applicants choose hourly club slots (`applicant.html`). The fixture uses the hourly slot 09:00–10:00, and the CF-031 Unassigned reason is reworded to be true for that data ("Gia Huy và cả hai phòng đã được xếp trong ca 09:00–09:15…").
+  - Screening decisions can only be recorded for Pending Review applications. Whether a decision may be reversed before confirmation is not settled by the sources (WORKFLOWS §3), so the UI does not offer reversal.
+  - Interview date, window, and duration in Campaign Management are editable only while no application exists, because applicants pick slots from them (UI assumption pending Q-03).
 
 ## D-UI-06 — Demo identity
 

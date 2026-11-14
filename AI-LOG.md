@@ -216,3 +216,29 @@ Rejected: Adding `@testing-library/user-event` (not installed; tests use `fireEv
 Verified: `npm run lint` 0, frontend tests 43 passed, `npm run build` 0, no React `act()` warnings. Headless Edge (same-origin iframe at exact widths): `/`, `/executive/review`, and a not-found path at 360/768/1280 px have one `<h1>` and no horizontal overflow; screenshots at 360 and 1280 checked against the reference header.
 
 By hand: The team reviews the commit.
+
+---
+
+## 2026-11-14 — UI-1.3 — Mock Data & Service Foundation
+
+Tool: Claude Code
+
+Asked for: One canonical, consistent mock dataset with demo scenarios and asynchronous mock services matching `specs/001-frontend-ui/contracts/ui-services.md`, so the five screens can be built against stable data and later switched to real APIs.
+
+Kept: The service contract boundaries; no HTTP endpoints were invented; no business-rule engine in React components.
+
+Changed:
+
+- `mocks/fixtures.js` (accounts, campaign, departments, positions, slots, rooms, interviewer assignments, CF-026…CF-031, draft and confirmed interviews, assessments, results, notifications — from `UI_REFERENCE_NOTES.md` and the reference pages), `mocks/scenarios.js` (draft, before-open, accepting, screening, confirmed; each with a fixed demo clock), `mocks/store.js` (current scenario, session, simulated network mode, reset), `mocks/derive.js` (submission window, campaign phase, demo schedule evaluation), `mocks/guards.js` (role checks and BR-14 locks so the demo answers like a backend would).
+- Services: `campaignService`, `applicationService`, `resultService`, `scheduleService`, `portalService`, `interviewerService`; `demoSessionService` gained scenarios, reset, and network simulation.
+- `DemoSessionContext` now exposes scenario, reset, simulation, and a `dataVersion` that page hooks reload on; the selection (not the data) is kept in `sessionStorage`. New `organisms/DemoBar` under the header, clearly labeled "Demo".
+- Hooks `useServiceData` (load with loading/error/refresh) and `useAction` (mutations returning `UiError`); `utils/validation.js` (UI input checks reused by the mock layer), `utils/csv.js`.
+- `frontend/public/demo/fictional-sample-cv.pdf`: copy of the reference package's fictional sample CV, used for every demo CV link. Its text could not be rendered for review here (subset fonts); it is the file the reference itself labels as fictional.
+- Spec updates in `research.md`/`data-model.md`: the extra `draft` scenario, mock-layer schedule evaluation, CF-031 availability resolution (reference showed 09:00–09:15; applicants choose hourly slots), no screening reversal (not settled by WORKFLOWS §3), interview configuration locked once applications exist (pending Q-03).
+- Tests: fixture invariants for every scenario, and service state transitions (BR-01…BR-14 behaviors as demo responses).
+
+Found and fixed during self-review: escape sequences in generated text were written as literal invisible characters (a CSV byte-order mark and a diacritics regex); replaced with `String.fromCharCode` and `\p{M}` and scanned the source tree for invisible characters (none left). A synchronous `setState` in `useServiceData` was flagged by `react-hooks/set-state-in-effect` and rewritten.
+
+Verified: `npm run lint` 0; `npm run verify` 0 (frontend 92 tests, backend 18); no `act()` warnings.
+
+By hand: The team reviews the commit; backend developers should treat `mocks/derive.js` and `mocks/guards.js` as descriptions of expected responses, not as reusable business logic.

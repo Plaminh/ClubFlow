@@ -46,7 +46,9 @@ Screening, schedule, assessment, and result are **separate fields** (BR-08); non
 | CF-030 | Phạm Quốc Bảo | UX Design | shortlisted; proposed 09:15 Hà My A-201 | confirmed 09:15–09:30 Hà My A-201; awaiting assessment; no decision |
 | CF-031 | Vũ Khánh Linh | Content Creation | shortlisted; unassigned (Gia Huy and both rooms busy in the only shared slot) | confirmed 09:00–09:15 Gia Huy B-105; awaiting assessment; no decision |
 
-In `before-open` and `accepting`, the campaign is published and the applications that exist are those whose `submittedAt` is before the demo clock. Trương Hải Đăng has no application in any scenario.
+In `before-open` and `accepting`, the campaign is published and the applications that exist are those whose `submittedAt` is before the demo clock (all six are Pending Review in `accepting`). Trương Hải Đăng has no application in any scenario. The `draft` scenario (added in UI-1.3) has an unpublished campaign and no applications.
+
+Applicant availability uses the hourly club slots: CF-026, CF-027, CF-031 → 09:00–10:00; CF-028 → 10:00–11:00; CF-029 → 11:00–12:00; CF-030 → 09:00–10:00 and 10:00–11:00. Fixtures live in `frontend/src/mocks/fixtures.js`; scenarios in `frontend/src/mocks/scenarios.js`.
 
 ## Consistency invariants (tested in UI-1)
 

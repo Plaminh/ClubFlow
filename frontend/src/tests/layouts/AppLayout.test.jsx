@@ -78,6 +78,18 @@ describe('AppLayout', () => {
     expect(opener).toHaveFocus();
   });
 
+  it('labels the demo controls and switches scenario with its fixed demo clock', async () => {
+    renderApp('/');
+    const demo = await screen.findByRole('region', { name: 'Điều khiển bản demo' });
+    expect(within(demo).getByText('Demo')).toBeInTheDocument();
+    expect(within(demo).getByText('31/10/2026, 09:00')).toBeInTheDocument();
+
+    fireEvent.change(within(demo).getByLabelText('Kịch bản'), { target: { value: 'confirmed' } });
+
+    expect(within(demo).getByText('05/11/2026, 13:00')).toBeInTheDocument();
+    expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession'))).toMatchObject({ scenarioId: 'confirmed' });
+  });
+
   it('places the skip link before the header so keyboard users reach it first', async () => {
     const { container } = renderApp('/');
     await screen.findByText('Khách (chưa đăng nhập)');
