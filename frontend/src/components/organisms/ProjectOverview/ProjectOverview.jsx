@@ -1,5 +1,5 @@
 import StatusBadge from '../../molecules/StatusBadge/index.js';
-import { PROJECT_STACK } from '../../../constants/project.js';
+import { APP_NAME, PROJECT_STACK } from '../../../constants/project.js';
 import './ProjectOverview.css';
 
 export default function ProjectOverview({ apiStatus, errorMessage }) {
@@ -7,8 +7,8 @@ export default function ProjectOverview({ apiStatus, errorMessage }) {
     <section className="project-overview" aria-labelledby="project-overview-title">
       <div className="project-overview__header">
         <div>
-          <p className="project-overview__eyebrow">Course Project Scaffold</p>
-          <h2 id="project-overview-title">Framework is ready for features</h2>
+          <p className="project-overview__eyebrow">{APP_NAME} · Development Preview</p>
+          <h2 id="project-overview-title">{APP_NAME} foundation is ready for features</h2>
         </div>
         <StatusBadge status={apiStatus} />
       </div>

@@ -1,6 +1,8 @@
-# Web Application Development
+# ClubFlow
 
-Course full-stack web application scaffold.
+ClubFlow is a student club recruitment management web application.
+
+It is built on the team's reusable full-stack course scaffold, which was originally developed in this repository under the name `web-application-development`. The scaffold infrastructure (health check, authentication utilities, upload middleware, quality gate) is kept; ClubFlow features are added on top of it through the Spec-Driven Development flow.
 
 ## Stack
 
@@ -59,6 +61,8 @@ Copy-Item .env.example .env
 
 Then update values if needed.
 
+`.env.example` uses `DB_NAME=clubflow` for new setups. If you already have a local PostgreSQL volume created under the earlier scaffold name (`webapp_db`), keep `DB_NAME` in your existing `.env` unchanged: PostgreSQL only creates the database named in `DB_NAME` when the Docker volume is first initialized.
+
 ### 3. Start PostgreSQL
 
 ```bash
@@ -83,10 +87,10 @@ npm run db:migrate
 npm run dev:backend
 ```
 
-Backend health endpoint:
+Backend health endpoint (port from `BACKEND_PORT`, `5000` in `.env.example`):
 
 ```text
-GET http://localhost:3000/api/health
+GET http://localhost:5000/api/health
 ```
 
 ### 6. Start frontend
@@ -97,10 +101,10 @@ Open another terminal:
 npm run dev:frontend
 ```
 
-Default Vite URL:
+Frontend URL (port `3000` is set in `frontend/vite.config.js` and must match `FRONTEND_ORIGIN`):
 
 ```text
-http://localhost:5173
+http://localhost:3000
 ```
 
 ## Testing

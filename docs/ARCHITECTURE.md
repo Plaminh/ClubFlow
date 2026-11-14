@@ -1,6 +1,6 @@
 # Architecture
 
-This document explains the project structure. For canonical implementation conventions and coding rules, see [`AGENTS.md`](../AGENTS.md).
+This document explains the structure of ClubFlow, a student club recruitment management web application. For canonical implementation conventions and coding rules, see [`AGENTS.md`](../AGENTS.md).
 
 ## Frontend
 

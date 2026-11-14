@@ -53,3 +53,19 @@ Changed: Updated the project conventions, README, AI-LOG, Quality Gate, and Self
 Rejected: CI and other unnecessary tools because they are not required for the current project.
 
 By hand: The team reviewed the changes and decided which parts to accept.
+
+---
+
+## 2026-11-14 — Phase 0A: rebrand framework to ClubFlow
+
+Tool: Claude Code
+
+Asked for: Rebrand the existing reusable web application framework to ClubFlow (names, metadata, visible branding, documentation) without adding business features.
+
+Kept: Architecture, API routes, authentication and upload infrastructure, database schema, ports, Docker Compose configuration, and earlier entries in this log.
+
+Changed: npm package names (`clubflow`, `clubflow-frontend`, `clubflow-backend`) and the matching lockfile entries, frontend title and displayed branding, `DB_NAME` in `.env.example`, README description, and README URLs that contradicted the configured ports.
+
+Rejected: Renaming the Docker Compose project, container, or existing local database, and editing the constitution title, because these need a manual migration or team approval.
+
+By hand: The team reviews the diff before committing; repository, directory, remote, and database renames are left as manual follow-up actions.
