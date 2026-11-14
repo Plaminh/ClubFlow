@@ -242,3 +242,23 @@ Found and fixed during self-review: escape sequences in generated text were writ
 Verified: `npm run lint` 0; `npm run verify` 0 (frontend 92 tests, backend 18); no `act()` warnings.
 
 By hand: The team reviews the commit; backend developers should treat `mocks/derive.js` and `mocks/guards.js` as descriptions of expected responses, not as reusable business logic.
+
+---
+
+## 2026-11-14 — UI-2.1 — Campaign Management UI
+
+Tool: Claude Code
+
+Asked for: Implement `/executive/campaign` from `index.html` and SCREEN_REQUIREMENTS Screen 1 (BR-01, BR-02, BR-04, BR-14) against the mock services.
+
+Changed:
+
+- `pages/CampaignManagementPage.jsx` + `hooks/useCampaign.js`: campaign information, timeline, departments/positions with quotas and requirements, interview preparation, Save Draft, Preview (modal), Publish (confirmation dialog), "Lưu thay đổi" once published, inline errors with an error banner and focus on the first invalid field, published state with a link to Application Review, read-only state after schedule confirmation, BR-04 block when removing a position that has applications.
+- New components: molecules `AsyncContent` (loading / error + retry), `Timeline`, `PositionCard`; organisms `ConfirmDialog`, `CampaignPreview`, `CampaignDetailsCard`, `PositionsEditor`, `InterviewSetupCard`. `routes/RoleGate.jsx` shows a restricted state for other demo roles (UI only, not access control).
+- Self-review fixes after the browser check: native date inputs showed the browser's US order (11/05/2026 for 5 Nov), so each date field now also shows "Ngày đã chọn: dd/MM/yyyy"; the header showed "Ban tuyển dụng · Ban tuyển dụng" and now shows the club; the demo bar took about 300 px on mobile and is now a collapsed `<details>` summary.
+
+Assumptions: interview date/window/duration are locked once applications exist (pending Q-03); a published campaign stays editable until schedule confirmation, as the reference states.
+
+Verified: lint 0; frontend tests 99 passed. Headless Edge as the demo Executive (`draft` scenario): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 360 and 1280 compared with `index-360.png`/`index-1280.png`.
+
+By hand: The team reviews the commit.

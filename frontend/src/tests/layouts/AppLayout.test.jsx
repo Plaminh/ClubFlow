@@ -26,7 +26,7 @@ describe('AppLayout', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
     expect(navLinks()).toEqual(['Chiến dịch', 'Duyệt hồ sơ', 'Xếp lịch', 'Trang công khai']);
     expect(screen.getByRole('link', { name: 'Chiến dịch' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByText('Ban tuyển dụng · Ban tuyển dụng')).toBeInTheDocument();
+    expect(screen.getByText('Ban tuyển dụng · CLB Công nghệ & Sáng tạo')).toBeInTheDocument();
   });
 
   it('marks the active link and focuses the main region when navigating', async () => {

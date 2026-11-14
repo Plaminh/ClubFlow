@@ -1,0 +1,32 @@
+.async-content__loading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-muted);
+  background: var(--color-surface);
+}
+
+.async-content__spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-brand-strong);
+  border-radius: 50%;
+  animation: async-content-spin 0.9s linear infinite;
+}
+
+@keyframes async-content-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .async-content__spinner {
+    animation: none;
+  }
+}

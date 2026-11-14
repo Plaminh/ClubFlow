@@ -3,9 +3,16 @@ import { MemoryRouter } from 'react-router-dom';
 import { expect } from 'vitest';
 import { DemoSessionProvider } from '../../contexts/DemoSessionContext.jsx';
 import AppRoutes from '../../routes/AppRoutes.jsx';
+import { restoreDemoState } from '../../services/demoSessionService.js';
 
-/** Renders the full app (shell + routes + demo session) at `path`. */
-export function renderApp(path = '/') {
+export const EXECUTIVE = 'exec-recruitment';
+
+/**
+ * Renders the full app (shell + routes + demo session) at `path`, optionally
+ * already signed in as a demo account and in a given scenario.
+ */
+export function renderApp(path = '/', { accountId, scenarioId } = {}) {
+  restoreDemoState({ accountId, scenarioId });
   return render(
     <MemoryRouter initialEntries={[path]}>
       <DemoSessionProvider>

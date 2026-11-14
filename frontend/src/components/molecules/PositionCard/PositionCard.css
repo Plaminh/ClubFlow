@@ -1,0 +1,30 @@
+.position-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-subtle);
+}
+
+.position-card p,
+.position-card__department {
+  margin-bottom: 0;
+}
+
+.position-card__meta {
+  color: var(--color-muted);
+}
+
+.position-card__details {
+  display: grid;
+  gap: var(--space-1);
+}
+
+@media (min-width: 48rem) {
+  .position-card {
+    grid-template-columns: minmax(10rem, 0.4fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}

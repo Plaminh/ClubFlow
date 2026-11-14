@@ -73,13 +73,13 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 **Goal**: US1 in spec.md. **Independent test**: see spec.md US1.
 
-- [ ] T028 [P] [US1] Create form atoms `TextInput`, `Select`, `Textarea` in `frontend/src/components/atoms/`
-- [ ] T029 [P] [US1] Create `FormField`, `StatCard`, `StepIndicator` in `frontend/src/components/molecules/`
+- [x] T028 [P] [US1] Create form atoms `TextInput`, `Select`, `Textarea` in `frontend/src/components/atoms/` — UI-2.1 (implemented as the FormField molecule wrapping native input/select/textarea instead of separate atoms)
+- [ ] T029 [P] [US1] Create `FormField`, `StatCard`, `StepIndicator` in `frontend/src/components/molecules/` — *UI-2.1 partial: FormField and StepIndicator done; StatCard comes with UI-2.2*
 - [x] T030 [US1] Create `frontend/src/services/campaignService.js` per contracts — UI-1.3 (mock services built with the data foundation; tested in `tests/services/mockServices.test.js`)
-- [ ] T031 [US1] Create `frontend/src/hooks/useCampaign.js`
-- [ ] T032 [US1] Create `CampaignForm` and `PositionEditor` organisms in `frontend/src/components/organisms/`
-- [ ] T033 [US1] Implement `frontend/src/pages/CampaignManagementPage.jsx` (draft, preview, publish, removal blocked, read-only when confirmed)
-- [ ] T034 [US1] Add tests in `frontend/src/tests/pages/CampaignManagementPage.test.jsx` (BR-01 messages, preserved input, publish confirmation, read-only)
+- [x] T031 [US1] Create `frontend/src/hooks/useCampaign.js` — UI-2.1
+- [x] T032 [US1] Create `CampaignForm` and `PositionEditor` organisms in `frontend/src/components/organisms/` — UI-2.1 (CampaignDetailsCard, PositionsEditor, InterviewSetupCard, CampaignPreview)
+- [x] T033 [US1] Implement `frontend/src/pages/CampaignManagementPage.jsx` (draft, preview, publish, removal blocked, read-only when confirmed) — UI-2.1
+- [x] T034 [US1] Add tests in `frontend/src/tests/pages/CampaignManagementPage.test.jsx` (BR-01 messages, preserved input, publish confirmation, read-only) — UI-2.1
 
 ---
 
