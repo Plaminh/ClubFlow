@@ -1,19 +1,41 @@
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #172033;
-  background: #f7f8fb;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+@import './tokens.css';
+
+/*
+ * Global base styles. Mobile-first; layout must reflow at narrow widths and
+ * high browser zoom. Do not hide overflow on <body> or scale the page with
+ * transforms; fix the component that overflows instead.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-* {
-  box-sizing: border-box;
+html {
+  min-width: 320px;
+  color: var(--color-text);
+  background: var(--color-page);
+  font-family: var(--font-sans);
+  font-size: 100%;
+  line-height: var(--line-height-base);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
+  background: var(--color-page);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 button,
@@ -21,4 +43,51 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: var(--color-brand);
+  text-underline-offset: 0.16em;
+}
+
+a:hover {
+  color: var(--color-brand-strong);
+}
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+::selection {
+  color: var(--color-text);
+  background: var(--color-selection);
+}
+
+/* Long names (campaigns, applicants, positions) must wrap, not overflow. */
+h1,
+h2,
+h3,
+p,
+li,
+a,
+button,
+label,
+td,
+th {
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

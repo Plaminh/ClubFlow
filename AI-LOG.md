@@ -162,3 +162,33 @@ Rejected: Editing `reference.js` to satisfy lint, ignoring all JavaScript, insta
 Verified: `npm run lint`, `npm test` (frontend 3, backend 18), `npm run build`, `npm run verify`, and `git diff --check` all exited 0 (run from `D:` uppercase path); 49 relative Markdown links in the new and hub documents resolve.
 
 By hand: The team reviews and approves the spec, plan, and the router dependency before UI-1, and commits; this entry does not mean the phase has been committed.
+
+---
+
+## 2026-11-14 — UI-1.1 — Routing & Design Foundation
+
+Tool: Claude Code
+
+Asked for: Add the approved `react-router-dom`, the five-screen route structure with temporary placeholders, one shared design-token file, Vietnamese status labels, and tested date/time formatting, without building any ClubFlow screen, mock data, demo session, or navigation.
+
+Kept: The API health check (`useApiHealth` + `ClubFlowOverview`) still renders on `/`; `Button`, `StatusBadge`, `ClubFlowOverview`, `MainTemplate`, and `MainLayout` are unchanged; backend, database, Docker, and `.env` untouched.
+
+Changed:
+
+- Installed `react-router-dom@^7.18.5` in the `frontend` workspace (adds `react-router`, `cookie`, `set-cookie-parser` to the lockfile). npm 11 also re-sorted `devDependencies` alphabetically and dropped `"peer": true` metadata flags from the lockfile; no existing package version changed.
+- Routing: `App.jsx` uses `BrowserRouter`; `routes/AppRoutes.jsx` maps `/`, `/executive/campaign`, `/executive/review`, `/executive/scheduling`, `/interviewer`, and `*`. `routes/paths.js` holds the paths and the `?tab=` values for later phases.
+- Pages: `RoutePlaceholderPage.jsx` (clearly labeled temporary page), `NotFoundPage.jsx`; `HomePage.jsx` now renders the `/` placeholder titled "Cổng ứng viên" around the existing health overview.
+- Styles: `styles/tokens.css` copies the PA#2 `styles.css` token values (navy brand, page/surface/border/text, success/warning/danger, spacing, radii, focus ring, 2.75rem control height, 72rem content width; breakpoints 48rem/80rem documented). `styles/global.css` imports the tokens and adds the PA#2 base rules (focus-visible, link colors, overflow-wrap, reduced motion) without `overflow-x: hidden` or transforms.
+- `constants/labels.js`: Vietnamese labels for English identifiers, taken from the reference badges; `getLabel` never shows raw identifiers.
+- `utils/format.js`: `formatDate`, `formatTime`, `formatDateTime`, `formatTimeRange` with fixed `vi-VN` output (`dd/MM/yyyy`, 24-hour `HH:mm`), a single display time zone constant (`Asia/Ho_Chi_Minh`, pending Q-02), and `—` fallbacks.
+- Tests: `tests/routes/AppRoutes.test.jsx`, `tests/constants/labels.test.js`, `tests/utils/format.test.js`.
+- `specs/001-frontend-ui/tasks.md`: checked T005, T007–T010, T024; T025/T026 marked partial; the word-count helper moved to T052.
+
+Rejected: Five separate placeholder page files (one shared placeholder is clearer and is replaced screen by screen), relying on the browser's default `toLocaleDateString` (output varies by browser), and copying `reference.css` (px fonts, `overflow-x: hidden`).
+
+Verified:
+
+- `npm run lint`, `npm test` (frontend 29, backend 18), `npm run build`, and `npm run verify` exited 0 (run from the uppercase `D:` path).
+- Browser (headless Microsoft Edge against the Vite dev server): all six paths rendered the expected `<h1>`; `/` showed the real "API unavailable" state because the backend was not running. Headless Edge cannot shrink its window below 492 px, so widths were tested by loading each route in an iframe of exact width (360, 640, 768, 853, 1024, 1280 CSS px) through a same-origin local proxy: no horizontal overflow on any route. 640/853/1024 approximate a 1280 px window at 200/150/125% zoom; real browser zoom was not tested.
+
+By hand: The team reviews the diff, opens the routes in a browser, and commits; this entry does not mean the phase has been committed.

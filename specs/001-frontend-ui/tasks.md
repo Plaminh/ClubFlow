@@ -34,12 +34,12 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 **Purpose**: Dependencies and global styling. Requires team approval of D-UI-02 (router).
 
-- [ ] T005 Install `react-router-dom` in the `frontend` workspace (`frontend/package.json`, `package-lock.json`)
+- [x] T005 Install `react-router-dom` in the `frontend` workspace (`frontend/package.json`, `package-lock.json`) — UI-1.1
 - [ ] T006 [P] Set `lang="vi"` in `frontend/index.html`
-- [ ] T007 [P] Create design tokens in `frontend/src/styles/tokens.css` from `docs/reference/ui/assets/css/styles.css` (colors, spacing, radii, focus, content width, breakpoint notes)
-- [ ] T008 Extend `frontend/src/styles/global.css` to import tokens and set base typography, focus-visible, and `overflow-wrap` (no `overflow-x: hidden` on `body`)
-- [ ] T009 [P] Create status and role label mapping in `frontend/src/constants/labels.js`
-- [ ] T010 [P] Create date, time-range, and word-count helpers in `frontend/src/utils/format.js` with tests in `frontend/src/tests/utils/format.test.js`
+- [x] T007 [P] Create design tokens in `frontend/src/styles/tokens.css` from `docs/reference/ui/assets/css/styles.css` (colors, spacing, radii, focus, content width, breakpoint notes) — UI-1.1
+- [x] T008 Extend `frontend/src/styles/global.css` to import tokens and set base typography, focus-visible, and `overflow-wrap` (no `overflow-x: hidden` on `body`) — UI-1.1
+- [x] T009 [P] Create status and role label mapping in `frontend/src/constants/labels.js` with tests in `frontend/src/tests/constants/labels.test.js` — UI-1.1
+- [x] T010 [P] Create date, time, date-time, and time-range helpers in `frontend/src/utils/format.js` with tests in `frontend/src/tests/utils/format.test.js` — UI-1.1 (the SOP word-count helper moved to T052, where it is first used)
 
 ---
 
@@ -60,9 +60,9 @@ description: "Task list for the ClubFlow UI-first frontend"
 - [ ] T021 Create `frontend/src/components/organisms/AppHeader/` with role-aware navigation and demo controls
 - [ ] T022 Adapt `frontend/src/components/templates/MainTemplate/` into the page template (title, eyebrow, campaign context, actions slot)
 - [ ] T023 Turn `frontend/src/layouts/MainLayout.jsx` into the app shell (header, main, footer)
-- [ ] T024 Add route constants to `frontend/src/routes/paths.js` and create `frontend/src/routes/AppRoutes.jsx`
-- [ ] T025 Create the six route targets in `frontend/src/pages/` (five screens with correct titles and campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx`
-- [ ] T026 Add shell tests in `frontend/src/tests/routes/AppRoutes.test.jsx` (titles, role navigation, not-found)
+- [x] T024 Add route constants to `frontend/src/routes/paths.js` and create `frontend/src/routes/AppRoutes.jsx` — UI-1.1
+- [ ] T025 Create the six route targets in `frontend/src/pages/` (five screens with correct titles and campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx` — *UI-1.1 partial: `App.jsx` wired, `NotFoundPage.jsx` done, screens use the temporary `RoutePlaceholderPage.jsx` (campaign context pending UI-1.2)*
+- [ ] T026 Add shell tests in `frontend/src/tests/routes/AppRoutes.test.jsx` (titles, role navigation, not-found) — *UI-1.1 partial: titles, not-found, and API health on "/" tested; role navigation pending UI-1.2*
 - [ ] T027 Decide with the team whether to retire `ClubFlowOverview`, `StatusBadge`, `HomePage`, and `useApiHealth`; record the decision in `AI-LOG.md`
 
 **Checkpoint**: UI-1 complete — `npm run verify` passes; review and commit.
@@ -114,7 +114,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 - [ ] T049 [P] [US4] Create `Checkbox` atom and `FileField` molecule
 - [ ] T050 [US4] Create `frontend/src/services/portalService.js` (submission takes `FormData`)
 - [ ] T051 [US4] Create `frontend/src/hooks/useApplicantPortal.js`
-- [ ] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms
+- [ ] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms; add the SOP word-count helper to `frontend/src/utils/format.js` with tests
 - [ ] T053 [US4] Implement `frontend/src/pages/ApplicantPortalPage.jsx` with URL-synced tabs
 - [ ] T054 [US4] Add tests in `frontend/src/tests/pages/ApplicantPortalPage.test.jsx` (phase messages, sign-in prompt, PDF/5 MB, SOP 300/301 words, slot required, duplicate notice, unpublished results hidden)
 

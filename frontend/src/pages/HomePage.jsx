@@ -1,17 +1,16 @@
-import MainTemplate from '../components/templates/MainTemplate/index.js';
 import ClubFlowOverview from '../components/organisms/ClubFlowOverview/index.js';
-import MainLayout from '../layouts/MainLayout.jsx';
 import useApiHealth from '../hooks/useApiHealth.js';
-import { APP_DESCRIPTION, APP_NAME } from '../constants/project.js';
+import { SCREEN_LABELS } from '../constants/labels.js';
+import RoutePlaceholderPage from './RoutePlaceholderPage.jsx';
 
+// Route "/": temporary Applicant Portal entry point (UI-1.1). It keeps the
+// existing API health check until its replacement is reviewed.
 export default function HomePage() {
   const { status, errorMessage } = useApiHealth();
 
   return (
-    <MainLayout>
-      <MainTemplate title={APP_NAME} description={APP_DESCRIPTION}>
-        <ClubFlowOverview apiStatus={status} errorMessage={errorMessage} />
-      </MainTemplate>
-    </MainLayout>
+    <RoutePlaceholderPage title={SCREEN_LABELS.applicantPortal}>
+      <ClubFlowOverview apiStatus={status} errorMessage={errorMessage} />
+    </RoutePlaceholderPage>
   );
 }
