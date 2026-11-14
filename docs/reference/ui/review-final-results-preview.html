@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Application Review · Final Results (UI reference preview)</title>
+<link rel="stylesheet" href="assets/reference.css">
+</head>
+<body data-page="review">
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="#">ClubFlow</a>
+    <nav class="nav" aria-label="Điều hướng Ban tuyển dụng">
+      <a href="#">Chiến dịch</a>
+      <a href="#" aria-current="page">Duyệt hồ sơ</a>
+      <a href="#">Xếp lịch</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="container">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Bước 2 / 3 · CLB Công nghệ &amp; Sáng tạo</div>
+      <h1>Application Review</h1>
+      <p class="lede">Duyệt độc lập từng hồ sơ của cùng một chiến dịch.</p>
+    </div>
+    <div class="head-actions"><a class="btn" href="#">← Về chiến dịch</a></div>
+  </div>
+
+  <div class="alert info"><b>Bản xem trước thiết kế</b>Đây là trạng thái bổ sung (tab Final Results) của màn hình Application Review hiện có, không phải trang thứ sáu. Trạng thái mẫu: lịch phỏng vấn đã xác nhận.</div>
+
+  <div class="campaign-banner"><b>Chiến dịch:</b> Tuyển Thành Viên Câu Lạc Bộ Công Nghệ &amp; Sáng Tạo — Đợt Tuyển Chính Thức Học Kỳ 1, Năm Học 2026–2027, Dành Cho Sinh Viên Các Khoa Công Nghệ Thông Tin, Thiết Kế Và Truyền Thông · Đóng đơn 30/10/2026</div>
+
+  <div class="steps" style="grid-template-columns:repeat(3,minmax(0,1fr))" aria-label="Các bước chiến dịch">
+    <div class="step"><span class="num">1</span>Tạo chiến dịch</div>
+    <div class="step is-active" aria-current="step"><span class="num">2</span>Duyệt hồ sơ</div>
+    <div class="step"><span class="num">3</span>Xếp lịch phỏng vấn</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>6</b><span>Tổng hồ sơ</span></div>
+    <div class="stat"><b>5</b><span>Ứng viên riêng biệt</span></div>
+    <div class="stat"><b>4</b><span>Qua vòng CV</span></div>
+    <div class="stat"><b>0 + 2</b><span>Chờ duyệt + Loại</span></div>
+  </div>
+
+  <div class="steps" id="review-tabs" role="tablist" aria-label="Giai đoạn quản lý hồ sơ" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+    <button class="step" role="tab" id="tab-screening" aria-controls="panel-screening" aria-selected="false" tabindex="-1"><span class="num">A</span>CV Screening</button>
+    <button class="step" role="tab" id="tab-final" aria-controls="panel-final" aria-selected="true"><span class="num">B</span>Final Results</button>
+  </div>
+
+  <!-- ================= CV Screening (existing layout, read-only after schedule confirmation) ================= -->
+  <section role="tabpanel" id="panel-screening" aria-labelledby="tab-screening" hidden>
+    <div class="tabpanel-title">Tab A · CV Screening</div>
+    <div class="alert warn"><b>Lịch phỏng vấn đã được xác nhận</b>Quyết định sàng lọc CV được khóa và chỉ đọc. Hồ sơ không thể bị đổi trạng thái sau khi lịch được xác nhận.</div>
+    <div class="card">
+      <div class="card-head"><h2>Tìm và lọc hồ sơ</h2><button type="button" class="btn">Xuất CSV</button></div>
+      <div class="filters">
+        <div class="field" style="margin:0"><label for="q">Tìm tên hoặc mã hồ sơ</label><input type="search" id="q" placeholder="Ví dụ: CF-026"></div>
+        <div class="field" style="margin:0"><label for="fp">Vị trí</label><select id="fp"><option>Tất cả vị trí</option></select></div>
+        <div class="field" style="margin:0"><label for="fs">Trạng thái</label><select id="fs"><option>Tất cả trạng thái</option></select></div>
+        <div class="field" style="margin:0"><label for="fo">Sắp xếp</label><select id="fo"><option>Mới nhất trước</option></select></div>
+      </div>
+    </div>
+    <div class="grid-2 even">
+      <div class="card">
+        <div class="card-head"><h2>Hồ sơ · đang hiển thị 1–6 / 6</h2><p>Tất cả 6 hồ sơ nằm trên một trang.</p></div>
+        <div class="list">
+          <div class="item"><div class="item-top"><b>CF-031 · Vũ Khánh Linh</b></div><span class="meta">Content Creation · 18/10/2026, 15:30</span><div class="badges"><span class="badge b-green">Qua vòng CV</span></div></div>
+          <div class="item"><div class="item-top"><b>CF-030 · Phạm Quốc Bảo</b></div><span class="meta">User Experience Design · 17/10/2026, 14:20</span><div class="badges"><span class="badge b-green">Qua vòng CV</span></div></div>
+          <div class="item"><div class="item-top"><b>CF-029 · Lê Hoàng Thảo Vy</b></div><span class="meta">User Experience Design · 16/10/2026, 08:45</span><div class="badges"><span class="badge b-red">Loại ở vòng CV</span></div></div>
+          <div class="item"><div class="item-top"><b>CF-028 · Trần Bảo Ngọc</b></div><span class="meta">Content Creation · 15/10/2026, 11:08</span><div class="badges"><span class="badge b-red">Loại ở vòng CV</span></div></div>
+          <div class="item"><div class="item-top"><b>CF-027 · Nguyễn Minh Anh</b></div><span class="meta">Content Creation · 14/10/2026, 10:05</span><div class="badges"><span class="badge b-green">Qua vòng CV</span></div></div>
+          <div class="item selected"><div class="item-top"><b>CF-026 · Nguyễn Minh Anh</b><span class="badge b-gray">Đang xem</span></div><span class="meta">User Experience Design · 14/10/2026, 09:42</span><div class="badges"><span class="badge b-green">Qua vòng CV</span></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="label-caps" style="margin:0">Hồ sơ đang chọn</div><h2>CF-026 · Nguyễn Minh Anh</h2></div><span class="read-only-tag">Chỉ đọc</span></div>
+        <div class="badges" style="margin-bottom:14px"><span class="badge b-green">Qua vòng CV</span></div>
+        <dl class="kv"><div><dt>Vị trí</dt><dd>User Experience Design</dd></div><div><dt>Thời gian nộp</dt><dd>14/10/2026, 09:42</dd></div></dl>
+        <div class="panel-gray"><h3>Ghi chú nội bộ · chỉ Ban tuyển dụng nhìn thấy</h3><p class="small muted">Có kinh nghiệm nghiên cứu người dùng; cần hỏi thêm cách ưu tiên phản hồi khi các nhóm người dùng có nhu cầu khác nhau.</p></div>
+        <div class="btn-row"><button type="button" class="btn btn-danger" disabled>Loại hồ sơ</button><button type="button" class="btn btn-primary" disabled>Shortlist Candidate</button></div>
+        <p class="hint">Các hành động bị vô hiệu hóa vì lịch phỏng vấn đã được xác nhận.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Final Results ================= -->
+  <section role="tabpanel" id="panel-final" aria-labelledby="tab-final">
+    <div class="tabpanel-title">Tab B · Final Results</div>
+    <div class="alert info"><b>Final Results là giai đoạn sau phỏng vấn</b>“Qua vòng CV” không có nghĩa là Pass. Mỗi quyết định thuộc về từng hồ sơ riêng, nên cùng một ứng viên có thể có kết quả khác nhau ở các vị trí. CF-028 và CF-029 bị loại ở vòng CV nên không nằm trong danh sách này.</div>
+
+    <div class="card">
+      <div class="card-head"><h2>Kết quả cuối theo hồ sơ</h2><p>Chỉ gồm hồ sơ Qua vòng CV đã có lịch phỏng vấn Confirmed ngày 05/11/2026.</p></div>
+      <div class="table-wrap">
+        <table class="table-stack">
+          <caption class="sr-only">Các hồ sơ đủ điều kiện xử lý kết quả cuối</caption>
+          <thead><tr><th scope="col">Hồ sơ</th><th scope="col">Vị trí</th><th scope="col">Phỏng vấn</th><th scope="col">Đánh giá</th><th scope="col">Người phỏng vấn</th><th scope="col">Quyết định</th><th scope="col">Công bố</th><th scope="col">Thao tác</th></tr></thead>
+          <tbody id="fr-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><div><div class="label-caps" style="margin:0">Hồ sơ đang chọn</div><h2 id="fr-title"></h2></div></div>
+        <p class="muted small" id="fr-sub" style="margin-bottom:14px"></p>
+
+        <div class="action-group"><button type="button" class="btn" id="btn-view-assess" aria-expanded="true" aria-controls="assess-view">View Assessment</button></div>
+        <div id="assess-view"></div>
+
+        <div class="action-sep"></div>
+        <div class="label-caps">Quyết định cuối của Ban tuyển dụng</div>
+        <p class="small" id="decision-state" style="margin-bottom:10px"></p>
+        <div class="action-group"><button type="button" class="btn btn-success" id="btn-pass">Record Pass</button><button type="button" class="btn btn-danger" id="btn-fail">Record Fail</button></div>
+        <p class="hint" id="decide-why"></p>
+      </div>
+
+      <aside class="card">
+        <div class="card-head"><h2>Công bố kết quả</h2></div>
+        <div id="publish-result" class="alert" role="status" hidden></div>
+        <p class="muted" style="margin-bottom:14px" id="publish-why"></p>
+        <button type="button" class="btn btn-primary" id="btn-publish" style="width:100%">Publish Results</button>
+        <p class="hint">Chỉ kết quả đã công bố mới hiển thị cho ứng viên trong Applicant Portal. Ghi nhận quyết định không tự công bố.</p>
+        <p class="hint">Mô phỏng trong bộ nhớ, không ghi dữ liệu thật.</p>
+      </aside>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer class="site-footer"><div class="container">ClubFlow · PA#2 UI reference draft</div></footer>
+<script src="assets/reference.js"></script>
+</body>
+</html>

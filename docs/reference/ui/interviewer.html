@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interviewer Workspace · ClubFlow (UI reference)</title>
+<link rel="stylesheet" href="assets/reference.css">
+</head>
+<body data-page="interviewer">
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="interviewer.html">ClubFlow</a>
+    <nav class="nav" aria-label="Điều hướng người phỏng vấn">
+      <a href="interviewer.html" aria-current="page">Interviewer Workspace</a>
+      <span class="who" id="who">Hà My · Interviewer</span>
+      <button type="button" class="btn btn-sm" id="btn-signout">Sign Out</button>
+      <button type="button" class="btn btn-sm btn-primary" id="btn-signin-back" hidden>Sign In (demo)</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="container">
+  <div id="signed-out" hidden>
+    <div class="card"><div class="empty"><b>Bạn đã đăng xuất (mô phỏng)</b>Đăng nhập lại bằng tài khoản demo của người phỏng vấn để xem các buổi phỏng vấn được phân công.</div></div>
+  </div>
+
+  <div id="app">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Không gian phỏng vấn · CLB Công nghệ &amp; Sáng tạo</div>
+      <h1>Interviewer Workspace</h1>
+      <p class="lede">Xem các buổi phỏng vấn được phân công cho bạn và gửi đánh giá sau phỏng vấn.</p>
+    </div>
+    <div class="head-actions"><span class="badge b-navy">Hà My · User Experience Design</span></div>
+  </div>
+
+  <div class="campaign-banner"><b>Chiến dịch:</b> Tuyển Thành Viên Câu Lạc Bộ Công Nghệ &amp; Sáng Tạo — Đợt Tuyển Chính Thức Học Kỳ 1, Năm Học 2026–2027, Dành Cho Sinh Viên Các Khoa Công Nghệ Thông Tin, Thiết Kế Và Truyền Thông · Phỏng vấn 05/11/2026</div>
+
+  <div class="stats">
+    <div class="stat"><b>2</b><span>Phỏng vấn được phân công</span></div>
+    <div class="stat"><b id="cnt-done">1</b><span>Đã đánh giá</span></div>
+    <div class="stat"><b id="cnt-wait">1</b><span>Chờ đánh giá</span></div>
+    <div class="stat"><b>05/11/2026</b><span>Ngày phỏng vấn</span></div>
+  </div>
+
+  <!-- A -->
+  <section class="card" aria-labelledby="h-assigned">
+    <div class="card-head"><h2 id="h-assigned">Assigned Interviews</h2><p>Chỉ gồm lịch đã Confirmed và được phân công cho Hà My. Ghi chú sàng lọc nội bộ của Ban tuyển dụng không hiển thị ở đây.</p></div>
+    <div class="table-wrap">
+      <table id="assigned" class="table-stack">
+        <caption class="sr-only">Các buổi phỏng vấn được phân công cho Hà My</caption>
+        <thead><tr><th scope="col">Hồ sơ</th><th scope="col">Ứng viên</th><th scope="col">Vị trí</th><th scope="col">Ngày</th><th scope="col">Khung giờ</th><th scope="col">Phòng</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead>
+        <tbody>
+          <tr data-id="CF-026"><td data-label="Hồ sơ"><b>CF-026</b></td><td data-label="Ứng viên">Nguyễn Minh Anh</td><td data-label="Vị trí">User Experience Design</td><td data-label="Ngày">05/11/2026</td><td data-label="Khung giờ">09:00–09:15</td><td data-label="Phòng">A-201</td><td data-label="Trạng thái"><span class="badge b-green">Confirmed</span> <span class="st"><span class="badge b-green">Đã đánh giá</span></span></td><td class="actions"><div class="btn-row"><button type="button" class="btn btn-sm" data-cv>View CV</button><button type="button" class="btn btn-sm" data-select>Chọn</button></div></td></tr>
+          <tr data-id="CF-030"><td data-label="Hồ sơ"><b>CF-030</b></td><td data-label="Ứng viên">Phạm Quốc Bảo</td><td data-label="Vị trí">User Experience Design</td><td data-label="Ngày">05/11/2026</td><td data-label="Khung giờ">09:15–09:30</td><td data-label="Phòng">A-201</td><td data-label="Trạng thái"><span class="badge b-green">Confirmed</span> <span class="st"><span class="badge b-amber">Chờ đánh giá</span></span></td><td class="actions"><div class="btn-row"><button type="button" class="btn btn-sm" data-cv>View CV</button><button type="button" class="btn btn-sm" data-select>Chọn</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Hà My chỉ thấy hồ sơ của mình. Các buổi của Gia Huy (CF-027, CF-031) không hiển thị. Quyền truy cập thật sẽ do backend thực thi ở PA#4.</p>
+  </section>
+
+  <div class="grid-2 even" id="detail-card">
+    <!-- B -->
+    <section class="card" aria-labelledby="h-detail">
+      <div class="card-head"><div><div class="label-caps" style="margin:0">Hồ sơ đang chọn</div><h2 id="h-detail"><span id="d-id"></span></h2></div><span class="read-only-tag">Chỉ đọc</span></div>
+      <dl class="kv">
+        <div><dt>Vị trí</dt><dd id="d-pos"></dd></div>
+        <div><dt>Khoa · Năm</dt><dd id="d-fac"></dd></div>
+        <div class="wide"><dt>Buổi phỏng vấn</dt><dd id="d-when"></dd></div>
+        <div class="wide"><dt>Bài trình bày nguyện vọng (trích)</dt><dd id="d-sop"></dd></div>
+      </dl>
+      <p class="label-caps">CV</p>
+      <div class="btn-row"><button type="button" class="btn" id="btn-cv">Mở CV mẫu hư cấu (PDF)</button><span class="muted small" id="d-cv"></span></div>
+      <div class="alert info" id="cv-note" hidden style="margin:12px 0 0"><b>Thao tác mô phỏng</b>Không có tệp thật được mở. Bản triển khai sẽ chỉ cấp quyền xem CV cho người phỏng vấn được phân công.</div>
+    </section>
+
+    <!-- C -->
+    <section class="card" aria-labelledby="h-assess">
+      <div class="card-head"><h2 id="h-assess">Interview Assessment</h2><p id="a-who"></p></div>
+      <div id="assess-result" class="alert" role="status" hidden></div>
+
+      <form id="assess-form" novalidate>
+        <div class="field">
+          <label for="a-notes">Nhận xét phỏng vấn</label>
+          <textarea id="a-notes" aria-describedby="err-notes" placeholder="Ghi nhận xét ngắn về buổi phỏng vấn…"></textarea>
+          <p class="error-text" id="err-notes" hidden>Vui lòng nhập nhận xét phỏng vấn.</p>
+        </div>
+        <div class="field" id="rec-field">
+          <fieldset>
+            <legend>Đánh giá tổng thể</legend>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="rec" value="Đề xuất tiếp nhận"> Đề xuất tiếp nhận</label>
+              <label class="chip"><input type="radio" name="rec" value="Cần cân nhắc"> Cần cân nhắc</label>
+              <label class="chip"><input type="radio" name="rec" value="Không đề xuất"> Không đề xuất</label>
+            </div>
+            <p class="hint">Đây là đánh giá tham khảo, không phải kết quả Pass/Fail. Chỉ Ban tuyển dụng ghi nhận và công bố kết quả cuối.</p>
+            <p class="error-text" id="err-rec" hidden>Vui lòng chọn đánh giá tổng thể.</p>
+          </fieldset>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Assessment</button>
+        <p class="hint">Mỗi buổi phỏng vấn đã diễn ra chỉ có một đánh giá.</p>
+      </form>
+
+      <div id="assess-done" hidden>
+        <div class="alert ok"><b>Đã gửi đánh giá</b>Đánh giá này đã khóa; không thể gửi lần hai.</div>
+        <dl class="kv"><div class="wide"><dt>Đánh giá tổng thể</dt><dd id="done-rec"></dd></div><div class="wide"><dt>Nhận xét</dt><dd id="done-notes"></dd></div></dl>
+        <button type="button" class="btn" disabled>Submit Assessment</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="demo">
+    <div class="demo-bar">Ví dụ trạng thái thay thế: phỏng vấn chưa đủ điều kiện đánh giá</div>
+    <div class="demo-body">
+      <div class="card">
+        <div class="card-head"><h2>Interview Assessment</h2><span class="badge b-amber">Chưa diễn ra</span></div>
+        <p class="muted small" style="margin-bottom:12px">CF-030 · Phạm Quốc Bảo · User Experience Design · 05/11/2026 · 09:15–09:30 · Phòng A-201</p>
+        <div class="alert warn"><b>Chưa thể đánh giá</b>Buổi phỏng vấn chưa diễn ra. Biểu mẫu mở sau khi đến giờ phỏng vấn.</div>
+        <div class="field"><label>Nhận xét phỏng vấn</label><textarea disabled style="min-height:70px"></textarea></div>
+        <button type="button" class="btn" disabled>Submit Assessment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="demo">
+    <div class="demo-bar">Ví dụ trạng thái thay thế: người phỏng vấn chưa có phân công</div>
+    <div class="demo-body">
+      <div class="empty"><b>Chưa có buổi phỏng vấn nào được phân công cho bạn</b>Khi Ban tuyển dụng xác nhận lịch phỏng vấn, các buổi của bạn sẽ hiển thị tại đây. Bạn không thể xem lịch của người phỏng vấn khác.</div>
+    </div>
+  </div>
+  </div>
+</div>
+</main>
+
+<footer class="site-footer"><div class="container">ClubFlow · PA#2 UI reference draft</div></footer>
+<script src="assets/reference.js"></script>
+</body>
+</html>

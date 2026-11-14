@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Applicant Portal · ClubFlow (UI reference)</title>
+<link rel="stylesheet" href="assets/reference.css">
+</head>
+<body data-page="applicant">
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="applicant.html">ClubFlow</a>
+    <nav class="nav" aria-label="Điều hướng ứng viên">
+      <a href="applicant.html" aria-current="page">Applicant Portal</a>
+      <span class="who" id="who">Khách (chưa đăng nhập)</span>
+      <button type="button" class="btn btn-sm btn-primary" id="btn-signin">Sign In</button>
+      <button type="button" class="btn btn-sm" id="btn-signout" hidden>Sign Out</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="container">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Cổng ứng viên · CLB Công nghệ &amp; Sáng tạo</div>
+      <h1>Applicant Portal</h1>
+      <p class="lede">Xem chiến dịch tuyển thành viên, nộp hồ sơ và theo dõi từng hồ sơ của bạn.</p>
+    </div>
+  </div>
+
+  <div class="campaign-banner"><b>Chiến dịch:</b> Tuyển Thành Viên Câu Lạc Bộ Công Nghệ &amp; Sáng Tạo — Đợt Tuyển Chính Thức Học Kỳ 1, Năm Học 2026–2027, Dành Cho Sinh Viên Các Khoa Công Nghệ Thông Tin, Thiết Kế Và Truyền Thông</div>
+
+  <div class="demo" aria-label="Điều khiển trạng thái demo">
+    <div class="demo-bar">Trạng thái demo thay thế — chỉ dành cho bản tham chiếu</div>
+    <div class="demo-body">
+      <div class="field" style="margin:0;max-width:420px">
+        <label for="demo-phase">Thời điểm của chiến dịch</label>
+        <select id="demo-phase">
+          <option value="notopen">Chưa mở đơn (trước 12/10/2026)</option>
+          <option value="open">Đang nhận hồ sơ (12/10–30/10/2026)</option>
+          <option value="closed">Đã đóng đơn · sau phỏng vấn và công bố kết quả</option>
+        </select>
+        <p class="hint">Đăng nhập bằng tài khoản demo để xem các tab Apply, My Applications và Notifications.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps" id="portal-tabs" role="tablist" aria-label="Các phần của cổng ứng viên">
+    <button class="step" role="tab" id="tab-campaign" aria-controls="panel-campaign" aria-selected="true"><span class="num">1</span>Campaign</button>
+    <button class="step" role="tab" id="tab-apply" aria-controls="panel-apply" aria-selected="false" tabindex="-1"><span class="num">2</span>Apply</button>
+    <button class="step" role="tab" id="tab-mine" aria-controls="panel-mine" aria-selected="false" tabindex="-1"><span class="num">3</span>My Applications</button>
+    <button class="step" role="tab" id="tab-notes" aria-controls="panel-notes" aria-selected="false" tabindex="-1"><span class="num">4</span>Notifications <span class="count" id="notes-count" hidden>0</span></button>
+  </div>
+
+  <!-- ============ Campaign ============ -->
+  <section role="tabpanel" id="panel-campaign" aria-labelledby="tab-campaign">
+    <div class="tabpanel-title">Phần A · Public Campaign</div>
+    <div class="card">
+      <div class="label-caps">Mốc thời gian chiến dịch</div>
+      <div class="timeline">
+        <div class="milestone"><b>12/10/2026</b><span>Mở đơn ứng tuyển</span></div>
+        <div class="milestone"><b>30/10/2026</b><span>Đóng đơn ứng tuyển</span></div>
+        <div class="milestone"><b>05/11/2026</b><span>Phỏng vấn · 09:00–12:00</span></div>
+      </div>
+    </div>
+
+    <div id="campaign-status" class="alert ok"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><h2>Thông tin chiến dịch</h2><span class="badge b-green">Đã công bố</span></div>
+        <div class="field"><div class="legend">Mô tả chiến dịch</div><p class="muted">Cùng xây dựng các sản phẩm số và nội dung truyền thông hữu ích cho cộng đồng sinh viên trong năm học 2026–2027.</p></div>
+        <div class="field"><div class="legend">Hướng dẫn ứng tuyển</div><p class="muted">Chọn một vị trí phù hợp, chuẩn bị CV định dạng PDF tối đa 5 MB, viết bài trình bày nguyện vọng tối đa 300 từ và chọn các khung giờ phỏng vấn có thể tham gia. Mỗi vị trí cần một hồ sơ riêng.</p></div>
+        <h3 style="margin:20px 0 12px">Ban và vị trí tuyển</h3>
+        <div class="pos-card">
+          <div><div class="dept">Department</div><div class="dept-name">Digital Product</div><div class="muted small">2 chỉ tiêu</div></div>
+          <div><p><b>Position:</b> User Experience Design</p><p><b>Mô tả công việc:</b> Nghiên cứu nhu cầu và phác thảo luồng sản phẩm số cho sinh viên.</p><p><b>Yêu cầu:</b> Biết dùng Figma, trình bày rõ ràng và có tư duy lấy người dùng làm trung tâm.</p></div>
+        </div>
+        <div class="pos-card">
+          <div><div class="dept">Department</div><div class="dept-name">Communications</div><div class="muted small">2 chỉ tiêu</div></div>
+          <div><p><b>Position:</b> Content Creation</p><p><b>Mô tả công việc:</b> Lên ý tưởng và viết nội dung cho các kênh truyền thông của câu lạc bộ.</p><p><b>Yêu cầu:</b> Viết mạch lạc, chủ động phản hồi và phối hợp tốt với nhóm thiết kế.</p></div>
+        </div>
+      </div>
+      <aside class="card">
+        <div class="card-head"><h2>Ứng tuyển</h2></div>
+        <p class="muted" style="margin-bottom:14px">Khách có thể xem thông tin công khai của chiến dịch. Nộp hồ sơ cần đăng nhập.</p>
+        <div class="btn-row"><button type="button" class="btn btn-primary" id="btn-apply-now">Apply Now</button></div>
+        <p class="hint" id="apply-why"></p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ Apply ============ -->
+  <section role="tabpanel" id="panel-apply" aria-labelledby="tab-apply" hidden>
+    <div class="tabpanel-title">Phần B · Apply</div>
+    <div class="card" id="apply-gate">
+      <div class="empty"><b>Cần đăng nhập để nộp hồ sơ</b>Bạn có thể xem chiến dịch mà không cần đăng nhập.<div class="btn-row" style="justify-content:center;margin-top:12px"><button type="button" class="btn btn-primary" data-open-signin>Sign In</button></div></div>
+    </div>
+
+    <div id="apply-form-wrap" hidden>
+      <div class="alert warn" id="apply-closed" hidden></div>
+      <div id="apply-result" class="alert" role="status" hidden></div>
+      <form id="apply-form" novalidate>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h2>Hồ sơ ứng tuyển</h2><span class="badge b-amber">Bản nháp</span></div>
+
+            <div class="field">
+              <label for="f-position">Vị trí ứng tuyển</label>
+              <select id="f-position" aria-describedby="err-position">
+                <option value="">Chọn vị trí…</option>
+                <option value="User Experience Design">User Experience Design</option>
+                <option value="Content Creation">Content Creation</option>
+              </select>
+              <p class="hint">Bạn có thể ứng tuyển nhiều vị trí, mỗi vị trí một hồ sơ.</p>
+              <p class="error-text" id="err-position" hidden></p>
+            </div>
+
+            <div class="field-row">
+              <div class="field"><label for="f-name">Họ và tên</label><input type="text" id="f-name" readonly></div>
+              <div class="field"><label for="f-sid">Mã số sinh viên</label><input type="text" id="f-sid" readonly></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="f-email">Email liên hệ</label><input type="email" id="f-email"></div>
+              <div class="field"><label for="f-faculty">Khoa</label>
+                <select id="f-faculty"><option>Công nghệ thông tin</option><option>Thiết kế</option><option>Truyền thông</option></select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-cv">CV (PDF, tối đa 5 MB)</label>
+              <input type="file" id="f-cv" accept="application/pdf,.pdf" aria-describedby="err-cv">
+              <p class="hint">Chỉ kiểm tra tên, định dạng và dung lượng tệp. Bản demo không tải hay lưu tệp thật.</p>
+              <p class="error-text" id="err-cv" hidden></p>
+            </div>
+
+            <div class="field">
+              <label for="f-sop">Bài trình bày nguyện vọng (Statement of Purpose)</label>
+              <textarea id="f-sop" aria-describedby="sop-counter err-sop">Em mong muốn tham gia câu lạc bộ để thực hành làm sản phẩm số cùng một nhóm. Em đã từng phỏng vấn người dùng và dựng luồng màn hình trên Figma trong một dự án môn học, và muốn tiếp tục rèn cách đặt câu hỏi, ưu tiên phản hồi.</textarea>
+              <div class="counter" id="sop-counter"></div>
+              <p class="error-text" id="err-sop" hidden></p>
+            </div>
+
+            <div class="field" id="slot-field">
+              <fieldset>
+                <legend>Khung giờ phỏng vấn có thể tham gia · 05/11/2026</legend>
+                <div class="chips">
+                  <label class="chip"><input type="checkbox" name="slot" value="09:00–10:00" checked> 09:00–10:00</label>
+                  <label class="chip"><input type="checkbox" name="slot" value="10:00–11:00"> 10:00–11:00</label>
+                  <label class="chip"><input type="checkbox" name="slot" value="11:00–12:00"> 11:00–12:00</label>
+                </div>
+                <p class="hint">Mỗi ca kéo dài 15 phút. Lịch chính thức chỉ hiển thị sau khi Ban tuyển dụng xác nhận.</p>
+                <p class="error-text" id="err-slot" hidden></p>
+              </fieldset>
+            </div>
+          </div>
+
+          <aside class="card">
+            <div class="card-head"><h2>Tóm tắt hồ sơ</h2></div>
+            <dl class="kv" style="grid-template-columns:minmax(0,1fr)">
+              <div><dt>Vị trí</dt><dd id="sum-pos">Chưa chọn</dd></div>
+              <div><dt>CV</dt><dd id="sum-cv">Chưa chọn tệp</dd></div>
+              <div><dt>Bài trình bày</dt><dd id="sum-sop">0 / 300 từ</dd></div>
+              <div><dt>Khung giờ</dt><dd id="sum-slots">Chưa chọn</dd></div>
+            </dl>
+            <button type="submit" class="btn btn-primary" style="width:100%">Submit Application</button>
+            <p class="hint">Gửi hồ sơ không bảo đảm kết quả. Đây là mô phỏng, không ghi dữ liệu thật.</p>
+          </aside>
+        </div>
+      </form>
+    </div>
+
+    <div class="demo">
+      <div class="demo-bar">Ví dụ trạng thái thay thế: lỗi xác thực và hồ sơ trùng</div>
+      <div class="demo-body">
+        <div class="card">
+          <div class="alert err"><b>Chưa thể gửi hồ sơ</b>Hãy sửa các trường được đánh dấu. Dữ liệu hợp lệ bạn đã nhập vẫn được giữ lại.</div>
+          <div class="grid-2 even">
+            <div>
+              <div class="field has-error"><label>Vị trí ứng tuyển</label><select disabled><option>User Experience Design (đã nộp)</option></select><p class="error-text">Bạn đã nộp hồ sơ CF-026 cho vị trí này. Mỗi vị trí chỉ có một hồ sơ trong chiến dịch; bạn vẫn có thể ứng tuyển vị trí khác.</p></div>
+              <div class="field has-error"><label>CV (PDF, tối đa 5 MB)</label><input type="text" value="cv-minh-anh.pdf · 7,2 MB" readonly><p class="error-text">CV tối đa 5 MB; tệp hiện tại 7,2 MB.</p></div>
+            </div>
+            <div>
+              <div class="field has-error"><label>Bài trình bày nguyện vọng</label><textarea readonly style="min-height:70px">Nội dung dài hơn giới hạn…</textarea><div class="counter over"><span>Tối đa 300 từ</span><b>327 / 300 từ</b></div><p class="error-text">Bài trình bày dài 327 từ; tối đa 300 từ.</p></div>
+              <div class="field has-error"><label>Khung giờ có thể tham gia</label><div class="chips"><span class="chip">09:00–10:00</span><span class="chip">10:00–11:00</span><span class="chip">11:00–12:00</span></div><p class="error-text">Chọn ít nhất một khung giờ có thể tham gia.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ My Applications ============ -->
+  <section role="tabpanel" id="panel-mine" aria-labelledby="tab-mine" hidden>
+    <div class="tabpanel-title">Phần C · My Applications</div>
+    <div class="card" id="mine-gate"><div class="empty"><b>Đăng nhập để xem hồ sơ của bạn</b>Chỉ hồ sơ của tài khoản đang đăng nhập được hiển thị.<div class="btn-row" style="justify-content:center;margin-top:12px"><button type="button" class="btn btn-primary" data-open-signin>Sign In</button></div></div></div>
+    <div class="card" id="mine-wrap" hidden>
+      <div class="card-head"><h2>Hồ sơ của tôi</h2><p id="mine-count"></p></div>
+      <div class="alert info"><b>Mỗi hồ sơ được xử lý độc lập</b>Trạng thái sàng lọc, lịch phỏng vấn và kết quả cuối của hồ sơ này không quyết định hồ sơ khác của cùng bạn. “Qua vòng CV” chưa phải kết quả cuối.</div>
+      <div id="mine-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ Notifications ============ -->
+  <section role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden>
+    <div class="tabpanel-title">Phần D · Notifications</div>
+    <div class="card" id="notes-gate"><div class="empty"><b>Đăng nhập để xem thông báo</b>Thông báo là riêng tư theo từng ứng viên.</div></div>
+    <div class="card" id="notes-wrap" hidden>
+      <div class="card-head"><h2>Thông báo trong ứng dụng</h2><p>Chỉ gồm lịch phỏng vấn đã xác nhận và kết quả đã công bố. Kết quả chưa công bố không xuất hiện.</p></div>
+      <div class="list" id="notes-list"></div>
+    </div>
+  </section>
+</div>
+</main>
+
+<!-- Sign-in modal: visual mock only -->
+<div class="modal-backdrop" id="signin-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="signin-title">
+    <h2 id="signin-title">Sign In</h2>
+    <p class="muted small" style="margin-bottom:14px">Vai trò: Applicant</p>
+    <div class="alert info"><b>Tài khoản demo</b>Đây là mô phỏng giao diện, không có xác thực thật và không lưu mật khẩu. Quyền truy cập thật sẽ do backend thực thi ở PA#4.</div>
+    <form id="signin-form">
+      <div class="field"><label for="demo-account">Chọn tài khoản demo</label>
+        <select id="demo-account">
+          <option value="minhanh">Nguyễn Minh Anh · 2 hồ sơ</option>
+          <option value="quocbao">Phạm Quốc Bảo · 1 hồ sơ</option>
+          <option value="khanhlinh">Vũ Khánh Linh · 1 hồ sơ</option>
+          <option value="baongoc">Trần Bảo Ngọc · hồ sơ bị loại</option>
+          <option value="thaovy">Lê Hoàng Thảo Vy · hồ sơ bị loại</option>
+          <option value="haidang">Trương Hải Đăng · chưa có hồ sơ</option>
+        </select>
+      </div>
+      <div class="btn-row" style="justify-content:flex-end"><button type="button" class="btn" data-close>Hủy</button><button type="submit" class="btn btn-primary">Sign In (demo)</button></div>
+    </form>
+  </div>
+</div>
+
+<footer class="site-footer"><div class="container">ClubFlow · PA#2 UI reference draft</div></footer>
+<script src="assets/reference.js"></script>
+</body>
+</html>
