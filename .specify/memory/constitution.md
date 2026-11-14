@@ -1,13 +1,13 @@
 <!--
 Sync Impact Report:
-- Version change: N/A -> 1.0.0
-- Modified principles: Testing Strategy, Backend Architecture, Governance (Wording clarifications)
-- Added sections: 10 Core Principles based on user requirements.
+- Version change: 1.0.0 -> 1.0.1
+- Modified principles: None (title renamed from "Web Application Development Constitution" to "ClubFlow Constitution"; no principle or rule changed)
+- Added sections: N/A
 - Removed sections: N/A
 - Templates requiring updates: ✅ None pending.
 - Follow-up TODOs: None.
 -->
-# Web Application Development Constitution
+# ClubFlow Constitution
 
 This constitution defines high-level project governance. For canonical implementation conventions and coding rules, see [`AGENTS.md`](../../AGENTS.md).
 
@@ -90,4 +90,4 @@ Amendments require documentation, team approval, and a migration plan if applica
 
 All changes MUST be reviewed for constitution compliance before being considered complete. Pull requests, when used, MUST verify constitution compliance before merging.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-04 | **Last Amended**: 2026-10-04
+**Version**: 1.0.1 | **Ratified**: 2026-10-04 | **Last Amended**: 2026-11-14

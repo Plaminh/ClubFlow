@@ -1,4 +1,4 @@
-.project-overview {
+.clubflow-overview {
   background: #ffffff;
   border: 1px solid #e2e6ee;
   border-radius: 16px;
@@ -6,18 +6,18 @@
   box-shadow: 0 10px 30px rgba(23, 32, 51, 0.06);
 }
 
-.project-overview__header {
+.clubflow-overview__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.project-overview__header h2 {
+.clubflow-overview__header h2 {
   margin: 0.25rem 0 0;
 }
 
-.project-overview__eyebrow {
+.clubflow-overview__eyebrow {
   margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
@@ -25,13 +25,13 @@
   text-transform: uppercase;
 }
 
-.project-overview__stack {
+.clubflow-overview__stack {
   margin: 1.5rem 0 0;
   padding-left: 1.25rem;
   line-height: 1.8;
 }
 
-.project-overview__error {
+.clubflow-overview__error {
   margin: 1rem 0 0;
   color: #9b2c2c;
 }

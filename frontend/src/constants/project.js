@@ -1,6 +1,6 @@
 export const APP_NAME = 'ClubFlow';
 
-export const APP_DESCRIPTION = 'Student club recruitment management web application.';
+export const APP_DESCRIPTION = 'Student Club Recruitment Management System';
 
 export const PROJECT_STACK = Object.freeze([
   'React + Vite',
