@@ -61,9 +61,9 @@ description: "Task list for the ClubFlow UI-first frontend"
 - [x] T022 Adapt `frontend/src/components/templates/MainTemplate/` into the page template (title, eyebrow, campaign context, actions slot) — UI-1.2
 - [x] T023 Turn `frontend/src/layouts/MainLayout.jsx` into the app shell (header, main, footer) — UI-1.2 (renamed to `AppLayout.jsx`)
 - [x] T024 Add route constants to `frontend/src/routes/paths.js` and create `frontend/src/routes/AppRoutes.jsx` — UI-1.1
-- [ ] T025 Create the six route targets in `frontend/src/pages/` (five screens with correct titles and campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx` — *UI-1.1 partial: `App.jsx` wired, `NotFoundPage.jsx` done, screens use the temporary `RoutePlaceholderPage.jsx` (campaign context pending UI-1.2)*
+- [x] T025 Create the six route targets in `frontend/src/pages/` (five screens with correct titles and campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx` — UI-2…UI-4 (all five screens with their reference titles and campaign context; the temporary placeholder page was removed in UI-5)
 - [x] T026 Add shell tests in `frontend/src/tests/routes/AppRoutes.test.jsx` (titles, role navigation, not-found) — UI-1.2 (with `frontend/src/tests/layouts/AppLayout.test.jsx`)
-- [ ] T027 Decide with the team whether to retire `ClubFlowOverview`, `StatusBadge`, `HomePage`, and `useApiHealth`; record the decision in `AI-LOG.md`
+- [x] T027 Decide with the team whether to retire `ClubFlowOverview`, `StatusBadge`, `HomePage`, and `useApiHealth`; record the decision in `AI-LOG.md` — UI-5 (removed after confirming no references: HomePage, RoutePlaceholderPage, ClubFlowOverview, constants/project.js; useApiHealth and StatusBadge kept for the footer health check)
 
 **Checkpoint**: UI-1 complete — `npm run verify` passes; review and commit.
 
@@ -132,11 +132,11 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 ## Phase 8: Polish & Integration Readiness (UI-5)
 
-- [ ] T060 Run the `specs/001-frontend-ui/quickstart.md` responsive, zoom, and accessibility checklist for all five screens and fix issues in the affected component CSS
-- [ ] T061 Record results in the quickstart.md results log
-- [ ] T062 Update `frontend/src/services/apiClient.js` (no forced JSON header for `FormData`, keep backend error message, optional Bearer token, 204 handling) with tests in `frontend/src/tests/services/apiClient.test.js`
-- [ ] T063 [P] Write `docs/frontend/INTEGRATION.md` (service → hook → page map; how to replace demo bodies) and link it from `docs/README.md`
-- [ ] T064 Run `npm run verify` and update this file and `AI-LOG.md`
+- [x] T060 Run the `specs/001-frontend-ui/quickstart.md` responsive, zoom, and accessibility checklist for all five screens and fix issues in the affected component CSS — UI-5 (automated browser matrix; see quickstart.md results)
+- [x] T061 Record results in the quickstart.md results log — UI-5
+- [x] T062 Update `frontend/src/services/apiClient.js` (no forced JSON header for `FormData`, keep backend error message, optional Bearer token, 204 handling) with tests in `frontend/src/tests/services/apiClient.test.js` — UI-5
+- [x] T063 [P] Write `docs/frontend/INTEGRATION.md` (service → hook → page map; how to replace demo bodies) and link it from `docs/README.md` — UI-5
+- [x] T064 Run `npm run verify` and update this file and `AI-LOG.md` — UI-5
 
 ---
 

@@ -12,6 +12,7 @@ Start here to find the right document for your task. This page only links to exi
 | Understand the frontend/backend architecture | [Architecture](ARCHITECTURE.md) |
 | Know what "done" means and how to run checks | [Quality Gate](QUALITY-GATE.md) |
 | Find API contracts | [API documentation](api/README.md) |
+| Connect the React UI to the backend | [Frontend integration guide](frontend/INTEGRATION.md) |
 | Work on a Spec Kit feature (spec, plan, tasks) | [`specs/`](../specs/README.md) |
 | Record AI-assisted work | [`AI-LOG.md`](../AI-LOG.md) |
 

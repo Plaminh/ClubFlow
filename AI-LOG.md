@@ -358,3 +358,34 @@ Changed:
 Verified: `npm run verify` 0 (frontend 141, backend 18), run with the QA servers stopped. Headless Edge as Hà My (`confirmed`): one `<h1>`, no page or table-container overflow at 360/640/768/853/1024/1280/1600 px; empty state (`screening`) at 360 and 1280; screenshot at 1280 compared with `interviewer-1280.png`.
 
 By hand: The team reviews the commit.
+
+---
+
+## 2026-11-15 — UI-5 — Responsive, accessibility and integration readiness
+
+Tool: Claude Code
+
+Asked for: Review the finished UI for responsiveness, browser zoom, and accessibility; prepare `apiClient` for backend integration; document the integration boundary; remove scaffold code only after confirming it is unused.
+
+Changed (four commits):
+
+- `chore: remove unused scaffold pages and components` — `HomePage`, `RoutePlaceholderPage`, `ClubFlowOverview` (+ test), `constants/project.js`; each had no remaining references. `useApiHealth` and `StatusBadge` are kept for the footer health check.
+- `fix: improve frontend responsiveness and accessibility` — found by the browser matrix at 200 % root text: `overflow-wrap: anywhere` was applied only to a list of elements, so text in spans/badges/`dd` could not wrap and overflowed at 360 px; it is now inherited from `<body>`. Stacked table cells now wrap the value under its label instead of using a fixed 7rem label column; desktop tables keep `break-word`. `useServiceData` gained `{ enabled }`, so optional detail/assessment loads no longer start empty requests. `CampaignPreview` no longer spreads a `key` prop. New `tests/a11y/screens.a11y.test.jsx` checks every screen for one `<h1>`, one `<main>`, header/footer landmarks, accessible names on all controls, and unique ids.
+- `feat: prepare api client for integration` — query strings, JSON bodies, `FormData` without a forced content type (CV upload), optional Bearer token provider, 204/empty → `null`, failures as `UiError` keeping the backend `{ error }` message with a status-based kind and optional `fieldErrors`/`details`; tests in `tests/services/apiClient.test.js`.
+- `docs: document frontend backend integration contracts` — `docs/frontend/INTEGRATION.md` (route ownership, layer boundary, every service function with what the backend must enforce, error/loading conventions, auth replacement, CV boundary, mock-only code not to reuse, open questions), linked from `docs/README.md`; `quickstart.md` results log; `tasks.md` T025, T027, T060–T064.
+
+Checked:
+
+- Contrast of all text/background token pairs: all pass WCAG AA (lowest 6.53:1; most AAA).
+- No hard-coded colors outside `tokens.css`, no `overflow-x: hidden`, no page-scaling transforms, no positive `tabIndex`; every form control is labelled.
+- Browser matrix (headless Edge, same-origin iframe at exact CSS widths): 117/117 checks pass — 17 screen/state combinations at 360, 640, 768, 853, 1024, 1280, 1600 px, plus 200 % root text at 360 and 768 px — no page overflow, no table-container overflow, one `<h1>`.
+
+Limitations stated plainly: real browser zoom was not driven; 640/853/1024 px approximate a 1280 px window at 200/150/125 % zoom. Injecting a 200 % root font does not move `rem` media-query breakpoints (a real browser text-size setting does), so 200 % text at 1280 px is not a valid test of the desktop table and was not counted. A manual keyboard pass in a real browser is still recommended.
+
+Correction to earlier entries: the UI-1.2…UI-4 entries say "no `act()` warnings". Those counts were taken from the default reporter output and missed two warnings that the verbose reporter showed (`ScreeningPanel`, `ResultsPanel`) and one React key-spread warning (`CampaignPreview`). All three were fixed in UI-5; the suite now prints no stderr at all (checked with `--reporter=verbose`).
+
+Open item from UI-2.4 (intermittent failure after browser QA): not reproduced in 2 runs under concurrent headless-browser load and 6 further verify runs; the slowest test now takes about 2.2 s against the 10 s limit. Every verify run since UI-3 keeps a full log.
+
+Verified: `npm run verify` 0 (frontend 156, backend 18, build OK); `--reporter=verbose` run with 0 stderr blocks; 57 relative Markdown links in the hub, the guide, and the spec folder resolve.
+
+By hand: The team reviews the four UI-5 commits and does the manual keyboard pass.

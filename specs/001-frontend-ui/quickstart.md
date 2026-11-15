@@ -52,4 +52,5 @@ For each of the 5 screens × conditions {360 px, 768 px, 1280 px, 1280 px @125%,
 
 | Phase | Date | Screens checked | Result | Notes |
 |---|---|---|---|---|
-| — | — | — | Not yet run | UI-0 creates this checklist only |
+| UI-1.1…UI-4 | 2026-11-14/15 | Each screen as it was built | Pass | Per-phase results in AI-LOG.md |
+| UI-5 | 2026-11-15 | All 5 screens, all tabs, key states (visitor, applicant, Executive draft/screening/confirmed, interviewer) | Pass (117/117 automated checks) | Headless Edge, each route in a same-origin iframe of exact CSS width: 360, 640, 768, 853, 1024, 1280, 1600 px → no page overflow, no table-container overflow, one h1. 640/853/1024 approximate a 1280 px window at 200/150/125% zoom (real browser zoom not driven). 200% root text at 360 and 768 px → no overflow after the UI-5 fixes. Keyboard/focus/dialog/tab behaviour covered by automated tests; a manual keyboard pass in a real browser is still recommended. |
