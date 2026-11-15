@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect } from 'vitest';
@@ -13,12 +14,15 @@ export const EXECUTIVE = 'exec-recruitment';
  */
 export function renderApp(path = '/', { accountId, scenarioId } = {}) {
   restoreDemoState({ accountId, scenarioId });
+  // StrictMode as in main.jsx, so effects run twice like in development.
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <DemoSessionProvider>
-        <AppRoutes />
-      </DemoSessionProvider>
-    </MemoryRouter>,
+    <StrictMode>
+      <MemoryRouter initialEntries={[path]}>
+        <DemoSessionProvider>
+          <AppRoutes />
+        </DemoSessionProvider>
+      </MemoryRouter>
+    </StrictMode>,
   );
 }
 

@@ -90,6 +90,14 @@ describe('AppLayout', () => {
     expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession'))).toMatchObject({ scenarioId: 'confirmed' });
   });
 
+  it('does not move focus into the page on first load (StrictMode double effects)', async () => {
+    renderApp('/');
+    await screen.findByText('Khách (chưa đăng nhập)');
+
+    expect(screen.getByRole('main')).not.toHaveFocus();
+    expect(document.activeElement).toBe(document.body);
+  });
+
   it('places the skip link before the header so keyboard users reach it first', async () => {
     const { container } = renderApp('/');
     await screen.findByText('Khách (chưa đăng nhập)');

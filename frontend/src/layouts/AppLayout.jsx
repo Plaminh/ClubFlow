@@ -34,17 +34,20 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const mainRef = useRef(null);
-  const isFirstRender = useRef(true);
+  const previousPath = useRef(pathname);
   const [signInOpen, setSignInOpen] = useState(false);
   const [signInBusy, setSignInBusy] = useState(false);
   const [signInError, setSignInError] = useState('');
 
-  // Move focus to the new page on client-side navigation (not on first load).
+  // Move focus to the new page on client-side navigation, never on first load.
+  // Compare with the previous path instead of a "first render" flag: React
+  // StrictMode runs mount effects twice in development, which made a flag
+  // focus <main> on initial load and skip the header for keyboard users.
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (previousPath.current === pathname) {
       return;
     }
+    previousPath.current = pathname;
     mainRef.current?.focus();
   }, [pathname]);
 
