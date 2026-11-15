@@ -39,7 +39,7 @@
 | FR-10 | Brief §4 #6; Business §2 | Ownership/assignment, private notes and CV security | RBAC, private file access | AC-24, 43, 45 | 1–6 | Not verified |
 | FR-11 | Brief §4 #7; Business §6 | Interviewer assessment after interview | Assessment | AC-44–45 | 6 | Not verified |
 | FR-12 | Brief §3.3, §4 #7; Business §6 | Executive Pass/Fail and publication, in-app notices | Outcome | AC-46–49 | 6 | Not verified |
-| FR-13 | Brief §5 | Three PA#2 screens and *Fix these* | Design/React | AC-50–53 | PA#2 / PA#3 | Prototype reference; React not verified |
+| FR-13 | Brief §5 | Three PA#2 screens and *Fix these* | Design/React | AC-50–53 | PA#2 / PA#3 | Prototype reference; React UI-first prototype implemented with mock data and frontend tests (`specs/001-frontend-ui`); not verified against a backend |
 | FR-14 | Brief §4 Not Building; Business §7 | Respect out-of-scope boundaries | Scope checks across phases | Scope review | All phases | No code status |
 | FR-15 | Meeting Notes PA#3–#6 | React frontend, Express+JWT+Upload+DB, harness, demo/defense | Course planning | Quality-gate/demo evidence | PA#3–#6 | Subject to official course requirements |
 

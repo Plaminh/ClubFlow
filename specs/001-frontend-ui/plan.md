@@ -117,7 +117,7 @@ frontend/src/
 └── tests/                          # existing location; mirrors components/, pages/, mocks/
 ```
 
-**Structure Decision**: Keep the existing `frontend/src` layout and Atomic Design folders. The only new top-level folder is `mocks/` (justified in D-UI-05). `layouts/MainLayout.jsx` remains the routing shell; `templates/` stays the page-level composition, as described in `docs/ARCHITECTURE.md`.
+**Structure Decision**: Keep the existing `frontend/src` layout and Atomic Design folders. The only new top-level folder is `mocks/` (justified in D-UI-05). `layouts/AppLayout.jsx` remains the routing shell; `templates/` stays the page-level composition, as described in `docs/ARCHITECTURE.md`.
 
 ## Phased Roadmap
 

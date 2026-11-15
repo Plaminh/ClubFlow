@@ -91,4 +91,4 @@
 - For each test, select AC ID → inspect BR/source → create fixture → exercise API/database/UI behavior.
 - Security cases must test direct endpoint/file access, not merely disabled or hidden controls.
 - One automated test may cover several ACs, but never rewrite an acceptance criterion just to fit current code.
-- **Current status:** No ClubFlow domain-specific test was verified as implemented while compiling these documents. Do not mark them passing without evidence.
+- **Current status:** No ClubFlow domain-specific test was verified as implemented while compiling these documents. Since then, the UI-first prototype (`specs/001-frontend-ui`) added frontend tests that exercise many of these cases against **mock services only** (UI behaviour, demo guards). They do not prove backend, database, or security behaviour; do not mark an AC passing without backend/API evidence.

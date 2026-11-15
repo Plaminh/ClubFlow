@@ -86,7 +86,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 ## Phase 4: User Story 2 — Application Review and Final Results (UI-2, P1)
 
 - [x] T035 [P] [US2] Create `Tabs`, `Pagination`, `EmptyState` in `frontend/src/components/molecules/` — UI-2.2
-- [x] T036 [P] [US2] Create `Modal`, `ConfirmDialog`, `DetailPanel`, `DataTable` (stacked rows below 48rem) in `frontend/src/components/organisms/` — UI-2.2/UI-2.3 (`DataTable` with stacked cards below 48rem and explicit table roles; the detail panel is the `ApplicationDetail` organism)
+- [x] T036 [P] [US2] Create `Modal`, `ConfirmDialog`, `DetailPanel`, `DataTable` (stacked rows below 80rem) in `frontend/src/components/organisms/` — UI-2.2/UI-2.3 (`DataTable` with stacked cards below 80rem since UI-2.4, see research.md D-UI-04, and explicit table roles; the detail panel is the `ApplicationDetail` organism)
 - [x] T037 [US2] Create `frontend/src/services/applicationService.js` and `frontend/src/services/resultService.js` — UI-1.3
 - [x] T038 [US2] Create `frontend/src/hooks/useApplications.js` and `frontend/src/hooks/useFinalResults.js` — UI-2.2/UI-2.3
 - [x] T039 [US2] Create `ApplicationList`, `ApplicationDetail`, `FinalResultsTable` organisms — UI-2.2/UI-2.3 (plus `ApplicationFilters`, `FinalDecisionPanel`, `PublishResultsCard`)
@@ -140,12 +140,25 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 ---
 
+## Phase 9: Pre-integration cleanup (UI-6)
+
+Source: AI-assisted read-only audit (AI-LOG 2026-11-15, UI-6). Corrects mismatches with this spec and the integration contract; no new features.
+
+- [x] T065 Store the submitted student info (`studentInfo` in data-model.md: email/faculty as submitted) on each application and read it in the Executive detail, CSV export, and interviewer detail; validate `faculty` — tests in `tests/services/mockServices.test.js`
+- [x] T066 Give the Interviewer Workspace its campaign context from `listAssignedInterviews()` and make the mock `getCampaign()` Executive-only — tests in `mockServices.test.js`, `InterviewerWorkspacePage.test.jsx`
+- [x] T067 `apiClient`: backend `details` keys directly on `UiError.details` next to `status` — test in `apiClient.test.js`
+- [x] T068 Cancel a mock call when the demo account/scenario changed while it waited (UI-FR-009); show the Mark-all-read failure (UI-FR-028); focus the first invalid field in `AssessmentForm` and `ScheduleRowDialog` (UI-FR-017) — tests in `mockServices.test.js`, `ApplicantPortalPage.test.jsx`, `InterviewerWorkspacePage.test.jsx`, `tests/components/ScheduleRowDialog.test.jsx`
+- [x] T069 Remove unused placeholders and code (`.gitkeep` ×3, `getNow`, `CAMPAIGN_STATUS_LABELS`, 3 unused CSS rules, `.field--invalid`); load the review campaign once and the portal data in parallel
+- [x] T070 Align `plan.md`, `research.md`, `contracts/ui-services.md`, this file, `quickstart.md`, `spec.md` status, `docs/frontend/INTEGRATION.md`, TRACEABILITY and ACCEPTANCE_CRITERIA status with the implementation; run `npm run verify`; update `AI-LOG.md`
+
+---
+
 ## Dependencies & Execution Order
 
 - Phase 0 → Phase 1 → Phase 2 (blocks all stories)
 - US1 → US2 → US3 in order for one developer (US2 creates `Modal`/`Tabs`/`DataTable` reused later)
 - US4 needs Phase 2 and the US2 shared components; US5 needs Phase 2 and `DataTable`/`FormField`
-- Phase 8 after all stories
+- Phase 8 after all stories; Phase 9 after Phase 8, before backend integration
 - Within a story: service → hook → organisms → page → page tests
 
 ## Implementation Strategy

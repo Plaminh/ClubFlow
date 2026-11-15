@@ -44,7 +44,7 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `campaignService.removePosition(id)` | same view, or `UiError('conflict')` | BR-04: block when applications exist |
 | `applicationService.list(query)` | `{ items[], total, page, pageSize, pageCount }` | filter/sort/paginate server-side; Executive only |
 | `applicationService.getStats(query)` | `{ campaign, filtered, isFiltered }` counts | BR-06: applications vs distinct applicants |
-| `applicationService.get(id)` | detail incl. `sop`, `cv`, `privateNote`, `siblingIds`, `locked` | private note Executive-only; CV via authorized URL |
+| `applicationService.get(id)` | detail incl. `student` (the `{ name, studentId, email, faculty, year }` submitted with the application, not the current profile), `sop`, `cv`, `privateNote`, `siblingIds`, `locked` | private note Executive-only; CV via authorized URL |
 | `applicationService.saveNote(id, note)` | detail | Executive only |
 | `applicationService.setScreening(id, status)` | detail | BR-07 one application only; BR-14 lock |
 | `applicationService.exportCsv(query)` | `{ fileName, content, rowCount }` | BR-09: current filter, permitted fields only (no notes, no CV) |
@@ -61,9 +61,9 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `scheduleService.exportTimetable()` | `{ fileName, content, rowCount }` | — |
 | `portalService.getPublicCampaign()` | `{ campaign\|null, phase, window, positions[], slots[] }` | published campaigns only (BR-02) |
 | `portalService.listMyApplications()` | own applications; `interview` only if confirmed; `result` only if published | ownership from the token, never from the client (BR-08) |
-| `portalService.submitApplication(formData)` | created application, or `UiError` (`validation` / `conflict` with `details.existingApplicationId`) | BR-02 window, BR-03 no quota cap, BR-05 uniqueness incl. concurrent requests, PDF ≤ 5 MB, SOP ≤ 300 words |
+| `portalService.submitApplication(formData)` | created application, or `UiError` (`validation` / `conflict` with `details.existingApplicationId`) | store the submitted `email`/`faculty` with the application; BR-02 window, BR-03 no quota cap, BR-05 uniqueness incl. concurrent requests, PDF ≤ 5 MB, SOP ≤ 300 words |
 | `portalService.listNotifications()` / `markNotificationsRead()` | own notifications | own records only |
-| `interviewerService.listAssignedInterviews()` | `{ scheduleConfirmed, interviewDate, interviews[] }` | assigned + confirmed only |
+| `interviewerService.listAssignedInterviews()` | `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` | assigned + confirmed only; this is the Interviewer page's only campaign context (it must not call `getCampaign()`) |
 | `interviewerService.getInterview(id)` | detail **without** `privateNote` | assignment check; never return screening notes |
 | `interviewerService.submitAssessment(id, { recommendation, notes })` | assessment | one per completed interview; fields are Q-04 |
 
@@ -83,10 +83,10 @@ If the API returns a different shape, **map it inside the service** so pages sta
 
 ## 5. Errors, loading and empty states
 
-- `apiClient` rejects with `UiError { kind, message, fieldErrors?, details? }`. Kinds: `validation` (400/422), `forbidden` (401/403), `notFound` (404), `conflict` (409), `network`, `unknown`.
+- `apiClient` rejects with `UiError { kind, message, fieldErrors?, details? }`. Kinds: `validation` (400/422), `forbidden` (401/403), `notFound` (404), `conflict` (409), `network`, `unknown`. `details` always has the HTTP `status`; the keys of a backend `details` object are placed next to it (so `{ error, details: { conditions } }` → `error.details.conditions`), the same shape the mock services produce.
 - The current backend returns `{ error: message }`; that message is shown as is. For field-level messages, return `{ error, fieldErrors: { field: message } }` with these field names:
   - Campaign: `name`, `hostClub`, `description`, `instructions`, `opensOn`, `closesOn`, `interviewDate`, `positions`, `position:<positionId>:<field>`.
-  - Application: `positionId`, `email`, `cv`, `sop`, `slotIds`.
+  - Application: `positionId`, `email`, `faculty`, `cv`, `sop`, `slotIds`.
   - Schedule row: `start`, `interviewerId`, `roomId`.
   - Assessment: `notes`, `recommendation`.
 - `useServiceData` exposes `status: 'idle' | 'loading' | 'success' | 'error'`; pages render `AsyncContent` (spinner, or error + "Thử lại") and their own empty states. `useAction().run()` never throws: it resolves `{ ok, value }` or `{ ok: false, error }`.
@@ -115,6 +115,7 @@ If the API returns a different shape, **map it inside the service** so pages sta
 | `mocks/guards.js` | role checks and BR-14 locks for demo responses | not security |
 | `utils/validation.js` | instant form feedback | the server must validate every request |
 | `mocks/scenarios.js` | fixed demo clocks (`now`) | the server uses the real time; time zone is Q-02 |
+| `mocks/store.js` → `mockRequest` | cancels a demo call (`UiError('conflict')`) when the demo account or scenario changed while it waited | demo-only consistency; a real backend has no scenario switch, and auth changes are handled by the auth provider |
 
 ## 9. Tests after switching a service
 

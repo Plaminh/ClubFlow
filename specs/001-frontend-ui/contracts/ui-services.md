@@ -16,11 +16,11 @@
     kind: 'validation' | 'conflict' | 'forbidden' | 'notFound' | 'network' | 'unknown',
     message: string,            // safe to show to the user (Vietnamese)
     fieldErrors?: { [field: string]: string },
-    details?: unknown,          // e.g. unmet confirmation conditions
+    details?: object,           // e.g. { conditions } or { existingApplicationId }; apiClient adds { status }
   }
   ```
 
-  The backend currently returns only `{ error: message }`; mapping that (and any future field-level format) to `UiError` is a backend-integration task.
+  `apiClient` (UI-5) maps a backend `{ error, fieldErrors?, details? }` body to this shape; backend `details` keys sit directly on `error.details`. See `docs/frontend/INTEGRATION.md` §5.
 - Demo implementations may accept an optional `{ simulate: 'error' | 'slow' }` argument **only through the demo controls**, so loading and error states can be reviewed.
 
 ## Demo session (UI-1)
@@ -34,9 +34,9 @@
 
 | Function | Input | Returns |
 |---|---|---|
-| `campaignService.getCampaign()` | — | campaign with departments, positions, slots |
+| `campaignService.getCampaign()` | — | campaign with positions, slots, phase, lock state — **Executive only** |
 | `campaignService.saveDraft(draft)` | campaign draft | saved campaign |
-| `campaignService.publish(campaignId)` | id | published campaign, or `UiError(validation)` |
+| `campaignService.publish(draft)` | campaign draft (saved, then published) | published campaign, or `UiError(validation)` |
 | `campaignService.removePosition(positionId)` | id | ok, or `UiError(conflict)` when applications are linked (BR-04) |
 
 ## Applications and results (UI-2, US2)
@@ -45,7 +45,7 @@
 |---|---|---|
 | `applicationService.list(query)` | `{ search, positionId, status, sort, page, pageSize }` | page of application summaries |
 | `applicationService.getStats(query)` | same filters | `{ applications, applicants, byStatus, scope }` |
-| `applicationService.get(id)` | id | application detail (Executive view) |
+| `applicationService.get(id)` | id | application detail (Executive view); `student` is the snapshot submitted with the application |
 | `applicationService.saveNote(id, note)` | id, text | updated application |
 | `applicationService.setScreening(id, status)` | id, `shortlisted` or `rejected` | updated application |
 | `applicationService.exportCsv(query)` | filters | `{ fileName, rowCount }` (demo: no real file privacy) |
@@ -60,7 +60,8 @@
 |---|---|---|
 | `scheduleService.getSchedule()` | — | `{ settings, assignments, rooms, rows, summary, conditions, status }` |
 | `scheduleService.generateDraft()` | — | schedule (demo: scenario data) |
-| `scheduleService.updateRow(interviewId, change)` | `{ start?, interviewerId?, roomId? }` | schedule (demo: scripted transitions only) |
+| `scheduleService.updateSettings(settings)` | `{ slotMinutes, roomIds }` | schedule |
+| `scheduleService.updateRow(applicationId, change)` | `{ start, interviewerId, roomId }` | schedule, or `UiError(validation, fieldErrors)` |
 | `scheduleService.saveDraft()` | — | schedule |
 | `scheduleService.confirm()` | — | confirmed schedule, or `UiError(conflict, details: unmetConditions)` |
 | `scheduleService.exportTimetable()` | — | `{ fileName, rowCount }` |
@@ -71,14 +72,15 @@
 |---|---|---|
 | `portalService.getPublicCampaign()` | — | public campaign view (no drafts) |
 | `portalService.listMyApplications()` | — | own applications with screening, confirmed interview, **published** result only |
-| `portalService.submitApplication(formData)` | `FormData` (student fields, `cv` file, `sop`, `slotIds`) | created application, `UiError(validation)`, or `UiError(conflict, details: existingApplicationId)` |
+| `portalService.submitApplication(formData)` | `FormData`: `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, `cv` file | created application, `UiError(validation)`, or `UiError(conflict, details: existingApplicationId)` |
 | `portalService.listNotifications()` | — | own notifications |
+| `portalService.markNotificationsRead()` | — | nothing; own unread notifications become read |
 
 ## Interviewer (UI-4, US5)
 
 | Function | Input | Returns |
 |---|---|---|
-| `interviewerService.listAssignedInterviews()` | — | own confirmed interviews |
+| `interviewerService.listAssignedInterviews()` | — | `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` — own confirmed interviews plus the campaign context the page shows |
 | `interviewerService.getInterview(id)` | id | interview + application details (no private screening note) |
 | `interviewerService.submitAssessment(interviewId, assessment)` | `{ recommendation, notes }` | saved assessment, or `UiError(validation)` / `UiError(conflict)` if one already exists |
 

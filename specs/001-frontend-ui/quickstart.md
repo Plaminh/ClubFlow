@@ -32,7 +32,7 @@ For each of the 5 screens × conditions {360 px, 768 px, 1280 px, 1280 px @125%,
 
 - [ ] No horizontal page scroll (`document.documentElement.scrollWidth <= innerWidth`).
 - [ ] Page title, campaign context, and primary actions visible without horizontal scrolling.
-- [ ] Tables: ID, status, and row actions visible (stacked rows below 48rem).
+- [ ] Tables: ID, status, and row actions visible (stacked rows below 80rem).
 - [ ] Detail panel and list both readable; the panel never covers most of the list (Fix these #3).
 - [ ] Dialogs fit the viewport and scroll internally when taller than the screen.
 - [ ] Header and navigation wrap without overlap.

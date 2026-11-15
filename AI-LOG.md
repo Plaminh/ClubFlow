@@ -393,3 +393,35 @@ By hand: The team reviews the four UI-5 commits and does the manual keyboard pas
 Follow-up (2026-11-15, after the UI-5 docs commit): the final verification failed once more with no browser load, so the earlier "CPU load" explanation was wrong. Code review found the cause: in `ApplicationReviewPage.test.jsx`, "shows the reference header…" waited for the screening panel's request and then synchronously read the campaign context, which comes from the page header's separate `useCampaign()` request. A throwaway experiment that delayed only the header request made the old assertion fail and the awaited version pass. The test now awaits that text (`test: await the separately loaded campaign context`). No product change; the page shows the context as soon as its own request finishes.
 
 Follow-up 2 (2026-11-15): the final gate failed once more (`npm test` and `verify` in the same run; the failing test name was not captured because that run was not logged — every later run is). A review of all page tests for "act on something found before its data arrived" found a **product bug**: when a different application or interview is selected, `useServiceData` kept showing the previous detail until the new one loaded, while the Shortlist / Reject / Save note / Submit Assessment handlers used the newly selected ID. With real network latency a user could act on the wrong application. Fixed (`fix: never show or act on a previous selection while it loads`): the CV-screening detail panel and the interviewer detail/assessment panel render only when the loaded data matches the selection (loading state otherwise), and the handlers use the ID of the displayed data. Two regression tests assert synchronously that the previous item disappears right after another is selected; both failed with the old page code and pass with the fix. The interviewer test that took the stale "Submit Assessment" button now waits for the new item, which is the most likely cause of the remaining intermittent failure. Verified: lint/test/build/verify sequence twice in a row, all exit 0 (frontend 157, backend 18), `--reporter=verbose` with 0 stderr blocks.
+
+---
+
+## 2026-11-15 — UI-6 — Pre-integration audit and cleanup
+
+Tool: Claude Code (implementation). The read-only audit was AI-assisted; the team should add which tool produced it.
+
+Asked for: A read-only audit of the repository before backend integration (unused files, code quality, CSS, mocks, backend scaffold, docs, quality gate), then the approved cleanup batches 1–5. Batch 6 (code splitting) is deferred, as the audit recommended.
+
+Audit result: no Critical Constitution violation, no P0; four P1 issues, each confirmed in the code before it was changed.
+
+Changed (five commits, `tasks.md` T065–T070):
+
+- `fix: keep submitted student info and role-correct contracts before integration` — applications store a `studentInfo` snapshot (the email/faculty the applicant submitted; before this, `faculty` was dropped and reviewers saw the account profile); the Interviewer Workspace takes its campaign context from `listAssignedInterviews()` instead of the Executive-only `getCampaign()`, which the mock now guards; `apiClient` puts backend `details` keys directly on `UiError.details` (it produced `details.details`).
+- `fix: cancel stale demo mutations and surface form and mark-read errors` — `mockRequest()` cancels a call with `UiError('conflict')` if the demo account or scenario changed while it waited (in Slow mode an action could change the newly loaded scenario); Mark all read shows an error alert; `AssessmentForm` and `ScheduleRowDialog` focus the first invalid field.
+- `chore: remove unused placeholders, label map, and CSS selectors` — three `.gitkeep` files, `CAMPAIGN_STATUS_LABELS`, `.choice-list`, `.card--subtle`, `.field-legend`, the `.field--invalid` class (no rule); `getNow()` was removed in the previous commit.
+- `perf: load the review campaign once and portal data in parallel` — the CV Screening panel no longer refetches `getCampaign()` on every filter change; one Retry reloads every failed request (a full-suite run caught that the first version needed two clicks); the Applicant Portal loads its three requests in parallel.
+- `docs: align specs and integration guide with the cleanup` — contracts (`publish(draft)`, `updateRow(applicationId, …)`, `updateSettings`, `markNotificationsRead`, FormData fields, `details` shape, Executive-only `getCampaign`), plan (`AppLayout.jsx`), research (apiClient gap resolved), 80rem table breakpoint in tasks/quickstart, spec status, INTEGRATION.md, TRACEABILITY FR-13 and the ACCEPTANCE_CRITERIA status (mock-only UI evidence, not backend evidence).
+
+Not done, with reasons:
+
+- `.vscode/settings.json` (`{}`) was not deleted: it is Git-ignored, local editor configuration, not repository content.
+- The audit's "quickstart says 117/117 tests" is a misreading: 117 is the UI-5 browser-matrix check count, not the unit-test count, so it was left unchanged.
+- Making internal-only exports module-private was skipped: the audit named no specific exports, and changing them gives little value.
+- The `node_modules/clubflow-backend` junction pointing to the old repository folder is a local-environment issue; a clean `npm install` fixes it. Nothing was changed.
+- Feedback messages can still appear on a newly selected item when the selection changes in Slow mode (cosmetic; actions already use the displayed item's ID).
+
+Checked: each new regression test was confirmed to fail without its fix where practical (the stale-mutation test fails with the guard disabled). One environment note: in this session, Vitest started from the Git Bash tool failed to load suites ("failed to find the current suite") even on unchanged files, while the same runs from PowerShell passed; all results below come from PowerShell.
+
+Verified: `npm run verify` exit 0 — lint clean, frontend 166 tests (18 files), backend 18 tests, build OK (same >500 kB chunk warning as before).
+
+By hand: The team reviews the five UI-6 commits, especially the `studentInfo` snapshot (the backend must store the submitted values too) and the Executive-only `getCampaign()`.
