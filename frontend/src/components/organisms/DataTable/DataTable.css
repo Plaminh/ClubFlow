@@ -71,7 +71,7 @@
   font-weight: 700;
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 80rem) {
   .table-scroll {
     overflow-x: auto;
     border: 1px solid var(--color-border);
@@ -130,5 +130,19 @@
 
   .data-table tr[data-selected='true'] td {
     background: var(--color-brand-soft);
+  }
+}
+
+/* Short values (IDs, rooms, times) must not break mid-word inside table
+   columns; "anywhere" (global) would let columns shrink below a word. */
+.data-table th,
+.data-table td {
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 80rem) {
+  .data-table .button,
+  .data-table .badge {
+    white-space: nowrap;
   }
 }

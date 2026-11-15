@@ -1,0 +1,24 @@
+.assignment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.assignment-card {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-subtle);
+}
+
+.assignment-card h3,
+.assignment-card p {
+  margin-bottom: var(--space-1);
+}
+
+@media (min-width: 48rem) {
+  .assignment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,10 +1,11 @@
 import './DataTable.css';
 
 /**
- * Responsive data table. Below 48rem each row becomes a stacked card with
+ * Responsive data table. Below 80rem each row becomes a stacked card with
  * "label: value" cells, so identifiers, status and actions are never pushed
- * off-screen (specs/001-frontend-ui/research.md D-UI-04). Wider screens get a
- * normal table that scrolls inside its own container only if it must.
+ * off-screen (specs/001-frontend-ui/research.md D-UI-04). The wide tables
+ * (8 columns) only fit without internal scrolling from 80rem; measured at
+ * 768–1024 px they overflowed and hid the action column.
  *
  * Explicit table roles keep the semantics when rows are restyled as cards.
  * columns: [{ key, header, render(row) }]

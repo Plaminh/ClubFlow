@@ -1,0 +1,22 @@
+.confirmation-checklist {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.confirmation-checklist li {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.confirmation-checklist__met {
+  color: var(--color-success-text);
+}
+
+.confirmation-checklist__failed {
+  color: var(--color-danger-text);
+}

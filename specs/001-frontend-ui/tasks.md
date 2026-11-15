@@ -100,10 +100,10 @@ description: "Task list for the ClubFlow UI-first frontend"
 ## Phase 5: User Story 3 — Interview Scheduling (UI-2, P1)
 
 - [x] T044 [US3] Create `frontend/src/services/scheduleService.js` (scenario data and scripted demo transitions only) — UI-1.3
-- [ ] T045 [US3] Create `frontend/src/hooks/useSchedule.js`
-- [ ] T046 [US3] Create `ScheduleSettings`, `InterviewerAssignments`, `ScheduleTable`, `ConfirmationChecklist` organisms
-- [ ] T047 [US3] Implement `frontend/src/pages/InterviewSchedulingPage.jsx` (draft, regenerate confirmation, conditions, confirm, read-only, export)
-- [ ] T048 [US3] Add tests in `frontend/src/tests/pages/InterviewSchedulingPage.test.jsx` (counts equal rows, conflict reasons, confirm disabled with reasons, confirmed read-only, zero-shortlisted message)
+- [x] T045 [US3] Create `frontend/src/hooks/useSchedule.js` — UI-2.4
+- [x] T046 [US3] Create `ScheduleSettings`, `InterviewerAssignments`, `ScheduleTable`, `ConfirmationChecklist` organisms — UI-2.4 (plus `ScheduleRowDialog`, `InterviewerAssignmentsCard`, `ChoiceGroup` molecule)
+- [x] T047 [US3] Implement `frontend/src/pages/InterviewSchedulingPage.jsx` (draft, regenerate confirmation, conditions, confirm, read-only, export) — UI-2.4
+- [x] T048 [US3] Add tests in `frontend/src/tests/pages/InterviewSchedulingPage.test.jsx` (counts equal rows, conflict reasons, confirm disabled with reasons, confirmed read-only, zero-shortlisted message) — UI-2.4
 
 **Checkpoint**: UI-2 complete — review and commit per story.
 

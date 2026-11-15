@@ -3,6 +3,7 @@ import AppLayout from '../layouts/AppLayout.jsx';
 import ApplicationReviewPage from '../pages/ApplicationReviewPage.jsx';
 import CampaignManagementPage from '../pages/CampaignManagementPage.jsx';
 import HomePage from '../pages/HomePage.jsx';
+import InterviewSchedulingPage from '../pages/InterviewSchedulingPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import RoutePlaceholderPage from '../pages/RoutePlaceholderPage.jsx';
 import { SCREEN_LABELS } from '../constants/labels.js';
@@ -32,7 +33,11 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.EXECUTIVE_SCHEDULING}
-          element={<RoutePlaceholderPage title={SCREEN_LABELS.interviewScheduling} />}
+          element={
+            <RoleGate role="executive" title={SCREEN_LABELS.interviewScheduling}>
+              <InterviewSchedulingPage />
+            </RoleGate>
+          }
         />
         <Route
           path={ROUTES.INTERVIEWER}

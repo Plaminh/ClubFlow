@@ -299,3 +299,22 @@ Changed:
 Verified: `npm run verify` 0 (frontend 116, backend 18). Headless Edge as the demo Executive (`confirmed`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 1280 (table + side-by-side panels) and 360 (stacked result cards) compared with `review-final-results-1280.png`/`-360.png`.
 
 By hand: The team reviews the commit.
+
+---
+
+## 2026-11-15 — UI-2.4 — Interview Scheduling UI
+
+Tool: Claude Code
+
+Asked for: Implement `/executive/scheduling` from `scheduling.html` and SCREEN_REQUIREMENTS Screen 3 (BR-07, BR-08, BR-10…BR-14) using verified mock responses, without a frontend scheduling algorithm.
+
+Changed:
+
+- `pages/InterviewSchedulingPage.jsx` + `hooks/useSchedule.js`: draft parameters (one interview date and window from the campaign; common duration; available rooms), Generate / Regenerate (confirmation before replacing a draft), summary counts taken from the same rows as the table, interviewer assignments and availability, draft table with Proposed / Conflict / Unassigned and the reason for each, a conflict alert listing the real overlaps (including the same applicant across positions), manual Edit / Resolve / Assign Slot dialog, Save Changes with an unsaved-changes badge, timetable CSV export, BR-13 conditions with ✓/✗ text, confirmation dialog, confirmed read-only state (export still allowed), and the BR-13 "no shortlisted applications → skip confirmation" state.
+- New components: molecule `ChoiceGroup`; organisms `ScheduleSettingsCard`, `InterviewerAssignmentsCard`, `ScheduleTable`, `ScheduleRowDialog`, `ConfirmationChecklist`.
+- Self-review fixes from the browser check: short table values were breaking mid-word ("A-" / "201") because the global `overflow-wrap: anywhere` let columns shrink below a word — tables now use `break-word`; the 8-column tables overflowed their containers at 768–1024 px and hid the action column, so `DataTable` stacks rows as cards below 80rem (recorded in `research.md` D-UI-04); after confirmation the disabled button read "Tạo lịch nháp" and now reads "Tạo lại lịch nháp".
+- Tests: `tests/pages/InterviewSchedulingPage.test.jsx` (counts equal rows, conflict reasons, blocked confirmation with each condition, room double-booking, resolve → save → confirm → read-only, regenerate confirmation, confirmed scenario, zero-shortlisted skip).
+
+Verified: `npm run verify` 0 three times in a row (frontend 124, backend 18). One earlier `verify` run, started right after the headless-browser checks, had 1 intermittent frontend test failure that could not be reproduced in 4 later full runs; its name was not captured. Open item for UI-5: find the flaky test under load (logs are now kept for every verify run). Headless Edge as the demo Executive: one `<h1>`, no page overflow and no table-container overflow (`scrollWidth == clientWidth`) at 360/640/768/853/1024/1280/1600 px in the `screening` and `confirmed` scenarios; screenshot at 1280 compared with `scheduling-1280.png`.
+
+By hand: The team reviews the commit.

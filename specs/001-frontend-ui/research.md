@@ -41,6 +41,7 @@ Each decision records what was chosen, why, and what was rejected. Decisions D-U
 
 - **Decision**: Target 360 / 768 / 1280+ px and 100 / 125 / 150 / 200% zoom. Use flexbox, grid with `minmax(0, 1fr)`, `max-width` containers, `overflow-wrap: anywhere` for names, and `clamp()` only for headings. Data tables render as **stacked cards below 48rem** (label + value per cell), keeping ID, status, and actions visible. Above 48rem, tables may scroll horizontally inside their container only when no key column or action is pushed out of view.
 - **Evidence**: `docs/reference/ui/screenshots/scheduling-360.png` shows the 8-column schedule table hiding time, interviewer, room, status, and actions off-screen at 360 px; `styles.css` sets `th, td { min-width: 8rem }`, giving ≈64rem minimum table width.
+- **Implementation update (UI-2.4)**: Measured in the browser, the 8-column Final Results and schedule tables overflowed their containers at 768–1024 px (e.g. 948 px of content in an 893 px box), hiding the action column. `DataTable` therefore uses stacked cards below **80rem** (not 48rem) and a normal table from 80rem, where both tables fit without internal scrolling. This also covers a 1280 px window at 125–200% zoom.
 - **Date display**: Show dates formatted as `dd/MM/yyyy` next to native date inputs, because native inputs display in the browser locale (the reference screenshot shows `11/05/2026` for 5 Nov 2026).
 
 ## D-UI-05 — Mock data and demo scenarios
