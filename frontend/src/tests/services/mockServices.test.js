@@ -43,6 +43,20 @@ describe('demo session and scenarios', () => {
     await expect(applicationService.list()).rejects.toMatchObject({ name: 'UiError', kind: 'network' });
   });
 
+  it('cancels a mutation when the scenario or account changes while it is in flight', async () => {
+    await asExecutive();
+    const pendingNote = applicationService.saveNote('CF-028', 'Ghi chú cũ');
+    demoSessionService.resetDemoData();
+    await expect(pendingNote).rejects.toMatchObject({ kind: 'conflict' });
+    expect((await applicationService.get('CF-028')).privateNote).toBe('');
+
+    const pendingDecision = applicationService.setScreening('CF-028', 'rejected');
+    await demoSessionService.signOut();
+    await expect(pendingDecision).rejects.toMatchObject({ kind: 'conflict' });
+    await asExecutive();
+    expect((await applicationService.get('CF-028')).screeningStatus).toBe('pendingReview');
+  });
+
   it('rejects calls from the wrong demo role', async () => {
     await demoSessionService.signIn('ap-minhanh');
     await expect(applicationService.list()).rejects.toMatchObject({ kind: 'forbidden' });

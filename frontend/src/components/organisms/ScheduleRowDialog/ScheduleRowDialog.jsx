@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Button from '../../atoms/Button/index.js';
 import Alert from '../../molecules/Alert/index.js';
 import FormField from '../../molecules/FormField/index.js';
@@ -17,6 +17,14 @@ export default function ScheduleRowDialog({ row, sessionStarts, slotMinutes, int
     roomId: row.roomId ?? rooms[0]?.id ?? '',
   });
   const fieldErrors = error?.fieldErrors ?? {};
+  const formRef = useRef(null);
+
+  // UI-FR-017: when the service rejects the change field by field, focus the first invalid field.
+  useEffect(() => {
+    if (error?.fieldErrors) {
+      formRef.current?.querySelector('[aria-invalid="true"]')?.focus();
+    }
+  }, [error]);
   const set = (field) => (event) => setValues((previous) => ({ ...previous, [field]: event.target.value }));
   const endOf = (start) => new Date(new Date(start).getTime() + slotMinutes * 60000).toISOString();
 
@@ -36,6 +44,7 @@ export default function ScheduleRowDialog({ row, sessionStarts, slotMinutes, int
         </Alert>
       ) : null}
       <form
+        ref={formRef}
         className="stack"
         onSubmit={(event) => {
           event.preventDefault();

@@ -176,13 +176,20 @@ export default function ApplicantPortalPage() {
           ) : null
         }
       >
-        {notifications.length > 0 ? (
-          <NotificationList notifications={notifications} />
-        ) : (
-          <EmptyState title="Chưa có thông báo" headingLevel={3}>
-            <p>Thông báo về kết quả đã công bố sẽ hiện ở đây. ClubFlow không gửi email, SMS hay thông báo đẩy.</p>
-          </EmptyState>
-        )}
+        <div className="stack">
+          {markRead.error ? (
+            <Alert tone="error" title="Chưa thể đánh dấu đã đọc" live>
+              <p>{markRead.error.message}</p>
+            </Alert>
+          ) : null}
+          {notifications.length > 0 ? (
+            <NotificationList notifications={notifications} />
+          ) : (
+            <EmptyState title="Chưa có thông báo" headingLevel={3}>
+              <p>Thông báo về kết quả đã công bố sẽ hiện ở đây. ClubFlow không gửi email, SMS hay thông báo đẩy.</p>
+            </EmptyState>
+          )}
+        </div>
       </Card>
     );
   }

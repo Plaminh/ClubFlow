@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { setSimulation } from '../../mocks/store.js';
 import { renderApp } from '../helpers/renderApp.jsx';
 
 const MINH_ANH = 'ap-minhanh';
@@ -144,5 +145,17 @@ describe('Applicant Portal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Đánh dấu tất cả đã đọc' }));
     await waitFor(() => expect(screen.queryByText('Mới')).not.toBeInTheDocument());
+  });
+
+  it('reports a failed "mark all read" instead of failing silently', async () => {
+    await openTab('notifications', { scenarioId: 'confirmed', accountId: MINH_ANH });
+    const button = await screen.findByRole('button', { name: 'Đánh dấu tất cả đã đọc' });
+    setSimulation('error');
+    fireEvent.click(button);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Chưa thể đánh dấu đã đọc');
+    expect(alert).toHaveTextContent('mô phỏng lỗi mạng');
+    expect(screen.getByText('Mới')).toBeInTheDocument();
   });
 });

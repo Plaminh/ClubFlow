@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Badge from '../../atoms/Badge/index.js';
 import Button from '../../atoms/Button/index.js';
 import Alert from '../../molecules/Alert/index.js';
@@ -22,7 +22,16 @@ export default function AssessmentForm({ interview, onSubmit }) {
   const [errors, setErrors] = useState({});
   const [banner, setBanner] = useState(null);
   const [pending, setPending] = useState(false);
+  const [focusErrors, setFocusErrors] = useState(0);
+  const formRef = useRef(null);
   const subtitle = `${interview.applicationId} · ${interview.applicantName} · ${interview.positionName}`;
+
+  // UI-FR-017: after a failed submit, move focus to the first invalid field.
+  useEffect(() => {
+    if (focusErrors > 0) {
+      formRef.current?.querySelector('[aria-invalid="true"], .choice-group--invalid input')?.focus();
+    }
+  }, [focusErrors]);
 
   if (interview.assessment) {
     return (
@@ -88,6 +97,7 @@ export default function AssessmentForm({ interview, onSubmit }) {
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
       setBanner({ tone: 'error', title: 'Chưa thể gửi đánh giá', text: 'Điền nhận xét và chọn đề xuất. Nội dung đã nhập được giữ lại.' });
+      setFocusErrors((count) => count + 1);
       return;
     }
     setPending(true);
@@ -96,12 +106,15 @@ export default function AssessmentForm({ interview, onSubmit }) {
     if (!result.ok) {
       setErrors(result.error?.fieldErrors ?? {});
       setBanner({ tone: 'error', title: 'Chưa thể gửi đánh giá', text: result.error?.message ?? '' });
+      if (result.error?.fieldErrors) {
+        setFocusErrors((count) => count + 1);
+      }
     }
   }
 
   return (
     <Card title="Interview Assessment" subtitle={subtitle}>
-      <form className="stack" noValidate onSubmit={handleSubmit}>
+      <form ref={formRef} className="stack" noValidate onSubmit={handleSubmit}>
         {banner ? (
           <Alert tone={banner.tone} title={banner.title} live>
             <p>{banner.text}</p>

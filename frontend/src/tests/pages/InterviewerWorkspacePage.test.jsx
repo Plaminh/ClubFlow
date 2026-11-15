@@ -63,6 +63,7 @@ describe('Interviewer Workspace', () => {
     fireEvent.click(submit);
     expect(screen.getByText('Vui lòng nhập nhận xét phỏng vấn.')).toBeInTheDocument();
     expect(screen.getByText('Vui lòng chọn đánh giá tổng thể.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Nhận xét phỏng vấn')).toHaveFocus();
 
     fireEvent.change(screen.getByLabelText('Nhận xét phỏng vấn'), { target: { value: 'Tư duy thiết kế tốt.' } });
     fireEvent.click(screen.getByRole('radio', { name: 'Cần cân nhắc' }));
