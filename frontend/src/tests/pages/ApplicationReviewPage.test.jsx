@@ -83,6 +83,18 @@ describe('Application Review — CV Screening', () => {
     expect(statValue('Ứng viên riêng biệt')).toBe('5');
   });
 
+  it('never shows or acts on the previous application while another one loads', async () => {
+    await openScreening();
+    fireEvent.click(screen.getByRole('button', { name: 'Review CF-031 · Vũ Khánh Linh' }));
+    await screen.findByRole('heading', { level: 2, name: 'CF-031 · Vũ Khánh Linh' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review CF-028 · Trần Bảo Ngọc' }));
+
+    expect(screen.queryByRole('heading', { name: 'CF-031 · Vũ Khánh Linh' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Shortlist Candidate' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 2, name: 'CF-028 · Trần Bảo Ngọc' })).toBeInTheDocument();
+  });
+
   it('asks for confirmation before rejecting', async () => {
     await openScreening();
     fireEvent.change(screen.getByLabelText('Trạng thái'), { target: { value: 'pendingReview' } });

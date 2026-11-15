@@ -44,8 +44,15 @@ describe('Interviewer Workspace', () => {
 
   it('validates and submits one assessment for a completed interview', async () => {
     await openAs('iv-hamy');
+    await screen.findByText('Đã gửi đánh giá');
     fireEvent.click(screen.getByRole('button', { name: 'Chọn CF-030 · Phạm Quốc Bảo' }));
-    const submit = await screen.findByRole('button', { name: 'Submit Assessment' });
+
+    // Until CF-030 has loaded, CF-026's panel (and its form) must not stay on screen.
+    expect(screen.queryByText('Đã gửi đánh giá')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'CF-026 · Nguyễn Minh Anh' })).not.toBeInTheDocument();
+
+    await screen.findByRole('heading', { name: 'CF-030 · Phạm Quốc Bảo' });
+    const submit = screen.getByRole('button', { name: 'Submit Assessment' });
 
     fireEvent.click(submit);
     expect(screen.getByText('Vui lòng nhập nhận xét phỏng vấn.')).toBeInTheDocument();

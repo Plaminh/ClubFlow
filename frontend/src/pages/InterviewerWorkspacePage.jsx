@@ -26,6 +26,8 @@ export default function InterviewerWorkspacePage() {
   const interviews = assigned.data?.interviews ?? [];
   const selectedId = interviews.some((item) => item.interviewId === chosenId) ? chosenId : interviews[0]?.interviewId ?? null;
   const detail = useInterviewDetail(selectedId);
+  // Never show (or submit for) the previous interview while the newly selected one loads.
+  const current = detail.data && detail.data.interviewId === selectedId ? detail.data : null;
   const interviewDate = assigned.data?.interviewDate;
 
   const heading = {
@@ -62,7 +64,7 @@ export default function InterviewerWorkspacePage() {
   const done = interviews.filter((item) => item.assessmentStatus === 'submitted').length;
 
   async function submitAssessment(values) {
-    const id = selectedId;
+    const id = current.interviewId;
     const result = await action.run(() => interviewerActions.submitAssessment(id, values));
     if (result.ok) {
       setMessage({
@@ -113,13 +115,13 @@ export default function InterviewerWorkspacePage() {
           </Alert>
         ) : null}
 
-        {detail.status === 'success' && detail.data ? (
+        {current ? (
           <div className="two-column">
-            <InterviewDetailCard interview={detail.data} />
-            <AssessmentForm key={detail.data.interviewId} interview={detail.data} onSubmit={submitAssessment} />
+            <InterviewDetailCard interview={current} />
+            <AssessmentForm key={current.interviewId} interview={current} onSubmit={submitAssessment} />
           </div>
         ) : (
-          <AsyncContent status={detail.status} error={detail.error} onRetry={detail.reload} />
+          <AsyncContent status={detail.status === 'error' ? 'error' : 'loading'} error={detail.error} onRetry={detail.reload} />
         )}
       </div>
     </MainTemplate>

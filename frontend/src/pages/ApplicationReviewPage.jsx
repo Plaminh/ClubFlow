@@ -43,6 +43,8 @@ function ScreeningPanel() {
   const overview = useApplications(query);
   const detail = useApplicationDetail(selectedId);
   const action = useAction();
+  // Never show (or act on) the previous application while the newly selected one loads.
+  const current = detail.data && detail.data.id === selectedId ? detail.data : null;
 
   if (overview.status !== 'success') {
     return <AsyncContent status={overview.status} error={overview.error} onRetry={overview.reload} />;
@@ -64,7 +66,8 @@ function ScreeningPanel() {
   }
 
   async function saveNote(note) {
-    const result = await action.run(() => applicationActions.saveNote(selectedId, note));
+    const id = current.id;
+    const result = await action.run(() => applicationActions.saveNote(id, note));
     setMessage(
       result.ok
         ? { tone: 'success', title: 'Đã lưu ghi chú nội bộ (mô phỏng)' }
@@ -74,11 +77,12 @@ function ScreeningPanel() {
 
   async function decide(status) {
     setRejectOpen(false);
-    const result = await action.run(() => applicationActions.setScreening(selectedId, status));
+    const id = current.id;
+    const result = await action.run(() => applicationActions.setScreening(id, status));
     if (result.ok) {
       setMessage({
         tone: 'success',
-        title: status === 'shortlisted' ? `${selectedId} đã qua vòng CV` : `${selectedId} đã bị loại ở vòng CV`,
+        title: status === 'shortlisted' ? `${id} đã qua vòng CV` : `${id} đã bị loại ở vòng CV`,
         text: 'Quyết định chỉ áp dụng cho hồ sơ này.',
       });
       overview.reload();
@@ -171,10 +175,10 @@ function ScreeningPanel() {
         </Card>
 
         {selectedId ? (
-          detail.status === 'success' && detail.data ? (
+          current ? (
             <ApplicationDetail
-              key={detail.data.id}
-              detail={detail.data}
+              key={current.id}
+              detail={current}
               pending={action.pending}
               message={message}
               focusOnMount={focusDetail}
@@ -187,7 +191,7 @@ function ScreeningPanel() {
               }}
             />
           ) : (
-            <AsyncContent status={detail.status} error={detail.error} onRetry={detail.reload} />
+            <AsyncContent status={detail.status === 'error' ? 'error' : 'loading'} error={detail.error} onRetry={detail.reload} />
           )
         ) : null}
       </div>
@@ -208,7 +212,7 @@ function ScreeningPanel() {
 
       <ConfirmDialog
         open={rejectOpen}
-        title={`Loại hồ sơ ${selectedId ?? ''}?`}
+        title={`Loại hồ sơ ${current?.id ?? ''}?`}
         confirmLabel="Loại hồ sơ"
         tone="danger"
         busy={action.pending}
