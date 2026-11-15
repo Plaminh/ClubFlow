@@ -35,7 +35,7 @@ export function DemoSessionProvider({ children }) {
   });
   const [accounts, setAccounts] = useState([]);
   const [status, setStatus] = useState('loading');
-  const [accountId, setAccountId] = useState(initial.accountId);
+  const [account, setAccount] = useState(initial.account);
   const [scenarioId, setScenarioId] = useState(initial.scenarioId);
   const [simulation, setSimulationState] = useState(initial.simulation);
   const [dataVersion, setDataVersion] = useState(0);
@@ -61,19 +61,21 @@ export function DemoSessionProvider({ children }) {
     };
   }, []);
 
+  const accountId = account?.id ?? null;
+
   useEffect(() => {
     save({ accountId, scenarioId });
   }, [accountId, scenarioId]);
 
   const signIn = useCallback(async (id) => {
-    const account = await demoSessionService.signIn(id);
-    setAccountId(account.id);
-    return account;
+    const signedIn = await demoSessionService.signIn(id);
+    setAccount(signedIn);
+    return signedIn;
   }, []);
 
   const signOut = useCallback(async () => {
     await demoSessionService.signOut();
-    setAccountId(null);
+    setAccount(null);
   }, []);
 
   const setScenario = useCallback((id) => {
@@ -94,7 +96,6 @@ export function DemoSessionProvider({ children }) {
   }, []);
 
   const value = useMemo(() => {
-    const account = accounts.find((item) => item.id === accountId) ?? null;
     return {
       status,
       accounts,
@@ -114,6 +115,7 @@ export function DemoSessionProvider({ children }) {
     };
   }, [
     accounts,
+    account,
     accountId,
     status,
     signIn,

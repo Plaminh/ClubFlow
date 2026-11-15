@@ -11,11 +11,13 @@ import { toUiError } from '../services/uiError.js';
  *
  * State is only set from the async callbacks; "loading" is derived by
  * comparing the key of the last finished request with the current one.
+ * Data loaded for a different account is never returned (no stale data from
+ * another identity while the new request is in flight).
  */
 export default function useServiceData(loader, deps = []) {
   const { accountId, dataVersion } = useDemoSession();
   const [reloadCount, setReloadCount] = useState(0);
-  const [result, setResult] = useState({ key: null, data: null, error: null });
+  const [result, setResult] = useState({ key: null, accountId: null, data: null, error: null });
   const loaderRef = useRef(loader);
   const requestKey = JSON.stringify([...deps, accountId, dataVersion, reloadCount]);
 
@@ -28,34 +30,38 @@ export default function useServiceData(loader, deps = []) {
     loaderRef.current().then(
       (data) => {
         if (active) {
-          setResult({ key: requestKey, data, error: null });
+          setResult({ key: requestKey, accountId, data, error: null });
         }
       },
       (error) => {
         if (active) {
-          setResult({ key: requestKey, data: null, error: toUiError(error) });
+          setResult({ key: requestKey, accountId, data: null, error: toUiError(error) });
         }
       },
     );
     return () => {
       active = false;
     };
+    // accountId is part of requestKey.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestKey]);
 
   const reload = useCallback(() => setReloadCount((count) => count + 1), []);
   const settled = result.key === requestKey;
+  const sameAccount = result.accountId === accountId;
+  const data = sameAccount ? result.data : null;
   let status = 'loading';
   if (settled) {
     status = result.error ? 'error' : 'success';
-  } else if (result.data !== null) {
+  } else if (data !== null) {
     status = 'success';
   }
 
   return {
-    data: result.data,
+    data,
     status,
     error: settled ? result.error : null,
-    refreshing: !settled && result.data !== null,
+    refreshing: !settled && data !== null,
     reload,
   };
 }

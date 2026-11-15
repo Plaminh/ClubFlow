@@ -44,8 +44,11 @@ export function listScenarios() {
   return clone(SCENARIOS);
 }
 
+/** Current demo selection; the account object is included so the role is known on first render. */
 export function getDemoState() {
-  return { accountId: getSessionAccountId(), scenarioId: getScenarioId(), simulation: getSimulation() };
+  const accountId = getSessionAccountId();
+  const account = ACCOUNTS.find((item) => item.id === accountId) ?? null;
+  return { accountId, account: account ? clone(account) : null, scenarioId: getScenarioId(), simulation: getSimulation() };
 }
 
 /** Restores a saved demo selection (e.g. after a reload); data itself restarts from fixtures. */
