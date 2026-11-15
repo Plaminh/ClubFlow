@@ -19,10 +19,7 @@ export function useApplications(query) {
 
 /** One application's detail for the side panel; `null` when nothing is selected. */
 export function useApplicationDetail(applicationId) {
-  return useServiceData(
-    () => (applicationId ? applicationService.get(applicationId) : Promise.resolve(null)),
-    [applicationId],
-  );
+  return useServiceData(() => applicationService.get(applicationId), [applicationId], { enabled: Boolean(applicationId) });
 }
 
 export const applicationActions = {

@@ -8,10 +8,9 @@ export function useFinalResults() {
 
 /** Submitted assessment for one application (`null` if none or nothing selected). */
 export function useAssessment(applicationId, enabled) {
-  return useServiceData(
-    () => (applicationId && enabled ? resultService.getAssessment(applicationId) : Promise.resolve(null)),
-    [applicationId, enabled],
-  );
+  return useServiceData(() => resultService.getAssessment(applicationId), [applicationId], {
+    enabled: Boolean(applicationId && enabled),
+  });
 }
 
 export const resultActions = {

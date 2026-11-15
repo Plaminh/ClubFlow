@@ -69,17 +69,9 @@ a:hover {
   background: var(--color-selection);
 }
 
-/* Long names (campaigns, applicants, positions) must wrap, not overflow. */
-h1,
-h2,
-h3,
-p,
-li,
-a,
-button,
-label,
-td,
-th {
+/* Long names and enlarged text must wrap, not overflow. Set on <body> so
+   every element inherits it (spans, badges, list values, summaries…). */
+body {
   overflow-wrap: anywhere;
 }
 

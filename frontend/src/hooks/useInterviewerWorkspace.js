@@ -8,10 +8,9 @@ export function useAssignedInterviews() {
 
 /** Detail of one assigned interview (no Executive-only screening notes). */
 export function useInterviewDetail(interviewId) {
-  return useServiceData(
-    () => (interviewId ? interviewerService.getInterview(interviewId) : Promise.resolve(null)),
-    [interviewId],
-  );
+  return useServiceData(() => interviewerService.getInterview(interviewId), [interviewId], {
+    enabled: Boolean(interviewId),
+  });
 }
 
 export const interviewerActions = {

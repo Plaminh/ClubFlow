@@ -58,17 +58,25 @@
   background: var(--color-brand-soft);
 }
 
+/* Label beside value when there is room, value below the label when not
+   (narrow cards or enlarged text) — never wider than the card. */
 .data-table td {
-  display: grid;
-  grid-template-columns: minmax(7rem, 0.4fr) minmax(0, 1fr);
-  gap: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
   padding: var(--space-1) 0;
 }
 
 .data-table td::before {
   content: attr(data-label);
+  flex: 0 1 7rem;
+  min-width: 0;
   color: var(--color-muted);
   font-weight: 700;
+}
+
+.data-table td > .data-table__value {
+  flex: 1 1 9rem;
 }
 
 @media (min-width: 80rem) {
@@ -133,14 +141,15 @@
   }
 }
 
-/* Short values (IDs, rooms, times) must not break mid-word inside table
-   columns; "anywhere" (global) would let columns shrink below a word. */
-.data-table th,
-.data-table td {
-  overflow-wrap: break-word;
-}
-
 @media (min-width: 80rem) {
+  /* In the desktop table, short values (IDs, rooms, times) must not break
+     mid-word; "anywhere" (inherited) would let columns shrink below a word.
+     Stacked cards keep "anywhere" so large text never overflows a card. */
+  .data-table th,
+  .data-table td {
+    overflow-wrap: break-word;
+  }
+
   .data-table .button,
   .data-table .badge {
     white-space: nowrap;

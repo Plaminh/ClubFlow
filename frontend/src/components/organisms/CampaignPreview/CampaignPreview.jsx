@@ -39,8 +39,8 @@ export default function CampaignPreview({ campaign, positions }) {
       <div className="stack">
         <h3>Ban và vị trí tuyển</h3>
         {positions.length === 0 ? <p className="muted">Chưa có vị trí nào.</p> : null}
-        {positions.map((position) => (
-          <PositionCard key={position.key ?? position.id} {...position} headingLevel={4} />
+        {positions.map(({ key, ...position }) => (
+          <PositionCard key={key ?? position.id} {...position} headingLevel={4} />
         ))}
       </div>
     </div>
