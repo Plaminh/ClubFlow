@@ -123,10 +123,10 @@ description: "Task list for the ClubFlow UI-first frontend"
 ## Phase 7: User Story 5 — Interviewer Workspace (UI-4, P2)
 
 - [x] T055 [US5] Create `frontend/src/services/interviewerService.js` — UI-1.3
-- [ ] T056 [US5] Create `frontend/src/hooks/useInterviewerWorkspace.js`
-- [ ] T057 [US5] Create `AssignedInterviews`, `InterviewDetail`, `AssessmentForm` organisms
-- [ ] T058 [US5] Implement `frontend/src/pages/InterviewerWorkspacePage.jsx` (empty and restricted states)
-- [ ] T059 [US5] Add tests in `frontend/src/tests/pages/InterviewerWorkspacePage.test.jsx`
+- [x] T056 [US5] Create `frontend/src/hooks/useInterviewerWorkspace.js` — UI-4
+- [x] T057 [US5] Create `AssignedInterviews`, `InterviewDetail`, `AssessmentForm` organisms — UI-4 (`AssignedInterviewsTable`, `InterviewDetailCard`, `AssessmentForm`)
+- [x] T058 [US5] Implement `frontend/src/pages/InterviewerWorkspacePage.jsx` (empty and restricted states) — UI-4
+- [x] T059 [US5] Add tests in `frontend/src/tests/pages/InterviewerWorkspacePage.test.jsx` — UI-4
 
 ---
 

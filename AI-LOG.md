@@ -339,3 +339,22 @@ Not done as suggested: the two suggested UI-3 commits are one, because the track
 Verified: `npm run verify` 0 (frontend 134, backend 18); the isolated fix commit also passed verify (frontend 124, backend 18); no `act()` warnings. Headless Edge: one `<h1>`, no page or table-container overflow for visitor `/` and `?tab=apply` (accepting) at 360/768/1280, applicant `?tab=apply` (accepting) at 360/640/768/1024/1280/1600, and `?tab=mine` / `?tab=notifications` (confirmed) at 360/768/1024/1280; screenshots of Apply at 1280 and My Applications at 360 compared with `applicant-1280.png` / `applicant-results-360.png`. The native file button shows the browser's own language ("Choose File"); the Vietnamese status line under it states the chosen file.
 
 By hand: The team reviews both commits.
+
+---
+
+## 2026-11-15 — UI-4 — Interviewer Workspace
+
+Tool: Claude Code
+
+Asked for: Implement `/interviewer` from `interviewer.html` (F6, F7; BR-14): assigned interviews only, details and CV access, one assessment per completed interview, submitted / upcoming / empty / restricted states, no Executive notes, no Pass/Fail publishing.
+
+Changed:
+
+- `pages/InterviewerWorkspacePage.jsx` + `hooks/useInterviewerWorkspace.js`: interviewer identity badge, campaign and interview-date context, four stats, "Assigned Interviews" table (only the signed-in interviewer's confirmed interviews, with Confirmed + assessment status), selected application details (faculty/year, interview time and room, SOP, link to the fictional sample CV), Interview Assessment form, success message that Pass/Fail is recorded by the Executive elsewhere.
+- New organisms: `AssignedInterviewsTable`, `InterviewDetailCard`, `AssessmentForm` (states: form, submitted read-only, not-yet-held locked). `/interviewer` now goes through `RoleGate`; the temporary `RoutePlaceholderPage` is no longer routed (removal is part of the UI-5 cleanup).
+- Assumption (Q-04 open): the assessment has the reference fields only — notes (required) and a three-option overall recommendation (required); no numeric scores. The form is a single organism so the fields are easy to change once Q-04 is answered.
+- Tests: `tests/pages/InterviewerWorkspacePage.test.jsx` (own interviews only, no private notes, submitted read-only, validation then submit → locked, upcoming interview locked after confirming a schedule in the `screening` scenario, empty state, restricted state for other roles).
+
+Verified: `npm run verify` 0 (frontend 141, backend 18), run with the QA servers stopped. Headless Edge as Hà My (`confirmed`): one `<h1>`, no page or table-container overflow at 360/640/768/853/1024/1280/1600 px; empty state (`screening`) at 360 and 1280; screenshot at 1280 compared with `interviewer-1280.png`.
+
+By hand: The team reviews the commit.

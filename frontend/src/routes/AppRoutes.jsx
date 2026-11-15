@@ -4,8 +4,8 @@ import ApplicantPortalPage from '../pages/ApplicantPortalPage.jsx';
 import ApplicationReviewPage from '../pages/ApplicationReviewPage.jsx';
 import CampaignManagementPage from '../pages/CampaignManagementPage.jsx';
 import InterviewSchedulingPage from '../pages/InterviewSchedulingPage.jsx';
+import InterviewerWorkspacePage from '../pages/InterviewerWorkspacePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
-import RoutePlaceholderPage from '../pages/RoutePlaceholderPage.jsx';
 import { SCREEN_LABELS } from '../constants/labels.js';
 import { ROUTES } from './paths.js';
 import RoleGate from './RoleGate.jsx';
@@ -41,7 +41,11 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.INTERVIEWER}
-          element={<RoutePlaceholderPage title={SCREEN_LABELS.interviewerWorkspace} />}
+          element={
+            <RoleGate role="interviewer" title={SCREEN_LABELS.interviewerWorkspace}>
+              <InterviewerWorkspacePage />
+            </RoleGate>
+          }
         />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

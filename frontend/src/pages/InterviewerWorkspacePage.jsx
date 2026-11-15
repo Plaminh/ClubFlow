@@ -1,0 +1,127 @@
+import { useState } from 'react';
+import Badge from '../components/atoms/Badge/index.js';
+import Alert from '../components/molecules/Alert/index.js';
+import AsyncContent from '../components/molecules/AsyncContent/index.js';
+import Card from '../components/molecules/Card/index.js';
+import EmptyState from '../components/molecules/EmptyState/index.js';
+import StatCard from '../components/molecules/StatCard/index.js';
+import AssessmentForm from '../components/organisms/AssessmentForm/index.js';
+import AssignedInterviewsTable from '../components/organisms/AssignedInterviewsTable/index.js';
+import InterviewDetailCard from '../components/organisms/InterviewDetailCard/index.js';
+import MainTemplate from '../components/templates/MainTemplate/index.js';
+import { SCREEN_LABELS } from '../constants/labels.js';
+import { useDemoSession } from '../contexts/demoSession.js';
+import useAction from '../hooks/useAction.js';
+import useCampaign from '../hooks/useCampaign.js';
+import { interviewerActions, useAssignedInterviews, useInterviewDetail } from '../hooks/useInterviewerWorkspace.js';
+import { formatDate } from '../utils/format.js';
+
+export default function InterviewerWorkspacePage() {
+  const { account } = useDemoSession();
+  const assigned = useAssignedInterviews();
+  const campaign = useCampaign();
+  const [chosenId, setChosenId] = useState(null);
+  const [message, setMessage] = useState(null);
+  const action = useAction();
+  const interviews = assigned.data?.interviews ?? [];
+  const selectedId = interviews.some((item) => item.interviewId === chosenId) ? chosenId : interviews[0]?.interviewId ?? null;
+  const detail = useInterviewDetail(selectedId);
+  const interviewDate = assigned.data?.interviewDate;
+
+  const heading = {
+    eyebrow: 'Không gian phỏng vấn · CLB Công nghệ & Sáng tạo',
+    title: SCREEN_LABELS.interviewerWorkspace,
+    description: 'Xem các buổi phỏng vấn được phân công cho bạn và gửi đánh giá sau phỏng vấn.',
+    actions: account ? <Badge tone="info">{`${account.displayName} · ${account.description}`}</Badge> : null,
+    context: campaign.data
+      ? `${campaign.data.campaign.name}${interviewDate ? ` · Phỏng vấn ${formatDate(interviewDate)}` : ''}`
+      : null,
+  };
+
+  if (assigned.status !== 'success') {
+    return (
+      <MainTemplate {...heading}>
+        <AsyncContent status={assigned.status} error={assigned.error} onRetry={assigned.reload} />
+      </MainTemplate>
+    );
+  }
+
+  if (interviews.length === 0) {
+    return (
+      <MainTemplate {...heading}>
+        <EmptyState title="Chưa có buổi phỏng vấn nào được phân công cho bạn">
+          <p>
+            Khi Ban tuyển dụng xác nhận lịch phỏng vấn, các buổi của bạn sẽ hiển thị tại đây. Bạn không thể xem lịch của
+            người phỏng vấn khác.
+          </p>
+        </EmptyState>
+      </MainTemplate>
+    );
+  }
+
+  const done = interviews.filter((item) => item.assessmentStatus === 'submitted').length;
+
+  async function submitAssessment(values) {
+    const id = selectedId;
+    const result = await action.run(() => interviewerActions.submitAssessment(id, values));
+    if (result.ok) {
+      setMessage({
+        tone: 'success',
+        title: 'Đã gửi đánh giá (mô phỏng)',
+        text: 'Mỗi buổi phỏng vấn chỉ có một đánh giá. Quyết định Pass/Fail do Ban tuyển dụng ghi nhận ở màn hình Application Review, không phải ở đây.',
+      });
+      assigned.reload();
+      detail.reload();
+    }
+    return result;
+  }
+
+  return (
+    <MainTemplate {...heading}>
+      <div className="stack stack--roomy">
+        <section aria-label="Tổng quan phỏng vấn của bạn">
+          <div className="stats-grid">
+            <StatCard value={interviews.length} label="Phỏng vấn được phân công" />
+            <StatCard value={done} label="Đã đánh giá" />
+            <StatCard value={interviews.length - done} label="Chờ đánh giá" />
+            <StatCard value={formatDate(interviewDate)} label="Ngày phỏng vấn" />
+          </div>
+        </section>
+
+        <Card
+          title="Assigned Interviews"
+          subtitle={`Chỉ gồm lịch đã Confirmed và được phân công cho ${account?.displayName ?? 'bạn'}. Ghi chú sàng lọc nội bộ của Ban tuyển dụng không hiển thị ở đây.`}
+        >
+          <div className="stack">
+            <AssignedInterviewsTable
+              interviews={interviews}
+              selectedId={selectedId}
+              onSelect={(id) => {
+                setChosenId(id);
+                setMessage(null);
+              }}
+            />
+            <p className="hint">
+              Bạn chỉ thấy các buổi được phân công cho mình. Quyền truy cập thật sẽ do backend thực thi.
+            </p>
+          </div>
+        </Card>
+
+        {message ? (
+          <Alert tone={message.tone} title={message.title} live>
+            <p>{message.text}</p>
+          </Alert>
+        ) : null}
+
+        {detail.status === 'success' && detail.data ? (
+          <div className="two-column">
+            <InterviewDetailCard interview={detail.data} />
+            <AssessmentForm key={detail.data.interviewId} interview={detail.data} onSubmit={submitAssessment} />
+          </div>
+        ) : (
+          <AsyncContent status={detail.status} error={detail.error} onRetry={detail.reload} />
+        )}
+      </div>
+    </MainTemplate>
+  );
+}
