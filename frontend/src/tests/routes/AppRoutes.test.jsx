@@ -19,7 +19,7 @@ describe('AppRoutes', () => {
   ])('renders %s inside the app shell with exactly one h1', async (path, title) => {
     renderApp(path);
 
-    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: title });
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getAllByRole('main')).toHaveLength(1);
     expect(screen.getByRole('banner')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('AppRoutes', () => {
   it('shows a not-found state with a link home for unknown paths', async () => {
     renderApp('/executive/unknown-page');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trang' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trang' });
     expect(screen.getByText(/"\/executive\/unknown-page"/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Về trang chủ' })).toHaveAttribute('href', ROUTES.HOME);
   });
@@ -50,6 +50,6 @@ describe('AppRoutes', () => {
   it('does not treat a tab name as its own route', async () => {
     renderApp('/executive/review/results');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trang' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trang' });
   });
 });

@@ -28,7 +28,7 @@ describe('Applicant Portal', () => {
   it('shows the public campaign to visitors and asks them to sign in to apply (BR-02)', async () => {
     renderApp('/', { scenarioId: 'accepting' });
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
     expect(await screen.findByText('Đang nhận hồ sơ', { selector: '.alert__title' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Digital Product' })).toBeInTheDocument();
 

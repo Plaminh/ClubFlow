@@ -13,7 +13,7 @@ describe('Campaign Management', () => {
   it('shows a restricted state to visitors', async () => {
     renderApp(PATH);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(screen.getByText('Màn hình này dành cho Ban tuyển dụng')).toBeInTheDocument();
     expect(screen.queryByLabelText('Tên chiến dịch')).not.toBeInTheDocument();
   });

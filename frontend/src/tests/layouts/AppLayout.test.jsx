@@ -23,7 +23,7 @@ describe('AppLayout', () => {
 
     await signInAs('Ban tuyển dụng · CLB Công nghệ & Sáng tạo');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(navLinks()).toEqual(['Chiến dịch', 'Duyệt hồ sơ', 'Xếp lịch', 'Trang công khai']);
     expect(screen.getByRole('link', { name: 'Chiến dịch' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('Ban tuyển dụng · CLB Công nghệ & Sáng tạo')).toBeInTheDocument();
@@ -35,7 +35,7 @@ describe('AppLayout', () => {
 
     fireEvent.click(screen.getByRole('link', { name: 'Xếp lịch' }));
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Interview Scheduling' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Interview Scheduling' });
     expect(screen.getByRole('link', { name: 'Xếp lịch' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Chiến dịch' })).not.toHaveAttribute('aria-current');
     expect(screen.getByRole('main')).toHaveFocus();
@@ -45,12 +45,12 @@ describe('AppLayout', () => {
     renderApp('/');
     await signInAs('Hà My · User Experience Design');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
     expect(navLinks()).toEqual(['Interviewer Workspace']);
 
     fireEvent.click(screen.getByRole('button', { name: 'Sign Out' }));
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
     expect(await screen.findByText('Khách (chưa đăng nhập)')).toBeInTheDocument();
   });
 

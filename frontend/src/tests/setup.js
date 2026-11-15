@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { configure } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { cleanup, configure } from '@testing-library/react';
+import { afterEach, beforeEach, vi } from 'vitest';
 import { resetMockStore } from '../mocks/store.js';
 
 // Full-page tests render the whole app shell; when every test file runs in
@@ -12,7 +12,22 @@ vi.mock('../services/healthService.js', () => ({
   getHealth: vi.fn(() => Promise.resolve({ status: 'ok' })),
 }));
 
-afterEach(() => {
+function resetDemo() {
   resetMockStore();
   window.sessionStorage.clear();
+}
+
+// Unmount first, then reset. Testing Library registers its own cleanup when it
+// is imported above, and Vitest runs after-hooks in reverse order, so without
+// this explicit cleanup() the demo data was reset while the previous test's app
+// was still mounted, and a late effect could save the old demo account back
+// into sessionStorage for the next test.
+afterEach(() => {
+  cleanup();
+  resetDemo();
+});
+
+// Every test also starts from a clean demo state, whatever ran before it.
+beforeEach(() => {
+  resetDemo();
 });
