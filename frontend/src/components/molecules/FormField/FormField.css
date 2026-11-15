@@ -2,8 +2,7 @@
   min-width: 0;
 }
 
-.field__label,
-.field-legend {
+.field__label {
   display: block;
   margin-bottom: var(--space-1);
   color: var(--color-text);

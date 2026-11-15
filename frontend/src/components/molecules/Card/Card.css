@@ -40,11 +40,6 @@
   align-items: center;
 }
 
-/* Inner cards (cards inside cards) use the subtle surface. */
-.card--subtle {
-  background: var(--color-surface-subtle);
-}
-
 @media (min-width: 48rem) {
   .card {
     padding: var(--space-6);

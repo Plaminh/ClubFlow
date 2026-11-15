@@ -14,7 +14,7 @@ export default function FormField({ id, label, hint, error, extra, className = '
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
 
   return (
-    <div className={`field ${error ? 'field--invalid' : ''} ${className}`.trim()}>
+    <div className={`field ${className}`.trim()}>
       <label className="field__label" htmlFor={controlId}>
         {label}
       </label>

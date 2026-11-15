@@ -39,11 +39,6 @@ export const ROLE_LABELS = Object.freeze({
   interviewer: 'Người phỏng vấn',
 });
 
-export const CAMPAIGN_STATUS_LABELS = Object.freeze({
-  draft: 'Bản nháp',
-  published: 'Đã công bố',
-});
-
 export const SCREENING_STATUS_LABELS = Object.freeze({
   pendingReview: 'Chờ duyệt',
   shortlisted: 'Qua vòng CV',
