@@ -101,9 +101,12 @@ export async function apiClient(path, { method = 'GET', query, body, headers = {
   if (!response.ok) {
     const kind = STATUS_KINDS[response.status] ?? 'unknown';
     const message = (data && typeof data === 'object' && (data.error || data.message)) || DEFAULT_MESSAGES[kind];
+    // Backend `details` keys sit directly on error.details (e.g. details.conditions,
+    // details.existingApplicationId), the same shape the mock services produce.
+    const backendDetails = data?.details && typeof data.details === 'object' ? data.details : {};
     throw new UiError(kind, message, {
       fieldErrors: data?.fieldErrors,
-      details: { status: response.status, ...(data?.details ? { details: data.details } : {}) },
+      details: { ...backendDetails, status: response.status },
     });
   }
   return data;

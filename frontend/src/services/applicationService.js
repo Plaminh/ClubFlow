@@ -2,7 +2,7 @@
  * Application review service (Executive). Demo implementation over the mock
  * store; replace bodies with apiClient calls during backend integration.
  */
-import { accountById, accountName, isScheduleConfirmed, positionById, slotText } from '../mocks/derive.js';
+import { accountName, isScheduleConfirmed, positionById, slotText } from '../mocks/derive.js';
 import { SAMPLE_CV_URL } from '../mocks/fixtures.js';
 import { assertNotLockedBySchedule, requireRole } from '../mocks/guards.js';
 import { clone, getState, mockRequest } from '../mocks/store.js';
@@ -64,16 +64,10 @@ function findApplication(state, id) {
 }
 
 function detailOf(state, application) {
-  const account = accountById(application.applicantId);
   return {
     ...summaryOf(state, application),
-    student: {
-      name: account?.displayName ?? '—',
-      studentId: account?.studentId ?? '—',
-      email: account?.email ?? '—',
-      faculty: account?.faculty ?? '—',
-      year: account?.year ?? '—',
-    },
+    // The snapshot submitted with this application, not the current account profile.
+    student: { ...application.studentInfo },
     availabilityText: slotText(state, application.slotIds),
     sop: application.sop,
     cv: { ...application.cv, url: SAMPLE_CV_URL },
@@ -171,12 +165,12 @@ export async function exportCsv(query = {}) {
   const items = filtered(state, query);
   const header = ['Mã hồ sơ', 'Ứng viên', 'Mã số sinh viên', 'Email', 'Vị trí', 'Thời gian nộp', 'Trạng thái'];
   const lines = items.map((item) => {
-    const account = accountById(item.applicantId);
+    const { studentInfo } = findApplication(state, item.id);
     return [
       item.id,
       item.applicantName,
-      account?.studentId,
-      account?.email,
+      studentInfo.studentId,
+      studentInfo.email,
       item.positionName,
       formatDateTime(item.submittedAt),
       getLabel(SCREENING_STATUS_LABELS, item.screeningStatus),

@@ -12,14 +12,12 @@ import MainTemplate from '../components/templates/MainTemplate/index.js';
 import { SCREEN_LABELS } from '../constants/labels.js';
 import { useDemoSession } from '../contexts/demoSession.js';
 import useAction from '../hooks/useAction.js';
-import useCampaign from '../hooks/useCampaign.js';
 import { interviewerActions, useAssignedInterviews, useInterviewDetail } from '../hooks/useInterviewerWorkspace.js';
 import { formatDate } from '../utils/format.js';
 
 export default function InterviewerWorkspacePage() {
   const { account } = useDemoSession();
   const assigned = useAssignedInterviews();
-  const campaign = useCampaign();
   const [chosenId, setChosenId] = useState(null);
   const [message, setMessage] = useState(null);
   const action = useAction();
@@ -29,15 +27,14 @@ export default function InterviewerWorkspacePage() {
   // Never show (or submit for) the previous interview while the newly selected one loads.
   const current = detail.data && detail.data.interviewId === selectedId ? detail.data : null;
   const interviewDate = assigned.data?.interviewDate;
+  const campaignName = assigned.data?.campaignName;
 
   const heading = {
     eyebrow: 'Không gian phỏng vấn · CLB Công nghệ & Sáng tạo',
     title: SCREEN_LABELS.interviewerWorkspace,
     description: 'Xem các buổi phỏng vấn được phân công cho bạn và gửi đánh giá sau phỏng vấn.',
     actions: account ? <Badge tone="info">{`${account.displayName} · ${account.description}`}</Badge> : null,
-    context: campaign.data
-      ? `${campaign.data.campaign.name}${interviewDate ? ` · Phỏng vấn ${formatDate(interviewDate)}` : ''}`
-      : null,
+    context: campaignName ? `${campaignName}${interviewDate ? ` · Phỏng vấn ${formatDate(interviewDate)}` : ''}` : null,
   };
 
   if (assigned.status !== 'success') {

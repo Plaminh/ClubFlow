@@ -26,6 +26,12 @@ describe('Interviewer Workspace', () => {
     expect(screen.getByText('Hà My · User Experience Design')).toBeInTheDocument();
   });
 
+  it('shows the campaign context without the Executive-only campaign request', async () => {
+    await openAs('iv-hamy');
+
+    expect(screen.getByText(/· Phỏng vấn 05\/11\/2026/)).toBeInTheDocument();
+  });
+
   it('never shows Executive-only screening notes', async () => {
     await openAs('iv-hamy');
     await screen.findByRole('heading', { name: 'CF-026 · Nguyễn Minh Anh' });

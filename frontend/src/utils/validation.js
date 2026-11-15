@@ -76,7 +76,7 @@ export function validateCampaignForPublish(draft) {
 }
 
 /** Application form checks (Business §3.2). `cv` is a File-like { name, type, size } or null. */
-export function validateApplicationInput({ positionId, email, sop, slotIds, cv }) {
+export function validateApplicationInput({ positionId, email, faculty, sop, slotIds, cv }) {
   const errors = {};
   if (isBlank(positionId)) {
     errors.positionId = 'Vui lòng chọn vị trí ứng tuyển.';
@@ -85,6 +85,9 @@ export function validateApplicationInput({ positionId, email, sop, slotIds, cv }
     errors.email = 'Vui lòng nhập email liên hệ.';
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     errors.email = 'Email chưa đúng định dạng.';
+  }
+  if (isBlank(faculty)) {
+    errors.faculty = 'Vui lòng chọn khoa.';
   }
   if (!cv) {
     errors.cv = 'Vui lòng chọn CV định dạng PDF.';

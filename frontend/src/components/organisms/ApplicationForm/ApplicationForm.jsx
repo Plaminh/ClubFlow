@@ -144,7 +144,7 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
                   />
                 )}
               </FormField>
-              <FormField id="apply-faculty" label="Khoa">
+              <FormField id="apply-faculty" label="Khoa" error={errors.faculty}>
                 {(props) => (
                   <select {...props} value={values.faculty} disabled={disabled} onChange={(event) => set('faculty', event.target.value)}>
                     {FACULTIES.map((faculty) => (

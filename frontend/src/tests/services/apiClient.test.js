@@ -76,6 +76,17 @@ describe('apiClient', () => {
     });
   });
 
+  it('puts backend details directly on error.details next to the status', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(409, { error: 'Chưa thể xác nhận lịch.', details: { conditions: ['CF-026 trùng giờ'], existingApplicationId: 'CF-026' } }),
+    );
+
+    await expect(apiClient('/example')).rejects.toMatchObject({
+      kind: 'conflict',
+      details: { status: 409, conditions: ['CF-026 trùng giờ'], existingApplicationId: 'CF-026' },
+    });
+  });
+
   it('passes field errors through and falls back to a Vietnamese message', async () => {
     fetchMock.mockResolvedValue(jsonResponse(422, { fieldErrors: { sop: 'Quá 300 từ.' } }));
 

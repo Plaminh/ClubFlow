@@ -18,6 +18,7 @@ function applicationForm(fields) {
   const form = new FormData();
   form.set('positionId', fields.positionId ?? 'pos-ux');
   form.set('email', fields.email ?? 'hai.dang@demo.example');
+  form.set('faculty', fields.faculty ?? 'Thiết kế');
   form.set('sop', fields.sop ?? 'Em muốn tham gia câu lạc bộ.');
   for (const slot of fields.slotIds ?? ['slot-0900']) {
     form.append('slotIds', slot);
@@ -126,6 +127,15 @@ describe('scheduling', () => {
     await expect(applicationService.setScreening('CF-028', 'shortlisted')).rejects.toMatchObject({ kind: 'forbidden' });
     await expect(campaignService.saveDraft({ name: 'X' })).rejects.toMatchObject({ kind: 'forbidden' });
   });
+
+  it('keeps getCampaign Executive-only; interviewers get campaign context from their own list', async () => {
+    await demoSessionService.signIn('iv-hamy');
+    await expect(campaignService.getCampaign()).rejects.toMatchObject({ kind: 'forbidden' });
+    expect(await interviewerService.listAssignedInterviews()).toMatchObject({
+      campaignName: expect.any(String),
+      interviewDate: expect.any(String),
+    });
+  });
 });
 
 describe('campaign', () => {
@@ -169,6 +179,29 @@ describe('applicant portal', () => {
       portalService.submitApplication(applicationForm({ positionId: 'pos-content', cv: pdf('cv.pdf', 6 * 1024 * 1024) })),
     ).rejects.toMatchObject({ kind: 'validation', fieldErrors: { cv: 'CV tối đa 5 MB; tệp hiện tại 6,0 MB.' } });
     expect(await portalService.listMyApplications()).toHaveLength(1);
+  });
+
+  it('shows reviewers and interviewers the email and faculty submitted with the application', async () => {
+    demoSessionService.setScenario('accepting');
+    await demoSessionService.signIn('ap-haidang');
+    const created = await portalService.submitApplication(
+      applicationForm({ email: 'dang.moi@demo.example', faculty: 'Truyền thông' }),
+    );
+
+    await asExecutive();
+    const detail = await applicationService.get(created.id);
+    expect(detail.student).toMatchObject({ email: 'dang.moi@demo.example', faculty: 'Truyền thông' });
+    const csv = await applicationService.exportCsv({});
+    expect(csv.content).toContain('dang.moi@demo.example');
+  });
+
+  it('requires a faculty on submission', async () => {
+    demoSessionService.setScenario('accepting');
+    await demoSessionService.signIn('ap-haidang');
+    await expect(portalService.submitApplication(applicationForm({ faculty: ' ' }))).rejects.toMatchObject({
+      kind: 'validation',
+      fieldErrors: { faculty: 'Vui lòng chọn khoa.' },
+    });
   });
 
   it('rejects submissions outside the window (BR-02)', async () => {

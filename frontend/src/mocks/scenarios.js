@@ -3,7 +3,7 @@
  * reference campaign dates (Oct–Nov 2026) must not depend on today's date.
  * Each scenario is derived from the base fixtures so records stay consistent.
  */
-import { BASE, at } from './fixtures.js';
+import { ACCOUNTS, BASE, at } from './fixtures.js';
 
 export const SCENARIOS = Object.freeze([
   {
@@ -56,6 +56,26 @@ function withEnd(interviews, minutes) {
   }));
 }
 
+/**
+ * Student details as submitted with the application (data-model `studentInfo`).
+ * Fixture applications were "submitted" with the account's profile values.
+ */
+export function studentInfoSnapshot(account, overrides = {}) {
+  return {
+    name: account?.displayName ?? '—',
+    studentId: account?.studentId ?? '—',
+    email: account?.email ?? '—',
+    faculty: account?.faculty ?? '—',
+    year: account?.year ?? '—',
+    ...overrides,
+  };
+}
+
+function withStudentInfo(application) {
+  const account = ACCOUNTS.find((item) => item.id === application.applicantId);
+  return { ...application, studentInfo: studentInfoSnapshot(account) };
+}
+
 function baseState(scenario) {
   const base = structuredClone(BASE);
   return {
@@ -67,7 +87,7 @@ function baseState(scenario) {
     slots: base.slots,
     rooms: base.rooms,
     assignments: base.assignments,
-    applications: base.applications,
+    applications: base.applications.map(withStudentInfo),
     interviews: [],
     schedule: {
       status: 'none',

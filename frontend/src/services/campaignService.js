@@ -103,6 +103,7 @@ function applyDraft(state, draft) {
 
 export async function getCampaign() {
   await mockRequest();
+  requireRole('executive');
   return clone(campaignView(getState()));
 }
 

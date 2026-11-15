@@ -3,7 +3,7 @@
  * An interviewer sees only their own CONFIRMED interviews and never the
  * Executive's private screening notes (ROLES_AND_PERMISSIONS §3).
  */
-import { accountById, accountName, isScheduleConfirmed, positionById, roomName, toMs } from '../mocks/derive.js';
+import { accountName, isScheduleConfirmed, positionById, roomName, toMs } from '../mocks/derive.js';
 import { SAMPLE_CV_URL } from '../mocks/fixtures.js';
 import { requireRole } from '../mocks/guards.js';
 import { clone, getState, mockRequest } from '../mocks/store.js';
@@ -51,6 +51,8 @@ export async function listAssignedInterviews() {
   const state = getState();
   return clone({
     scheduleConfirmed: isScheduleConfirmed(state),
+    // Minimal campaign context: interviewers may not call the Executive-only getCampaign().
+    campaignName: state.campaign.name,
     interviewDate: state.campaign.interviewDate,
     interviews: myInterviews(state, account).map((interview) => summaryOf(state, interview)),
   });
@@ -70,13 +72,12 @@ export async function getInterview(interviewId) {
   const state = getState();
   const interview = findMine(state, account, interviewId);
   const application = state.applications.find((item) => item.id === interview.applicationId);
-  const applicant = accountById(application.applicantId);
   const assessment = state.assessments.find((item) => item.interviewId === interview.id) ?? null;
   // No privateNote here: screening notes are Executive-only.
   return clone({
     ...summaryOf(state, interview),
-    faculty: applicant?.faculty ?? '—',
-    year: applicant?.year ?? '—',
+    faculty: application.studentInfo.faculty,
+    year: application.studentInfo.year,
     sop: application.sop,
     cv: { ...application.cv, url: SAMPLE_CV_URL },
     assessment,

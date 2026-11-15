@@ -13,6 +13,7 @@ import {
   submissionWindow,
 } from '../mocks/derive.js';
 import { requireRole } from '../mocks/guards.js';
+import { studentInfoSnapshot } from '../mocks/scenarios.js';
 import { clone, getState, mockRequest } from '../mocks/store.js';
 import { validateApplicationInput } from '../utils/validation.js';
 import { createUiError } from './uiError.js';
@@ -111,6 +112,7 @@ export async function submitApplication(formData) {
   const input = {
     positionId: formData.get('positionId') ?? '',
     email: formData.get('email') ?? '',
+    faculty: formData.get('faculty') ?? '',
     sop: formData.get('sop') ?? '',
     slotIds: formData.getAll('slotIds'),
     cv: cvFile && typeof cvFile === 'object' && cvFile.name ? cvFile : null,
@@ -150,7 +152,8 @@ export async function submitApplication(formData) {
     screeningStatus: 'pendingReview',
     reviewedAt: null,
     privateNote: '',
-    contactEmail: input.email.trim(),
+    // Snapshot of what the applicant submitted; reviewers see these values.
+    studentInfo: studentInfoSnapshot(account, { email: input.email.trim(), faculty: input.faculty.trim() }),
   };
   state.applications.push(application);
   return clone(myApplicationView(state, application));
