@@ -91,6 +91,7 @@ If the API returns a different shape, **map it inside the service** so pages sta
   - Assessment: `notes`, `recommendation`.
 - `useServiceData` exposes `status: 'idle' | 'loading' | 'success' | 'error'`; pages render `AsyncContent` (spinner, or error + "Thử lại") and their own empty states. `useAction().run()` never throws: it resolves `{ ok, value }` or `{ ok: false, error }`.
 - To preview these states without a backend, use the demo bar: **Mạng → Chậm / Lỗi mạng**.
+- While refreshing, `useServiceData` keeps the previous data on screen (no flicker). For a **detail of a selected item**, only render it when the loaded data's ID matches the current selection, and take IDs for actions from the displayed data (see `current` in `ApplicationReviewPage.jsx` and `InterviewerWorkspacePage.jsx`). Otherwise, with real latency, a user can act on the previous item.
 
 ## 6. Authentication and authorization
 
