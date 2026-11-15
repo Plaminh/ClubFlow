@@ -20,7 +20,8 @@ describe('Application Review — CV Screening', () => {
     await openScreening();
 
     expect(screen.getByRole('heading', { level: 1, name: 'Application Review' })).toBeInTheDocument();
-    expect(screen.getByText(/Đóng đơn 30\/10\/2026/)).toBeInTheDocument();
+    // The campaign context comes from the page header's own request, not the panel awaited above.
+    expect(await screen.findByText(/Đóng đơn 30\/10\/2026/)).toBeInTheDocument();
     expect(statValue('Tổng hồ sơ')).toBe('6');
     expect(statValue('Ứng viên riêng biệt')).toBe('5');
     expect(statValue('Qua vòng CV')).toBe('4');

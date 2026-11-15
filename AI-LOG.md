@@ -389,3 +389,5 @@ Open item from UI-2.4 (intermittent failure after browser QA): not reproduced in
 Verified: `npm run verify` 0 (frontend 156, backend 18, build OK); `--reporter=verbose` run with 0 stderr blocks; 57 relative Markdown links in the hub, the guide, and the spec folder resolve.
 
 By hand: The team reviews the four UI-5 commits and does the manual keyboard pass.
+
+Follow-up (2026-11-15, after the UI-5 docs commit): the final verification failed once more with no browser load, so the earlier "CPU load" explanation was wrong. Code review found the cause: in `ApplicationReviewPage.test.jsx`, "shows the reference header…" waited for the screening panel's request and then synchronously read the campaign context, which comes from the page header's separate `useCampaign()` request. A throwaway experiment that delayed only the header request made the old assertion fail and the awaited version pass. The test now awaits that text (`test: await the separately loaded campaign context`). No product change; the page shows the context as soon as its own request finishes.
