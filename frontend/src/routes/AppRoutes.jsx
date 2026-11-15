@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout.jsx';
+import ApplicantPortalPage from '../pages/ApplicantPortalPage.jsx';
 import ApplicationReviewPage from '../pages/ApplicationReviewPage.jsx';
 import CampaignManagementPage from '../pages/CampaignManagementPage.jsx';
-import HomePage from '../pages/HomePage.jsx';
 import InterviewSchedulingPage from '../pages/InterviewSchedulingPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import RoutePlaceholderPage from '../pages/RoutePlaceholderPage.jsx';
@@ -14,7 +14,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route path={ROUTES.HOME} element={<ApplicantPortalPage />} />
         <Route
           path={ROUTES.EXECUTIVE_CAMPAIGN}
           element={

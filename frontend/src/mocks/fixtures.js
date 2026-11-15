@@ -77,8 +77,6 @@ export const ACCOUNTS = Object.freeze([
   },
 ]);
 
-export const FACULTIES = Object.freeze(['Công nghệ thông tin', 'Thiết kế', 'Truyền thông']);
-
 const CAMPAIGN = {
   id: 'cmp-2026-hk1',
   name: 'Tuyển Thành Viên Câu Lạc Bộ Công Nghệ & Sáng Tạo — Đợt Tuyển Chính Thức Học Kỳ 1, Năm Học 2026–2027, Dành Cho Sinh Viên Các Khoa Công Nghệ Thông Tin, Thiết Kế Và Truyền Thông',

@@ -318,3 +318,24 @@ Changed:
 Verified: `npm run verify` 0 three times in a row (frontend 124, backend 18). One earlier `verify` run, started right after the headless-browser checks, had 1 intermittent frontend test failure that could not be reproduced in 4 later full runs; its name was not captured. Open item for UI-5: find the flaky test under load (logs are now kept for every verify run). Headless Edge as the demo Executive: one `<h1>`, no page overflow and no table-container overflow (`scrollWidth == clientWidth`) at 360/640/768/853/1024/1280/1600 px in the `screening` and `confirmed` scenarios; screenshot at 1280 compared with `scheduling-1280.png`.
 
 By hand: The team reviews the commit.
+
+---
+
+## 2026-11-15 — UI-3 — Applicant Portal (and a session data fix)
+
+Tool: Claude Code
+
+Asked for: Implement the Applicant Portal on `/` from `applicant.html` (F2, F6, F7; BR-02, BR-03, BR-05, BR-08): public campaign, Apply, My Applications, Notifications, shared sign-in, no registration or recovery.
+
+Changed:
+
+- `pages/ApplicantPortalPage.jsx` replaces the UI-1.1 `HomePage` on `/`. URL-driven tabs (`?tab=campaign|apply|mine|notifications`) with an unread count; public campaign (timeline, submission-window message per phase, positions, Apply Now → shared demo sign-in for visitors); a drafts-are-not-public state (BR-02); Apply form (read-only name/student ID, email, faculty, PDF CV ≤ 5 MB, SOP ≤ 300 words with live counter, club slots, summary, duplicate-position notice "(đã nộp)", field errors with banner and focus, disabled outside the submission window); My Applications (each application tracked separately; interview only once confirmed; result only once published, otherwise "Chưa công bố"); in-app notifications with "Mới" and mark-all-read; sign-in gates on private tabs and a notice for non-applicant demo roles.
+- New: molecule `FileField`; organisms `PublicCampaignPanel`, `ApplicationForm`, `MyApplicationsTable`, `NotificationList`; hook `hooks/useApplicantPortal.js`; `utils/campaignPhase.js`. Removed the unused `FACULTIES` export from the fixtures (the form owns the option list).
+- Separate commit `fix: never show another account's data while reloading`: found while testing the portal — the demo session learned the role only after the account list loaded, so a restored applicant session briefly loaded as a visitor and showed that data during the refresh. The provider now restores the account synchronously and `useServiceData` never returns data loaded for another account.
+- Tests: `tests/pages/ApplicantPortalPage.test.jsx` (public access and sign-in prompt, private-tab gates, before-open state, draft hidden, validation and preserved input with focus, 300/301-word boundary, 6 MB CV, successful submission appearing as Pending Review, duplicate notice, BR-08 visibility in screening vs confirmed, notification and mark-as-read).
+
+Not done as suggested: the two suggested UI-3 commits are one, because the tracking and notification tabs live in the same page file as the form.
+
+Verified: `npm run verify` 0 (frontend 134, backend 18); the isolated fix commit also passed verify (frontend 124, backend 18); no `act()` warnings. Headless Edge: one `<h1>`, no page or table-container overflow for visitor `/` and `?tab=apply` (accepting) at 360/768/1280, applicant `?tab=apply` (accepting) at 360/640/768/1024/1280/1600, and `?tab=mine` / `?tab=notifications` (confirmed) at 360/768/1024/1280; screenshots of Apply at 1280 and My Applications at 360 compared with `applicant-1280.png` / `applicant-results-360.png`. The native file button shows the browser's own language ("Choose File"); the Vietnamese status line under it states the chosen file.
+
+By hand: The team reviews both commits.

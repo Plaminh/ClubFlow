@@ -111,12 +111,12 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 ## Phase 6: User Story 4 — Applicant Portal (UI-3, P2)
 
-- [ ] T049 [P] [US4] Create `Checkbox` atom and `FileField` molecule
+- [x] T049 [P] [US4] Create `Checkbox` atom and `FileField` molecule — UI-3 (checkboxes via the `ChoiceGroup` molecule from UI-2.4; `FileField` molecule)
 - [x] T050 [US4] Create `frontend/src/services/portalService.js` (submission takes `FormData`) — UI-1.3
-- [ ] T051 [US4] Create `frontend/src/hooks/useApplicantPortal.js`
-- [ ] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms; add the SOP word-count helper to `frontend/src/utils/format.js` with tests
-- [ ] T053 [US4] Implement `frontend/src/pages/ApplicantPortalPage.jsx` with URL-synced tabs
-- [ ] T054 [US4] Add tests in `frontend/src/tests/pages/ApplicantPortalPage.test.jsx` (phase messages, sign-in prompt, PDF/5 MB, SOP 300/301 words, slot required, duplicate notice, unpublished results hidden)
+- [x] T051 [US4] Create `frontend/src/hooks/useApplicantPortal.js` — UI-3
+- [x] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms; add the SOP word-count helper to `frontend/src/utils/format.js` with tests — UI-3 (`PublicCampaignPanel`, `ApplicationForm`, `MyApplicationsTable`, `NotificationList`; sign-in uses the shared `SignInDialog` from UI-1.2; the word counter uses `countWords` in `utils/validation.js`)
+- [x] T053 [US4] Implement `frontend/src/pages/ApplicantPortalPage.jsx` with URL-synced tabs — UI-3
+- [x] T054 [US4] Add tests in `frontend/src/tests/pages/ApplicantPortalPage.test.jsx` (phase messages, sign-in prompt, PDF/5 MB, SOP 300/301 words, slot required, duplicate notice, unpublished results hidden) — UI-3
 
 ---
 
