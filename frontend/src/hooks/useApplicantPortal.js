@@ -7,11 +7,12 @@ import useServiceData from './useServiceData.js';
  */
 export default function useApplicantPortal(isApplicant) {
   const resource = useServiceData(async () => {
-    const publicCampaign = await portalService.getPublicCampaign();
     if (!isApplicant) {
-      return { publicCampaign, applications: [], notifications: [] };
+      return { publicCampaign: await portalService.getPublicCampaign(), applications: [], notifications: [] };
     }
-    const [applications, notifications] = await Promise.all([
+    // Independent requests: load them in parallel.
+    const [publicCampaign, applications, notifications] = await Promise.all([
+      portalService.getPublicCampaign(),
       portalService.listMyApplications(),
       portalService.listNotifications(),
     ]);

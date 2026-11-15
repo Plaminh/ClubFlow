@@ -33,7 +33,8 @@ const TABS = [
 
 const INITIAL_QUERY = { search: '', positionId: '', status: '', sort: 'newest', page: 1 };
 
-function ScreeningPanel() {
+/** `campaign` is the page's single useCampaign() resource (positions for the filter). */
+function ScreeningPanel({ campaign }) {
   const [query, setQuery] = useState(INITIAL_QUERY);
   const [selectedId, setSelectedId] = useState(null);
   const [focusDetail, setFocusDetail] = useState(false);
@@ -46,8 +47,11 @@ function ScreeningPanel() {
   // Never show (or act on) the previous application while the newly selected one loads.
   const current = detail.data && detail.data.id === selectedId ? detail.data : null;
 
-  if (overview.status !== 'success') {
-    return <AsyncContent status={overview.status} error={overview.error} onRetry={overview.reload} />;
+  if (campaign.status !== 'success' || overview.status !== 'success') {
+    const failed = [campaign, overview].filter((resource) => resource.status === 'error');
+    // One retry reloads every request that failed.
+    const retry = () => failed.forEach((resource) => resource.reload());
+    return <AsyncContent status={failed.length > 0 ? 'error' : 'loading'} error={failed[0]?.error} onRetry={retry} />;
   }
 
   const { list, stats } = overview.data;
@@ -125,7 +129,7 @@ function ScreeningPanel() {
 
       <ApplicationFilters
         query={query}
-        positions={overview.data.positions}
+        positions={campaign.data.positions}
         onChange={updateQuery}
         onExport={exportCsv}
         exporting={action.pending}
@@ -375,7 +379,7 @@ export default function ApplicationReviewPage() {
         onChange={(id) => setSearchParams({ [TAB_QUERY_PARAM]: id }, { replace: true })}
       />
       <div role="tabpanel" id={`review-panel-${tab}`} aria-labelledby={`review-tab-${tab}`}>
-        {tab === 'screening' ? <ScreeningPanel key={dataVersion} /> : <ResultsPanel key={dataVersion} />}
+        {tab === 'screening' ? <ScreeningPanel key={dataVersion} campaign={campaignResource} /> : <ResultsPanel key={dataVersion} />}
       </div>
     </MainTemplate>
   );

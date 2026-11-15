@@ -1,19 +1,15 @@
 import * as applicationService from '../services/applicationService.js';
-import * as campaignService from '../services/campaignService.js';
 import useServiceData from './useServiceData.js';
 
 /**
- * Application Review (CV Screening tab): list page, statistics, and campaign
- * context for the given query { search, positionId, status, sort, page }.
+ * Application Review (CV Screening tab): list page and statistics for the
+ * given query { search, positionId, status, sort, page }. The campaign context
+ * (positions for the filter) is loaded once by the page, not per query.
  */
 export function useApplications(query) {
   return useServiceData(async () => {
-    const [list, stats, campaignView] = await Promise.all([
-      applicationService.list(query),
-      applicationService.getStats(query),
-      campaignService.getCampaign(),
-    ]);
-    return { list, stats, campaign: campaignView.campaign, positions: campaignView.positions, locked: campaignView.locked };
+    const [list, stats] = await Promise.all([applicationService.list(query), applicationService.getStats(query)]);
+    return { list, stats };
   }, [query]);
 }
 
