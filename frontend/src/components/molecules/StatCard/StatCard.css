@@ -1,0 +1,21 @@
+.stat-card {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.stat-card__value {
+  display: block;
+  color: var(--color-brand-strong);
+  font-size: 1.5rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.stat-card__label {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-muted);
+}

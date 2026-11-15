@@ -262,3 +262,22 @@ Assumptions: interview date/window/duration are locked once applications exist (
 Verified: lint 0; frontend tests 99 passed. Headless Edge as the demo Executive (`draft` scenario): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 360 and 1280 compared with `index-360.png`/`index-1280.png`.
 
 By hand: The team reviews the commit.
+
+---
+
+## 2026-11-15 — UI-2.2 — Application Review: CV Screening tab
+
+Tool: Claude Code
+
+Asked for: Implement `/executive/review?tab=screening` from `review.html` and SCREEN_REQUIREMENTS Screen 2 (BR-06…BR-09, BR-14). Work resumed after a pause; the uncommitted UI-2.2 changes were re-verified before committing.
+
+Changed:
+
+- `pages/ApplicationReviewPage.jsx` with URL-synced tabs (`?tab=screening|results`, no separate routes). CV Screening: campaign-wide statistics with applications and distinct applicants counted separately and the scope stated (BR-06); search (accent-insensitive), position/status filters, sort, pagination (5 per page) with a "filtered" summary; a detail panel beside the list (student info, availability, link to the fictional sample CV, full SOP, Executive-only private note); Shortlist / Reject for the selected application only, with a confirmation before rejecting (BR-07); CSV export of the current filter without private notes or CV files (BR-09); empty, filtered-empty, loading, and error-with-retry states; decisions read-only after schedule confirmation (BR-14). The Final Results tab shows a labeled interim state until UI-2.3.
+- New components: molecules `StatCard`, `Tabs` (WAI-ARIA keyboard pattern), `Pagination`; organisms `ApplicationFilters`, `ApplicationList`, `ApplicationDetail`; hook `hooks/useApplications.js`; badge tone maps in `constants/labels.js`; the detail service response now includes the applicant's other application IDs and the lock flag.
+- Decision hint follows the reference ("Áp dụng riêng cho CF-026; hồ sơ CF-027 được duyệt độc lập") and adds the reason when the buttons are unavailable (already decided — reversal is not defined by WORKFLOWS §3 — or locked by BR-14).
+- Test timing: `tests/setup.js` raises the Testing Library async timeout from 1 s to 3 s, and `frontend/vitest.config.js` sets `testTimeout: 10000`. On resume, `npm run verify` failed twice intermittently (a full-page test still loading after 1 s when all files ran in parallel; the slowest page test takes about 3.4 s against the 5 s default). Both passed when rerun; no assertion was changed.
+
+Verified: `npm run verify` 0 twice in a row (frontend 110 tests after adding the Tabs test, backend 18); no `act()` warnings. Headless Edge as the demo Executive (`screening`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px for both tabs; screenshots at 360 and 1280 compared with `review-360.png`/`review-1280.png`. The detail-panel-open state is covered by tests but was not captured in the browser (the headless check cannot click).
+
+By hand: The team reviews the commit.

@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout.jsx';
+import ApplicationReviewPage from '../pages/ApplicationReviewPage.jsx';
 import CampaignManagementPage from '../pages/CampaignManagementPage.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
@@ -23,7 +24,11 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.EXECUTIVE_REVIEW}
-          element={<RoutePlaceholderPage title={SCREEN_LABELS.applicationReview} />}
+          element={
+            <RoleGate role="executive" title={SCREEN_LABELS.applicationReview}>
+              <ApplicationReviewPage />
+            </RoleGate>
+          }
         />
         <Route
           path={ROUTES.EXECUTIVE_SCHEDULING}

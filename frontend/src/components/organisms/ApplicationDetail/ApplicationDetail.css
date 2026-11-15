@@ -1,0 +1,15 @@
+.application-detail {
+  min-width: 0;
+}
+
+.application-detail__title:focus {
+  outline: none;
+}
+
+.application-detail p {
+  margin-bottom: 0;
+}
+
+.application-detail section p + p {
+  margin-top: var(--space-3);
+}

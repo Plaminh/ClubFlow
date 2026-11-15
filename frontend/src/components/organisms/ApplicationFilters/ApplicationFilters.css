@@ -1,0 +1,10 @@
+.application-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.application-filters > .field {
+  min-width: 0;
+  flex: 1 1 12rem;
+}

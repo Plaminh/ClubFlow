@@ -93,3 +93,29 @@ export function getLabel(labels, id, fallback = EMPTY_LABEL) {
 
   return Object.hasOwn(labels, id) ? labels[id] : fallback;
 }
+
+// Badge tones per status (presentation only), matching the reference colors:
+// green = passed/valid, amber = waiting/needs action, red = rejected/conflict.
+export const SCREENING_STATUS_TONES = Object.freeze({
+  pendingReview: 'warning',
+  shortlisted: 'success',
+  rejected: 'danger',
+});
+
+export const SCHEDULE_STATUS_TONES = Object.freeze({
+  proposed: 'success',
+  conflict: 'danger',
+  unassigned: 'warning',
+  confirmed: 'success',
+});
+
+export const ASSESSMENT_STATUS_TONES = Object.freeze({
+  awaiting: 'warning',
+  submitted: 'success',
+});
+
+export const RESULT_DECISION_TONES = Object.freeze({
+  none: 'neutral',
+  pass: 'success',
+  fail: 'danger',
+});

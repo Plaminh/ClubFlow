@@ -1,0 +1,16 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.pagination__status {
+  display: inline-flex;
+  min-height: var(--control-min-height);
+  align-items: center;
+  padding-inline: var(--space-3);
+  font-weight: 700;
+}

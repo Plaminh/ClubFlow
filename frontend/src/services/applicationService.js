@@ -2,7 +2,7 @@
  * Application review service (Executive). Demo implementation over the mock
  * store; replace bodies with apiClient calls during backend integration.
  */
-import { accountById, accountName, positionById, slotText } from '../mocks/derive.js';
+import { accountById, accountName, isScheduleConfirmed, positionById, slotText } from '../mocks/derive.js';
 import { SAMPLE_CV_URL } from '../mocks/fixtures.js';
 import { assertNotLockedBySchedule, requireRole } from '../mocks/guards.js';
 import { clone, getState, mockRequest } from '../mocks/store.js';
@@ -79,6 +79,11 @@ function detailOf(state, application) {
     cv: { ...application.cv, url: SAMPLE_CV_URL },
     reviewedAt: application.reviewedAt,
     privateNote: application.privateNote,
+    // Other applications by the same student (decided independently, BR-07).
+    siblingIds: state.applications
+      .filter((item) => item.applicantId === application.applicantId && item.id !== application.id)
+      .map((item) => item.id),
+    locked: isScheduleConfirmed(state),
   };
 }
 
