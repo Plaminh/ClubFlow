@@ -398,7 +398,7 @@ Follow-up 2 (2026-11-15): the final gate failed once more (`npm test` and `verif
 
 ## 2026-11-15 — UI-6 — Pre-integration audit and cleanup
 
-Tool: Claude Code (implementation). The read-only audit was AI-assisted; the team should add which tool produced it.
+Tool: Claude Code (implementation); Codex using the `speckit-analyze` skill (read-only audit).
 
 Asked for: A read-only audit of the repository before backend integration (unused files, code quality, CSS, mocks, backend scaffold, docs, quality gate), then the approved cleanup batches 1–5. Batch 6 (code splitting) is deferred, as the audit recommended.
 
