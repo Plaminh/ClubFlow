@@ -52,7 +52,16 @@ export async function list() {
   await mockRequest();
   requireRole('executive');
   const state = getState();
-  return clone({ scheduleConfirmed: isScheduleConfirmed(state), rows: rowsOf(state) });
+  return clone({
+    scheduleConfirmed: isScheduleConfirmed(state),
+    interviewDate: state.campaign.interviewDate,
+    // CV-rejected applications never become result candidates (WORKFLOWS §5).
+    rejectedIds: state.applications
+      .filter((application) => application.screeningStatus === 'rejected')
+      .map((application) => application.id)
+      .sort(),
+    rows: rowsOf(state),
+  });
 }
 
 export async function getAssessment(applicationId) {

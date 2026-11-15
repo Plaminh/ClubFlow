@@ -12,11 +12,15 @@ import ApplicationDetail from '../components/organisms/ApplicationDetail/index.j
 import ApplicationFilters from '../components/organisms/ApplicationFilters/index.js';
 import ApplicationList from '../components/organisms/ApplicationList/index.js';
 import ConfirmDialog from '../components/organisms/ConfirmDialog/index.js';
+import FinalDecisionPanel from '../components/organisms/FinalDecisionPanel/index.js';
+import FinalResultsTable from '../components/organisms/FinalResultsTable/index.js';
+import PublishResultsCard from '../components/organisms/PublishResultsCard/index.js';
 import MainTemplate from '../components/templates/MainTemplate/index.js';
 import { SCREEN_LABELS } from '../constants/labels.js';
 import { useDemoSession } from '../contexts/demoSession.js';
 import useAction from '../hooks/useAction.js';
 import useCampaign from '../hooks/useCampaign.js';
+import { resultActions, useAssessment, useFinalResults } from '../hooks/useFinalResults.js';
 import { applicationActions, useApplicationDetail, useApplications } from '../hooks/useApplications.js';
 import { ROUTES, TAB_QUERY_PARAM } from '../routes/paths.js';
 import { downloadText } from '../utils/csv.js';
@@ -218,10 +222,122 @@ function ScreeningPanel() {
 }
 
 function ResultsPanel() {
+  const results = useFinalResults();
+  const [chosenId, setChosenId] = useState(null);
+  const [assessmentOpen, setAssessmentOpen] = useState(false);
+  const [decisionMessage, setDecisionMessage] = useState(null);
+  const [publishMessage, setPublishMessage] = useState(null);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const action = useAction();
+  const rows = results.data?.rows ?? [];
+  const selected = rows.find((row) => row.applicationId === chosenId) ?? rows[0] ?? null;
+  const assessment = useAssessment(selected?.applicationId, assessmentOpen && selected?.assessmentStatus === 'submitted');
+
+  if (results.status !== 'success') {
+    return <AsyncContent status={results.status} error={results.error} onRetry={results.reload} />;
+  }
+
+  const { scheduleConfirmed, interviewDate, rejectedIds } = results.data;
+  if (!scheduleConfirmed) {
+    return (
+      <EmptyState
+        title="Chưa có lịch phỏng vấn đã xác nhận"
+        actions={<Button to={ROUTES.EXECUTIVE_SCHEDULING}>Mở Interview Scheduling →</Button>}
+      >
+        <p>
+          Final Results là giai đoạn sau phỏng vấn. Danh sách chỉ xuất hiện sau khi lịch được xác nhận và buổi phỏng vấn
+          diễn ra.
+        </p>
+      </EmptyState>
+    );
+  }
+
+  const pendingIds = rows.filter((row) => row.decision && !row.publishedAt).map((row) => row.applicationId);
+
+  function select(id) {
+    setChosenId(id);
+    setAssessmentOpen(false);
+    setDecisionMessage(null);
+  }
+
+  async function record(decision) {
+    const id = selected.applicationId;
+    const result = await action.run(() => resultActions.record(id, decision));
+    if (result.ok) {
+      setDecisionMessage({
+        tone: 'success',
+        title: `Đã ghi nhận ${decision === 'pass' ? 'Pass' : 'Fail'} cho ${id} (mô phỏng)`,
+        text: 'Kết quả chưa hiển thị cho ứng viên cho đến khi được công bố.',
+      });
+      results.reload();
+    } else {
+      setDecisionMessage({ tone: 'error', title: 'Chưa ghi nhận được quyết định', text: result.error?.message });
+    }
+  }
+
+  async function publish() {
+    const result = await action.run(() => resultActions.publishRecorded());
+    setPublishOpen(false);
+    if (result.ok) {
+      setPublishMessage({
+        tone: 'success',
+        title: `Đã công bố ${result.value.publishedIds.join(', ')} (mô phỏng)`,
+        text: 'Mỗi hồ sơ tạo một thông báo trong ứng dụng cho ứng viên tương ứng. Không có email, SMS hay push.',
+      });
+      results.reload();
+    } else {
+      setPublishMessage({ tone: 'error', title: 'Chưa công bố được kết quả', text: result.error?.message });
+    }
+  }
+
   return (
-    <EmptyState title="Final Results" headingLevel={2}>
-      <p>Tab kết quả cuối đang được hoàn thiện.</p>
-    </EmptyState>
+    <div className="stack stack--roomy">
+      <Alert tone="info" title="Final Results là giai đoạn sau phỏng vấn">
+        <p>
+          “Qua vòng CV” không có nghĩa là Pass. Mỗi quyết định thuộc về từng hồ sơ riêng, nên cùng một ứng viên có thể có
+          kết quả khác nhau ở các vị trí.
+          {rejectedIds.length > 0 ? ` ${rejectedIds.join(' và ')} bị loại ở vòng CV nên không nằm trong danh sách này.` : ''}
+        </p>
+      </Alert>
+      <Card
+        title="Kết quả cuối theo hồ sơ"
+        subtitle={`Chỉ gồm hồ sơ Qua vòng CV đã có lịch phỏng vấn Confirmed ngày ${formatDate(interviewDate)}.`}
+      >
+        <FinalResultsTable rows={rows} selectedId={selected?.applicationId} onSelect={select} />
+      </Card>
+      {selected ? (
+        <div className="split-layout split-layout--wide-first">
+          <FinalDecisionPanel
+            row={selected}
+            assessment={assessment}
+            assessmentOpen={assessmentOpen}
+            onToggleAssessment={() => setAssessmentOpen((open) => !open)}
+            onRecord={record}
+            pending={action.pending}
+            message={decisionMessage}
+          />
+          <PublishResultsCard
+            pendingIds={pendingIds}
+            onPublish={() => setPublishOpen(true)}
+            pending={action.pending}
+            message={publishMessage}
+          />
+        </div>
+      ) : null}
+      <ConfirmDialog
+        open={publishOpen}
+        title="Công bố kết quả?"
+        confirmLabel="Publish Results"
+        busy={action.pending}
+        onConfirm={publish}
+        onCancel={() => setPublishOpen(false)}
+      >
+        <p>
+          Công bố {pendingIds.join(', ')}. Ứng viên sẽ thấy kết quả và nhận thông báo trong ứng dụng; kết quả đã công bố
+          không thể thay đổi.
+        </p>
+      </ConfirmDialog>
+    </div>
   );
 }
 

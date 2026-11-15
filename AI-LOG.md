@@ -281,3 +281,21 @@ Changed:
 Verified: `npm run verify` 0 twice in a row (frontend 110 tests after adding the Tabs test, backend 18); no `act()` warnings. Headless Edge as the demo Executive (`screening`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px for both tabs; screenshots at 360 and 1280 compared with `review-360.png`/`review-1280.png`. The detail-panel-open state is covered by tests but was not captured in the browser (the headless check cannot click).
 
 By hand: The team reviews the commit.
+
+---
+
+## 2026-11-15 — UI-2.3 — Application Review: Final Results tab
+
+Tool: Claude Code
+
+Asked for: Implement `/executive/review?tab=results` from `review-final-results-preview.html` (F6; BR-08, BR-14): results per application, assessment viewing, Executive Pass/Fail, publication with confirmation, in-app notifications.
+
+Changed:
+
+- `ApplicationReviewPage.jsx` Final Results panel: info alert (Shortlisted ≠ Pass; CV-rejected applications listed as excluded from the service data), results table, selected-application panel with "View Assessment" (advisory, `aria-expanded`), Record Pass / Record Fail (only with a submitted assessment and before publication), "Công bố kết quả" card with a confirmation dialog; empty state with a link to scheduling before the schedule is confirmed.
+- New: organism `DataTable` (stacked label/value cards below 48rem so status and actions stay visible; explicit table roles so the semantics survive the card layout; `data-selected` instead of the invalid `aria-selected` on table rows), organisms `FinalResultsTable`, `FinalDecisionPanel`, `PublishResultsCard`, hook `hooks/useFinalResults.js`; `resultService.list()` also returns the interview date and the CV-rejected IDs.
+- Tests: `tests/pages/FinalResults.test.jsx` (visibility rules, assessment view, Pass/Fail gating, publish → notification only for that applicant, pre-confirmation state).
+
+Verified: `npm run verify` 0 (frontend 116, backend 18). Headless Edge as the demo Executive (`confirmed`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 1280 (table + side-by-side panels) and 360 (stacked result cards) compared with `review-final-results-1280.png`/`-360.png`.
+
+By hand: The team reviews the commit.

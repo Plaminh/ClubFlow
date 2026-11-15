@@ -194,3 +194,9 @@ h3 {
     gap: var(--space-8);
   }
 }
+
+@media (min-width: 48rem) {
+  .split-layout--wide-first {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+}

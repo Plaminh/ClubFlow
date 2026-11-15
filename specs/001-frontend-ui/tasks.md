@@ -86,14 +86,14 @@ description: "Task list for the ClubFlow UI-first frontend"
 ## Phase 4: User Story 2 — Application Review and Final Results (UI-2, P1)
 
 - [x] T035 [P] [US2] Create `Tabs`, `Pagination`, `EmptyState` in `frontend/src/components/molecules/` — UI-2.2
-- [ ] T036 [P] [US2] Create `Modal`, `ConfirmDialog`, `DetailPanel`, `DataTable` (stacked rows below 48rem) in `frontend/src/components/organisms/` — *UI-2.2 partial: Modal and ConfirmDialog done; the detail panel is the `ApplicationDetail` organism beside the list; DataTable comes with UI-2.3*
+- [x] T036 [P] [US2] Create `Modal`, `ConfirmDialog`, `DetailPanel`, `DataTable` (stacked rows below 48rem) in `frontend/src/components/organisms/` — UI-2.2/UI-2.3 (`DataTable` with stacked cards below 48rem and explicit table roles; the detail panel is the `ApplicationDetail` organism)
 - [x] T037 [US2] Create `frontend/src/services/applicationService.js` and `frontend/src/services/resultService.js` — UI-1.3
-- [ ] T038 [US2] Create `frontend/src/hooks/useApplications.js` and `frontend/src/hooks/useFinalResults.js` — *UI-2.2 partial: `useApplications` done; `useFinalResults` comes with UI-2.3*
-- [ ] T039 [US2] Create `ApplicationList`, `ApplicationDetail`, `FinalResultsTable` organisms — *UI-2.2 partial: `ApplicationList`, `ApplicationDetail`, `ApplicationFilters` done; `FinalResultsTable` comes with UI-2.3*
+- [x] T038 [US2] Create `frontend/src/hooks/useApplications.js` and `frontend/src/hooks/useFinalResults.js` — UI-2.2/UI-2.3
+- [x] T039 [US2] Create `ApplicationList`, `ApplicationDetail`, `FinalResultsTable` organisms — UI-2.2/UI-2.3 (plus `ApplicationFilters`, `FinalDecisionPanel`, `PublishResultsCard`)
 - [x] T040 [US2] Implement the CV Screening tab in `frontend/src/pages/ApplicationReviewPage.jsx` — UI-2.2
-- [ ] T041 [US2] Implement the Final Results tab in `frontend/src/pages/ApplicationReviewPage.jsx`
+- [x] T041 [US2] Implement the Final Results tab in `frontend/src/pages/ApplicationReviewPage.jsx` — UI-2.3
 - [x] T042 [P] [US2] Add dialog and tabs tests in `frontend/src/tests/components/` (focus trap, Escape, arrow keys) — UI-2.2 (`tests/components/Modal.test.jsx`, `tests/components/Tabs.test.jsx`)
-- [ ] T043 [US2] Add page tests in `frontend/src/tests/pages/ApplicationReviewPage.test.jsx` (stats 6/5, filters vs counts, per-application decision, preserved filters, results visibility, publish) — *UI-2.2 partial: CV Screening tests done; Final Results tests come with UI-2.3*
+- [x] T043 [US2] Add page tests in `frontend/src/tests/pages/ApplicationReviewPage.test.jsx` (stats 6/5, filters vs counts, per-application decision, preserved filters, results visibility, publish) — UI-2.2/UI-2.3 (`ApplicationReviewPage.test.jsx`, `FinalResults.test.jsx`)
 
 ---
 
