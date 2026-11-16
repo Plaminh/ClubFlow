@@ -163,6 +163,9 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T074 Audit Q-02 date-only and timestamp formatting across all five screens and rerun boundary-focused tests; no code change required beyond existing commit `f76eb54`
 - [x] T075 [US3] Align mock schedule/resource presentation with Q-01 submission-time/ID, chronological-slot and stable-resource ordering without adding a frontend generator; add regression coverage
 - [x] T076 Document the Q-01 backend first-fit loop, no-backtracking limitation and pending approval status in the decision record, integration guide and research
+- [x] T077 [US2] [US4] Keep Q-05 publication and applicant notification visibility consistent, and state accurately that mock mode sends no real email
+- [x] T078 [US2] Add Q-05 regression coverage that repeat publication cannot duplicate an in-app notification
+- [x] T079 Document the deferred Brevo outbox, idempotent retry, credential boundary, common template and pending approval status
 
 ---
 

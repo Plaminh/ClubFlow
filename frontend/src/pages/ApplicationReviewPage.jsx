@@ -312,7 +312,8 @@ function ResultsPanel() {
       setPublishMessage({
         tone: 'success',
         title: `Đã công bố ${result.value.publishedIds.join(', ')} (mô phỏng)`,
-        text: 'Mỗi hồ sơ tạo một thông báo trong ứng dụng cho ứng viên tương ứng. Không có email, SMS hay push.',
+        text:
+          'Mỗi hồ sơ tạo một thông báo trong ứng dụng. Bản mô phỏng không gửi email thật; backend sau này gửi một mẫu email kết quả chung qua Brevo. Không có SMS hay push.',
       });
       results.reload();
     } else {

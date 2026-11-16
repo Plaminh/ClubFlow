@@ -39,7 +39,7 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | Service function | Returns (see the function's JSDoc for fields) | Backend must |
 |---|---|---|
 | `campaignService.getCampaign()` | `{ campaign, phase, positions[], slots[], locked, lockReason }` (`lockReason`: `null` for a draft, `'published'`, or `'scheduleConfirmed'`) | Executive only; drafts never public |
-| `campaignService.saveDraft(draft)` | same view, or `UiError('forbidden')` | only while the campaign is a draft (Q-03, §12.2); also rejected after schedule confirmation (BR-14) |
+| `campaignService.saveDraft(draft)` | same view, or `UiError('forbidden')` | only while the campaign is a draft (Q-03, §12.3); also rejected after schedule confirmation (BR-14) |
 | `campaignService.publish(draft)` | same view, or `UiError('validation', fieldErrors)` / `UiError('forbidden')` | validate BR-01 server-side; only a draft can be published; publishing locks the configuration (Q-03) |
 | `campaignService.removePosition(id)` | same view, or `UiError('conflict')` / `UiError('forbidden')` | BR-04: block when applications exist; only while the campaign is a draft (Q-03) |
 | `applicationService.list(query)` | `{ items[], total, page, pageSize, pageCount }` | filter/sort/paginate server-side; Executive only |
@@ -65,7 +65,7 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `portalService.listNotifications()` / `markNotificationsRead()` | own notifications | own records only |
 | `interviewerService.listAssignedInterviews()` | `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` | assigned + confirmed only; this is the Interviewer page's only campaign context (it must not call `getCampaign()`) |
 | `interviewerService.getInterview(id)` | detail **without** `privateNote` | assignment check; never return screening notes |
-| `interviewerService.submitAssessment(id, { recommendation, notes })` | assessment `{ id, interviewId, interviewerId, notes, recommendation, submittedAt }` | assigned interviewer only; interview already ended; one per interview, never editable; `notes` required, `recommendation` is `'pass'`, `'fail'` or `null` and must not create or change the final result (Q-04, §12.3) |
+| `interviewerService.submitAssessment(id, { recommendation, notes })` | assessment `{ id, interviewId, interviewerId, notes, recommendation, submittedAt }` | assigned interviewer only; interview already ended; one per interview, never editable; `notes` required, `recommendation` is `'pass'`, `'fail'` or `null` and must not create or change the final result (Q-04, §12.4) |
 
 ## 4. Replacing a mock body
 
@@ -129,8 +129,8 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 | Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12.2 |
 | Q-03 | Editable fields after publication | Team-selected: none. The whole campaign configuration is read-only from publication; Scheduling shows date/window/duration as text and edits rooms only. See §12.3 |
 | Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.4 |
-| Q-05 | Notification UI | List in the Applicant Portal with unread badge and "mark all read" |
-| Q-06 | Editing submissions / availability | Not offered |
+| Q-05 | Notification UI and email | In-app list with unread badge and "mark all read"; mock sends no email. Backend queues one common Brevo email on publication. See §12.5 |
+| Q-06 | Editing submissions / availability | Not offered. See §12.6 |
 | Q-07 | Private CV delivery | Demo uses one fictional file; see §7 |
 | — | Screening reversal | Only Pending Review applications can be decided (WORKFLOWS §3 does not settle reversal) |
 
@@ -192,7 +192,16 @@ Use explicit `ORDER BY`; database row order and JavaScript array insertion order
 - Read access: the assigned interviewer and the Executive (Business §2). Applicants never receive assessments or recommendations.
 - Field errors use the names `notes` and `recommendation`.
 
-### 12.5 Immutable workflow transitions (Q-06)
+### 12.5 Result notifications and Brevo delivery (Q-05)
+
+- `resultService.publishRecorded()` remains the only trigger. For each application, one database transaction must: set `published_at`, insert the applicant's in-app notification, and insert one email outbox/delivery record for the common transactional result template.
+- Protect each logical side effect with a unique key, for example the application/result ID plus notification kind/template kind. Repeating publication must not create another notification or email job.
+- A background worker calls Brevo with server-side credentials. Store delivery state (`queued`, `sent`, `failed`), attempt count, provider message ID, a safe last-error summary and the next retry time. Never put the Brevo key in a `VITE_` variable or React bundle.
+- Retry only a `failed`/retryable delivery record. Reuse its idempotency key and never call publication again. A manual operational retry endpoint, if added, must be backend-authorized and is not a new product screen in this frontend task.
+- The API may return delivery-queue status for operational use, but the current applicant UI needs only the published result and in-app notification. Email failure must not hide or duplicate those records.
+- Use one common result-email template for Pass and Fail with data fields rather than separate marketing templates. Sender identity, exact content, retry schedule and Brevo account capabilities remain backend integration decisions.
+
+### 12.6 Immutable workflow transitions (Q-06)
 
 | Transition | Accepted current state | Server result | Later update/delete |
 |---|---|---|---|

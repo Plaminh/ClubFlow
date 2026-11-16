@@ -99,7 +99,11 @@ export async function record(applicationId, decision) {
   return clone(rowsOf(state).find((item) => item.applicationId === applicationId));
 }
 
-/** Publishes every recorded, unpublished decision and creates one in-app notification each. */
+/**
+ * Publishes every recorded, unpublished decision and creates one in-app
+ * notification each. Mock mode never sends email; the future backend owns the
+ * Brevo outbox and retry contract documented for Q-05.
+ */
 export async function publishRecorded() {
   await mockRequest();
   requireRole('executive');

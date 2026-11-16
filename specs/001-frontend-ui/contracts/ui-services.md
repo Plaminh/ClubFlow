@@ -52,7 +52,7 @@
 | `resultService.list()` | — | final-results rows |
 | `resultService.getAssessment(applicationId)` | id | assessment or `null` |
 | `resultService.record(applicationId, decision)` | id, `pass` or `fail` | updated row |
-| `resultService.publishRecorded()` | — | `{ publishedIds }` |
+| `resultService.publishRecorded()` | — | `{ publishedIds }`; demo creates one in-app notification per ID and sends no email; backend also queues one idempotent common-template Brevo delivery per ID (Q-05) |
 
 ## Scheduling (UI-2, US3)
 

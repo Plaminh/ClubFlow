@@ -421,4 +421,16 @@ describe('assessments and results', () => {
     const [notification] = await portalService.listNotifications();
     expect(notification.message).toContain('CF-030');
   });
+
+  it('publishes each result and creates its in-app notification only once (Q-05)', async () => {
+    demoSessionService.setScenario('confirmed');
+    await asExecutive();
+
+    expect(await resultService.publishRecorded()).toEqual({ publishedIds: ['CF-027'] });
+    await expect(resultService.publishRecorded()).rejects.toMatchObject({ kind: 'conflict' });
+
+    await demoSessionService.signIn('ap-minhanh');
+    const notifications = await portalService.listNotifications();
+    expect(notifications.filter((notification) => notification.applicationId === 'CF-027')).toHaveLength(1);
+  });
 });

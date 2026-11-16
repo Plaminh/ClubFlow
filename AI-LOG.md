@@ -479,3 +479,27 @@ Verified:
 - No browser check was repeated in this phase because the default fixture order and rendered UI did not change; only order stability under rearranged service input changed.
 
 By hand: The team reviews the first-fit ordering and accepts its intentionally non-optimal/no-backtracking limitation before backend implementation.
+
+---
+
+## 2026-11-16 — UI-7.3 — Q-05 Brevo notification readiness
+
+Tool: Codex using the `speckit-implement` skill.
+
+Asked for: Preserve the in-app result notification flow, make mock-mode email claims accurate, and document a future Brevo delivery/retry contract without integrating Brevo or modifying the backend.
+
+Kept: `Publish Results` as the only trigger; confirmation before publication; unpublished result/notification privacy; one Applicant Portal notification list with unread state; no SMS, push, realtime or marketing feature.
+
+Changed:
+
+- Publication success now says the mock creates in-app notifications but sends no real email, and identifies the future one-template Brevo integration. React still makes no Brevo call and no credential/configuration was added.
+- Added service and page regressions proving repeat publication is rejected and cannot duplicate an application's in-app notification.
+- Added the complete Q-05 decision record and integration contract: atomic result publication + unique in-app notification + unique email outbox record; server-side Brevo worker; delivery status and provider ID; retry the failed record without republishing or duplicating side effects. Tasks T077–T079 are complete. Product Owner confirmation remains pending because email is excluded by the supplied product scope.
+
+Verified:
+
+- Targeted lint and notification tests: lint exit 0; 48/48 tests passed (3 files).
+- Full `npm run verify` exit 0: frontend 195/195 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
+- Headless Microsoft Edge at 360, 768 and 1280 CSS px: Publish Results confirmation fit the viewport with Cancel initially focused; after confirmation, the updated success alert containing the Brevo/mock disclaimer fit the viewport and the page had no horizontal overflow at all three widths. This was viewport simulation, not real browser zoom. No external email was sent.
+
+By hand: Backend developers must review the outbox/idempotency model and verify the Brevo account, sender, template, retry policy and credential handling before implementation.

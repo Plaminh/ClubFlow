@@ -97,6 +97,7 @@ describe('Application Review — Final Results', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Publish Results' }));
 
     expect(await screen.findByText('Đã công bố CF-027 (mô phỏng)')).toBeInTheDocument();
+    expect(screen.getByText(/Bản mô phỏng không gửi email thật; backend sau này gửi một mẫu email kết quả chung qua Brevo/)).toBeInTheDocument();
     expect(await screen.findByText('Không có kết quả nào đang chờ công bố.')).toBeInTheDocument();
 
     await demoSessionService.signIn('ap-minhanh');
