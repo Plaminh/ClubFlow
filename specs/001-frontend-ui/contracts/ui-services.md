@@ -30,6 +30,27 @@
 | `demoSessionService.listAccounts()` | demo accounts grouped by role |
 | `demoSessionService.listScenarios()` | scenario IDs, labels, demo clock |
 
+## Authentication prototype (UI-8, US6)
+
+| Function | Input | Returns |
+|---|---|---|
+| `authService.signIn(credentials)` | `{ email, password }` | current account profile, or `UiError(forbidden)` for invalid credentials. The account is matched by its profile's **current** email (case-insensitive) plus the shared development password; a non-object argument (the old `signIn(accountId)` shape) is rejected |
+| `authService.signOut()` | — | `null`; clears the selected demo account |
+| `authService.getCurrentUser()` | — | current account profile or `null` |
+| `authService.listDemoCredentials()` | — | three representative development logins (one per role) with each account's current email |
+| `demoSessionService.signIn(accountId)` | account ID | development-only account switch used by the Demo controls; no credentials |
+
+The prototype stores only the selected account ID in session storage. A future backend replaces these bodies with a login request/current-user request and token lifecycle; no password may be persisted by the frontend.
+
+## Profile prototype (UI-8, US7)
+
+| Function | Input | Returns |
+|---|---|---|
+| `profileService.getProfile()` | — | current account profile; `UiError(forbidden)` when signed out |
+| `profileService.updateProfile(payload)` | `{ displayName, email }` (other keys are ignored) | updated current account profile; `UiError(validation, fieldErrors)` for a missing/malformed field or an email used by another demo account; `UiError(conflict)` when the account, scenario, or demo data changed while the save was pending (nothing is written) |
+
+`id`, `role`, `studentId`, `faculty`, and `year` are response-only in UI-8. Updating a profile must not rewrite `Application.studentInfo` snapshots. Password change is not part of this prototype contract.
+
 ## Campaign (UI-2, US1)
 
 | Function | Input | Returns |

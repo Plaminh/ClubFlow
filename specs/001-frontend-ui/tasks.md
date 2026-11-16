@@ -175,12 +175,45 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 
 ---
 
+## Phase 11: User Story 6 — Dedicated demo Sign In (UI-8, P1)
+
+**Goal**: Replace the normal account-picker entry with validated credentials at `/login`, while preserving the existing demo session and safe role-aware redirects.
+
+**Independent test**: Exercise empty, malformed, invalid, slow, and failed submissions; sign in as each role; restore only an allowed intended route; redirect an already authenticated account away from `/login`.
+
+- [x] T086 [US6] Extend UI-8 requirements, design decisions, data model, service contracts, quality checklist, and implementation plan in `specs/001-frontend-ui/`
+- [x] T087 [US6] Add Sign In route, form, redirect, loading, failure, and unauthorized-intent tests in `frontend/src/tests/pages/SignInPage.test.jsx`, `frontend/src/tests/routes/AppRoutes.test.jsx`, and `frontend/src/tests/layouts/AppLayout.test.jsx`
+- [x] T088 [US6] Add fictional credential fixtures and `signIn`, `signOut`, `getCurrentUser`, and demo-credential contracts in `frontend/src/mocks/auth.js`, `frontend/src/services/authService.js`, and `frontend/src/tests/services/authService.test.js`
+- [x] T089 [US6] Integrate credential Sign In and development-only account switching with `frontend/src/contexts/DemoSessionContext.jsx`, `frontend/src/services/demoSessionService.js`, and `frontend/src/components/organisms/DemoBar/`
+- [x] T090 [US6] Implement the responsive accessible form and page in `frontend/src/components/organisms/SignInForm/`, `frontend/src/hooks/useSignIn.js`, and `frontend/src/pages/SignInPage.jsx`
+- [x] T091 [US6] Wire `/login`, safe intended-route checks, visitor redirects, and the header entry in `frontend/src/routes/`, `frontend/src/layouts/AppLayout.jsx`, `frontend/src/pages/ApplicantPortalPage.jsx`, and `frontend/src/components/organisms/AppHeader/`
+
+## Phase 12: User Story 7 — Shared My Profile (UI-8, P2)
+
+**Goal**: Let every authenticated role view its own profile and edit only display name/email without leaking state or rewriting application snapshots.
+
+**Independent test**: Open `/profile` as all roles, save/cancel/validate edits, switch accounts/scenarios, compare application snapshots, sign out, and retry protected access.
+
+- [x] T092 [US7] Add guest/all-role, read-only, save/cancel/error, account-isolation, snapshot, and sign-out tests in `frontend/src/tests/pages/ProfilePage.test.jsx` and `frontend/src/tests/services/profileService.test.js`
+- [x] T093 [US7] Add scenario-backed profile records and `getProfile`/`updateProfile` contracts in `frontend/src/mocks/scenarios.js`, `frontend/src/services/profileService.js`, and `frontend/src/contexts/DemoSessionContext.jsx`
+- [x] T094 [US7] Implement profile loading/actions and the shared protected page in `frontend/src/hooks/useProfile.js`, `frontend/src/components/organisms/ProfileDetailsCard/`, `frontend/src/components/organisms/ProfileEditForm/`, and `frontend/src/pages/ProfilePage.jsx`
+- [x] T095 [US7] Add `/profile`, the shared authentication gate, and the account menu actions in `frontend/src/routes/`, `frontend/src/layouts/AppLayout.jsx`, and `frontend/src/components/organisms/AppHeader/`
+
+## Phase 13: UI-8 regression, responsive review, and handoff
+
+- [x] T096 Add Sign In/Profile accessibility coverage and update existing five-screen expectations in `frontend/src/tests/a11y/screens.a11y.test.jsx` and affected frontend tests
+- [x] T097 Document routes, mock credentials, editability, future service replacement, prototype limitations, and 360/768/1280 results in `docs/frontend/INTEGRATION.md` and `specs/001-frontend-ui/quickstart.md`
+- [x] T098 Run `npm run lint`, `npm test`, `npm run build`, and `npm run verify`; inspect the final diff; update `AI-LOG.md`, `specs/001-frontend-ui/spec.md`, and this task list without committing
+
+---
+
 ## Dependencies & Execution Order
 
 - Phase 0 → Phase 1 → Phase 2 (blocks all stories)
 - US1 → US2 → US3 in order for one developer (US2 creates `Modal`/`Tabs`/`DataTable` reused later)
 - US4 needs Phase 2 and the US2 shared components; US5 needs Phase 2 and `DataTable`/`FormField`
 - Phase 8 after all stories; Phase 9 after Phase 8, before backend integration; Phase 10 aligns the team-selected Q-01…Q-07 decisions before backend integration
+- UI-8 US6 depends on UI-1 and replaces the normal SignInDialog entry; US7 depends on the US6 session/route work; Phase 13 follows both
 - Within a story: service → hook → organisms → page → page tests
 
 ## Implementation Strategy

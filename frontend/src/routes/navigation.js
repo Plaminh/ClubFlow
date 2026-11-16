@@ -22,3 +22,25 @@ export const HOME_BY_ROLE = Object.freeze({
   executive: ROUTES.EXECUTIVE_CAMPAIGN,
   interviewer: ROUTES.INTERVIEWER,
 });
+
+const PROTECTED_PATHS_BY_ROLE = Object.freeze({
+  applicant: new Set([ROUTES.HOME, ROUTES.PROFILE]),
+  executive: new Set([
+    ROUTES.PROFILE,
+    ROUTES.EXECUTIVE_CAMPAIGN,
+    ROUTES.EXECUTIVE_REVIEW,
+    ROUTES.EXECUTIVE_SCHEDULING,
+  ]),
+  interviewer: new Set([ROUTES.PROFILE, ROUTES.INTERVIEWER]),
+});
+
+export function canAccessProtectedPath(role, pathname) {
+  return PROTECTED_PATHS_BY_ROLE[role]?.has(pathname) ?? false;
+}
+
+export function postSignInDestination(role, intendedLocation) {
+  if (intendedLocation?.pathname && canAccessProtectedPath(role, intendedLocation.pathname)) {
+    return `${intendedLocation.pathname}${intendedLocation.search ?? ''}`;
+  }
+  return HOME_BY_ROLE[role] ?? ROUTES.HOME;
+}

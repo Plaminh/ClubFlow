@@ -550,3 +550,27 @@ Verified:
 - `git diff --check` passed; the relevant local Markdown links resolved; the branch remained `feature/q01-q07-decisions`; scope and ignored-file checks found no backend or `.env` change.
 
 By hand: Product Owner confirmation is still required for Q-01…Q-07. Backend engineers must implement and review the documented production contracts, migrations, authorization, provider configuration and failure handling before the UI can replace mock services.
+
+---
+
+## 2026-11-16 — UI-8 — Sign In and My Profile prototypes (simulated authentication)
+
+Tool: Claude Code.
+
+Asked for: Finish, debug, test and document the partially implemented UI-8 screens using React and mock data only; no backend, token, database, registration or password features; no commit.
+
+Completed:
+
+- Registered `/login` and the protected `/profile`; the header now links to "Đăng nhập" and, when signed in, offers an account menu with "Hồ sơ cá nhân" and "Đăng xuất". The account-picker `SignInDialog` was removed; a development-only account switch remains in the Demo controls.
+- Mock Sign In matches the account by its current profile email, so an edited email signs into the same account; duplicate emails are rejected; the password stays a development fixture and is never stored in the browser.
+- Fixed: profile email and credential email could disagree; a profile save could be shown stale after saving; Sign Out from a protected screen could end on `/login` instead of `/`; a service field error could miss focus because the field was still disabled; redirect after Sign In could race with the "already signed in" redirect; a late profile result could replace a newly selected account in the header.
+- An in-flight profile save is cancelled without writing when the account, scenario or demo data changes; unsaved edits are discarded on any session change.
+
+Verified:
+
+- From the repository root: `npm run lint`, `npm test`, `npm run build` and `npm run verify` all exited 0; frontend 295/295 tests passed (23 files), backend 18/18 (5 files, unchanged). `git diff --check` reported no whitespace errors. The existing Vite >500 kB chunk warning remains.
+- Headless Microsoft Edge on the production build at 360, 640, 768 and 1280 CSS px: 28/28 state checks passed (details in `specs/001-frontend-ui/quickstart.md`). Viewport simulation only; real browser zoom and a screen reader were not used.
+
+Limitations: authentication and profile changes are simulated in browser memory and reset on reload, scenario switch or demo reset; route guards are UI convenience, not security; lists that resolve a person's name by account ID still show the fixture name after a profile rename.
+
+By hand: The team must review this AI-assisted change before committing, and should repeat a keyboard-only pass in a real browser. Backend engineers own real authentication, authorization and profile persistence.

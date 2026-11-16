@@ -28,6 +28,8 @@ Page (layout + UI state) → hook (loading / error / data) → service (Promise)
 | `/executive/review?tab=results` | `ApplicationReviewPage` (Final Results) | Executive | `useFinalResults`, `useAssessment` | `resultService` |
 | `/executive/scheduling` | `InterviewSchedulingPage` | Executive | `useSchedule` | `scheduleService`, `campaignService` |
 | `/interviewer` | `InterviewerWorkspacePage` | Interviewer | `useAssignedInterviews`, `useInterviewDetail`, `useCampaign` | `interviewerService` |
+| `/login` | `SignInPage` (simulated Sign In) | Visitor; a signed-in account is redirected to its role home | `useSignIn` | `authService` |
+| `/profile` | `ProfilePage` (My Profile) behind `AuthGate` | Executive, Applicant, Interviewer | `useProfile` | `profileService` |
 | `*` | `NotFoundPage` | any | — | — |
 
 `routes/RoleGate.jsx` hides screens from other **demo** roles. It is presentation only; the API must authorize every request.
@@ -63,6 +65,11 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `portalService.listMyApplications()` | own applications; `interview` only if confirmed; `result` only if published | ownership from the token, never from the client (BR-08) |
 | `portalService.submitApplication(formData)` | created application, or `UiError` (`validation` / `conflict` with `details.existingApplicationId`) | store the submitted `email`/`faculty` with the application; BR-02 window, BR-03 no quota cap, BR-05 uniqueness incl. concurrent requests, PDF ≤ 5 MB, SOP ≤ 300 words |
 | `portalService.listNotifications()` / `markNotificationsRead()` | own notifications | own records only |
+| `authService.signIn({ email, password })` | account profile, or `UiError('forbidden')` | real login; issue and manage the token server-side contract; never return or store a password |
+| `authService.signOut()` / `getCurrentUser()` | `null` / profile or `null` | end the session / return the token's user |
+| `authService.listDemoCredentials()` | fictional example logins | **remove** with the mock; never expose credentials |
+| `profileService.getProfile()` | `{ id, role, displayName, email, description?, studentId?, faculty?, year? }` | own profile only, identity from the token |
+| `profileService.updateProfile({ displayName, email })` | profile, or `UiError('validation', fieldErrors)` | accept only these two fields; enforce email uniqueness; never rewrite the student snapshot stored on submitted applications |
 | `interviewerService.listAssignedInterviews()` | `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` | assigned + confirmed only; this is the Interviewer page's only campaign context (it must not call `getCampaign()`) |
 | `interviewerService.getInterview(id)` | detail **without** `privateNote` | assignment check; never return screening notes |
 | `interviewerService.submitAssessment(id, { recommendation, notes })` | assessment `{ id, interviewId, interviewerId, notes, recommendation, submittedAt }` | assigned interviewer only; interview already ended; one per interview, never editable; `notes` required, `recommendation` is `'pass'`, `'fail'` or `null` and must not create or change the final result (Q-04, §12.4) |
@@ -98,7 +105,12 @@ If the API returns a different shape, **map it inside the service** so pages sta
 - `contexts/DemoSessionContext.jsx` (demo accounts, scenarios, reset) is **not** authentication. Replace it with an auth provider that exposes the same `useDemoSession()` fields the pages use: `account`, `accountId`, `role`, `signIn`, `signOut`, and keep `dataVersion` constant.
 - Register the token once: `setAuthTokenProvider(() => currentAccessToken)`; every request then sends `Authorization: Bearer <token>`.
 - Remove `organisms/DemoBar` from `layouts/AppLayout.jsx` (or show it only in a demo build) once real data is used.
-- The shared `SignInDialog` must become a real credential form; there is no registration or recovery (out of scope).
+- UI-8 added the credential form (`/login`, `SignInForm`) and My Profile (`/profile`). Both are **simulated**: `authService` and `profileService` read and write the in-memory mock store. There is no token, no hashing, no backend call, and no registration, recovery, or password change (out of scope). The old account-picker `SignInDialog` was removed.
+- Simulated Sign In: the account is found by its profile's current email and the single fictional development password in `mocks/auth.js` (shown on the Sign In page; example logins: `executive@clubflow.demo.example`, `minh.anh@demo.example`, `ha.my@clubflow.demo.example`). Only the selected account ID and scenario ID are kept in `sessionStorage`; the password is never stored. Replace the `authService` bodies with real requests and delete `mocks/auth.js` and `listDemoCredentials`.
+- Redirects: Executive → `/executive/campaign`, Applicant → `/`, Interviewer → `/interviewer`. A guest opening a protected route goes to `/login` and returns to that route after Sign In only if `routes/navigation.js` → `canAccessProtectedPath(role, pathname)` allows it (a fixed allow-list of in-app paths; anything else falls back to the role home). Sign Out ("Đăng xuất" in the header account menu) clears the session and returns to `/`.
+- My Profile edits only `displayName` and `email`; account ID, role, student ID, faculty, and academic year are read-only. A changed email becomes the Sign In email for that account within the current scenario; an email of another demo account is rejected. Edits live in memory only: a page reload, scenario switch, or "Đặt lại dữ liệu demo" restores the fixture values (and the original Sign In email). Submitted applications keep the student snapshot taken at submission; lists that show a person's name by account ID (`mocks/derive.js` → `accountName`) keep showing the fixture name.
+- The Demo controls keep a development-only "Đổi tài khoản nhanh" select (`demoSessionService.signIn(accountId)`, no credentials) for scenario review. It disappears together with `DemoBar`.
+- `useDemoSession().sessionEpoch` changes on sign-in/out, account switch, scenario switch, and reset; `ProfilePage` keys its local state on it so unsaved edits never carry over. A real auth provider can keep it constant or bump it on user change.
 - The backend decides every permission (ROLES_AND_PERMISSIONS). Frontend checks (`RoleGate`, disabled buttons) are convenience only.
 
 ## 7. CV upload and viewing

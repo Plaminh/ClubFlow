@@ -34,7 +34,7 @@ describe('Applicant Portal', () => {
     expect(screen.getByRole('heading', { name: 'Digital Product' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Apply Now' }));
-    expect(await screen.findByRole('dialog', { name: 'Sign In' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' })).toBeInTheDocument();
   });
 
   it('keeps private tabs behind the demo sign-in', async () => {

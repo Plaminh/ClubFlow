@@ -22,11 +22,19 @@ function expectNoEditingControls() {
 }
 
 describe('Campaign Management', () => {
-  it('shows a restricted state to visitors', async () => {
+  it('sends visitors to Sign In instead of showing the screen', async () => {
     renderApp(PATH);
+
+    await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
+    expect(screen.queryByLabelText('Tên chiến dịch')).not.toBeInTheDocument();
+  });
+
+  it('shows a restricted state to a signed-in account with another role', async () => {
+    renderApp(PATH, { accountId: 'ap-minhanh' });
 
     await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(screen.getByText('Màn hình này dành cho Ban tuyển dụng')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Về trang của tôi' })).toHaveAttribute('href', '/');
     expect(screen.queryByLabelText('Tên chiến dịch')).not.toBeInTheDocument();
   });
 

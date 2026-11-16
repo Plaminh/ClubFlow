@@ -15,6 +15,10 @@ const SCREENS = [
   ['Final Results', '/executive/review?tab=results', { accountId: EXECUTIVE, scenarioId: 'confirmed' }, 'Kết quả cuối theo hồ sơ'],
   ['Interview Scheduling', '/executive/scheduling', { accountId: EXECUTIVE }, 'Lịch nháp'],
   ['Interviewer Workspace', '/interviewer', { accountId: 'iv-hamy', scenarioId: 'confirmed' }, 'Interview Assessment'],
+  ['Sign In', '/login', {}, 'Thông tin đăng nhập'],
+  ['My Profile (applicant)', '/profile', { accountId: 'ap-minhanh' }, 'Thông tin cá nhân'],
+  ['My Profile (executive)', '/profile', { accountId: EXECUTIVE }, 'Thông tin cá nhân'],
+  ['My Profile (interviewer)', '/profile', { accountId: 'iv-hamy' }, 'Thông tin cá nhân'],
   ['Not found', '/missing-page', {}, 'Đường dẫn không tồn tại'],
 ];
 
@@ -43,6 +47,12 @@ describe.each(SCREENS)('%s', (_name, path, session, readyHeading) => {
     for (const fileInput of container.querySelectorAll('input[type="file"]')) {
       expect(fileInput).toHaveAccessibleName();
     }
+
+    // Heading levels never skip (h1 -> h3 without an h2 in between).
+    const levels = screen.getAllByRole('heading').map((heading) => Number(heading.tagName[1]));
+    levels.forEach((level, index) => {
+      expect(level - (levels[index - 1] ?? 0)).toBeLessThanOrEqual(1);
+    });
 
     const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
     expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([]);

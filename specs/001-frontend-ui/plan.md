@@ -6,7 +6,7 @@
 
 ## Summary
 
-Build the five ClubFlow screens (Campaign Management, Application Review with Final Results, Interview Scheduling, Applicant Portal, Interviewer Workspace) as a responsive, keyboard-accessible React UI driven by one consistent set of demo records. Pages talk to Promise-based service functions that use demo data now and are replaced by real API calls later, without changing layouts. Decisions and their justifications are in [research.md](research.md); demo records are in [data-model.md](data-model.md); the service boundary is in [contracts/ui-services.md](contracts/ui-services.md); manual verification steps are in [quickstart.md](quickstart.md).
+Build the five ClubFlow business screens plus shared Sign In and My Profile screens as a responsive, keyboard-accessible React UI driven by one consistent set of demo records. Pages talk to Promise-based service functions that use demo data now and are replaced by real API calls later, without changing layouts. UI-8 keeps the existing session context as the single account source, replaces the normal account-picker entry with credential-based mock Sign In, and stores editable profile values in the scenario-backed in-memory store. Decisions and their justifications are in [research.md](research.md); demo records are in [data-model.md](data-model.md); the service boundary is in [contracts/ui-services.md](contracts/ui-services.md); manual verification steps are in [quickstart.md](quickstart.md).
 
 ## Technical Context
 
@@ -26,7 +26,7 @@ Build the five ClubFlow screens (Campaign Management, Application Review with Fi
 
 **Constraints**: 360 / 768 / 1280+ px; 100–200% browser zoom by reflow; Vietnamese UI; no backend changes; `npm run verify` must pass at each commit.
 
-**Scale/Scope**: 5 screens, about 6 routes, 4 demo scenarios.
+**Scale/Scope**: 5 business screens, 2 shared account screens, 8 route targets, 5 demo scenarios.
 
 ## Constitution Check
 
@@ -95,6 +95,8 @@ frontend/src/
 │   ├── healthService.js            # existing
 │   ├── uiError.js
 │   ├── demoSessionService.js
+│   ├── authService.js               # mock credential boundary
+│   ├── profileService.js            # current profile read/update
 │   ├── campaignService.js
 │   ├── applicationService.js
 │   ├── resultService.js
@@ -113,6 +115,8 @@ frontend/src/
 │   ├── InterviewSchedulingPage.jsx
 │   ├── ApplicantPortalPage.jsx
 │   ├── InterviewerWorkspacePage.jsx
+│   ├── SignInPage.jsx
+│   ├── ProfilePage.jsx
 │   └── NotFoundPage.jsx
 └── tests/                          # existing location; mirrors components/, pages/, mocks/
 ```
@@ -171,6 +175,16 @@ Each phase ends with `npm run verify` passing, an AI-LOG entry, and a review bef
 - **Acceptance**: SC-002, SC-004, SC-006, SC-007 met and recorded in quickstart.md results; `apiClient` sends `FormData` without forcing JSON content type and rejects with a `UiError` carrying the backend message.
 - **Tests**: `apiClient` (JSON, FormData, error body, 204); loading/error/empty rendering per hook.
 - **Commit boundary**: (1) `fix: responsive and zoom adjustments`; (2) `feat: prepare api client for integration`; (3) `docs: add frontend integration guide`.
+
+### UI-8 — Shared Sign In and My Profile prototypes (US6, US7)
+
+- **Scope**: add public `/login` and protected `/profile`; validate fictional credentials through `authService`; preserve a known role-permitted intended destination; replace the product-facing account-picker dialog; add a development-only account switch to Demo controls; expose a header account menu; show and edit only current-account display name/email through `profileService`; reset profile fixtures with scenario/reset operations; preserve immutable application snapshots.
+- **Dependencies**: UI-1 demo session, router, FormField, Alert, Card, AsyncContent, Button, role navigation, and UI-7's stale-request cancellation.
+- **Expected files**: `src/pages/{SignInPage,ProfilePage}.jsx`, `src/components/organisms/{SignInForm,ProfileDetailsCard,ProfileEditForm}/`, `src/services/{authService,profileService}.js`, `src/hooks/{useSignIn,useProfile}.js`, route/layout/header/demo-session/mock-store updates, and focused route/page/service/a11y tests.
+- **Architecture**: Page → hook → service → mock store. `DemoSessionContext` remains the single account source; successful profile updates replace its current account and bump `dataVersion`. Credentials stay in a development fixture and only the selected account ID is stored in `sessionStorage`.
+- **Acceptance**: US6 and US7 scenarios; UI-FR-030…UI-FR-042; no registration/recovery, real tokens, backend endpoint, avatar upload, or password change.
+- **Tests**: validation, invalid credential, role redirects, slow/failure feedback, safe intended-route restoration, authenticated-login redirect, guest profile redirect, all-role profiles, read-only identity fields, save/cancel/error, account isolation, snapshot immutability, sign-out protection, and existing five-screen regression suite.
+- **Responsive review**: Sign In and Profile at 360/768/1280 px with keyboard/focus and one-h1 checks; record results in quickstart.md.
 
 ## Complexity Tracking
 

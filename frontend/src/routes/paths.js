@@ -1,6 +1,8 @@
 // Route paths for the five ClubFlow screens (specs/001-frontend-ui/research.md, D-UI-02).
 export const ROUTES = Object.freeze({
   HOME: '/',
+  LOGIN: '/login',
+  PROFILE: '/profile',
   EXECUTIVE_CAMPAIGN: '/executive/campaign',
   EXECUTIVE_REVIEW: '/executive/review',
   EXECUTIVE_SCHEDULING: '/executive/scheduling',

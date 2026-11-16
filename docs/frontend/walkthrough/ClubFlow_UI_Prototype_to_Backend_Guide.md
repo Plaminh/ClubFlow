@@ -598,7 +598,8 @@ Bảng sau liệt kê mọi hàm service mà trang dùng, đọc trực tiếp t
 
 | Màn hình · thao tác | Page / component · Hook | Service method | Request → Response | Backend cần · Quyền · BR | Mock hiện tại · Trạng thái |
 |---|---|---|---|---|---|
-| Đăng nhập | `AppLayout` / `SignInDialog` · `useDemoSession` | `demoSessionService.signIn(accountId)`, `signOut()`, `listAccounts()` | id tài khoản → account `{ id, role, displayName, … }` | Đăng nhập thật bằng tài khoản tạo sẵn, JWT; không đăng ký | Chọn tài khoản hư cấu · **Mock, phải thay** |
+| Đăng nhập (UI-8) | `/login` · `SignInPage` / `SignInForm` · `useSignIn`, `useDemoSession` | `authService.signIn({ email, password })`, `signOut()`, `getCurrentUser()`; đổi tài khoản nhanh trong thanh Demo: `demoSessionService.signIn(accountId)` | email + mật khẩu demo hư cấu → account `{ id, role, displayName, email, … }` | Đăng nhập thật bằng tài khoản tạo sẵn, JWT; không đăng ký | Xác thực mô phỏng trong bộ nhớ, không có token · **Mock, phải thay** |
+| Hồ sơ cá nhân (UI-8) | `/profile` · `ProfilePage` · `useProfile` | `profileService.getProfile()`, `updateProfile({ displayName, email })` | hồ sơ tài khoản hiện tại | Chỉ hồ sơ của chính người dùng theo token; email duy nhất | Lưu trong bộ nhớ, mất khi tải lại/đổi kịch bản · **Mock, phải thay** |
 | Kiểm tra API | footer `StatusBadge` · `useApiHealth` | `healthService.getHealth()` | — → `{ status, … }` | `GET /api/health` (đã có) | **Thật** |
 | Campaign · tải | `CampaignManagementPage` · `useCampaign` | `campaignService.getCampaign()` | — → `{ campaign, phase, positions[], slots[], locked, hasApplications }` | Chỉ Executive; drafts không công khai · BR-02 | Mock (guard Executive) |
 | Campaign · Lưu bản nháp / Lưu thay đổi | như trên | `campaignService.saveDraft(draft)` | draft → cùng view | Executive; khóa sau xác nhận · BR-14 | Mock |
@@ -723,7 +724,7 @@ Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trư�
 - **Loading/lỗi:** không cần sửa — `useServiceData` trả `status` và `AsyncContent` hiển thị spinner hoặc lỗi + *Thử lại*; `useAction().run()` trả `{ ok, value }` hoặc `{ ok: false, error }`.
 - **Xác thực:** thay `DemoSessionProvider` bằng provider thật cung cấp cùng các trường `account`, `accountId`, `role`, `signIn`, `signOut`, `status`, và giữ `dataVersion` cố định; gọi `setAuthTokenProvider(() => token)` một lần.
 - **Phân quyền:** backend quyết định mọi quyền. `RoleGate` và nút bị khoá chỉ là tiện ích UI.
-- **Thanh Demo:** gỡ `<DemoBar … />` khỏi `layouts/AppLayout.jsx` hoặc chỉ render trong build demo; `SignInDialog` phải thành form đăng nhập thật (không có đăng ký/khôi phục mật khẩu).
+- **Thanh Demo:** gỡ `<DemoBar … />` khỏi `layouts/AppLayout.jsx` hoặc chỉ render trong build demo; form đăng nhập `/login` (UI-8, hiện là mô phỏng qua `authService`) phải gọi API đăng nhập thật (không có đăng ký/khôi phục mật khẩu).
 
 ## 13.5 Cập nhật kiểm thử
 

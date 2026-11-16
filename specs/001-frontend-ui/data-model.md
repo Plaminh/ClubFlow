@@ -25,7 +25,8 @@ Screening, schedule, assessment, and result are **separate fields** (BR-08); non
 | `Department` | `id`, `name` | "Digital Product", "Communications" |
 | `Position` | `id`, `departmentId`, `name`, `quota`, `description`, `requirements` | UX Design, Content Creation; quota 2 each |
 | `AvailabilitySlot` | `id`, `campaignId`, `start`, `end` | 09:00–10:00, 10:00–11:00, 11:00–12:00 on 05/11/2026 |
-| `Account` | `id`, `role`, `displayName`, `studentId?`, `email?`, `faculty?` | Applicants: minhanh, quocbao, khanhlinh, baongoc, thaovy, haidang; Interviewers: hamy, giahuy; one Executive |
+| `AccountProfile` | `id`, `role`, `displayName`, `email`, `studentId?`, `faculty?`, `year?` | One current mutable demo profile per pre-provisioned account; only `displayName` and `email` are editable in UI-8 |
+| `DemoCredential` | `accountId`, `email`, `password` | Development-only lookup; fictional `.example` emails; password is never copied to browser storage or returned with a profile |
 | `Application` | `id` (CF-026…CF-031), `applicantId`, `campaignId`, `positionId`, `submittedAt`, `reviewedAt?`, `studentInfo`, `sop`, `cvFileName`, `availabilitySlotIds[]`, `screeningStatus`, `privateNote?` | Unique per applicant + campaign + position (BR-05) |
 | `Room` | `id`, `name` | A-201, B-105 |
 | `InterviewerAssignment` | `interviewerId`, `positionIds[]`, `availability [{start,end}]` | Hà My → UX; Gia Huy → Content |
@@ -64,3 +65,5 @@ These checks test **fixture integrity**. They are not a frontend implementation 
 ## View state (owned by pages, not stored in mocks)
 
 Filters, search text, sort, page number, selected application, open dialog, active tab, form values, and form errors.
+
+Sign In additionally owns email/password input, password visibility, validation errors, and an intended router location. My Profile owns edit mode and a draft of `displayName`/`email`. The scenario store owns account profiles so switching accounts cannot reuse another account's draft. Existing `Application.studentInfo` values remain snapshots and are never derived again after a profile update.

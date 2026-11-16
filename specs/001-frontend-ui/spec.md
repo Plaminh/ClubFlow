@@ -4,13 +4,13 @@
 
 **Created**: 2026-11-14
 
-**Status**: UI prototype complete with mock data; pre-integration cleanup and team-selected Q-01…Q-07 frontend/contract alignment complete through UI-7. SC-005 (replace mocks with the backend without layout changes) can only be verified during backend integration. Q-01…Q-07 remain pending Product Owner confirmation.
+**Status**: UI prototype complete with mock data through UI-8 (shared Sign In and My Profile prototypes; simulated authentication only). SC-005 (replace mocks with the backend without layout changes) can only be verified during backend integration. Q-01…Q-07 remain pending Product Owner confirmation.
 
 **Input**: User description: "UI-first React frontend for the five ClubFlow screens with mock data and integration-ready boundaries"
 
 ## Context and Scope
 
-This feature delivers the **complete ClubFlow user interface** before backend integration. It covers exactly five main screens:
+This feature delivers the **complete ClubFlow user interface** before backend integration. It preserves five main business screens:
 
 1. Campaign Management (Executive)
 2. Application Review, including the Final Results tab (Executive)
@@ -18,11 +18,16 @@ This feature delivers the **complete ClubFlow user interface** before backend in
 4. Applicant Portal (Visitor and Applicant)
 5. Interviewer Workspace (Interviewer)
 
+UI-8 adds two shared account screens around those business screens:
+
+6. Sign In (Visitor; shared entry for all authenticated roles)
+7. My Profile (Executive, Applicant, and Interviewer)
+
 **Business source of truth**: [`docs/requirements/`](../../docs/requirements/README.md). This spec **does not redefine** BR-01…BR-14, AC-01…AC-53, F1…F7, or the team-internal FR-01…FR-15; it references them. To avoid confusion with those IDs, requirements in this spec use the prefix `UI-FR-`.
 
 **Visual reference**: [`docs/reference/ui/`](../../docs/reference/ui/README.md). Where the references are illustrative, incomplete, or contradict the requirements, the requirements win.
 
-**Out of scope for this feature**: real authentication, backend APIs, persistence, file storage, automatic schedule generation, server-side business-rule enforcement, email/SMS/push, and anything listed as out of scope in [PRODUCT_SPEC §6](../../docs/requirements/PRODUCT_SPEC.md). Other team members integrate those later without changing page layouts.
+**Out of scope for this feature**: real authentication or tokens, account registration/recovery, password changes, backend APIs, persistence, avatar upload, file storage, automatic schedule generation, server-side business-rule enforcement, email/SMS/push, and anything listed as out of scope in [PRODUCT_SPEC §6](../../docs/requirements/PRODUCT_SPEC.md). Other team members integrate those later without changing page layouts.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -98,7 +103,7 @@ A Visitor sees the published campaign and positions. Signing in (demo) lets an A
 **Acceptance Scenarios** (F2, F6, F7, BR-02, BR-03, BR-05, BR-08; AC-05…AC-09, AC-11…AC-16, AC-22, AC-43, AC-46…AC-48):
 
 1. **Given** the before-open scenario, **When** a Visitor opens the portal, **Then** campaign information is visible and submission is unavailable with an explanation.
-2. **Given** a Visitor clicks Apply, **When** not signed in, **Then** the demo sign-in dialog opens; no registration or password recovery is offered.
+2. **Given** a Visitor clicks Apply, **When** not signed in, **Then** the Sign In page (`/login`) opens (UI-8 replaced the earlier account-picker dialog); no registration or password recovery is offered.
 3. **Given** the accepting scenario, **When** the CV is not a PDF or exceeds 5 MB, the SOP exceeds 300 words, or no slot is chosen, **Then** submission is blocked with a field-specific message and other input is preserved.
 4. **Given** the Applicant already applied to a position, **When** they select it again, **Then** the UI points them to the existing application instead of creating another.
 5. **Given** the screening scenario, **When** the Applicant opens My Applications, **Then** each application shows its own screening status and no interview time or final result.
@@ -124,6 +129,46 @@ The Interviewer sees only their assigned confirmed interviews, opens an applicat
 
 ---
 
+### User Story 6 - User signs in with a pre-provisioned demo account (Priority: P1)
+
+A Visitor enters a fictional email and development-only password on a dedicated Sign In screen. The prototype validates the fields, resolves the matching demo account through the shared session, and sends the user to an allowed destination for their role.
+
+**Why this priority**: It replaces the account-picker dialog as the normal entry flow and is required before the shared protected profile can be reached.
+
+**Independent Test**: Start signed out, open `/login`, exercise empty, malformed, invalid, slow, and failed submissions, then sign in once as each role and confirm the correct landing page. Attempt a protected deep link before signing in and confirm only a role-permitted destination is restored.
+
+**Acceptance Scenarios**:
+
+1. **Given** a Visitor opens `/login`, **When** they submit empty or malformed values, **Then** field-specific messages appear and focus moves to the first invalid field.
+2. **Given** validly shaped but unknown credentials, **When** Sign In completes, **Then** an invalid-credentials message is announced and no session starts.
+3. **Given** a valid Executive, Applicant, or Interviewer demo credential, **When** Sign In succeeds, **Then** the shared demo session uses that account and navigates to `/executive/campaign`, `/`, or `/interviewer` respectively.
+4. **Given** a Visitor requested a protected route, **When** the matching role signs in, **Then** that intended route is restored; a role that is not permitted there lands on its own default page instead.
+5. **Given** an authenticated account opens `/login`, **When** the route resolves, **Then** the account is redirected to its role home page.
+6. **Given** a mock request is slow or fails, **When** Sign In is submitted, **Then** the action shows a loading state or an announced error and remains retryable.
+
+---
+
+### User Story 7 - Authenticated user views and edits My Profile (Priority: P2)
+
+An Executive, Applicant, or Interviewer opens one shared profile screen, reviews the identity and role-specific fields for the current account, and edits only display name and email. The update is a demo in-memory action and must never alter another account or an application's submitted student snapshot.
+
+**Why this priority**: It provides one consistent account destination without duplicating role-specific business screens.
+
+**Independent Test**: Open `/profile` as each role, verify the correct data, edit and cancel/save the allowed fields, switch accounts and scenarios, and sign out while checking that protected access and historical application details remain correct.
+
+**Acceptance Scenarios**:
+
+1. **Given** a Visitor requests `/profile`, **When** routing resolves, **Then** they are sent to `/login` with the intended profile destination preserved.
+2. **Given** any authenticated role opens `/profile`, **When** data loads, **Then** the current account's name, email, role, account ID, and available role-specific fields are shown.
+3. **Given** edit mode, **When** the user inspects the form, **Then** only display name and email are editable; account ID, role, student ID, faculty, and academic year remain read-only.
+4. **Given** invalid editable values, **When** Save is submitted, **Then** field-specific messages appear, focus moves to the first invalid field, and no profile is changed.
+5. **Given** valid changes, **When** the mock save succeeds, **Then** the profile and shared header update immediately and a success message is announced.
+6. **Given** unsaved edits, **When** Cancel is chosen, **Then** the displayed values revert without a mutation.
+7. **Given** another account or scenario is selected, **When** profile data reloads, **Then** no values from the previous account are shown and historical application snapshots remain unchanged.
+8. **Given** the user signs out, **When** they revisit a protected route, **Then** they must sign in again.
+
+---
+
 ### Edge Cases
 
 - Very long campaign, position, and applicant names must wrap without horizontal page scroll.
@@ -133,6 +178,9 @@ The Interviewer sees only their assigned confirmed interviews, opens an applicat
 - Unpublished results must never appear in any Applicant view, including notifications.
 - At 200% browser zoom on a 1280px screen (≈640 CSS px), primary actions remain visible and reachable without horizontal page scroll.
 - Reference dates (October–November 2026) are in the past relative to the real date; the UI uses a controlled demo clock instead of the system clock.
+- An intended post-login destination may be unknown, public, or unauthorized for the submitted role; only known role-permitted paths may be restored.
+- Profile data may change while a mock request is pending because the demo account or scenario changes; stale responses must not replace the new account's profile.
+- Development credentials are fictional and may be shown as demo help, but their passwords must never be written to browser storage.
 
 ## Requirements *(mandatory)*
 
@@ -184,10 +232,23 @@ The Interviewer sees only their assigned confirmed interviews, opens an applicat
 - **UI-FR-027**: Screens MUST obtain data and perform actions only through replaceable service functions, so a real backend can replace demo data without changing page layouts.
 - **UI-FR-028**: The UI MUST be able to display server-side validation and business-rule errors (for example a schedule conflict or a blocked confirmation) returned by a future backend, using the same message areas as client-side validation.
 - **UI-FR-029**: The UI MUST NOT present client-side checks or demo roles as security; private data visibility in demo mode is illustrative only.
+- **UI-FR-030**: `/login` MUST provide a dedicated Vietnamese credential form with email, password, an accessible show/hide control, loading/error feedback, and a link to the public Applicant Portal; it MUST NOT offer registration or password recovery.
+- **UI-FR-031**: Demo credential validation MUST use fictional development fixtures and MUST support at least one Executive, Applicant, and Interviewer account without storing plaintext passwords in browser storage.
+- **UI-FR-032**: Successful Sign In MUST update the existing demo session and navigate to a known intended destination only when that role is permitted there; otherwise it MUST use the role home page.
+- **UI-FR-033**: Visitors requesting a protected route MUST be redirected to `/login` with the intended in-app destination preserved; authenticated users MUST NOT remain on `/login`.
+- **UI-FR-034**: The account-picker dialog MUST no longer be a normal product entry flow. A clearly labeled development-only account switch MAY remain in the Demo controls for scenario review.
+- **UI-FR-035**: `/profile` MUST be protected and shared by Executive, Applicant, and Interviewer accounts.
+- **UI-FR-036**: My Profile MUST show the current account's display name, email, role, account ID, and any available applicant student ID, faculty, and academic year values.
+- **UI-FR-037**: My Profile MUST allow editing only display name and email in UI-8; account ID, role, student ID, faculty, and academic year MUST remain read-only.
+- **UI-FR-038**: Profile Save MUST validate required display name and email fields, show loading and announced success/error feedback, and update the shared session immediately after the mock service succeeds; Cancel MUST discard unsaved input.
+- **UI-FR-039**: Profile data MUST be isolated by account, MUST reload on account/scenario changes without stale leakage, and MUST NOT mutate the student-information snapshot stored on an existing application.
+- **UI-FR-040**: The signed-in header account area MUST expose "Hồ sơ cá nhân" and "Đăng xuất"; Sign Out MUST clear the demo session, navigate to `/`, and prevent further protected-route access until another sign-in.
+- **UI-FR-041**: My Profile MUST include an informational "Bảo mật tài khoản" section that states password management is unavailable in this frontend prototype; password-change behavior is out of scope for UI-8.
+- **UI-FR-042**: The Sign In and My Profile screens MUST meet UI-FR-017 and UI-FR-019…UI-FR-025 at 360, 768, and 1280 px.
 
 ### Key Entities
 
-Business meaning is defined in [PRODUCT_SPEC §5](../../docs/requirements/PRODUCT_SPEC.md). The UI demo records cover: Campaign, Department, Position, Account (Executive, Applicant, Interviewer), Application, Interview Slot (applicant availability), Interviewer Assignment and Availability, Room, Interview, Assessment, Final Result, Notification, and Demo Scenario (a named workflow phase with a fixed demo date and time).
+Business meaning is defined in [PRODUCT_SPEC §5](../../docs/requirements/PRODUCT_SPEC.md). The UI demo records cover: Campaign, Department, Position, Account (Executive, Applicant, Interviewer), Demo Credential (development-only account lookup), Editable Profile (current account values), Application, Interview Slot (applicant availability), Interviewer Assignment and Availability, Room, Interview, Assessment, Final Result, Notification, and Demo Scenario (a named workflow phase with a fixed demo date and time).
 
 ## Success Criteria *(mandatory)*
 
@@ -200,6 +261,9 @@ Business meaning is defined in [PRODUCT_SPEC §5](../../docs/requirements/PRODUC
 - **SC-005**: Replacing the demo data source for one screen requires no change to that screen's layout or visual components (verified during the first backend integration).
 - **SC-006**: All interactive flows can be completed with the keyboard alone.
 - **SC-007**: The project quality gate (`npm run verify`) passes at the end of every implementation phase.
+- **SC-008**: A reviewer can sign in as all three roles from `/login`, with 100% of attempts landing only on a route permitted for the selected role.
+- **SC-009**: Sign In and My Profile have no horizontal page overflow or clipped primary action at 360, 768, and 1280 px, and each has exactly one main heading.
+- **SC-010**: In automated profile isolation checks, 100% of account switches show the newly selected account and 0 historical application snapshots change after a profile edit.
 
 ## Assumptions
 
@@ -210,3 +274,6 @@ Business meaning is defined in [PRODUCT_SPEC §5](../../docs/requirements/PRODUC
 - The first-fit generator's ordering (Q-01) is not implemented in the UI; "Generate draft" shows demo results.
 - Demo data comes from `docs/reference/ui/UI_REFERENCE_NOTES.md`. Where reference files disagree, the notes and the requirements decide (see `research.md`).
 - Browser support: current Chrome, Edge, and Firefox.
+- UI-8 edits only `displayName` and `email`. Applicant `studentId`, `faculty`, and `year` are displayed but read-only, and Executive/Interviewer accounts omit fields they do not have.
+- Password change is intentionally omitted from UI-8; the security card documents that limitation instead of simulating persistence the prototype cannot provide.
+- Switching or resetting a demo scenario restores fixture profile values along with the rest of that scenario's in-memory data.

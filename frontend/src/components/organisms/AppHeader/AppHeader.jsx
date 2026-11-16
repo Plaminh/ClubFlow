@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import Button from '../../atoms/Button/index.js';
+import AccountMenu from '../../molecules/AccountMenu/index.js';
 import { ROLE_LABELS } from '../../../constants/labels.js';
 import './AppHeader.css';
 
@@ -7,7 +8,7 @@ import './AppHeader.css';
  * Site header: brand, role-specific navigation, current demo identity, and
  * the sign-in / sign-out entry. Pure presentation; the layout supplies data.
  */
-export default function AppHeader({ homeTo, navItems, account, role, onSignIn, onSignOut }) {
+export default function AppHeader({ homeTo, navItems, account, role, signInTo, signInState, profileTo, onSignOut }) {
   let who = 'Khách (chưa đăng nhập)';
   if (account) {
     // The Executive account is named after its role; show the club instead of repeating it.
@@ -35,11 +36,11 @@ export default function AppHeader({ homeTo, navItems, account, role, onSignIn, o
         <div className="app-header__session">
           <span className="app-header__who">{who}</span>
           {account ? (
-            <Button variant="secondary" onClick={onSignOut}>
-              Sign Out
-            </Button>
+            <AccountMenu displayName={account.displayName} profileTo={profileTo} onSignOut={onSignOut} />
           ) : (
-            <Button onClick={onSignIn}>Sign In</Button>
+            <Button to={signInTo} state={signInState}>
+              Đăng nhập
+            </Button>
           )}
         </div>
       </div>

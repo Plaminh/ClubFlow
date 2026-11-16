@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import Badge from '../../atoms/Badge/index.js';
 import Button from '../../atoms/Button/index.js';
+import { ROLE_LABELS } from '../../../constants/labels.js';
 import { formatDateTime } from '../../../utils/format.js';
 import './DemoBar.css';
 
@@ -11,11 +12,25 @@ const SIMULATIONS = [
 ];
 
 /**
- * Demo controls: scenario (fixed demo clock), simulated network mode, reset.
+ * Demo controls: development-only account switch (no credentials; the real
+ * sign-in flow is the /login page), scenario (fixed demo clock), simulated network mode, reset.
  * Clearly labeled so nobody mistakes it for product functionality; collapsed
  * by default so it does not push page content down on small screens.
  */
-export default function DemoBar({ scenarios, scenarioId, onScenarioChange, simulation, onSimulationChange, onReset }) {
+const ROLE_ORDER = ['applicant', 'executive', 'interviewer'];
+
+export default function DemoBar({
+  accounts = [],
+  accountId = '',
+  onAccountChange,
+  scenarios,
+  scenarioId,
+  onScenarioChange,
+  simulation,
+  onSimulationChange,
+  onReset,
+}) {
+  const accountFieldId = useId();
   const scenarioFieldId = useId();
   const simulationFieldId = useId();
   const scenario = scenarios.find((item) => item.id === scenarioId);
@@ -35,6 +50,24 @@ export default function DemoBar({ scenarios, scenarioId, onScenarioChange, simul
             Dữ liệu hư cấu trong bộ nhớ trình duyệt; tải lại trang sẽ khôi phục dữ liệu ban đầu của kịch bản.
           </p>
           <div className="demo-bar__controls">
+            <label className="demo-bar__field" htmlFor={accountFieldId}>
+              <span>Đổi tài khoản nhanh (chỉ để thử nghiệm)</span>
+              <select id={accountFieldId} value={accountId} onChange={(event) => onAccountChange(event.target.value)}>
+                <option value="">Không đăng nhập (khách)</option>
+                {ROLE_ORDER.map((role) => (
+                  <optgroup key={role} label={ROLE_LABELS[role]}>
+                    {accounts
+                      .filter((account) => account.role === role)
+                      .map((account) => (
+                        <option key={account.id} value={account.id}>
+                          {account.displayName}
+                          {account.description ? ` · ${account.description}` : ''}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
             <label className="demo-bar__field" htmlFor={scenarioFieldId}>
               <span>Kịch bản</span>
               <select

@@ -1,27 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AppHeader from '../components/organisms/AppHeader/index.js';
 import DemoBar from '../components/organisms/DemoBar/index.js';
-import SignInDialog from '../components/organisms/SignInDialog/index.js';
 import StatusBadge from '../components/molecules/StatusBadge/index.js';
 import { useDemoSession } from '../contexts/demoSession.js';
 import useApiHealth from '../hooks/useApiHealth.js';
-import { HOME_BY_ROLE, NAV_BY_ROLE } from '../routes/navigation.js';
+import { HOME_BY_ROLE, NAV_BY_ROLE, canAccessProtectedPath } from '../routes/navigation.js';
 import { ROUTES } from '../routes/paths.js';
-import { toUiError } from '../services/uiError.js';
 import './AppLayout.css';
 
 /**
  * Application shell for every route: skip link, header, one <main>, footer.
- * Pages render inside <Outlet />. Pages can open the shared sign-in dialog
- * through the outlet context: `useOutletContext().openSignIn()`.
+ * Pages render inside <Outlet />. Pages send visitors to the Sign In page
+ * through the outlet context: `useOutletContext().openSignIn()` navigates to
+ * /login and remembers the current location as the intended destination.
  */
 export default function AppLayout() {
   const {
     account,
     role,
     accounts,
-    signIn,
+    selectDemoAccount,
     signOut,
     scenarios,
     scenarioId,
@@ -32,12 +31,11 @@ export default function AppLayout() {
   } = useDemoSession();
   const { status: apiStatus } = useApiHealth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const mainRef = useRef(null);
   const previousPath = useRef(pathname);
-  const [signInOpen, setSignInOpen] = useState(false);
-  const [signInBusy, setSignInBusy] = useState(false);
-  const [signInError, setSignInError] = useState('');
+  const signingOut = useRef(false);
 
   // Move focus to the new page on client-side navigation, never on first load.
   // Compare with the previous path instead of a "first render" flag: React
@@ -51,30 +49,43 @@ export default function AppLayout() {
     mainRef.current?.focus();
   }, [pathname]);
 
+  useEffect(() => {
+    if (signingOut.current && pathname === ROUTES.HOME) {
+      signingOut.current = false;
+      signOut();
+    }
+  }, [pathname, signOut]);
+
+  // The only normal sign-in flow is the /login page; remember where the visitor was.
   function openSignIn() {
-    setSignInError('');
-    setSignInOpen(true);
+    navigate(ROUTES.LOGIN, { state: { from: location } });
   }
 
-  async function handleSignIn(accountId) {
-    setSignInBusy(true);
-    setSignInError('');
+  // Development-only account switch from the DemoBar (no credentials involved).
+  async function handleDemoAccountChange(accountId) {
+    if (!accountId) {
+      handleSignOut();
+      return;
+    }
     try {
-      const signedIn = await signIn(accountId);
-      setSignInOpen(false);
-      const home = HOME_BY_ROLE[signedIn.role];
-      if (pathname !== home && !(signedIn.role === 'applicant' && pathname === ROUTES.HOME)) {
-        navigate(home);
+      const selected = await selectDemoAccount(accountId);
+      if (!canAccessProtectedPath(selected.role, pathname)) {
+        navigate(HOME_BY_ROLE[selected.role]);
       }
-    } catch (error) {
-      setSignInError(toUiError(error).message);
-    } finally {
-      setSignInBusy(false);
+    } catch {
+      // A switch cancelled by a scenario change or simulated network error keeps the current account.
     }
   }
 
-  async function handleSignOut() {
-    await signOut();
+  // Sign Out always ends on the public portal. The session is cleared only
+  // once that navigation has rendered: clearing it while a protected screen is
+  // still shown would let its gate redirect the new guest to /login instead.
+  function handleSignOut() {
+    if (pathname === ROUTES.HOME) {
+      signOut();
+      return;
+    }
+    signingOut.current = true;
     navigate(ROUTES.HOME);
   }
 
@@ -88,10 +99,15 @@ export default function AppLayout() {
         navItems={NAV_BY_ROLE[role]}
         account={account}
         role={role}
-        onSignIn={openSignIn}
+        signInTo={ROUTES.LOGIN}
+        signInState={{ from: location }}
+        profileTo={ROUTES.PROFILE}
         onSignOut={handleSignOut}
       />
       <DemoBar
+        accounts={accounts}
+        accountId={account?.id ?? ''}
+        onAccountChange={handleDemoAccountChange}
         scenarios={scenarios}
         scenarioId={scenarioId}
         onScenarioChange={setScenario}
@@ -108,17 +124,6 @@ export default function AppLayout() {
           <StatusBadge status={apiStatus} />
         </div>
       </footer>
-      {signInOpen ? (
-        <SignInDialog
-          open
-          accounts={accounts}
-          defaultAccountId={account?.id}
-          busy={signInBusy}
-          error={signInError}
-          onSignIn={handleSignIn}
-          onClose={() => setSignInOpen(false)}
-        />
-      ) : null}
     </div>
   );
 }
