@@ -108,14 +108,19 @@ export function validateApplicationInput({ positionId, email, faculty, sop, slot
   return errors;
 }
 
-/** Interview assessment checks (minimal form; Q-04 is still open). */
+export const ASSESSMENT_RECOMMENDATIONS = Object.freeze(['pass', 'fail']);
+
+/**
+ * Interview assessment checks (team-selected Q-04): notes are required; the
+ * recommendation is optional (null/empty) and otherwise 'pass' or 'fail'.
+ */
 export function validateAssessmentInput({ recommendation, notes }) {
   const errors = {};
   if (isBlank(notes)) {
     errors.notes = 'Vui lòng nhập nhận xét phỏng vấn.';
   }
-  if (isBlank(recommendation)) {
-    errors.recommendation = 'Vui lòng chọn đánh giá tổng thể.';
+  if (!isBlank(recommendation) && !ASSESSMENT_RECOMMENDATIONS.includes(recommendation)) {
+    errors.recommendation = 'Đề xuất chỉ có thể là Pass, Fail hoặc để trống.';
   }
   return errors;
 }

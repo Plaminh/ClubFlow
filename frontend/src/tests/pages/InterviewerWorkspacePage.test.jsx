@@ -44,8 +44,30 @@ describe('Interviewer Workspace', () => {
     await openAs('iv-hamy');
 
     expect(await screen.findByText('Đã gửi đánh giá')).toBeInTheDocument();
-    expect(screen.getByText('Đề xuất tiếp nhận')).toBeInTheDocument();
+    expect(screen.getByText('Đề xuất của bạn · chỉ để tham khảo').nextSibling).toHaveTextContent('Đề xuất Pass');
     expect(screen.getByRole('button', { name: 'Submit Assessment' })).toBeDisabled();
+    // Read-only: no field is offered for editing or re-submitting.
+    expect(screen.queryByLabelText('Nhận xét phỏng vấn')).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+  });
+
+  it('offers only notes and an optional Pass/Fail recommendation: no scores or criteria (Q-04)', async () => {
+    await openAs('iv-hamy');
+    fireEvent.click(await screen.findByRole('button', { name: 'Chọn CF-030 · Phạm Quốc Bảo' }));
+    await screen.findByRole('heading', { name: 'CF-030 · Phạm Quốc Bảo' });
+
+    const group = screen.getByRole('group', { name: 'Đề xuất của người phỏng vấn (không bắt buộc)' });
+    expect(within(group).getAllByRole('radio').map((radio) => radio.parentElement.textContent)).toEqual([
+      'Không nêu đề xuất',
+      'Đề xuất Pass',
+      'Đề xuất Fail',
+    ]);
+    expect(within(group).getByRole('radio', { name: 'Không nêu đề xuất' })).toBeChecked();
+    expect(within(group).getByText(/không phải kết quả cuối\. Chỉ Ban tuyển dụng ghi nhận và công bố Pass\/Fail/)).toBeInTheDocument();
+    const form = group.closest('form');
+    expect(within(form).getAllByRole('textbox')).toHaveLength(1);
+    expect(within(form).queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(within(form).queryByRole('combobox')).not.toBeInTheDocument();
   });
 
   it('validates and submits one assessment for a completed interview', async () => {
@@ -60,18 +82,33 @@ describe('Interviewer Workspace', () => {
     await screen.findByRole('heading', { name: 'CF-030 · Phạm Quốc Bảo' });
     const submit = screen.getByRole('button', { name: 'Submit Assessment' });
 
+    // Notes are required; the recommendation is not.
     fireEvent.click(submit);
     expect(screen.getByText('Vui lòng nhập nhận xét phỏng vấn.')).toBeInTheDocument();
-    expect(screen.getByText('Vui lòng chọn đánh giá tổng thể.')).toBeInTheDocument();
     expect(screen.getByLabelText('Nhận xét phỏng vấn')).toHaveFocus();
 
     fireEvent.change(screen.getByLabelText('Nhận xét phỏng vấn'), { target: { value: 'Tư duy thiết kế tốt.' } });
-    fireEvent.click(screen.getByRole('radio', { name: 'Cần cân nhắc' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Đề xuất Fail' }));
     fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
 
     expect(await screen.findByText('Đã gửi đánh giá (mô phỏng)')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Submit Assessment' })).toBeDisabled());
     expect(screen.getByText('Tư duy thiết kế tốt.')).toBeInTheDocument();
+    expect(screen.getByText('Đề xuất của bạn · chỉ để tham khảo').nextSibling).toHaveTextContent('Đề xuất Fail');
+  });
+
+  it('submits an assessment with notes only, without a recommendation (Q-04)', async () => {
+    await openAs('iv-hamy');
+    fireEvent.click(await screen.findByRole('button', { name: 'Chọn CF-030 · Phạm Quốc Bảo' }));
+    await screen.findByRole('heading', { name: 'CF-030 · Phạm Quốc Bảo' });
+
+    fireEvent.change(screen.getByLabelText('Nhận xét phỏng vấn'), { target: { value: 'Trả lời rõ ràng.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
+
+    expect(await screen.findByText('Đã gửi đánh giá (mô phỏng)')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByText('Đề xuất của bạn · chỉ để tham khảo').nextSibling).toHaveTextContent('Không nêu đề xuất'),
+    );
   });
 
   it('keeps the form locked for an interview that has not happened yet', async () => {

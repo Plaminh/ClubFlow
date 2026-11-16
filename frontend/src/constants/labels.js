@@ -70,10 +70,14 @@ export const PUBLICATION_STATUS_LABELS = Object.freeze({
   published: 'Đã công bố',
 });
 
+// The interviewer's OPTIONAL, advisory recommendation (team-selected Q-04). It
+// is not the final result: only the Executive records Pass/Fail
+// (RESULT_DECISION_LABELS). A missing recommendation is stored as null; show it
+// with getLabel(RECOMMENDATION_LABELS, value, RECOMMENDATION_LABELS.none).
 export const RECOMMENDATION_LABELS = Object.freeze({
-  recommend: 'Đề xuất tiếp nhận',
-  consider: 'Cần cân nhắc',
-  notRecommend: 'Không đề xuất',
+  none: 'Không nêu đề xuất',
+  pass: 'Đề xuất Pass',
+  fail: 'Đề xuất Fail',
 });
 
 /**

@@ -24,7 +24,9 @@ function decisionHint(row) {
 
 /**
  * Selected application in the Final Results tab: interview summary, the
- * interviewer's assessment (advisory), and the Executive's Pass/Fail.
+ * interviewer's assessment (advisory), and the Executive's Pass/Fail. The
+ * interviewer's recommendation is plain text inside the assessment box; only
+ * the Executive's final decision uses the Pass/Fail badges.
  */
 export default function FinalDecisionPanel({ row, assessment, assessmentOpen, onToggleAssessment, onRecord, pending, message }) {
   const assessmentId = useId();
@@ -53,9 +55,16 @@ export default function FinalDecisionPanel({ row, assessment, assessmentOpen, on
               <div className="panel-subtle stack stack--tight">
                 <h3>Đánh giá của người phỏng vấn · chỉ để tham khảo</h3>
                 <p>
-                  <strong>Đề xuất:</strong> {getLabel(RECOMMENDATION_LABELS, assessment.data.recommendation)}
+                  <strong>Nhận xét:</strong> {assessment.data.notes}
                 </p>
-                <p>{assessment.data.notes}</p>
+                <p>
+                  <strong>Đề xuất của người phỏng vấn:</strong>{' '}
+                  {getLabel(RECOMMENDATION_LABELS, assessment.data.recommendation, RECOMMENDATION_LABELS.none)}
+                </p>
+                <p className="hint">
+                  Đề xuất không phải kết quả cuối. Ban tuyển dụng tự ghi nhận Pass hoặc Fail ở phần “Quyết định cuối” bên
+                  dưới.
+                </p>
                 <p className="hint">
                   {assessment.data.interviewerName} · gửi {formatDateTime(assessment.data.submittedAt)}
                 </p>

@@ -84,7 +84,12 @@ export async function getInterview(interviewId) {
   });
 }
 
-/** One assessment per completed, assigned interview. Not a Pass/Fail decision. */
+/**
+ * One assessment per completed, assigned interview (team-selected Q-04):
+ * required notes plus an optional advisory recommendation ('pass' | 'fail' |
+ * null). It never creates or changes the final result; the Executive records
+ * Pass/Fail separately (resultService.record).
+ */
 export async function submitAssessment(interviewId, { recommendation, notes }) {
   await mockRequest();
   const account = requireRole('interviewer');
@@ -98,13 +103,13 @@ export async function submitAssessment(interviewId, { recommendation, notes }) {
   }
   const fieldErrors = validateAssessmentInput({ recommendation, notes });
   if (Object.keys(fieldErrors).length > 0) {
-    throw createUiError('validation', 'Chưa thể gửi đánh giá. Điền nhận xét và chọn đề xuất.', { fieldErrors });
+    throw createUiError('validation', 'Chưa thể gửi đánh giá. Hãy nhập nhận xét phỏng vấn.', { fieldErrors });
   }
   const assessment = {
     id: `as-${interview.applicationId.toLowerCase()}`,
     interviewId,
     interviewerId: account.id,
-    recommendation,
+    recommendation: recommendation || null,
     notes: notes.trim(),
     submittedAt: state.now,
   };

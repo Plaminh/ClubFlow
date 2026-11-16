@@ -263,7 +263,7 @@ const CONFIRMED_ASSESSMENTS = [
     id: 'as-026',
     interviewId: 'iv-026',
     interviewerId: 'iv-hamy',
-    recommendation: 'recommend',
+    recommendation: 'pass',
     notes: 'Trình bày rõ ràng, nêu được ví dụ cụ thể về phỏng vấn người dùng.',
     submittedAt: at(INTERVIEW_DATE, '09:20'),
   },
@@ -271,7 +271,8 @@ const CONFIRMED_ASSESSMENTS = [
     id: 'as-027',
     interviewId: 'iv-027',
     interviewerId: 'iv-giahuy',
-    recommendation: 'consider',
+    // No recommendation: it is optional, and the Executive still decided (Fail).
+    recommendation: null,
     notes: 'Ý tưởng nội dung còn chung chung; chưa nêu được kế hoạch phối hợp với nhóm thiết kế.',
     submittedAt: at(INTERVIEW_DATE, '09:35'),
   },

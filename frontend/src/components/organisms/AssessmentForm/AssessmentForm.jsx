@@ -9,13 +9,18 @@ import { RECOMMENDATION_LABELS, getLabel } from '../../../constants/labels.js';
 import { formatDateTime } from '../../../utils/format.js';
 import { validateAssessmentInput } from '../../../utils/validation.js';
 
-const RECOMMENDATIONS = Object.entries(RECOMMENDATION_LABELS).map(([value, label]) => ({ value, label }));
+// '' = no recommendation (the default); it is sent to the service as null.
+const RECOMMENDATIONS = [
+  { value: '', label: RECOMMENDATION_LABELS.none },
+  { value: 'pass', label: RECOMMENDATION_LABELS.pass },
+  { value: 'fail', label: RECOMMENDATION_LABELS.fail },
+];
 
 /**
  * One assessment per completed, assigned interview (reference "Interview
- * Assessment"). Fields follow the reference (notes + overall recommendation);
- * the final field list is open question Q-04, so keep this form easy to change.
- * The recommendation is advisory — only the Executive records Pass/Fail.
+ * Assessment"). Team-selected Q-04: interview notes are required; the
+ * recommendation (Pass or Fail) is optional and advisory. There are no scores
+ * and no criteria. Only the Executive records the final Pass/Fail.
  */
 export default function AssessmentForm({ interview, onSubmit }) {
   const [values, setValues] = useState({ notes: '', recommendation: '' });
@@ -48,12 +53,12 @@ export default function AssessmentForm({ interview, onSubmit }) {
           )}
           <dl className="summary-list">
             <div>
-              <dt>Đánh giá tổng thể</dt>
-              <dd>{getLabel(RECOMMENDATION_LABELS, interview.assessment.recommendation)}</dd>
+              <dt>Nhận xét phỏng vấn</dt>
+              <dd>{interview.assessment.notes}</dd>
             </div>
             <div>
-              <dt>Nhận xét</dt>
-              <dd>{interview.assessment.notes}</dd>
+              <dt>Đề xuất của bạn · chỉ để tham khảo</dt>
+              <dd>{getLabel(RECOMMENDATION_LABELS, interview.assessment.recommendation, RECOMMENDATION_LABELS.none)}</dd>
             </div>
             <div>
               <dt>Thời gian gửi</dt>
@@ -96,12 +101,12 @@ export default function AssessmentForm({ interview, onSubmit }) {
     const fieldErrors = validateAssessmentInput(values);
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
-      setBanner({ tone: 'error', title: 'Chưa thể gửi đánh giá', text: 'Điền nhận xét và chọn đề xuất. Nội dung đã nhập được giữ lại.' });
+      setBanner({ tone: 'error', title: 'Chưa thể gửi đánh giá', text: 'Hãy nhập nhận xét phỏng vấn. Nội dung đã nhập được giữ lại.' });
       setFocusErrors((count) => count + 1);
       return;
     }
     setPending(true);
-    const result = await onSubmit(values);
+    const result = await onSubmit({ notes: values.notes, recommendation: values.recommendation || null });
     setPending(false);
     if (!result.ok) {
       setErrors(result.error?.fieldErrors ?? {});
@@ -120,7 +125,7 @@ export default function AssessmentForm({ interview, onSubmit }) {
             <p>{banner.text}</p>
           </Alert>
         ) : null}
-        <FormField id="assessment-notes" label="Nhận xét phỏng vấn" error={errors.notes}>
+        <FormField id="assessment-notes" label="Nhận xét phỏng vấn" hint="Bắt buộc." error={errors.notes}>
           {(props) => (
             <textarea
               {...props}
@@ -132,13 +137,13 @@ export default function AssessmentForm({ interview, onSubmit }) {
           )}
         </FormField>
         <ChoiceGroup
-          legend="Đánh giá tổng thể"
+          legend="Đề xuất của người phỏng vấn (không bắt buộc)"
           name="recommendation"
           type="radio"
           options={RECOMMENDATIONS}
           value={values.recommendation}
           onChange={(value) => set('recommendation', value)}
-          hint="Đây là đánh giá tham khảo, không phải kết quả Pass/Fail. Chỉ Ban tuyển dụng ghi nhận và công bố kết quả cuối."
+          hint="Đề xuất chỉ để Ban tuyển dụng tham khảo, không phải kết quả cuối. Chỉ Ban tuyển dụng ghi nhận và công bố Pass/Fail."
           error={errors.recommendation}
         />
         <div>

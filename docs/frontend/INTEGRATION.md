@@ -65,7 +65,7 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `portalService.listNotifications()` / `markNotificationsRead()` | own notifications | own records only |
 | `interviewerService.listAssignedInterviews()` | `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` | assigned + confirmed only; this is the Interviewer page's only campaign context (it must not call `getCampaign()`) |
 | `interviewerService.getInterview(id)` | detail **without** `privateNote` | assignment check; never return screening notes |
-| `interviewerService.submitAssessment(id, { recommendation, notes })` | assessment | one per completed interview; fields are Q-04 |
+| `interviewerService.submitAssessment(id, { recommendation, notes })` | assessment `{ id, interviewId, interviewerId, notes, recommendation, submittedAt }` | assigned interviewer only; interview already ended; one per interview, never editable; `notes` required, `recommendation` is `'pass'`, `'fail'` or `null` and must not create or change the final result (Q-04, §12.3) |
 
 ## 4. Replacing a mock body
 
@@ -128,7 +128,7 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 | Q-01 | First-fit order | Not implemented in the UI; "Generate draft" shows the server's (today: demo) result |
 | Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12 |
 | Q-03 | Editable fields after publication | Team-selected: none. The whole campaign configuration is read-only from publication; Scheduling shows date/window/duration as text and edits rooms only. See §12.2 |
-| Q-04 | Assessment fields | Notes + three-option recommendation, both required; no scores |
+| Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.3 |
 | Q-05 | Notification UI | List in the Applicant Portal with unread badge and "mark all read" |
 | Q-06 | Editing submissions / availability | Not offered |
 | Q-07 | Private CV delivery | Demo uses one fictional file; see §7 |
@@ -170,3 +170,11 @@ These decisions are team-selected and still wait for Product Owner confirmation;
 - The server must reject `saveDraft`, `publish`, `removePosition` and any change of date/window/duration for a campaign that is not a draft, whatever the UI shows. The pages only hide the controls.
 - Three different things use the interview window and must stay separate in the API: the **campaign configuration** (owned by Campaign Management), the **applicant's chosen availability slots** (stored with each application, collected by the Applicant Portal), and the **interview assignment** (start, interviewer, room; owned by Interview Scheduling).
 - BR-04 still needs a database constraint and a service check. In the UI it can no longer be reached, because positions cannot be removed after publication and a draft has no applications.
+
+### 12.3 Interview assessment (Q-04)
+
+- Request: `{ notes: string (required, non-blank), recommendation: 'pass' | 'fail' | null }`. The form sends `null` when the interviewer chooses "Không nêu đề xuất".
+- The server accepts it only when the caller is the interviewer assigned to that interview, the schedule is confirmed, the interview's end time has passed (server clock), and no assessment exists for the interview yet (unique per interview). There is no update or delete endpoint.
+- `recommendation` is advice for the Executive. It is stored on the assessment and shown as text. The final result is a separate record written only by `resultService.record` (Executive) and may differ from the recommendation.
+- Read access: the assigned interviewer and the Executive (Business §2). Applicants never receive assessments or recommendations.
+- Field errors use the names `notes` and `recommendation`.

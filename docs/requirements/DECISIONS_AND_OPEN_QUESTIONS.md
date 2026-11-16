@@ -134,3 +134,24 @@ How to read this section:
   - The sources lock the configuration at schedule **confirmation** (Brief §3.2 Step 5, BR-14). They do not say that it must stay editable between publication and confirmation, so locking earlier is **stricter than, not contrary to,** the sources. `SCREEN_REQUIREMENTS.md` Screen 1 currently says "publication alone does not immediately lock all edits"; that sentence is the team's earlier reading and was **not changed**. If the Product Owners confirm this decision, update it through the §5 process.
   - Brief §3.2 Step 4 and Business §5 describe the Executive choosing the date, time window and duration when generating the draft. Under this decision those three values are chosen in Campaign Management before publication and are only displayed on the Scheduling screen. The single common duration (BR-10) is unaffected. This placement should be confirmed with the Product Owners.
 - **Source files and tests:** `pages/CampaignManagementPage.jsx`, `pages/InterviewSchedulingPage.jsx`, `components/organisms/CampaignDetailsCard`, `PositionsEditor`, `InterviewSetupCard`, `ScheduleSettingsCard`, `services/campaignService.js`, `services/scheduleService.js` (`updateSettings`), `mocks/guards.js` (`assertCampaignConfigEditable`). Tests: `tests/pages/CampaignManagementPage.test.jsx`, `tests/pages/InterviewSchedulingPage.test.jsx`, `tests/services/mockServices.test.js` (campaign and scheduling groups).
+
+### Q-04 — Minimal interview assessment
+
+- **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Selected decision:**
+  - Required: interview notes (free-text feedback).
+  - Optional: the interviewer's recommendation, `Pass` or `Fail`. It is advice only; the Executive keeps the final Pass/Fail authority and may decide differently.
+  - Only the assigned interviewer may submit, only after the interview has taken place, and at most one assessment exists per interview.
+  - After submission the assessment is read-only. There is no edit or re-submit workflow (see Q-06).
+  - No numerical scores, no configurable criteria, no rubric builder.
+- **Business rationale:** The sources ask for "one assessment" and for the Executive to "review it before making the final decision"; they ask for nothing more. Free-text notes carry the reasoning the Executive needs. A two-value recommendation in the Executive's own terms is quicker to read than the earlier three-level scale, and keeping it optional avoids forcing an interviewer to pre-empt the decision.
+- **Implementation scope:** Interviewer Workspace form, the assessment view in Final Results, labels, validation, mock data and tests.
+- **Frontend behavior (prototype):**
+  - `AssessmentForm` has one textarea (required) and one radio group "Đề xuất của người phỏng vấn (không bắt buộc)" with "Không nêu đề xuất" (default), "Đề xuất Pass", "Đề xuất Fail". The hint says it is not the final result.
+  - A submitted assessment is shown as text; the form is closed until the interview has ended.
+  - In Final Results the recommendation appears as plain text inside the box "Đánh giá của người phỏng vấn · chỉ để tham khảo", with a sentence that it is not the final result. Pass/Fail badges are used only under "Quyết định cuối của Ban tuyển dụng".
+  - Earlier three-option values (`recommend`, `consider`, `notRecommend`) were removed because they conflict with this decision. The demo data now has one assessment with a recommendation (CF-026) and one without (CF-027).
+- **Backend responsibility (not implemented):** Enforce assignment, "interview has ended" with the server clock, one assessment per interview (unique constraint), and immutability. Validate `notes` and the `recommendation` values. Never derive the final result from the recommendation. Limit read access to the assigned interviewer and the Executive.
+- **Known limitations:** A wrong assessment cannot be corrected (Q-06). The prototype decides "has taken place" from the scenario clock and the scheduled end time; it has no attendance or no-show state.
+- **Relation to source requirements:** Consistent with Business §6 and Brief §3.3 (one assessment per completed interview; the Executive records Pass/Fail). The field list is not prescribed by the sources.
+- **Source files and tests:** `components/organisms/AssessmentForm`, `components/organisms/FinalDecisionPanel`, `constants/labels.js` (`RECOMMENDATION_LABELS`), `utils/validation.js` (`validateAssessmentInput`), `services/interviewerService.js` (`submitAssessment`), `mocks/fixtures.js`. Tests: `tests/pages/InterviewerWorkspacePage.test.jsx`, `tests/pages/FinalResults.test.jsx`, `tests/services/mockServices.test.js` ("assessments and results").

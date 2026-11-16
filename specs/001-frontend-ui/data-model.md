@@ -11,7 +11,7 @@
 | `ScheduleRowStatus` | `proposed`, `conflict`, `unassigned`, `confirmed` | labels.js |
 | `AssessmentStatus` | `awaiting`, `submitted` | labels.js ("Chờ đánh giá", "Đã gửi") |
 | `ResultDecision` | `null`, `pass`, `fail` | labels.js |
-| `Recommendation` | `recommend`, `consider`, `notRecommend` | labels.js ("Đề xuất tiếp nhận", "Cần cân nhắc", "Không đề xuất") |
+| `Recommendation` | `null`, `pass`, `fail` (optional and advisory; team-selected Q-04) | labels.js ("Không nêu đề xuất", "Đề xuất Pass", "Đề xuất Fail") |
 | `ScenarioId` | `before-open`, `accepting`, `screening`, `confirmed` | labels.js |
 | `Role` | `visitor`, `executive`, `applicant`, `interviewer` | labels.js |
 
@@ -30,7 +30,7 @@ Screening, schedule, assessment, and result are **separate fields** (BR-08); non
 | `Room` | `id`, `name` | A-201, B-105 |
 | `InterviewerAssignment` | `interviewerId`, `positionIds[]`, `availability [{start,end}]` | Hà My → UX; Gia Huy → Content |
 | `Interview` | `id`, `applicationId`, `interviewerId?`, `roomId?`, `start?`, `end?`, `status`, `reason?`, `conflictWithIds[]` | At most one per application (BR-10) |
-| `Assessment` | `id`, `interviewId`, `interviewerId`, `recommendation`, `notes`, `submittedAt` | At most one per interview |
+| `Assessment` | `id`, `interviewId`, `interviewerId`, `notes` (required), `recommendation?`, `submittedAt` | At most one per interview; read-only after submission; the recommendation is not the final result |
 | `FinalResult` | `applicationId`, `decision`, `recordedAt?`, `publishedAt?` | Hidden from Applicant views until `publishedAt` is set |
 | `Notification` | `id`, `accountId`, `applicationId`, `message`, `createdAt` | Created only when a result is published |
 | `DemoScenario` | `id`, `now` (fixed date-time), `overrides` | Applied on top of base records |
@@ -39,8 +39,8 @@ Screening, schedule, assessment, and result are **separate fields** (BR-08); non
 
 | Application | Applicant | Position | `screening` scenario | `confirmed` scenario |
 |---|---|---|---|---|
-| CF-026 | Nguyễn Minh Anh | UX Design | shortlisted; conflict 09:00 Hà My A-201 | confirmed 09:00–09:15 Hà My A-201; assessment submitted; **Pass, published** |
-| CF-027 | Nguyễn Minh Anh | Content Creation | shortlisted; conflict 09:00 Gia Huy B-105 (same applicant) | confirmed 09:15–09:30 Gia Huy B-105; assessment submitted ("consider"); **Fail, not published** |
+| CF-026 | Nguyễn Minh Anh | UX Design | shortlisted; conflict 09:00 Hà My A-201 | confirmed 09:00–09:15 Hà My A-201; assessment submitted (recommendation `pass`); **Pass, published** |
+| CF-027 | Nguyễn Minh Anh | Content Creation | shortlisted; conflict 09:00 Gia Huy B-105 (same applicant) | confirmed 09:15–09:30 Gia Huy B-105; assessment submitted (no recommendation); **Fail, not published** |
 | CF-028 | Trần Bảo Ngọc | Content Creation | pendingReview | rejected |
 | CF-029 | Lê Hoàng Thảo Vy | UX Design | rejected | rejected |
 | CF-030 | Phạm Quốc Bảo | UX Design | shortlisted; proposed 09:15 Hà My A-201 | confirmed 09:15–09:30 Hà My A-201; awaiting assessment; no decision |

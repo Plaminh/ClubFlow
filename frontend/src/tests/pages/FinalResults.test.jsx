@@ -52,8 +52,26 @@ describe('Application Review — Final Results', () => {
     fireEvent.click(toggle);
 
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')).toBeInTheDocument();
-    expect(screen.getByText('Cần cân nhắc')).toBeInTheDocument();
+    const assessment = (await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')).closest('.panel-subtle');
+    // CF-027 has notes but no recommendation; the Executive recorded Fail on their own.
+    expect(within(assessment).getByText(/Ý tưởng nội dung còn chung chung/)).toBeInTheDocument();
+    expect(within(assessment).getByText('Đề xuất của người phỏng vấn:').parentElement).toHaveTextContent('Không nêu đề xuất');
+    expect(within(assessment).getByText(/Đề xuất không phải kết quả cuối/)).toBeInTheDocument();
+  });
+
+  it('keeps the interviewer recommendation visually apart from the Executive final decision (Q-04)', async () => {
+    await openResults();
+    await screen.findByRole('heading', { name: 'CF-026 · Nguyễn Minh Anh' });
+    fireEvent.click(screen.getByRole('button', { name: 'View Assessment' }));
+
+    const assessment = (await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')).closest('.panel-subtle');
+    expect(within(assessment).getByText('Đề xuất của người phỏng vấn:').parentElement).toHaveTextContent('Đề xuất Pass');
+    // The recommendation is plain text: Pass/Fail badges belong to the final decision only.
+    expect(assessment.querySelector('.badge')).toBeNull();
+
+    const decision = screen.getByText('Quyết định cuối của Ban tuyển dụng').parentElement;
+    expect(within(decision).getByText('Pass', { selector: '.badge' })).toBeInTheDocument();
+    expect(within(decision).getByText('Đã công bố · chỉ đọc')).toBeInTheDocument();
   });
 
   it('blocks Pass/Fail until an assessment exists and after publication', async () => {
