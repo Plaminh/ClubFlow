@@ -59,7 +59,7 @@
 | Function | Input | Returns |
 |---|---|---|
 | `scheduleService.getSchedule()` | — | `{ settings, assignments, rooms, rows, summary, conditions, status }` |
-| `scheduleService.generateDraft()` | — | schedule (demo: scenario data) |
+| `scheduleService.generateDraft()` | — | schedule (demo: ordered reference data; backend: deterministic first-fit by submission/ID, chronological slot, stable interviewer ID, stable room ID; Q-01) |
 | `scheduleService.updateSettings(settings)` | `{ roomIds }` (date, window and duration are campaign configuration, Q-03) | schedule, or `UiError(forbidden)` for a campaign-configuration field |
 | `scheduleService.updateRow(applicationId, change)` | `{ start, interviewerId, roomId }` | schedule, or `UiError(validation, fieldErrors)` |
 | `scheduleService.saveDraft()` | — | schedule |

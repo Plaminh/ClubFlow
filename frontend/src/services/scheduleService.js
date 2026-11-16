@@ -5,7 +5,15 @@
  * algorithm in the frontend). Statuses are re-evaluated by the mock layer so
  * the demo stays consistent; the backend must enforce BR-10…BR-14.
  */
-import { accountName, evaluateSchedule, isScheduleConfirmed, positionById, sessionStarts, toMs } from '../mocks/derive.js';
+import {
+  accountName,
+  compareApplicationsForScheduling,
+  evaluateSchedule,
+  isScheduleConfirmed,
+  positionById,
+  sessionStarts,
+  toMs,
+} from '../mocks/derive.js';
 import { BASE } from '../mocks/fixtures.js';
 import { assertNotLockedBySchedule, requireRole } from '../mocks/guards.js';
 import { addMinutes } from '../mocks/scenarios.js';
@@ -28,14 +36,16 @@ function scheduleView(state) {
       slotMinutes: state.campaign.slotMinutes,
       roomIds: state.schedule.roomIds,
     },
-    rooms: state.rooms,
-    assignments: state.assignments.map((assignment) => ({
-      interviewerId: assignment.interviewerId,
-      interviewerName: accountName(assignment.interviewerId),
-      positionIds: assignment.positionIds,
-      positionNames: assignment.positionIds.map((id) => positionById(state, id)?.name ?? '—'),
-      availabilityText: assignment.availability.map((range) => formatTimeRange(range.start, range.end)).join(', '),
-    })),
+    rooms: [...state.rooms].sort((a, b) => a.id.localeCompare(b.id)),
+    assignments: [...state.assignments]
+      .sort((a, b) => a.interviewerId.localeCompare(b.interviewerId))
+      .map((assignment) => ({
+        interviewerId: assignment.interviewerId,
+        interviewerName: accountName(assignment.interviewerId),
+        positionIds: assignment.positionIds,
+        positionNames: assignment.positionIds.map((id) => positionById(state, id)?.name ?? '—'),
+        availabilityText: assignment.availability.map((range) => formatTimeRange(range.start, range.end)).join(', '),
+      })),
     sessionStarts: sessionStarts(state),
     ...evaluation,
   };
@@ -60,7 +70,9 @@ export async function generateDraft() {
   requireRole('executive');
   assertNotLockedBySchedule('lịch phỏng vấn');
   const state = getState();
-  const shortlisted = state.applications.filter((application) => application.screeningStatus === 'shortlisted');
+  const shortlisted = state.applications
+    .filter((application) => application.screeningStatus === 'shortlisted')
+    .sort(compareApplicationsForScheduling);
   state.interviews = shortlisted.map((application) => {
     const template = BASE.draftInterviews.find((item) => item.applicationId === application.id);
     if (template) {

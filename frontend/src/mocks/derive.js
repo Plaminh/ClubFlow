@@ -14,6 +14,11 @@ const DAY_MINUTES = 24 * 60;
 
 export const toMs = (iso) => new Date(iso).getTime();
 
+/** Q-01 input order: oldest submitted application first, then stable ID. */
+export function compareApplicationsForScheduling(a, b) {
+  return toMs(a.submittedAt) - toMs(b.submittedAt) || a.id.localeCompare(b.id);
+}
+
 export function accountById(id) {
   return ACCOUNTS.find((account) => account.id === id) ?? null;
 }
@@ -62,6 +67,7 @@ export function isScheduleConfirmed(state) {
 export function slotText(state, slotIds) {
   return state.slots
     .filter((slot) => slotIds.includes(slot.id))
+    .sort((a, b) => toMs(a.start) - toMs(b.start) || a.id.localeCompare(b.id))
     .map((slot) => formatTimeRange(slot.start, slot.end))
     .join(', ');
 }
@@ -88,7 +94,7 @@ export function evaluateSchedule(state) {
   const confirmed = isScheduleConfirmed(state);
   const shortlisted = state.applications
     .filter((application) => application.screeningStatus === 'shortlisted')
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort(compareApplicationsForScheduling);
   const byApplication = new Map(state.interviews.map((interview) => [interview.applicationId, interview]));
   const windowRange = {
     start: at(campaign.interviewDate, campaign.interviewWindow.start),

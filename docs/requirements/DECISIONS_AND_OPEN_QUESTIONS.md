@@ -83,6 +83,25 @@ How to read this section:
 - "Frontend behavior" describes the React prototype, which runs on an in-memory mock layer. "Backend responsibility" is **not implemented**; it is the contract the Express/PostgreSQL work has to meet.
 - Paths are relative to `frontend/src/` unless they start with `docs/` or `specs/`.
 
+### Q-01 — Deterministic first-fit scheduling
+
+- **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Selected decision:**
+  1. Consider Shortlisted applications by `submittedAt` ascending; break an equal timestamp by Application ID ascending.
+  2. Consider valid session start times chronologically.
+  3. Consider qualified, available interviewers by stable interviewer ID ascending.
+  4. Consider available rooms by stable room ID ascending.
+  5. Assign the first combination that satisfies applicant availability, interviewer qualification/availability, the campaign window, and applicant/interviewer/room non-overlap.
+  6. If no combination is valid, keep the application Shortlisted and return an `Unassigned` schedule row with a reason.
+  7. Do not backtrack, optimize, globally reschedule, or move an earlier assignment to fit a later application.
+- **Business rationale:** A fixed order makes generated schedules reproducible and testable while preserving the brief's simple “first available” behavior. Avoiding optimization and backtracking keeps the rule understandable for the team and Product Owners.
+- **Implementation scope:** Frontend mock ordering, tests and the future backend contract only. No production scheduling engine was implemented in React.
+- **Frontend behavior (prototype):** `Generate draft` still loads the verified reference draft. The mock consistently exposes applications in submission-time/ID order, session starts chronologically, and interviewers/rooms in stable-ID order even if fixture arrays are rearranged. `evaluateSchedule` continues to validate manual demo edits and preserve `Conflict`/`Unassigned` reasons; it does not choose combinations.
+- **Backend responsibility (not implemented):** Implement the ordered first-fit loop in the Express service/domain layer, within a transaction appropriate to the API design. Read eligible applications and resources with explicit ordering, enforce BR-10/BR-11 overlaps and qualification, create at most one interview per application, return `Unassigned` reasons, and revalidate all BR-13 conditions before confirmation. PostgreSQL constraints/locking must prevent concurrent double-booking; array or query result order must never be treated as implicit.
+- **Known limitations:** First-fit is intentionally not globally optimal and can leave a later application Unassigned even when rearranging earlier assignments would fit everyone. Manual edits remain possible before confirmation and may change the draft after generation.
+- **Relation to source requirements:** Consistent with BR-10 through BR-13. The sources say “first available” but do not define the ordering or whether backtracking is allowed, so Product Owner confirmation remains necessary.
+- **Source files and tests:** `mocks/derive.js` (`compareApplicationsForScheduling`, `sessionStarts`, `evaluateSchedule`), `services/scheduleService.js` (`scheduleView`, `generateDraft`), `tests/services/mockServices.test.js` ("deterministic Q-01 order").
+
 ### Q-02 — Date, time and time zone convention
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.

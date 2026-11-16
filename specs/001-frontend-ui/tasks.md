@@ -160,6 +160,9 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T071 [US2] [US5] Finish Q-06 confirmations and immutable UI states for application screening and assessment submission; pin every confirmed action to its original entity and payload
 - [x] T072 [US2] [US4] [US5] Add Q-06 regression coverage for cancel, stale selection, duplicate submission guards and read-only submitted states
 - [x] T073 Document the Q-06 frontend behavior, backend state-transition contract, limitations and pending approval status in the decision record, integration guide and feature spec
+- [x] T074 Audit Q-02 date-only and timestamp formatting across all five screens and rerun boundary-focused tests; no code change required beyond existing commit `f76eb54`
+- [x] T075 [US3] Align mock schedule/resource presentation with Q-01 submission-time/ID, chronological-slot and stable-resource ordering without adding a frontend generator; add regression coverage
+- [x] T076 Document the Q-01 backend first-fit loop, no-backtracking limitation and pending approval status in the decision record, integration guide and research
 
 ---
 

@@ -451,3 +451,31 @@ Verified:
 - Headless Microsoft Edge against the Vite dev server: Shortlist and assessment confirmation dialogs checked at 360, 768 and 1280 CSS px. In all six checks the page and dialog had no horizontal overflow, the dialog fit the 900 px viewport, and Cancel had initial focus. Escape/cancel caused no screening mutation; assessment cancel preserved its draft. This was real-browser viewport simulation, not real browser zoom.
 
 By hand: The team must review and understand the immutable-workflow policy and code before accepting it; Product Owner confirmation is still pending.
+
+---
+
+## 2026-11-16 — UI-7.2 — Q-02 audit and Q-01 deterministic scheduling contract
+
+Tool: Codex using the `speckit-implement` skill.
+
+Asked for: Audit the existing Q-02 date/time work and all user-visible dates, then align the frontend mock and integration contract with the selected deterministic Q-01 first-fit order without implementing a production scheduling engine.
+
+Kept:
+
+- Q-02 implementation from `f76eb54`: UTC ISO instants, date-only campaign fields, `Asia/Ho_Chi_Minh` display, inclusive closing calendar day implemented as next-day exclusive midnight, and fixed scenario clocks. No date library or new code was needed.
+- The verified reference draft, manual schedule editing, conflict/Unassigned evaluation and confirmation conditions. React still does not choose interview combinations.
+
+Changed:
+
+- Added one shared mock comparator: shortlisted applications are exposed by submission instant ascending, then Application ID. Session starts remain chronological; visible applicant slots are explicitly chronological; interviewer assignments and rooms are exposed by stable ID.
+- Added a regression that reverses all fixture arrays and creates an equal-submission-time tie, then verifies the service order remains deterministic.
+- Added the complete Q-01 decision record and backend algorithm contract: explicit ordering, first valid combination, Unassigned on failure, no backtracking/optimization, transactional overlap protection. Updated the integration guide, service contract, research note and tasks T074–T076. Product Owner approval remains pending.
+
+Verified:
+
+- Q-02 boundary and five-screen date audit suite: 135/135 tests passed (8 files). All JSX date/timestamp displays use the shared `formatDate`/`formatDateTime`; native date inputs retain ISO values and show an explicit `dd/MM/yyyy` hint.
+- Q-01 targeted lint and scheduling tests: lint exit 0; 38/38 tests passed (2 files).
+- Full `npm run verify` exit 0: frontend 194/194 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
+- No browser check was repeated in this phase because the default fixture order and rendered UI did not change; only order stability under rearranged service input changed.
+
+By hand: The team reviews the first-fit ordering and accepts its intentionally non-optimal/no-backtracking limitation before backend implementation.

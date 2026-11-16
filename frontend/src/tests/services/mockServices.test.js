@@ -103,6 +103,25 @@ describe('application review', () => {
 });
 
 describe('scheduling', () => {
+  it('keeps the demo scheduling inputs in the deterministic Q-01 order without implementing a generator', async () => {
+    await asExecutive();
+    const state = getState();
+    const cf030 = state.applications.find((application) => application.id === 'CF-030');
+    const cf031 = state.applications.find((application) => application.id === 'CF-031');
+    cf031.submittedAt = cf030.submittedAt;
+    state.applications.reverse();
+    state.assignments.reverse();
+    state.rooms.reverse();
+
+    const schedule = await scheduleService.generateDraft();
+
+    // Submission time is primary; CF-030 wins the artificial tie by ID.
+    expect(schedule.rows.map((row) => row.applicationId)).toEqual(['CF-026', 'CF-027', 'CF-030', 'CF-031']);
+    expect(schedule.sessionStarts).toEqual([...schedule.sessionStarts].sort());
+    expect(schedule.assignments.map((assignment) => assignment.interviewerId)).toEqual(['iv-giahuy', 'iv-hamy']);
+    expect(schedule.rooms.map((room) => room.id)).toEqual(['room-a201', 'room-b105']);
+  });
+
   it('blocks confirmation with the unmet conditions, then confirms once resolved (BR-13)', async () => {
     await asExecutive();
     await expect(scheduleService.confirm()).rejects.toMatchObject({ kind: 'conflict' });

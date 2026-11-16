@@ -125,10 +125,10 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 
 | ID | Topic | Current UI assumption |
 |---|---|---|
-| Q-01 | First-fit order | Not implemented in the UI; "Generate draft" shows the server's (today: demo) result |
-| Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12 |
-| Q-03 | Editable fields after publication | Team-selected: none. The whole campaign configuration is read-only from publication; Scheduling shows date/window/duration as text and edits rooms only. See §12.2 |
-| Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.3 |
+| Q-01 | First-fit order | Team-selected deterministic order; not implemented as a frontend generator. "Generate draft" displays the service result. See §12.1 |
+| Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12.2 |
+| Q-03 | Editable fields after publication | Team-selected: none. The whole campaign configuration is read-only from publication; Scheduling shows date/window/duration as text and edits rooms only. See §12.3 |
+| Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.4 |
 | Q-05 | Notification UI | List in the Applicant Portal with unread badge and "mark all read" |
 | Q-06 | Editing submissions / availability | Not offered |
 | Q-07 | Private CV delivery | Demo uses one fictional file; see §7 |
@@ -146,7 +146,20 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 
 These decisions are team-selected and still wait for Product Owner confirmation; the full records are in [Decisions §6](../requirements/DECISIONS_AND_OPEN_QUESTIONS.md). This section only states what the API has to send and accept so that the current pages work unchanged.
 
-### 12.1 Dates and times (Q-02)
+### 12.1 Deterministic first-fit scheduling (Q-01)
+
+The backend generator owns this algorithm. The React page only calls `scheduleService.generateDraft()` and renders the returned rows.
+
+1. Query Shortlisted applications ordered by `submitted_at ASC, application_id ASC`.
+2. Enumerate session starts by instant ascending inside the campaign window.
+3. For each application, enumerate qualified and available interviewers by stable ID ascending, then selected available rooms by stable ID ascending.
+4. Accept the first combination that is inside the applicant's chosen availability and has no overlap for the applicant, interviewer or room. Adjacent sessions are allowed under BR-11.
+5. Persist that assignment before continuing to the next application. If none is valid, return an `Unassigned` row with a safe reason and continue.
+6. Do not backtrack, globally reschedule, or optimize. Revalidate the draft and every BR-13 condition when confirming.
+
+Use explicit `ORDER BY`; database row order and JavaScript array insertion order are not contracts. Generation and confirmation also need transactional/concurrency protection against double-booking. The mock service only keeps its reference rows and exposed resource lists in this order so contract tests are deterministic; it is not reusable backend scheduling logic.
+
+### 12.2 Dates and times (Q-02)
 
 | Kind | Fields (service objects) | Wire format | PostgreSQL |
 |---|---|---|---|
@@ -158,7 +171,7 @@ These decisions are team-selected and still wait for Product Owner confirmation;
 - Send instants with `Z` or an explicit offset. A string without an offset would be read in the browser's local time.
 - `scheduleService.updateRow` sends back one of the `sessionStarts` values it received, so the server can match it by instant.
 
-### 12.2 Campaign configuration lock (Q-03)
+### 12.3 Campaign configuration lock (Q-03)
 
 | Campaign state | `locked` / `lockReason` | Campaign Management | Interview Scheduling |
 |---|---|---|---|
@@ -171,7 +184,7 @@ These decisions are team-selected and still wait for Product Owner confirmation;
 - Three different things use the interview window and must stay separate in the API: the **campaign configuration** (owned by Campaign Management), the **applicant's chosen availability slots** (stored with each application, collected by the Applicant Portal), and the **interview assignment** (start, interviewer, room; owned by Interview Scheduling).
 - BR-04 still needs a database constraint and a service check. In the UI it can no longer be reached, because positions cannot be removed after publication and a draft has no applications.
 
-### 12.3 Interview assessment (Q-04)
+### 12.4 Interview assessment (Q-04)
 
 - Request: `{ notes: string (required, non-blank), recommendation: 'pass' | 'fail' | null }`. The form sends `null` when the interviewer chooses "Không nêu đề xuất".
 - The server accepts it only when the caller is the interviewer assigned to that interview, the schedule is confirmed, the interview's end time has passed (server clock), and no assessment exists for the interview yet (unique per interview). There is no update or delete endpoint.
@@ -179,7 +192,7 @@ These decisions are team-selected and still wait for Product Owner confirmation;
 - Read access: the assigned interviewer and the Executive (Business §2). Applicants never receive assessments or recommendations.
 - Field errors use the names `notes` and `recommendation`.
 
-### 12.4 Immutable workflow transitions (Q-06)
+### 12.5 Immutable workflow transitions (Q-06)
 
 | Transition | Accepted current state | Server result | Later update/delete |
 |---|---|---|---|
