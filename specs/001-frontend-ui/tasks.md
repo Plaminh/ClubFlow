@@ -169,6 +169,9 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T080 [US4] Audit Q-07 `FileField`, FormData, API-client and mock validation behavior; add an exact 5 MB acceptance boundary regression
 - [x] T081 Confirm the prototype exposes only the fictional sample PDF and makes no public-URL security claim; no real Cloudinary upload implemented
 - [x] T082 Document Multer/PDF-content validation, protected Cloudinary metadata, authorized retrieval, short-lived delivery, cleanup and pending capability/approval decisions
+- [x] T083 Audit the three requested UI cleanups: Vietnamese date display, concise interview preparation summary and absent Campaign Preview read-only badge; existing implementation/tests already satisfy them
+- [x] T084 Run the final headless Edge matrix for 8 key states across all five screens at 360/768/1280 px and record the 24/24 result in `quickstart.md`
+- [x] T085 Run the final lint, frontend/backend tests, build, verify, diff/link/status/security-scope checks; update `AI-LOG.md` and close UI-7
 
 ---
 

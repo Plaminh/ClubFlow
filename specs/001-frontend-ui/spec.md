@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: UI prototype complete with mock data (T001–T064). SC-005 (replace mocks with the backend without layout changes) can only be verified during backend integration.
+**Status**: UI prototype complete with mock data; pre-integration cleanup and team-selected Q-01…Q-07 frontend/contract alignment complete through UI-7. SC-005 (replace mocks with the backend without layout changes) can only be verified during backend integration. Q-01…Q-07 remain pending Product Owner confirmation.
 
 **Input**: User description: "UI-first React frontend for the five ClubFlow screens with mock data and integration-ready boundaries"
 

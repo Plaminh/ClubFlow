@@ -527,3 +527,26 @@ Verified:
 - No browser check was repeated because this phase changed only a service boundary test and documentation; the upload UI and rendered copy were unchanged from the previously verified screen.
 
 By hand: Backend developers must verify the Cloudinary account's protected/authenticated PDF delivery features and review retention, malware scanning, applicant self-access and recovery policy before implementation.
+
+---
+
+## 2026-11-16 — UI-7.5 — Q-01…Q-07 acceptance and cleanup audit
+
+Tool: Codex using the `speckit-implement` skill.
+
+Asked for: Complete the Q-01…Q-07 frontend and documentation work, audit the requested UI cleanups, verify all five screens, keep backend production work deferred, and leave a clean phase-by-phase Git history.
+
+Completed:
+
+- Audited the requested cleanup points: all user-visible campaign/application/interview dates use Vietnamese `dd/MM/yyyy` or `dd/MM/yyyy HH:mm` formatting; Scheduling renders campaign interview configuration as a concise, control-free summary; Campaign Preview has no read-only badge.
+- Recorded the final UI-7 browser evidence in `quickstart.md` and closed tasks T083–T085. All Q-01…Q-07 choices remain explicitly team-selected and pending Product Owner confirmation.
+- Confirmed the implementation range changes only frontend, tests, specifications and documentation. No backend source, migration, dependency, environment file or production integration was changed; `.env` remains ignored and untracked.
+
+Verified:
+
+- Final standalone commands: `npm run lint`, `npm test` and `npm run build` all exited 0; frontend 195/195 tests passed (18 files), backend 18/18 tests passed (5 files), and the production build completed. The existing Vite >500 kB chunk warning remains non-blocking.
+- Final `npm run verify` exited 0 with the same 195 frontend and 18 backend tests, lint and build success.
+- Headless Microsoft Edge at 360, 768 and 1280 CSS px: 24/24 checks across 8 key states and all 5 screens passed with one h1, no page/data-table overflow and no raw ISO date text. Dialog-specific checks for Q-05 and Q-06 also passed at all three widths. This was viewport simulation, not real browser zoom.
+- `git diff --check` passed; the relevant local Markdown links resolved; the branch remained `feature/q01-q07-decisions`; scope and ignored-file checks found no backend or `.env` change.
+
+By hand: Product Owner confirmation is still required for Q-01…Q-07. Backend engineers must implement and review the documented production contracts, migrations, authorization, provider configuration and failure handling before the UI can replace mock services.
