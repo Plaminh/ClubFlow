@@ -70,4 +70,41 @@ Impact: BR/AC/Screen/DB/API
 Updated by:
 ```
 
-**Current state:** None of the three supplied documents contains a public Product Owner clarification. Do not mark Q-01…Q-07 `Approved` on speculation.
+**Current state:** None of the three supplied documents contains a public Product Owner clarification. Do not mark Q-01…Q-07 `Approved` on speculation. The team has selected a working direction for each question so that development can continue; those selections are recorded in §6 and are **not** Product Owner answers.
+
+## 6. Team-selected implementation decisions (Q-01…Q-07)
+
+**Selected:** 2026-11-16, by the development team. **Evidence of Product Owner approval:** none in this repository.
+
+How to read this section:
+
+- Every record has the status `TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION`. It becomes `Approved` only through the process in §5, with a public source.
+- These records do **not** change the canonical requirements (`BUSINESS_RULES`, `WORKFLOWS_AND_STATES`, `ACCEPTANCE_CRITERIA`, `TRACEABILITY`, `SCREEN_REQUIREMENTS`). Where a selection is stricter than, or conflicts with, those documents, the record says so and the canonical text stays as it is.
+- "Frontend behavior" describes the React prototype, which runs on an in-memory mock layer. "Backend responsibility" is **not implemented**; it is the contract the Express/PostgreSQL work has to meet.
+- Paths are relative to `frontend/src/` unless they start with `docs/` or `specs/`.
+
+### Q-02 — Date, time and time zone convention
+
+- **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Selected decision:**
+  - Business time zone: `Asia/Ho_Chi_Minh` (UTC+7, no daylight saving).
+  - An absolute instant is stored and sent in UTC as an ISO 8601 string, for example `2026-11-05T02:00:00.000Z`. PostgreSQL target type: `TIMESTAMPTZ`.
+  - Display: dates as `dd/MM/yyyy`, times as 24-hour `HH:mm`, always in the business time zone, whatever the browser's locale or time zone is.
+  - Date-only fields (`opensOn`, `closesOn`, `interviewDate`) are calendar dates in the business time zone, not instants. PostgreSQL target type: `DATE`. The interview window (`09:00`–`12:00`) is a wall-clock time range on the interview date.
+  - Submission window: the opening date is inclusive and the closing date is inclusive as a calendar day. `openAt` = 00:00 on the opening date; `closeAt` = 00:00 on the day after the closing date; a submission is accepted when `openAt <= now < closeAt` (BR-02).
+  - Example: closing date 30/10/2026 → `closeAt` = 31/10/2026 00:00 Vietnam time = `2026-10-30T17:00:00.000Z`. A submission at 30/10/2026 23:59:59 is accepted; one at 31/10/2026 00:00:00 is rejected.
+- **Business rationale:** The club, its applicants and its interviewers are all in Vietnam, so one fixed zone avoids "which midnight?" disputes at the deadline. Executives enter dates, not times, so "until the end of the closing day" is what they expect. UTC storage keeps instants unambiguous for the database and the API.
+- **Implementation scope:** Frontend display, mock data and tests. No time zone library was added (`Intl.DateTimeFormat` is enough).
+- **Frontend behavior (prototype):**
+  - `utils/format.js` formats instants in `Asia/Ho_Chi_Minh`; date-only strings are reformatted as written and never pass through a time zone conversion. A date-only string that is not a real date (`2026-02-30`) gives the fallback text.
+  - Mock instants are UTC ISO strings (`mocks/fixtures.js` → `at()`), so the UI is exercised with the format the API will send. Mock comparisons use instants, not strings; `scheduleService.updateRow` accepts any ISO 8601 offset for the same moment and returns UTC.
+  - The demo clock of each scenario is fixed (`mocks/scenarios.js`) and is never read from the system clock, so the October–November 2026 campaign keeps working whatever today's date is.
+  - Native date inputs follow the browser's locale, so each one has a hint with the chosen date as `dd/MM/yyyy`; the opening and closing hints state the 00:00 rule and "giờ Việt Nam".
+  - Campaign validation requires the closing date to be **after** the opening date (`validateCampaignForPublish`). A same-day opening and closing would be a valid 24-hour window under this decision, but the stricter check is kept so that BR-01's "`open == close` is invalid" still holds for date inputs.
+- **Backend responsibility (not implemented):**
+  - Store instants in `TIMESTAMPTZ` and return them in UTC ISO 8601; store the three campaign dates as `DATE`.
+  - Compute `openAt`/`closeAt` from the dates in `Asia/Ho_Chi_Minh` and check `openAt <= now < closeAt` with the **server** clock when an application is submitted; never trust a client time.
+  - Compute interview start and end instants from the interview date, the wall-clock window and the slot duration in the business time zone.
+- **Known limitations:** One hard-coded time zone (the product serves one club). Seconds are not displayed. The prototype has no server clock; its time-dependent behavior uses the scenario clock only.
+- **Relation to source requirements:** Consistent with BR-01 and BR-02. The sources do not name a time zone or a storage format, so this adds detail and contradicts nothing.
+- **Source files and tests:** `utils/format.js`, `utils/campaignPhase.js`, `mocks/fixtures.js`, `mocks/scenarios.js`, `mocks/derive.js` (`submissionWindow`, `campaignPhase`), `services/scheduleService.js` (`updateRow`), `components/organisms/CampaignDetailsCard`. Tests: `tests/utils/format.test.js`, `tests/mocks/fixtures.test.js` ("date and time convention (Q-02)"), `tests/services/mockServices.test.js` (opening/closing boundary, UTC row edit).

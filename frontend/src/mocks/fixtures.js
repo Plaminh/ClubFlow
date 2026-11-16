@@ -3,12 +3,19 @@
  * Source: docs/reference/ui/UI_REFERENCE_NOTES.md and the reference pages.
  * Only the mock layer (src/mocks, src/services) may import this file.
  *
- * Times are ISO 8601 with the +07:00 offset; dates are YYYY-MM-DD.
+ * Date and time convention (Q-02): absolute instants are UTC ISO 8601 strings
+ * ("2026-11-05T02:00:00.000Z"), the way the API will serialize TIMESTAMPTZ
+ * values; date-only fields are calendar dates (YYYY-MM-DD) and interview-window
+ * times are wall-clock "HH:mm", both in the business time zone
+ * Asia/Ho_Chi_Minh (UTC+7, no daylight saving).
  * The base records describe the `screening` scenario; scenarios.js derives the
  * other scenarios from them.
  */
 
-export const at = (date, time) => `${date}T${time}:00+07:00`;
+const BUSINESS_UTC_OFFSET = '+07:00';
+
+/** Instant of a Vietnam wall-clock date and time, serialized in UTC. */
+export const at = (date, time) => new Date(`${date}T${time}:00${BUSINESS_UTC_OFFSET}`).toISOString();
 
 export const INTERVIEW_DATE = '2026-11-05';
 

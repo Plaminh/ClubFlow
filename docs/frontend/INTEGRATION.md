@@ -114,7 +114,7 @@ If the API returns a different shape, **map it inside the service** so pages sta
 | `mocks/derive.js` → `evaluateSchedule` | recomputes Proposed / Conflict / Unassigned so demo edits stay consistent | demo stand-in; the server owns BR-10/BR-11 and the first-fit generator |
 | `mocks/guards.js` | role checks and BR-14 locks for demo responses | not security |
 | `utils/validation.js` | instant form feedback | the server must validate every request |
-| `mocks/scenarios.js` | fixed demo clocks (`now`) | the server uses the real time; time zone is Q-02 |
+| `mocks/scenarios.js` | fixed demo clocks (`now`) | the server uses the real time; see §12 for the date and time convention (Q-02) |
 | `mocks/store.js` → `mockRequest` | cancels a demo call (`UiError('conflict')`) when the demo account or scenario changed while it waited | demo-only consistency; a real backend has no scenario switch, and auth changes are handled by the auth provider |
 
 ## 9. Tests after switching a service
@@ -126,7 +126,7 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 | ID | Topic | Current UI assumption |
 |---|---|---|
 | Q-01 | First-fit order | Not implemented in the UI; "Generate draft" shows the server's (today: demo) result |
-| Q-02 | Time zone / precision | Display fixed to `Asia/Ho_Chi_Minh`, `dd/MM/yyyy` and `HH:mm` (`utils/format.js`) |
+| Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12 |
 | Q-03 | Editable fields after publication | Campaign stays editable until confirmation; interview date/window/duration locked once applications exist |
 | Q-04 | Assessment fields | Notes + three-option recommendation, both required; no scores |
 | Q-05 | Notification UI | List in the Applicant Portal with unread badge and "mark all read" |
@@ -141,3 +141,19 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 3. Make sure server errors carry `error` (and `fieldErrors` for forms).
 4. Run `npm run verify` and the manual checks in `specs/001-frontend-ui/quickstart.md`.
 5. Remove the service's mock imports; delete `mocks/` once no service uses it.
+
+## 12. Contracts from the team-selected decisions (Q-01…Q-07)
+
+These decisions are team-selected and still wait for Product Owner confirmation; the full records are in [Decisions §6](../requirements/DECISIONS_AND_OPEN_QUESTIONS.md). This section only states what the API has to send and accept so that the current pages work unchanged.
+
+### 12.1 Dates and times (Q-02)
+
+| Kind | Fields (service objects) | Wire format | PostgreSQL |
+|---|---|---|---|
+| Instant | `submittedAt`, `reviewedAt`, `publishedAt`, `confirmedAt`, `savedAt`, `recordedAt`, `createdAt`, `readAt`, interview and slot `start`/`end`, `window.opensAt`/`closesAt` | UTC ISO 8601, e.g. `2026-11-05T02:00:00.000Z` | `TIMESTAMPTZ` |
+| Calendar date | `campaign.opensOn`, `closesOn`, `interviewDate` | `YYYY-MM-DD`, a day in `Asia/Ho_Chi_Minh` | `DATE` |
+| Wall-clock time | `campaign.interviewWindow.start`/`end` | `HH:mm` in `Asia/Ho_Chi_Minh` | `TIME` |
+
+- The frontend only **displays** these values (`utils/format.js`); it does not decide whether the window is open. The server compares its own clock with `openAt <= now < closeAt`, where `openAt` is 00:00 on `opensOn` and `closeAt` is 00:00 on the day after `closesOn`, both in `Asia/Ho_Chi_Minh`.
+- Send instants with `Z` or an explicit offset. A string without an offset would be read in the browser's local time.
+- `scheduleService.updateRow` sends back one of the `sessionStarts` values it received, so the server can match it by instant.

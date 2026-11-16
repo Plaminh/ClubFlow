@@ -27,6 +27,26 @@ describe('format utilities', () => {
     expect(formatDateTime('2026-10-30T17:30:00Z')).toBe('31/10/2026, 00:30');
   });
 
+  it('shows UTC instants from the API in Vietnam time on both sides of midnight (Q-02)', () => {
+    // 31/10/2026 00:00 in Vietnam is 30/10/2026 17:00 UTC.
+    expect(formatDateTime('2026-10-30T16:59:59.999Z')).toBe('30/10/2026, 23:59');
+    expect(formatDateTime('2026-10-30T17:00:00.000Z')).toBe('31/10/2026, 00:00');
+    expect(formatTimeRange('2026-11-05T02:00:00.000Z', '2026-11-05T02:15:00.000Z')).toBe('09:00–09:15');
+  });
+
+  it('treats date-only values as calendar dates, never as instants (Q-02)', () => {
+    expect(formatDate('2026-10-30')).toBe('30/10/2026');
+    expect(formatDate('2026-01-01')).toBe('01/01/2026');
+    expect(formatDate('2026-12-31')).toBe('31/12/2026');
+    expect(formatDate('2028-02-29')).toBe('29/02/2028');
+  });
+
+  it('rejects date-only values that are not real calendar dates', () => {
+    expect(formatDate('2026-02-30')).toBe('—');
+    expect(formatDate('2026-13-01')).toBe('—');
+    expect(formatDate('2026-00-10', 'Chưa chọn')).toBe('Chưa chọn');
+  });
+
   it('formats a time range with an en dash', () => {
     expect(formatTimeRange(INTERVIEW_START, INTERVIEW_END)).toBe('09:00–09:15');
   });

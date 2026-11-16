@@ -5,7 +5,7 @@
  * algorithm in the frontend). Statuses are re-evaluated by the mock layer so
  * the demo stays consistent; the backend must enforce BR-10…BR-14.
  */
-import { accountName, evaluateSchedule, isScheduleConfirmed, positionById, sessionStarts } from '../mocks/derive.js';
+import { accountName, evaluateSchedule, isScheduleConfirmed, positionById, sessionStarts, toMs } from '../mocks/derive.js';
 import { BASE } from '../mocks/fixtures.js';
 import { assertNotLockedBySchedule, requireRole } from '../mocks/guards.js';
 import { addMinutes } from '../mocks/scenarios.js';
@@ -118,7 +118,9 @@ export async function updateRow(applicationId, change) {
     throw createUiError('conflict', `Hồ sơ ${applicationId} không còn ở trạng thái Qua vòng CV.`);
   }
   const fieldErrors = {};
-  if (!sessionStarts(state).includes(change.start)) {
+  // Match by instant, so any ISO 8601 offset of the same moment is accepted (Q-02).
+  const start = sessionStarts(state).find((session) => toMs(session) === toMs(change.start));
+  if (!start) {
     fieldErrors.start = 'Chọn một ca trong khung giờ phỏng vấn.';
   }
   const assignment = state.assignments.find((item) => item.interviewerId === change.interviewerId);
@@ -135,8 +137,8 @@ export async function updateRow(applicationId, change) {
   const values = {
     interviewerId: change.interviewerId,
     roomId: change.roomId,
-    start: change.start,
-    end: addMinutes(change.start, state.campaign.slotMinutes),
+    start,
+    end: addMinutes(start, state.campaign.slotMinutes),
     note: '',
   };
   const existing = state.interviews.find((interview) => interview.applicationId === applicationId);

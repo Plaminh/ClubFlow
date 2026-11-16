@@ -29,14 +29,19 @@ export default function CampaignDetailsCard({ values, errors, statusLabel, statu
           {(props) => <textarea {...props} rows={4} {...bind('description')} />}
         </FormField>
         <div className="field-grid">
-          <FormField id="campaign-opens" label="Ngày mở đơn" error={errors.opensOn} hint={chosen(values.opensOn)}>
+          <FormField
+            id="campaign-opens"
+            label="Ngày mở đơn"
+            error={errors.opensOn}
+            hint={`${chosen(values.opensOn) ?? ''} Nhận hồ sơ từ 00:00 ngày mở đơn (giờ Việt Nam).`.trim()}
+          >
             {(props) => <input {...props} type="date" {...bind('opensOn')} />}
           </FormField>
           <FormField
             id="campaign-closes"
             label="Ngày đóng đơn"
             error={errors.closesOn}
-            hint={`${chosen(values.closesOn) ?? ''} Hồ sơ được nhận đến hết ngày đóng đơn.`.trim()}
+            hint={`${chosen(values.closesOn) ?? ''} Nhận hồ sơ đến hết ngày đóng đơn, tức trước 00:00 ngày kế tiếp (giờ Việt Nam).`.trim()}
           >
             {(props) => <input {...props} type="date" {...bind('closesOn')} />}
           </FormField>

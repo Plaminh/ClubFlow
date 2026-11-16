@@ -42,10 +42,7 @@ export function addMinutes(isoStart, minutes) {
   if (!isoStart) {
     return null;
   }
-  const end = new Date(new Date(isoStart).getTime() + minutes * MINUTE_MS);
-  // Keep the +07:00 representation used by the fixtures.
-  const local = new Date(end.getTime() + 7 * 60 * MINUTE_MS).toISOString().slice(0, 16);
-  return `${local}:00+07:00`;
+  return new Date(new Date(isoStart).getTime() + minutes * MINUTE_MS).toISOString();
 }
 
 function withEnd(interviews, minutes) {
@@ -119,7 +116,7 @@ export function buildScenarioState(scenarioId) {
       break;
     case 'accepting':
       state.applications = state.applications
-        .filter((application) => application.submittedAt <= scenario.now)
+        .filter((application) => new Date(application.submittedAt) <= new Date(scenario.now))
         .map((application) => ({ ...application, screeningStatus: 'pendingReview', reviewedAt: null, privateNote: '' }));
       break;
     case 'screening':

@@ -5,12 +5,13 @@
  * 24-hour HH:mm) regardless of the browser's locale or time zone, so the same
  * instant always reads the same way for every user.
  *
- * Inputs: Date objects, epoch milliseconds, or ISO 8601 strings. Pass ISO
- * strings WITH an offset (for example "2026-11-05T09:00:00+07:00"); strings
- * without an offset are interpreted by the JavaScript runtime in local time.
- *
- * The display time zone is a single constant. The final time representation
- * is still an open question (Q-02 in docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md).
+ * Convention (team-selected Q-02, docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md):
+ * - Instants: Date objects, epoch milliseconds, or ISO 8601 strings with "Z"
+ *   or an offset (the API sends UTC, for example "2026-11-05T02:00:00.000Z").
+ *   They are shown in the business time zone below. Strings without an offset
+ *   are interpreted by the JavaScript runtime in local time; do not pass them.
+ * - Date-only fields ("2026-10-30") are calendar dates, not instants: they
+ *   are reformatted as written and never shifted by a time zone.
  */
 
 import { EMPTY_LABEL } from '../constants/labels.js';
@@ -53,8 +54,24 @@ function partsOf(formatter, date) {
   );
 }
 
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+// "2026-10-30" → "30/10/2026" without going through a time zone; null if the
+// string is not a real calendar date (for example "2026-02-30").
+function formatCalendarDate(value) {
+  const [, year, month, day] = DATE_ONLY.exec(value);
+  const check = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  const real =
+    check.getUTCFullYear() === Number(year) && check.getUTCMonth() === Number(month) - 1 && check.getUTCDate() === Number(day);
+  return real ? `${day}/${month}/${year}` : null;
+}
+
 /** "05/11/2026", or the fallback for missing or invalid input. */
 export function formatDate(value, fallback = EMPTY_LABEL) {
+  if (typeof value === 'string' && DATE_ONLY.test(value)) {
+    return formatCalendarDate(value) ?? fallback;
+  }
+
   const date = toValidDate(value);
   if (!date) {
     return fallback;

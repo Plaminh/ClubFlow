@@ -6,7 +6,7 @@ import * as interviewerService from '../../services/interviewerService.js';
 import * as portalService from '../../services/portalService.js';
 import * as resultService from '../../services/resultService.js';
 import * as scheduleService from '../../services/scheduleService.js';
-import { setSimulation } from '../../mocks/store.js';
+import { getState, setSimulation } from '../../mocks/store.js';
 
 const asExecutive = () => demoSessionService.signIn('exec-recruitment');
 
@@ -134,6 +134,25 @@ describe('scheduling', () => {
     expect(row.reasons.join(' ')).toContain('cùng phòng A-201');
   });
 
+  it('matches an edited start by instant and stores it in UTC, whatever offset the client sent (Q-02)', async () => {
+    await asExecutive();
+    const viaOffset = await scheduleService.updateRow('CF-031', {
+      start: '2026-11-05T09:30:00+07:00',
+      interviewerId: 'iv-giahuy',
+      roomId: 'room-b105',
+    });
+    expect(viaOffset.rows.find((item) => item.applicationId === 'CF-031')).toMatchObject({
+      start: '2026-11-05T02:30:00.000Z',
+      end: '2026-11-05T02:45:00.000Z',
+      status: 'proposed',
+    });
+
+    // 12:00 in Vietnam is outside the 09:00–12:00 window (the last session starts at 11:45).
+    await expect(
+      scheduleService.updateRow('CF-031', { start: '2026-11-05T05:00:00.000Z', interviewerId: 'iv-giahuy', roomId: 'room-b105' }),
+    ).rejects.toMatchObject({ kind: 'validation', fieldErrors: { start: expect.any(String) } });
+  });
+
   it('locks screening, schedule, and campaign configuration after confirmation (BR-14)', async () => {
     demoSessionService.setScenario('confirmed');
     await asExecutive();
@@ -221,6 +240,27 @@ describe('applicant portal', () => {
   it('rejects submissions outside the window (BR-02)', async () => {
     await demoSessionService.signIn('ap-haidang');
     await expect(portalService.submitApplication(applicationForm({}))).rejects.toMatchObject({ kind: 'validation' });
+  });
+
+  it('accepts at the opening instant and until just before 00:00 after the closing day, Vietnam time (Q-02)', async () => {
+    demoSessionService.setScenario('accepting');
+    await demoSessionService.signIn('ap-haidang');
+    const submitAt = (now, positionId) => {
+      getState().now = now;
+      return portalService.submitApplication(applicationForm({ positionId }));
+    };
+
+    // 12/10/2026 00:00 and 30/10/2026 23:59:59.999 in Vietnam.
+    await expect(submitAt('2026-10-11T17:00:00.000Z', 'pos-ux')).resolves.toMatchObject({
+      submittedAt: '2026-10-11T17:00:00.000Z',
+    });
+    await expect(submitAt('2026-10-30T16:59:59.999Z', 'pos-content')).resolves.toMatchObject({ id: 'CF-033' });
+
+    await demoSessionService.signIn('ap-khanhlinh');
+    // 31/10/2026 00:00 in Vietnam: the closing instant itself is already too late.
+    await expect(submitAt('2026-10-30T17:00:00.000Z', 'pos-ux')).rejects.toMatchObject({ kind: 'validation' });
+    // 11/10/2026 23:59:59.999 in Vietnam: one millisecond before opening.
+    await expect(submitAt('2026-10-11T16:59:59.999Z', 'pos-ux')).rejects.toMatchObject({ kind: 'validation' });
   });
 
   it('never shows unconfirmed interviews or unpublished results to the applicant (BR-08)', async () => {

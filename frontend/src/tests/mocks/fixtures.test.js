@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { ACCOUNTS } from '../../mocks/fixtures.js';
-import { evaluateSchedule } from '../../mocks/derive.js';
+import { campaignPhase, evaluateSchedule, submissionWindow } from '../../mocks/derive.js';
 import { SCENARIOS, buildScenarioState } from '../../mocks/scenarios.js';
+import { formatDateTime } from '../../utils/format.js';
 
 const accountIds = new Set(ACCOUNTS.map((account) => account.id));
 const overlaps = (a, b) => new Date(a.start) < new Date(b.end) && new Date(b.start) < new Date(a.end);
@@ -67,6 +68,58 @@ describe.each(SCENARIOS.map((scenario) => scenario.id))('fixtures in scenario "%
   });
 });
 
+// Team-selected Q-02: instants are UTC ISO 8601; date-only fields are Vietnam calendar days.
+describe('date and time convention (Q-02)', () => {
+  const UTC_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+  it.each(SCENARIOS.map((scenario) => scenario.id))('serializes every instant of scenario "%s" in UTC', (scenarioId) => {
+    const state = buildScenarioState(scenarioId);
+    const instants = [
+      state.now,
+      state.campaign.publishedAt,
+      state.schedule.savedAt,
+      state.schedule.confirmedAt,
+      ...state.slots.flatMap((slot) => [slot.start, slot.end]),
+      ...state.assignments.flatMap((assignment) => assignment.availability.flatMap((range) => [range.start, range.end])),
+      ...state.applications.flatMap((application) => [application.submittedAt, application.reviewedAt]),
+      ...state.interviews.flatMap((interview) => [interview.start, interview.end]),
+      ...state.assessments.map((assessment) => assessment.submittedAt),
+      ...state.results.flatMap((result) => [result.recordedAt, result.publishedAt]),
+      ...state.notifications.flatMap((notification) => [notification.createdAt, notification.readAt]),
+    ].filter(Boolean);
+
+    expect(instants.length).toBeGreaterThan(0);
+    for (const instant of instants) {
+      expect(instant).toMatch(UTC_ISO);
+    }
+  });
+
+  it('keeps the campaign period and interview date as date-only calendar days', () => {
+    const { campaign } = buildScenarioState('screening');
+    expect([campaign.opensOn, campaign.closesOn, campaign.interviewDate]).toEqual(['2026-10-12', '2026-10-30', '2026-11-05']);
+  });
+
+  it('opens at 00:00 on the opening day and closes at 00:00 after the closing day, Vietnam time', () => {
+    const window = submissionWindow(buildScenarioState('screening').campaign);
+    expect(window).toEqual({ opensAt: '2026-10-11T17:00:00.000Z', closesAt: '2026-10-30T17:00:00.000Z' });
+    expect(formatDateTime(window.opensAt)).toBe('12/10/2026, 00:00');
+    expect(formatDateTime(window.closesAt)).toBe('31/10/2026, 00:00');
+  });
+
+  it('accepts applications while openAt <= now < closeAt (opening inclusive, closing exclusive)', () => {
+    const state = buildScenarioState('accepting');
+    const phaseAt = (now) => campaignPhase({ ...state, now });
+
+    expect(phaseAt('2026-10-11T16:59:59.999Z')).toBe('before-open');
+    expect(phaseAt('2026-10-11T17:00:00.000Z')).toBe('open');
+    expect(phaseAt('2026-10-30T16:59:59.999Z')).toBe('open');
+    expect(phaseAt('2026-10-30T17:00:00.000Z')).toBe('closed');
+    // The same instants written with the Vietnam offset give the same answer.
+    expect(phaseAt('2026-10-30T23:59:59+07:00')).toBe('open');
+    expect(phaseAt('2026-10-31T00:00:00+07:00')).toBe('closed');
+  });
+});
+
 describe('scenario specifics', () => {
   it('6. screening: 6 applications from 5 distinct applicants; CF-026 and CF-027 belong to Nguyễn Minh Anh', () => {
     const state = buildScenarioState('screening');
@@ -113,8 +166,11 @@ describe('scenario specifics', () => {
   });
 
   it('uses a fixed demo clock per scenario, independent of the real date', () => {
-    expect(buildScenarioState('accepting').now).toBe('2026-10-20T09:00:00+07:00');
-    expect(buildScenarioState('confirmed').now).toBe('2026-11-05T13:00:00+07:00');
+    // 09:00 and 13:00 in Vietnam (UTC+7), serialized in UTC.
+    expect(buildScenarioState('accepting').now).toBe('2026-10-20T02:00:00.000Z');
+    expect(buildScenarioState('confirmed').now).toBe('2026-11-05T06:00:00.000Z');
+    expect(formatDateTime(buildScenarioState('accepting').now)).toBe('20/10/2026, 09:00');
+    expect(formatDateTime(buildScenarioState('confirmed').now)).toBe('05/11/2026, 13:00');
   });
 
   it('builds independent copies, so demo mutations never leak into fixtures', () => {
