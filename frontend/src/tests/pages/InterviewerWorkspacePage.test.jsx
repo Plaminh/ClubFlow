@@ -91,6 +91,18 @@ describe('Interviewer Workspace', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Đề xuất Fail' }));
     fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
 
+    // Submitting is final, so it is confirmed first; cancelling keeps the draft text (Q-06).
+    let dialog = await screen.findByRole('dialog', { name: 'Gửi đánh giá cho CF-030?' });
+    expect(within(dialog).getByText('Sau khi gửi, đánh giá không thể sửa hay gửi lại.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Đề xuất Fail')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Hủy' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Nhận xét phỏng vấn')).toHaveValue('Tư duy thiết kế tốt.');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
+    dialog = await screen.findByRole('dialog', { name: 'Gửi đánh giá cho CF-030?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Gửi đánh giá' }));
+
     expect(await screen.findByText('Đã gửi đánh giá (mô phỏng)')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Submit Assessment' })).toBeDisabled());
     expect(screen.getByText('Tư duy thiết kế tốt.')).toBeInTheDocument();
@@ -104,11 +116,29 @@ describe('Interviewer Workspace', () => {
 
     fireEvent.change(screen.getByLabelText('Nhận xét phỏng vấn'), { target: { value: 'Trả lời rõ ràng.' } });
     fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Gửi đánh giá' }));
 
     expect(await screen.findByText('Đã gửi đánh giá (mô phỏng)')).toBeInTheDocument();
     await waitFor(() =>
       expect(screen.getByText('Đề xuất của bạn · chỉ để tham khảo').nextSibling).toHaveTextContent('Không nêu đề xuất'),
     );
+  });
+
+  it('cancels an assessment confirmation when another interview is selected', async () => {
+    await openAs('iv-hamy');
+    fireEvent.click(await screen.findByRole('button', { name: 'Chọn CF-030 · Phạm Quốc Bảo' }));
+    await screen.findByRole('heading', { name: 'CF-030 · Phạm Quốc Bảo' });
+    fireEvent.change(screen.getByLabelText('Nhận xét phỏng vấn'), { target: { value: 'Bản nháp cho CF-030.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
+    await screen.findByRole('dialog', { name: 'Gửi đánh giá cho CF-030?' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Chọn CF-026 · Nguyễn Minh Anh' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'CF-026 · Nguyễn Minh Anh' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Chọn CF-030 · Phạm Quốc Bảo' }));
+    await screen.findByRole('heading', { name: 'CF-030 · Phạm Quốc Bảo' });
+    expect(screen.getByRole('button', { name: 'Submit Assessment' })).toBeEnabled();
   });
 
   it('keeps the form locked for an interview that has not happened yet', async () => {

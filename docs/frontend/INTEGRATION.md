@@ -178,3 +178,17 @@ These decisions are team-selected and still wait for Product Owner confirmation;
 - `recommendation` is advice for the Executive. It is stored on the assessment and shown as text. The final result is a separate record written only by `resultService.record` (Executive) and may differ from the recommendation.
 - Read access: the assigned interviewer and the Executive (Business §2). Applicants never receive assessments or recommendations.
 - Field errors use the names `notes` and `recommendation`.
+
+### 12.4 Immutable workflow transitions (Q-06)
+
+| Transition | Accepted current state | Server result | Later update/delete |
+|---|---|---|---|
+| Submit application | campaign open; no existing applicant/campaign/position record | one immutable application snapshot, including CV metadata and availability | none |
+| Save screening decision | `pendingReview` | exactly one of `shortlisted` / `rejected` | none |
+| Submit assessment | assigned interview completed; no assessment exists | one immutable assessment | none |
+| Confirm schedule | every BR-13 condition met; schedule not confirmed | confirmed schedule locked under BR-14 | none |
+| Publish final result | recorded, unpublished decision | published result plus one in-app notification | none |
+
+- The frontend confirmations improve intent and prevent accidental duplicate clicks; they are not concurrency control. The server must check the expected state and authorization in the same transaction as each write and return `409 Conflict` for stale or duplicate transitions.
+- The application ID or interview ID in the request is the action target. Never infer it from a previously selected browser row. Idempotency keys may be added for network retries, but they must not enable a second domain record.
+- No override, correction, undo, update or delete endpoint is part of the selected contract. A future exception workflow requires Product Owner approval and an audit trail.

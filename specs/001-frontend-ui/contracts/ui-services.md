@@ -47,7 +47,7 @@
 | `applicationService.getStats(query)` | same filters | `{ applications, applicants, byStatus, scope }` |
 | `applicationService.get(id)` | id | application detail (Executive view); `student` is the snapshot submitted with the application |
 | `applicationService.saveNote(id, note)` | id, text | updated application |
-| `applicationService.setScreening(id, status)` | id, `shortlisted` or `rejected` | updated application |
+| `applicationService.setScreening(id, status)` | id, `shortlisted` or `rejected` | updated application, or `UiError(conflict)` unless the current status is `pendingReview`; no reversal (Q-06) |
 | `applicationService.exportCsv(query)` | filters | `{ fileName, rowCount }` (demo: no real file privacy) |
 | `resultService.list()` | — | final-results rows |
 | `resultService.getAssessment(applicationId)` | id | assessment or `null` |
@@ -72,7 +72,7 @@
 |---|---|---|
 | `portalService.getPublicCampaign()` | — | public campaign view (no drafts) |
 | `portalService.listMyApplications()` | — | own applications with screening, confirmed interview, **published** result only |
-| `portalService.submitApplication(formData)` | `FormData`: `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, `cv` file | created application, `UiError(validation)`, or `UiError(conflict, details: existingApplicationId)` |
+| `portalService.submitApplication(formData)` | `FormData`: `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, `cv` file | created immutable application, `UiError(validation)`, or `UiError(conflict, details: existingApplicationId)`; no update/withdraw contract (Q-06) |
 | `portalService.listNotifications()` | — | own notifications |
 | `portalService.markNotificationsRead()` | — | nothing; own unread notifications become read |
 
@@ -82,7 +82,7 @@
 |---|---|---|
 | `interviewerService.listAssignedInterviews()` | — | `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` — own confirmed interviews plus the campaign context the page shows |
 | `interviewerService.getInterview(id)` | id | interview + application details (no private screening note) |
-| `interviewerService.submitAssessment(interviewId, assessment)` | `{ recommendation, notes }` | saved assessment, or `UiError(validation)` / `UiError(conflict)` if one already exists |
+| `interviewerService.submitAssessment(interviewId, assessment)` | `{ recommendation, notes }` | saved immutable assessment, or `UiError(validation)` / `UiError(conflict)` if one already exists; no update/delete contract (Q-06) |
 
 ## Hooks (one per screen area)
 

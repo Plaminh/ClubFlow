@@ -153,12 +153,22 @@ Source: AI-assisted read-only audit (AI-LOG 2026-11-15, UI-6). Corrects mismatch
 
 ---
 
+## Phase 10: Q-01…Q-07 decision alignment (UI-7)
+
+Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`. These remain pending Product Owner confirmation and do not implement production backend behavior.
+
+- [x] T071 [US2] [US5] Finish Q-06 confirmations and immutable UI states for application screening and assessment submission; pin every confirmed action to its original entity and payload
+- [x] T072 [US2] [US4] [US5] Add Q-06 regression coverage for cancel, stale selection, duplicate submission guards and read-only submitted states
+- [x] T073 Document the Q-06 frontend behavior, backend state-transition contract, limitations and pending approval status in the decision record, integration guide and feature spec
+
+---
+
 ## Dependencies & Execution Order
 
 - Phase 0 → Phase 1 → Phase 2 (blocks all stories)
 - US1 → US2 → US3 in order for one developer (US2 creates `Modal`/`Tabs`/`DataTable` reused later)
 - US4 needs Phase 2 and the US2 shared components; US5 needs Phase 2 and `DataTable`/`FormField`
-- Phase 8 after all stories; Phase 9 after Phase 8, before backend integration
+- Phase 8 after all stories; Phase 9 after Phase 8, before backend integration; Phase 10 aligns the team-selected Q-01…Q-07 decisions before backend integration
 - Within a story: service → hook → organisms → page → page tests
 
 ## Implementation Strategy

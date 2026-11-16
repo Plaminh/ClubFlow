@@ -75,12 +75,56 @@ describe('Application Review — CV Screening', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Review CF-028 · Trần Bảo Ngọc' }));
     const detail = (await screen.findByRole('heading', { level: 2, name: 'CF-028 · Trần Bảo Ngọc' })).closest('article');
 
+    expect(within(detail).getByText(/Quyết định sẽ không thể thay đổi sau khi lưu\./)).toBeInTheDocument();
     fireEvent.click(within(detail).getByRole('button', { name: 'Shortlist Candidate' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Cho hồ sơ CF-028 qua vòng CV?' });
+    expect(within(dialog).getByText('Quyết định vòng CV đã lưu không thể thay đổi hay hoàn tác.')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Shortlist Candidate' }));
 
     expect(await screen.findByText('CF-028 đã qua vòng CV')).toBeInTheDocument();
     await waitFor(() => expect(statValue('Chờ duyệt + Loại')).toBe('0 + 1'));
     expect(statValue('Qua vòng CV')).toBe('5');
     expect(statValue('Ứng viên riêng biệt')).toBe('5');
+
+    // The saved decision is final: both actions are closed and the reason is stated (Q-06).
+    const decided = (await screen.findByRole('heading', { level: 2, name: 'CF-028 · Trần Bảo Ngọc' })).closest('article');
+    await waitFor(() => expect(within(decided).getByRole('button', { name: 'Loại hồ sơ' })).toBeDisabled());
+    expect(within(decided).getByRole('button', { name: 'Shortlist Candidate' })).toBeDisabled();
+    expect(within(decided).getByText(/Quyết định "Qua vòng CV" đã được lưu và không thể thay đổi\./)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Hoàn tác|Undo|Đổi quyết định/ })).not.toBeInTheDocument();
+  });
+
+  it('leaves the application pending when the shortlist confirmation is cancelled', async () => {
+    await openScreening();
+    fireEvent.change(screen.getByLabelText('Trạng thái'), { target: { value: 'pendingReview' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Review CF-028 · Trần Bảo Ngọc' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Shortlist Candidate' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Cho hồ sơ CF-028 qua vòng CV?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Hủy' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(statValue('Chờ duyệt + Loại')).toBe('1 + 1');
+    expect(screen.getByRole('button', { name: 'Shortlist Candidate' })).toBeEnabled();
+  });
+
+  it('keeps an open screening confirmation pinned to its original application', async () => {
+    await openScreening();
+    fireEvent.change(screen.getByLabelText('Trạng thái'), { target: { value: 'pendingReview' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Review CF-028 · Trần Bảo Ngọc' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Shortlist Candidate' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Cho hồ sơ CF-028 qua vòng CV?' });
+
+    fireEvent.change(screen.getByLabelText('Trạng thái'), { target: { value: '' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Review CF-031 · Vũ Khánh Linh' }));
+    await screen.findByRole('heading', { level: 2, name: 'CF-031 · Vũ Khánh Linh' });
+
+    expect(dialog).toHaveAccessibleName('Cho hồ sơ CF-028 qua vòng CV?');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Shortlist Candidate' }));
+
+    await waitFor(() => expect(statValue('Chờ duyệt + Loại')).toBe('0 + 1'));
+    expect(screen.queryByText('CF-028 đã qua vòng CV')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'CF-031 · Vũ Khánh Linh' })).toBeInTheDocument();
   });
 
   it('never shows or acts on the previous application while another one loads', async () => {
@@ -102,6 +146,7 @@ describe('Application Review — CV Screening', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Loại hồ sơ' }));
 
     const dialog = await screen.findByRole('dialog', { name: 'Loại hồ sơ CF-028?' });
+    expect(within(dialog).getByText('Quyết định vòng CV đã lưu không thể thay đổi hay hoàn tác.')).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Loại hồ sơ' }));
 
     expect(await screen.findByText('CF-028 đã bị loại ở vòng CV')).toBeInTheDocument();

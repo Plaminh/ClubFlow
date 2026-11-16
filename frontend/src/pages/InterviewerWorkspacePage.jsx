@@ -60,8 +60,7 @@ export default function InterviewerWorkspacePage() {
 
   const done = interviews.filter((item) => item.assessmentStatus === 'submitted').length;
 
-  async function submitAssessment(values) {
-    const id = current.interviewId;
+  async function submitAssessment(id, values) {
     const result = await action.run(() => interviewerActions.submitAssessment(id, values));
     if (result.ok) {
       setMessage({

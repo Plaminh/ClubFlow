@@ -40,7 +40,9 @@ function ScreeningPanel({ campaign }) {
   const [focusDetail, setFocusDetail] = useState(false);
   const [message, setMessage] = useState(null);
   const [exportMessage, setExportMessage] = useState(null);
-  const [rejectOpen, setRejectOpen] = useState(false);
+  // Pin both the application and decision while confirmation is open. A later
+  // selection must never retarget an irreversible action (Q-06).
+  const [confirming, setConfirming] = useState(null);
   const overview = useApplications(query);
   const detail = useApplicationDetail(selectedId);
   const action = useAction();
@@ -74,25 +76,26 @@ function ScreeningPanel({ campaign }) {
     const result = await action.run(() => applicationActions.saveNote(id, note));
     setMessage(
       result.ok
-        ? { tone: 'success', title: 'Đã lưu ghi chú nội bộ (mô phỏng)' }
-        : { tone: 'error', title: 'Chưa lưu được ghi chú', text: result.error?.message },
+        ? { applicationId: id, tone: 'success', title: 'Đã lưu ghi chú nội bộ (mô phỏng)' }
+        : { applicationId: id, tone: 'error', title: 'Chưa lưu được ghi chú', text: result.error?.message },
     );
   }
 
-  async function decide(status) {
-    setRejectOpen(false);
-    const id = current.id;
+  async function decide(target) {
+    setConfirming(null);
+    const { id, status } = target;
     const result = await action.run(() => applicationActions.setScreening(id, status));
     if (result.ok) {
       setMessage({
+        applicationId: id,
         tone: 'success',
         title: status === 'shortlisted' ? `${id} đã qua vòng CV` : `${id} đã bị loại ở vòng CV`,
-        text: 'Quyết định chỉ áp dụng cho hồ sơ này.',
+        text: 'Quyết định chỉ áp dụng cho hồ sơ này và không thể thay đổi.',
       });
       overview.reload();
       detail.reload();
     } else {
-      setMessage({ tone: 'error', title: 'Chưa ghi nhận được quyết định', text: result.error?.message });
+      setMessage({ applicationId: id, tone: 'error', title: 'Chưa ghi nhận được quyết định', text: result.error?.message });
     }
   }
 
@@ -184,11 +187,11 @@ function ScreeningPanel({ campaign }) {
               key={current.id}
               detail={current}
               pending={action.pending}
-              message={message}
+              message={message?.applicationId === current.id ? message : null}
               focusOnMount={focusDetail}
               onSaveNote={saveNote}
-              onShortlist={() => decide('shortlisted')}
-              onReject={() => setRejectOpen(true)}
+              onShortlist={() => setConfirming({ id: current.id, status: 'shortlisted' })}
+              onReject={() => setConfirming({ id: current.id, status: 'rejected' })}
               onClose={() => {
                 setSelectedId(null);
                 setMessage(null);
@@ -215,15 +218,34 @@ function ScreeningPanel({ campaign }) {
       ) : null}
 
       <ConfirmDialog
-        open={rejectOpen}
-        title={`Loại hồ sơ ${current?.id ?? ''}?`}
+        open={confirming?.status === 'shortlisted'}
+        title={`Cho hồ sơ ${confirming?.id ?? ''} qua vòng CV?`}
+        confirmLabel="Shortlist Candidate"
+        busy={action.pending}
+        onConfirm={() => decide(confirming)}
+        onCancel={() => setConfirming(null)}
+      >
+        <p>
+          Hồ sơ sẽ đủ điều kiện được xếp lịch phỏng vấn; đây chưa phải kết quả tuyển cuối. Quyết định chỉ áp dụng cho hồ
+          sơ này.
+        </p>
+        <p>
+          <strong>Quyết định vòng CV đã lưu không thể thay đổi hay hoàn tác.</strong>
+        </p>
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={confirming?.status === 'rejected'}
+        title={`Loại hồ sơ ${confirming?.id ?? ''}?`}
         confirmLabel="Loại hồ sơ"
         tone="danger"
         busy={action.pending}
-        onConfirm={() => decide('rejected')}
-        onCancel={() => setRejectOpen(false)}
+        onConfirm={() => decide(confirming)}
+        onCancel={() => setConfirming(null)}
       >
         <p>Hồ sơ sẽ kết thúc ở vòng CV và không được xếp lịch phỏng vấn. Quyết định chỉ áp dụng cho hồ sơ này.</p>
+        <p>
+          <strong>Quyết định vòng CV đã lưu không thể thay đổi hay hoàn tác.</strong>
+        </p>
       </ConfirmDialog>
     </div>
   );

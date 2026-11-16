@@ -166,7 +166,7 @@ The Interviewer sees only their assigned confirmed interviews, opens an applicat
 **Forms, dialogs, and states**
 
 - **UI-FR-017**: Forms MUST validate on submit (and where helpful, on field change), show field-specific messages linked to their fields, move focus to the first error, and preserve valid input.
-- **UI-FR-018**: Destructive or irreversible-looking actions (Publish campaign, Reject, Regenerate draft, Confirm schedule, Publish results) MUST ask for confirmation in an accessible dialog.
+- **UI-FR-018**: Destructive or irreversible actions (Publish campaign, Shortlist, Reject, submit assessment, Regenerate draft, Confirm schedule, Publish results) MUST ask for confirmation in an accessible dialog. Each confirmation MUST remain bound to the entity and payload that opened it, and cancelling MUST perform no mutation.
 - **UI-FR-019**: Every screen that loads data MUST show distinct loading, empty, and error states, with retry for errors.
 - **UI-FR-020**: Disabled actions MUST explain why they are unavailable.
 

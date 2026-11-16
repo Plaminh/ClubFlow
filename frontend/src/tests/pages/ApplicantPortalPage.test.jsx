@@ -97,6 +97,7 @@ describe('Applicant Portal', () => {
     await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
     fillValidForm();
 
+    expect(screen.getByText(/sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
 
     expect(await screen.findByText('Đã gửi hồ sơ CF-032 (mô phỏng)')).toBeInTheDocument();
@@ -104,6 +105,9 @@ describe('Applicant Portal', () => {
     const table = await screen.findByRole('table', { name: 'Hồ sơ của tôi' });
     expect(within(table).getByText('CF-032')).toBeInTheDocument();
     expect(within(table).getByText('Chờ duyệt')).toBeInTheDocument();
+    // A submitted application is read-only for the applicant: no edit or withdraw action (Q-06).
+    expect(within(table).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(table).queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('points to the existing application instead of creating a duplicate (BR-05)', async () => {

@@ -15,9 +15,9 @@ function decisionHint(detail) {
     return `${scope} Lịch phỏng vấn đã được xác nhận nên quyết định vòng CV đã khóa (BR-14).`;
   }
   if (detail.screeningStatus !== 'pendingReview') {
-    return `${scope} Quyết định "${getLabel(SCREENING_STATUS_LABELS, detail.screeningStatus)}" đã được ghi nhận; việc đổi quyết định chưa được quy định nên giao diện không hỗ trợ.`;
+    return `${scope} Quyết định "${getLabel(SCREENING_STATUS_LABELS, detail.screeningStatus)}" đã được lưu và không thể thay đổi.`;
   }
-  return scope;
+  return `${scope} Quyết định sẽ không thể thay đổi sau khi lưu.`;
 }
 
 /** Selected application beside the list (reference detail card). */

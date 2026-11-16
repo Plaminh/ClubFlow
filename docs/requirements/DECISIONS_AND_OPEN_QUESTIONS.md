@@ -155,3 +155,24 @@ How to read this section:
 - **Known limitations:** A wrong assessment cannot be corrected (Q-06). The prototype decides "has taken place" from the scenario clock and the scheduled end time; it has no attendance or no-show state.
 - **Relation to source requirements:** Consistent with Business §6 and Brief §3.3 (one assessment per completed interview; the Executive records Pass/Fail). The field list is not prescribed by the sources.
 - **Source files and tests:** `components/organisms/AssessmentForm`, `components/organisms/FinalDecisionPanel`, `constants/labels.js` (`RECOMMENDATION_LABELS`), `utils/validation.js` (`validateAssessmentInput`), `services/interviewerService.js` (`submitAssessment`), `mocks/fixtures.js`. Tests: `tests/pages/InterviewerWorkspacePage.test.jsx`, `tests/pages/FinalResults.test.jsx`, `tests/services/mockServices.test.js` ("assessments and results").
+
+### Q-06 — No exceptional editing or override workflows
+
+- **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Selected decision:**
+  - A submitted application, including its CV and selected availability, is read-only. There is no edit or withdraw action.
+  - A saved `Shortlisted` or `Rejected` screening decision is final. There is no reverse, undo or override action.
+  - A submitted assessment is read-only and cannot be submitted twice.
+  - A confirmed schedule is read-only under BR-14. A published final result is also read-only.
+  - There is no super-admin or exceptional correction workflow in the current product.
+- **Business rationale:** The sources define the normal workflow but do not grant correction or override permissions. Omitting exceptional rights avoids inventing authority and keeps every irreversible transition explicit.
+- **Implementation scope:** Frontend controls, mock service guards, confirmation dialogs and regression tests. No new screen or undo workflow was added.
+- **Frontend behavior (prototype):**
+  - The application form warns that the submitted application, CV and availability cannot be changed; My Applications exposes no edit or withdraw control.
+  - Shortlist and Reject both open the shared accessible confirmation dialog and state that the saved decision cannot be changed. Each dialog snapshots the application ID and requested decision, so changing the selected row cannot retarget the action. Cancelling performs no mutation; `useAction` rejects a duplicate in-flight UI action.
+  - Assessment submission validates first, then snapshots the interview ID and payload in a confirmation dialog. Cancelling keeps the draft. Selecting another interview unmounts the form and cancels its dialog. The service accepts at most one assessment.
+  - Confirmed schedules expose no row editor or regeneration action. Published final results expose no Pass/Fail action.
+- **Backend responsibility (not implemented):** Treat application submission, screening decisions, assessment submission, schedule confirmation and result publication as server-side state transitions. Enforce the current state atomically, reject stale or duplicate writes with `409 Conflict`, use database uniqueness/constraints where applicable, and authorize every transition. Do not provide update/delete/override endpoints unless a later approved requirement adds them.
+- **Known limitations:** A genuine data-entry mistake cannot be corrected inside the product. Operational correction would require an approved future workflow and audit trail; it must not be performed by exposing database or storage credentials to the browser.
+- **Relation to source requirements — needs Product Owner confirmation:** BR-14 already locks the confirmed schedule and related workflow data. The other immutability rules are stricter than the supplied sources, which do not describe exceptional editing rights.
+- **Source files and tests:** `pages/ApplicationReviewPage.jsx`, `pages/InterviewerWorkspacePage.jsx`, `components/organisms/ApplicationDetail`, `ApplicationForm`, `AssessmentForm`, `services/applicationService.js`, `services/interviewerService.js`, `hooks/useAction.js`. Tests: `tests/pages/ApplicationReviewPage.test.jsx`, `ApplicantPortalPage.test.jsx`, `InterviewerWorkspacePage.test.jsx`, `tests/services/mockServices.test.js`.

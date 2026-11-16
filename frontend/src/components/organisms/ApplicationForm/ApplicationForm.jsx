@@ -226,6 +226,9 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
             <Button type="submit" block disabled={disabled || pending}>
               {pending ? 'Đang gửi…' : 'Submit Application'}
             </Button>
+            <p className="hint">
+              Kiểm tra kỹ trước khi gửi: sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn.
+            </p>
             <p className="hint">Gửi hồ sơ không bảo đảm kết quả. Đây là mô phỏng, không ghi dữ liệu thật.</p>
           </div>
         </Card>

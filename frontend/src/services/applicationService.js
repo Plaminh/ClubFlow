@@ -127,8 +127,9 @@ export async function saveNote(id, note) {
 
 /**
  * Records the CV-screening decision for ONE application (BR-07).
- * Only Pending Review applications can be decided: whether a decision may be
- * reversed before confirmation is not settled by the sources (WORKFLOWS §3).
+ * Only Pending Review applications can be decided: a saved Shortlist/Reject
+ * decision is final (team-selected Q-06; the sources leave reversal open,
+ * WORKFLOWS §3). There is no undo and no override.
  */
 export async function setScreening(id, status) {
   await mockRequest();
@@ -142,7 +143,7 @@ export async function setScreening(id, status) {
   if (application.screeningStatus !== 'pendingReview') {
     throw createUiError(
       'conflict',
-      `Hồ sơ ${id} đã có quyết định "${getLabel(SCREENING_STATUS_LABELS, application.screeningStatus)}".`,
+      `Hồ sơ ${id} đã có quyết định "${getLabel(SCREENING_STATUS_LABELS, application.screeningStatus)}"; quyết định đã lưu không thể thay đổi.`,
     );
   }
   application.screeningStatus = status;

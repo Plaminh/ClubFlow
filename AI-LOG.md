@@ -425,3 +425,29 @@ Checked: each new regression test was confirmed to fail without its fix where pr
 Verified: `npm run verify` exit 0 — lint clean, frontend 166 tests (18 files), backend 18 tests, build OK (same >500 kB chunk warning as before).
 
 By hand: The team reviews the five UI-6 commits, especially the `studentInfo` snapshot (the backend must store the submitted values too) and the Executive-only `getCampaign()`.
+
+---
+
+## 2026-11-16 — UI-7.1 — Q-06 irreversible workflow actions
+
+Tool: Codex using the `speckit-implement` skill.
+
+Asked for: Resume the interrupted Q-06 frontend work without discarding the recovered changes; finish confirmations and immutable states for applications, screening decisions, assessments, confirmed schedules and published results; prevent stale-selection and duplicate-action regressions; synchronize documentation and tests.
+
+Kept: The recovered changes in eight frontend files, the shared `ConfirmDialog`, the existing service/hook boundaries, the mock service state guards, the no-edit application and schedule behavior, and all Q-03/Q-04 behavior. No backend, dependency, environment or Docker file changed.
+
+Changed:
+
+- Both Shortlist and Reject now state that the saved decision is final and require confirmation. The confirmation state snapshots the application ID and decision, so selecting another application cannot retarget the action; feedback is shown only on the application it belongs to.
+- Assessment submission validates first, then snapshots the interview ID and payload in a confirmation dialog. Cancelling keeps the draft; selecting another interview unmounts and cancels the old form. `useAction` and the mock service continue to reject duplicate in-flight or already-submitted actions.
+- Application and assessment screens explicitly explain their read-only-after-submit behavior. Regression tests cover cancel, stale selection, immutable screening controls and submitted read-only states.
+- Added the Q-06 decision record and backend state-transition contract (still `TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION`); aligned the UI service contract, feature requirement and Spec Kit tasks T071–T073.
+
+Verified:
+
+- Recovery baseline before edits: `npm run verify` exit 0 — frontend 191/191, backend 18/18, lint and build passed.
+- Targeted tests: 23/23 passed across `ApplicationReviewPage.test.jsx` and `InterviewerWorkspacePage.test.jsx`.
+- Full `npm run verify` exit 0 — frontend 193/193 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
+- Headless Microsoft Edge against the Vite dev server: Shortlist and assessment confirmation dialogs checked at 360, 768 and 1280 CSS px. In all six checks the page and dialog had no horizontal overflow, the dialog fit the 900 px viewport, and Cancel had initial focus. Escape/cancel caused no screening mutation; assessment cancel preserved its draft. This was real-browser viewport simulation, not real browser zoom.
+
+By hand: The team must review and understand the immutable-workflow policy and code before accepting it; Product Owner confirmation is still pending.
