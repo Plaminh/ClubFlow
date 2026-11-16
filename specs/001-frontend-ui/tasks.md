@@ -11,7 +11,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 **Tests**: Included. `AGENTS.md` requires automated tests for critical UI interactions and validators when observable behavior changes.
 
-**Organization**: UI-0 is preparation. Phase 1–2 = UI-1 (foundation), Phase 3–5 = UI-2 (Executive stories US1–US3), Phase 6 = UI-3 (US4), Phase 7 = UI-4 (US5), Phase 8 = UI-5 (polish and integration readiness).
+**Organization**: UI-0 is preparation. Phase 1–2 = UI-1 (foundation), Phase 3–5 = UI-2 (Executive stories US1–US3), Phase 6 = UI-3 (US4), Phase 7 = UI-4 (US5), Phase 8 = UI-5 (polish and integration readiness), and Phases 11–13 = UI-8 (US6 Sign In and US7 My Profile). Historical task wording is retained where useful and annotated when UI-8 superseded it.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -61,7 +61,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 - [x] T022 Adapt `frontend/src/components/templates/MainTemplate/` into the page template (title, eyebrow, campaign context, actions slot) — UI-1.2
 - [x] T023 Turn `frontend/src/layouts/MainLayout.jsx` into the app shell (header, main, footer) — UI-1.2 (renamed to `AppLayout.jsx`)
 - [x] T024 Add route constants to `frontend/src/routes/paths.js` and create `frontend/src/routes/AppRoutes.jsx` — UI-1.1
-- [x] T025 Create the six route targets in `frontend/src/pages/` (five screens with correct titles and campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx` — UI-2…UI-4 (all five screens with their reference titles and campaign context; the temporary placeholder page was removed in UI-5)
+- [x] T025 Create the six route targets present in the historical UI-1…UI-4 scope (five business screens with correct titles/campaign context, plus `NotFoundPage.jsx`) and wire `frontend/src/App.jsx` — UI-2…UI-4 (UI-8 later added Sign In and My Profile; the temporary placeholder page was removed in UI-5)
 - [x] T026 Add shell tests in `frontend/src/tests/routes/AppRoutes.test.jsx` (titles, role navigation, not-found) — UI-1.2 (with `frontend/src/tests/layouts/AppLayout.test.jsx`)
 - [x] T027 Decide with the team whether to retire `ClubFlowOverview`, `StatusBadge`, `HomePage`, and `useApiHealth`; record the decision in `AI-LOG.md` — UI-5 (removed after confirming no references: HomePage, RoutePlaceholderPage, ClubFlowOverview, constants/project.js; useApiHealth and StatusBadge kept for the footer health check)
 
@@ -114,7 +114,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 - [x] T049 [P] [US4] Create `Checkbox` atom and `FileField` molecule — UI-3 (checkboxes via the `ChoiceGroup` molecule from UI-2.4; `FileField` molecule)
 - [x] T050 [US4] Create `frontend/src/services/portalService.js` (submission takes `FormData`) — UI-1.3
 - [x] T051 [US4] Create `frontend/src/hooks/useApplicantPortal.js` — UI-3
-- [x] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms; add the SOP word-count helper to `frontend/src/utils/format.js` with tests — UI-3 (`PublicCampaignPanel`, `ApplicationForm`, `MyApplicationsTable`, `NotificationList`; sign-in uses the shared `SignInDialog` from UI-1.2; the word counter uses `countWords` in `utils/validation.js`)
+- [x] T052 [US4] Create `PublicCampaign`, `SignInDialog`, `ApplicationForm`, `MyApplications`, `NotificationList` organisms; add the SOP word-count helper to `frontend/src/utils/format.js` with tests — UI-3 (`PublicCampaignPanel`, `ApplicationForm`, `MyApplicationsTable`, `NotificationList`; the historical `SignInDialog` was removed and replaced by `/login` in UI-8; the word counter uses `countWords` in `utils/validation.js`)
 - [x] T053 [US4] Implement `frontend/src/pages/ApplicantPortalPage.jsx` with URL-synced tabs — UI-3
 - [x] T054 [US4] Add tests in `frontend/src/tests/pages/ApplicantPortalPage.test.jsx` (phase messages, sign-in prompt, PDF/5 MB, SOP 300/301 words, slot required, duplicate notice, unpublished results hidden) — UI-3
 
@@ -132,7 +132,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 
 ## Phase 8: Polish & Integration Readiness (UI-5)
 
-- [x] T060 Run the `specs/001-frontend-ui/quickstart.md` responsive, zoom, and accessibility checklist for all five screens and fix issues in the affected component CSS — UI-5 (automated browser matrix; see quickstart.md results)
+- [x] T060 Run the `specs/001-frontend-ui/quickstart.md` responsive, zoom, and accessibility checklist for all five business screens and fix issues in the affected component CSS — UI-5 (automated browser matrix; see quickstart.md results)
 - [x] T061 Record results in the quickstart.md results log — UI-5
 - [x] T062 Update `frontend/src/services/apiClient.js` (no forced JSON header for `FormData`, keep backend error message, optional Bearer token, 204 handling) with tests in `frontend/src/tests/services/apiClient.test.js` — UI-5
 - [x] T063 [P] Write `docs/frontend/INTEGRATION.md` (service → hook → page map; how to replace demo bodies) and link it from `docs/README.md` — UI-5
@@ -160,7 +160,7 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T071 [US2] [US5] Finish Q-06 confirmations and immutable UI states for application screening and assessment submission; pin every confirmed action to its original entity and payload
 - [x] T072 [US2] [US4] [US5] Add Q-06 regression coverage for cancel, stale selection, duplicate submission guards and read-only submitted states
 - [x] T073 Document the Q-06 frontend behavior, backend state-transition contract, limitations and pending approval status in the decision record, integration guide and feature spec
-- [x] T074 Audit Q-02 date-only and timestamp formatting across all five screens and rerun boundary-focused tests; no code change required beyond existing commit `f76eb54`
+- [x] T074 Audit Q-02 date-only and timestamp formatting across all five business screens and rerun boundary-focused tests; no code change required beyond existing commit `f76eb54`
 - [x] T075 [US3] Align mock schedule/resource presentation with Q-01 submission-time/ID, chronological-slot and stable-resource ordering without adding a frontend generator; add regression coverage
 - [x] T076 Document the Q-01 backend first-fit loop, no-backtracking limitation and pending approval status in the decision record, integration guide and research
 - [x] T077 [US2] [US4] Keep Q-05 publication and applicant notification visibility consistent, and state accurately that mock mode sends no real email
@@ -170,7 +170,7 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T081 Confirm the prototype exposes only the fictional sample PDF and makes no public-URL security claim; no real Cloudinary upload implemented
 - [x] T082 Document Multer/PDF-content validation, protected Cloudinary metadata, authorized retrieval, short-lived delivery, cleanup and pending capability/approval decisions
 - [x] T083 Audit the three requested UI cleanups: Vietnamese date display, concise interview preparation summary and absent Campaign Preview read-only badge; existing implementation/tests already satisfy them
-- [x] T084 Run the final headless Edge matrix for 8 key states across all five screens at 360/768/1280 px and record the 24/24 result in `quickstart.md`
+- [x] T084 Run the final headless Edge matrix for 8 key states across all five business screens at 360/768/1280 px and record the 24/24 result in `quickstart.md`
 - [x] T085 Run the final lint, frontend/backend tests, build, verify, diff/link/status/security-scope checks; update `AI-LOG.md` and close UI-7
 
 ---

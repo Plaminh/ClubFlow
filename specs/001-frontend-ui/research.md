@@ -23,10 +23,12 @@ Each decision records what was chosen, why, and what was rejected. Decisions D-U
   | `/executive/review` | Application Review — `?tab=screening\|results` | Executive |
   | `/executive/scheduling` | Interview Scheduling | Executive |
   | `/interviewer` | Interviewer Workspace | Interviewer |
+  | `/login` | Shared Sign In | Visitor; authenticated accounts redirect to a role-safe destination |
+  | `/profile` | Shared My Profile | Executive / Applicant / Interviewer (`AuthGate`) |
   | `*` | Not found | Any |
 
-  Six routes in total; the route constants live in `frontend/src/routes/paths.js`.
-- **Rationale**: Five screens, deep-linkable tabs (UI-FR-004), and browser back/forward. A hand-written router would duplicate a well-known library and be harder for teammates to explain.
+  Eight route targets in total: five business screens, two shared account screens, and Not found. Route constants live in `frontend/src/routes/paths.js`.
+- **Rationale**: Seven product screens, deep-linkable business tabs (UI-FR-004), protected profile/intended destinations, and browser back/forward. A hand-written router would duplicate a well-known library and be harder for teammates to explain.
 - **Rejected**: State-only page switching (no URLs or back button); Next.js or a framework change (prohibited by `AGENTS.md`).
 - **Approval needed**: Adding a dependency requires team approval per `AGENTS.md` ("Change Safety"). Recording it here is the justification required by the constitution (§IX).
 
@@ -67,6 +69,7 @@ Each decision records what was chosen, why, and what was rejected. Decisions D-U
   - Reference conflict resolved: `scheduling.html` shows CF-031's availability as 09:00–09:15, but applicants choose hourly club slots (`applicant.html`). The fixture uses the hourly slot 09:00–10:00, and the CF-031 Unassigned reason is reworded to be true for that data ("Gia Huy và cả hai phòng đã được xếp trong ca 09:00–09:15…").
   - Screening decisions can only be recorded for Pending Review applications. Whether a decision may be reversed before confirmation is not settled by the sources (WORKFLOWS §3), so the UI does not offer reversal.
   - Interview date, window, and duration in Campaign Management are editable only while no application exists, because applicants pick slots from them (UI assumption pending Q-03).
+  - **Implementation update (UI-7, supersedes the preceding Q-03 planning assumption):** the team selected a stricter rule: the entire campaign configuration becomes read-only immediately on publication. Scheduling can change only selected room IDs. This remains pending Product Owner confirmation.
 
 ## D-UI-06 — Demo identity
 

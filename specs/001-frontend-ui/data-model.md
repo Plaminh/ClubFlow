@@ -12,7 +12,7 @@
 | `AssessmentStatus` | `awaiting`, `submitted` | labels.js ("Chờ đánh giá", "Đã gửi") |
 | `ResultDecision` | `null`, `pass`, `fail` | labels.js |
 | `Recommendation` | `null`, `pass`, `fail` (optional and advisory; team-selected Q-04) | labels.js ("Không nêu đề xuất", "Đề xuất Pass", "Đề xuất Fail") |
-| `ScenarioId` | `before-open`, `accepting`, `screening`, `confirmed` | labels.js |
+| `ScenarioId` | `draft`, `before-open`, `accepting`, `screening`, `confirmed` | labels.js |
 | `Role` | `visitor`, `executive`, `applicant`, `interviewer` | labels.js |
 
 Screening, schedule, assessment, and result are **separate fields** (BR-08); none is derived from another.
@@ -21,11 +21,11 @@ Screening, schedule, assessment, and result are **separate fields** (BR-08); non
 
 | Record | Key fields | Relationships / notes |
 |---|---|---|
-| `Campaign` | `id`, `name`, `hostClub`, `description`, `instructions`, `opensAt`, `closesAt`, `interviewDate`, `interviewWindow {start,end}`, `slotMinutes` (15/20/30), `status` | One campaign in the demo |
+| `Campaign` | `id`, `name`, `hostClub`, `description`, `instructions`, `opensOn`, `closesOn`, `publishedAt?`, `interviewDate`, `interviewWindow {start,end}`, `slotMinutes` (15/20/30), `status` | One campaign in the demo; date-only fields use `YYYY-MM-DD` |
 | `Department` | `id`, `name` | "Digital Product", "Communications" |
 | `Position` | `id`, `departmentId`, `name`, `quota`, `description`, `requirements` | UX Design, Content Creation; quota 2 each |
 | `AvailabilitySlot` | `id`, `campaignId`, `start`, `end` | 09:00–10:00, 10:00–11:00, 11:00–12:00 on 05/11/2026 |
-| `AccountProfile` | `id`, `role`, `displayName`, `email`, `studentId?`, `faculty?`, `year?` | One current mutable demo profile per pre-provisioned account; only `displayName` and `email` are editable in UI-8 |
+| `AccountProfile` | `id`, `role`, `displayName`, `email`, `description?`, `studentId?`, `faculty?`, `year?` | One current mutable demo profile per pre-provisioned account; only `displayName` and `email` are editable in UI-8 |
 | `DemoCredential` | `accountId`, `email`, `password` | Development-only lookup; fictional `.example` emails; password is never copied to browser storage or returned with a profile |
 | `Application` | `id` (CF-026…CF-031), `applicantId`, `campaignId`, `positionId`, `submittedAt`, `reviewedAt?`, `studentInfo`, `sop`, `cvFileName`, `availabilitySlotIds[]`, `screeningStatus`, `privateNote?` | Unique per applicant + campaign + position (BR-05) |
 | `Room` | `id`, `name` | A-201, B-105 |
@@ -33,7 +33,7 @@ Screening, schedule, assessment, and result are **separate fields** (BR-08); non
 | `Interview` | `id`, `applicationId`, `interviewerId?`, `roomId?`, `start?`, `end?`, `status`, `reason?`, `conflictWithIds[]` | At most one per application (BR-10) |
 | `Assessment` | `id`, `interviewId`, `interviewerId`, `notes` (required), `recommendation?`, `submittedAt` | At most one per interview; read-only after submission; the recommendation is not the final result |
 | `FinalResult` | `applicationId`, `decision`, `recordedAt?`, `publishedAt?` | Hidden from Applicant views until `publishedAt` is set |
-| `Notification` | `id`, `accountId`, `applicationId`, `message`, `createdAt` | Created only when a result is published |
+| `Notification` | `id`, `accountId`, `applicationId`, `message`, `createdAt`, `readAt?` | Created only when a result is published |
 | `DemoScenario` | `id`, `now` (fixed date-time), `overrides` | Applied on top of base records |
 
 ## Scenario states (from UI_REFERENCE_NOTES.md)

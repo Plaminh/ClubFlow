@@ -255,9 +255,9 @@ Business meaning is defined in [PRODUCT_SPEC §5](../../docs/requirements/PRODUC
 ### Measurable Outcomes
 
 - **SC-001**: A reviewer can complete each of the five user stories' independent tests end to end using only the demo data, without developer help.
-- **SC-002**: All five screens show no horizontal page scroll and no clipped primary action at 360, 768, and 1280 px, and at 125/150/200% zoom on a 1280 px window (manual checklist: 5 screens × 6 conditions = 30 checks, all passing).
+- **SC-002**: All five business screens show no horizontal page scroll and no clipped primary action at 360, 768, and 1280 px, and at 125/150/200% zoom on a 1280 px window (historical UI-5 checklist: 5 business screens × 6 conditions = 30 checks). UI-8 extends the same expectation to Sign In and My Profile; recorded headless evidence is in `quickstart.md`.
 - **SC-003**: For every displayed summary count (statistics, schedule counts, pagination text), the number equals the matching visible records in 100% of demo scenarios.
-- **SC-004**: Every primary control in the five screens produces a visible result (navigation, tab change, dialog, validation message, or state change); zero controls do nothing silently.
+- **SC-004**: Every primary control in the five business screens and the two shared account screens produces a visible result (navigation, tab change, dialog, validation message, or state change); zero controls do nothing silently.
 - **SC-005**: Replacing the demo data source for one screen requires no change to that screen's layout or visual components (verified during the first backend integration).
 - **SC-006**: All interactive flows can be completed with the keyboard alone.
 - **SC-007**: The project quality gate (`npm run verify`) passes at the end of every implementation phase.

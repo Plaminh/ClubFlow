@@ -574,3 +574,27 @@ Verified:
 Limitations: authentication and profile changes are simulated in browser memory and reset on reload, scenario switch or demo reset; route guards are UI convenience, not security; lists that resolve a person's name by account ID still show the fixture name after a profile rename.
 
 By hand: The team must review this AI-assisted change before committing, and should repeat a keyboard-only pass in a real browser. Backend engineers own real authentication, authorization and profile persistence.
+
+---
+
+## 2026-11-16 — Final frontend documentation synchronization after UI-8
+
+Tool: Codex.
+
+Asked for: Audit the current React implementation and synchronize frontend documentation only; cover five business screens plus shared Sign In and My Profile, align service contracts and backend handoff guidance, preserve canonical requirements, validate links/diff, and stop before commit.
+
+Changed:
+
+- Updated the detailed frontend walkthrough to describe all seven product screens, the current `/login` and `/profile` flows, role-safe redirects, account menu/Sign Out, `AuthGate`/`RoleGate`, `dataVersion`/`sessionEpoch`, mock reset/isolation, immutable application snapshots, loading/error/empty states, and current limitations.
+- Rebuilt the walkthrough service map from the actual pages, hooks and service signatures, separated input/output/mock/backend responsibilities, and removed the unapproved proposed endpoint-path table.
+- Synchronized `docs/frontend/INTEGRATION.md`, the UI service contracts, data model, routing research, plan, spec, tasks, quickstart and root README. Historical references to five screens now say five **business** screens where needed; historical `SignInDialog` work is explicitly marked as superseded by UI-8.
+- Preserved `docs/requirements/` unchanged. Flagged the Q-05 conflict instead of silently resolving it: canonical scope excludes email/SMS/push, while the team's Brevo idea is provisional and still lacks Product Owner approval.
+- Added a complete UI-8 manual checklist for all three roles, invalid credentials, Profile Save/Cancel/duplicate email, changed-email sign-in, account switching/reset, Sign Out, protected routes, responsive navigation, five-business-screen regressions, real zoom and screen-reader review.
+
+Evidence used:
+
+- Existing UI-8 records: frontend 295/295 (23 files), backend 18/18 (5 files), and 28/28 headless responsive/state checks at 360/640/768/1280 CSS px. These checks were **not rerun** for this documentation-only task.
+- Manual real-browser zoom and screen-reader verification remain outstanding, as already recorded in `specs/001-frontend-ui/quickstart.md`.
+- Documentation verification for this task: all relative Markdown targets in the modified files resolve; Markdown table column counts pass; stale-term search leaves only clearly historical five-business-screen/`SignInDialog` references; `git diff --check` passes; the changed-file scope contains documentation only.
+
+Scope: Documentation only. No file under `frontend/src/`, `backend/`, database, environment, dependency or canonical requirement documentation was modified. No branch, commit, add or push operation was performed.

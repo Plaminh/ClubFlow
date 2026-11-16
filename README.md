@@ -31,6 +31,8 @@ The project intentionally uses one local `.env` file at repository root. Fronten
 
 Models represent domain entities and behavior; they are not a mandatory processing layer after repositories. For canonical implementation conventions, see [`AGENTS.md`](AGENTS.md). For an explanatory overview, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+The current frontend prototype contains five business screens plus the shared `/login` and protected `/profile` screens. It uses mock data and simulated authentication/profile state; only the API health check reaches the backend. See the detailed [frontend walkthrough](docs/frontend/walkthrough/ClubFlow_UI_Prototype_to_Backend_Guide.md) and the concise [backend integration contract](docs/frontend/INTEGRATION.md).
+
 ## Prerequisites
 
 - Node.js 22.12+ (Node 24 is also fine)

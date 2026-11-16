@@ -12,11 +12,11 @@ Build the five ClubFlow business screens plus shared Sign In and My Profile scre
 
 **Language/Version**: JavaScript (ES modules), JSX, React 19, Node ≥ 22.12 for tooling
 
-**Primary Dependencies**: React, Vite (existing). **New in UI-1, pending team approval**: `react-router-dom` (D-UI-02). No other new runtime dependencies.
+**Primary Dependencies**: React, Vite, and `react-router-dom` (approved and installed in UI-1; D-UI-02). No other runtime dependency was added for this feature.
 
-**Storage**: None. Demo records live in memory (`frontend/src/mocks/`) and reset on reload.
+**Storage**: Demo records live in memory (`frontend/src/mocks/`) and reset to scenario fixtures on reload. `sessionStorage` preserves only selected account/scenario IDs, never a password or durable profile data.
 
-**Testing**: Vitest + React Testing Library + jest-dom (existing). Responsive and zoom checks are manual ([quickstart.md](quickstart.md)) because jsdom does not render layout.
+**Testing**: Vitest + React Testing Library + jest-dom. Headless Edge adds responsive/state evidence because jsdom does not render layout; real browser zoom, keyboard and screen-reader checks remain in the manual checklist ([quickstart.md](quickstart.md)).
 
 **Target Platform**: Current Chrome, Edge, and Firefox on desktop, tablet, and mobile widths.
 
@@ -34,7 +34,7 @@ Build the five ClubFlow business screens plus shared Sign In and My Profile scre
 
 | Principle | Status | Notes |
 |---|---|---|
-| I. Fixed stack | ✅ | React + Vite + Vitest unchanged. `react-router-dom` is a library within the stack, not a replacement; needs approval (see Complexity Tracking). |
+| I. Fixed stack | ✅ | React + Vite + Vitest unchanged. `react-router-dom` was approved as a library within the existing stack, not a replacement. |
 | II. Frontend architecture | ✅ | Atomic Design kept; atoms and molecules never call services; API access only through `services/` and `apiClient`; no Redux (context only). |
 | III. Backend architecture | ✅ N/A | No backend changes. |
 | IV. Database discipline | ✅ N/A | No schema changes; demo records are not seeds. |
@@ -65,31 +65,24 @@ specs/001-frontend-ui/
 └── tasks.md
 ```
 
-### Source Code (target state after UI-5; files appear phase by phase)
+### Source Code (current state after UI-8)
 
 ```text
 frontend/src/
 ├── App.jsx                         # router + providers
 ├── main.jsx
-├── routes/
-│   ├── paths.js                    # route constants (existing, extended)
-│   └── AppRoutes.jsx
+├── routes/                         # AppRoutes, paths, navigation, AuthGate, RoleGate
 ├── contexts/
 │   └── DemoSessionContext.jsx      # demo account + scenario (not auth)
 ├── layouts/
-│   └── MainLayout.jsx              # existing, becomes the app shell
+│   └── AppLayout.jsx               # app shell, auth navigation, account menu, DemoBar
 ├── styles/
 │   ├── tokens.css                  # one token system
 │   └── global.css                  # existing, extended
 ├── constants/
-│   ├── project.js                  # existing
 │   └── labels.js                   # status id → Vietnamese label
-├── utils/
-│   └── format.js                   # dd/MM/yyyy, time ranges, word count
-├── mocks/
-│   ├── fixtures.js                 # base records
-│   ├── scenarios.js                # scenario overrides + demo clock
-│   └── store.js                    # in-memory session store
+├── utils/                          # format, validation, CSV, campaign phase helpers
+├── mocks/                          # auth, fixtures, scenarios, store, derive, guards
 ├── services/
 │   ├── apiClient.js                # existing (fixed in UI-5)
 │   ├── healthService.js            # existing
@@ -103,12 +96,12 @@ frontend/src/
 │   ├── scheduleService.js
 │   ├── portalService.js
 │   └── interviewerService.js
-├── hooks/                          # one per screen area (useCampaign, useApplications, …)
+├── hooks/                          # shared async/action hooks + one per screen area
 ├── components/
-│   ├── atoms/                      # Button (existing), Badge, TextInput, Select, Textarea, Checkbox
-│   ├── molecules/                  # FormField, Alert, StatCard, Tabs, Pagination, EmptyState, StepIndicator, FileField
-│   ├── organisms/                  # AppHeader, Modal, ConfirmDialog, DataTable, DetailPanel, screen organisms
-│   └── templates/                  # MainTemplate (existing) → page template with title + campaign context
+│   ├── atoms/                      # Button, Badge
+│   ├── molecules/                  # reusable fields, alerts, cards, tabs, pagination, account menu, etc.
+│   ├── organisms/                  # AppHeader, DemoBar, dialogs/tables/forms and screen organisms
+│   └── templates/                  # MainTemplate → page title/context/actions composition
 ├── pages/
 │   ├── CampaignManagementPage.jsx
 │   ├── ApplicationReviewPage.jsx
@@ -118,7 +111,7 @@ frontend/src/
 │   ├── SignInPage.jsx
 │   ├── ProfilePage.jsx
 │   └── NotFoundPage.jsx
-└── tests/                          # existing location; mirrors components/, pages/, mocks/
+└── tests/                          # a11y, components, contexts, layouts, mocks, pages, routes, services, utils
 ```
 
 **Structure Decision**: Keep the existing `frontend/src` layout and Atomic Design folders. The only new top-level folder is `mocks/` (justified in D-UI-05). `layouts/AppLayout.jsx` remains the routing shell; `templates/` stays the page-level composition, as described in `docs/ARCHITECTURE.md`.
@@ -150,10 +143,10 @@ Each phase ends with `npm run verify` passing, an AI-LOG entry, and a review bef
 
 ### UI-3 — Applicant Portal (US4)
 
-- **Scope**: public campaign and positions, demo sign-in dialog, application form (CV file checks, SOP counter, slot selection, duplicate-position notice), My Applications, notifications.
+- **Scope (historical UI-3)**: public campaign and positions, the then-current demo sign-in dialog, application form (CV file checks, SOP counter, slot selection, duplicate-position notice), My Applications, notifications. UI-8 later removed the dialog and replaced it with `/login`.
 - **Shared components added**: `Checkbox`, `FileField`, reuse `Tabs`, `Modal`, `DataTable`.
 - **Dependencies**: UI-1; `Modal` and `Tabs` from UI-2.
-- **Expected files**: `src/pages/ApplicantPortalPage.jsx`, `src/services/portalService.js`, `src/hooks/useApplicantPortal.js`, organisms (`PublicCampaign`, `ApplicationForm`, `MyApplications`, `NotificationList`, `SignInDialog`), tests.
+- **Expected files (at UI-3)**: `src/pages/ApplicantPortalPage.jsx`, `src/services/portalService.js`, `src/hooks/useApplicantPortal.js`, organisms (`PublicCampaign`, `ApplicationForm`, `MyApplications`, `NotificationList`, historical `SignInDialog`), tests. `SignInDialog` is not part of the current source after UI-8.
 - **Acceptance**: the US4 acceptance scenarios.
 - **Tests**: phase messages per scenario; sign-in prompt for Visitor; PDF type and 5 MB checks; SOP 300-word boundary (300 passes, 301 fails); slot required; duplicate position notice; unpublished result never shown; notification appears only for published results.
 - **Commit boundary**: (1) `feat: add applicant portal campaign and application form`; (2) `feat: add applicant applications and notifications`.
@@ -191,5 +184,5 @@ Each phase ends with `npm run verify` passing, an AI-LOG entry, and a review bef
 | Addition | Why needed | Simpler alternative rejected because |
 |---|---|---|
 | `react-router-dom` dependency | Deep-linkable screens and tabs, back/forward, role routes | Hand-written state switching gives no URLs and is harder to explain |
-| `src/mocks/` folder + in-memory store | Consistent demo data across five screens in one session | Per-page constants contradict each other (shown in the reference package) |
+| `src/mocks/` folder + in-memory store | Consistent demo data across five business screens and two shared account screens in one session | Per-page constants contradict each other (shown in the reference package) |
 | `DemoSessionContext` | Role and scenario previews without real auth | Prop drilling through every page; Redux is prohibited |

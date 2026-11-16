@@ -13,8 +13,8 @@ ma trận màn hình → service → API và checklist tích hợp.</p>
 <tr><th>Phạm vi</th><td>Frontend React (UI-first prototype, dữ liệu mock) và kế hoạch nối với backend Express + PostgreSQL</td></tr>
 <tr><th>Đối tượng đọc</th><td>Nhóm sinh viên phát triển ClubFlow, đặc biệt là thành viên làm API và cơ sở dữ liệu</td></tr>
 <tr><th>Nguồn sự thật</th><td>Mã nguồn hiện tại trong <code>frontend/src</code>, <code>docs/frontend/INTEGRATION.md</code>, <code>docs/requirements/</code>, <code>specs/001-frontend-ui/</code></td></tr>
-<tr><th>Ảnh chụp</th><td>Chụp mới ngày 15/11/2026 từ <code>http://localhost:3000</code> (Vite dev server) bằng Microsoft Edge headless; 1280 px và 360 px CSS</td></tr>
-<tr><th>Nhánh mã</th><td><code>chore/clubflow-rebrand</code> (commit <code>1c95c31</code>; mã nguồn giống <code>4204e80</code>)</td></tr>
+<tr><th>Ảnh chụp</th><td>Bộ ảnh của năm màn hình nghiệp vụ được chụp ngày 15/11/2026 từ <code>http://localhost:3000</code> bằng Microsoft Edge headless; ảnh Sign In kiểu hộp thoại là bằng chứng lịch sử trước UI-8, không còn là luồng hiện tại</td></tr>
+<tr><th>Đồng bộ tài liệu</th><td>16/11/2026 · đối chiếu mã nguồn sau UI-8 (Sign In và My Profile)</td></tr>
 </table>
 <div class="cover-note"><strong>Lưu ý quan trọng.</strong> Giao diện React và các tương tác đã được xây dựng, nhưng mọi dữ liệu
 đều là dữ liệu hư cấu trong bộ nhớ trình duyệt. Chưa có API nghiệp vụ, chưa có xác thực thật, chưa lưu trữ bền vững.
@@ -36,15 +36,15 @@ Bài toán thực tế mà ClubFlow giải quyết là các đợt tuyển thư�
 
 ## 1.2 Phạm vi prototype hiện tại
 
-Frontend hiện là một **prototype React được chuẩn bị để tích hợp backend** (feature `specs/001-frontend-ui`, tasks T001–T070 đã hoàn thành). Năm màn hình chính đều có thể sử dụng với dữ liệu demo; mọi lệnh gọi dữ liệu đi qua lớp `services`, nên khi có API thật chỉ cần thay thân hàm service.
+Frontend hiện là một **prototype React được chuẩn bị để tích hợp backend** (feature `specs/001-frontend-ui`, tasks T001–T098 đã hoàn thành). Phạm vi giao diện gồm **năm màn hình nghiệp vụ và hai màn hình tài khoản dùng chung**: Sign In và My Profile. Cả bảy đều có thể sử dụng với dữ liệu demo; mọi lệnh gọi dữ liệu đi qua lớp `services`, nên điểm thay thế chính khi tích hợp là thân hàm service và provider xác thực.
 
 | Thành phần | Trạng thái | Ghi chú |
 |---|---|---|
-| Giao diện React (5 màn hình, tab, hộp thoại) | **Đã triển khai** | Atomic Design, responsive 360 px → desktop |
-| Tương tác mock (lọc, quyết định, xếp lịch, công bố…) | **Đã triển khai** | Chạy trên store trong bộ nhớ, mất khi tải lại trang |
+| Giao diện React (5 màn hình nghiệp vụ + 2 màn hình tài khoản) | **Đã triển khai** | Atomic Design, responsive 360 px → desktop |
+| Tương tác mock (đăng nhập, hồ sơ, lọc, quyết định, xếp lịch, công bố…) | **Đã triển khai** | Chạy trên store trong bộ nhớ; tải lại trang khôi phục fixture của kịch bản và chỉ giữ lựa chọn account/scenario |
 | Dữ liệu và service mock | **Đã triển khai** | `frontend/src/mocks/`, thân hàm trong `frontend/src/services/` |
 | `apiClient` (HTTP, Bearer token, ánh xạ lỗi) | **Đã triển khai, chưa dùng cho nghiệp vụ** | Chỉ `GET /health` đang gọi thật |
-| Xác thực, phân quyền thật | **Chưa triển khai** | Demo Session chỉ chọn tài khoản hư cấu |
+| Xác thực, phân quyền thật | **Chưa triển khai** | `/login` kiểm credential hư cấu; `DemoSessionContext`, `AuthGate`, `RoleGate` chỉ mô phỏng UI, không phải bảo mật |
 | API nghiệp vụ, lưu trữ PostgreSQL | **Chưa triển khai** | Backend mới có scaffold và `/api/health` |
 | Quy tắc nghiệp vụ phía server (BR-01…BR-14) | **Chưa triển khai** | Mock chỉ mô phỏng để UI hiển thị đúng |
 
@@ -59,7 +59,7 @@ Frontend hiện là một **prototype React được chuẩn bị để tích h�
 ## 1.4 Cái gì là mock, cái gì là thật
 
 - **Thật:** mã React, định tuyến, component, kiểm tra hợp lệ phía client (`utils/validation.js`), `apiClient`, kiểm tra sức khỏe API ở footer (`useApiHealth` → `GET /api/health`, hiển thị *API connected* / *API unavailable*).
-- **Mock:** tài khoản và đăng nhập (`DemoSessionContext`), kịch bản demo với đồng hồ cố định, toàn bộ dữ liệu chiến dịch/hồ sơ/lịch/đánh giá/kết quả, kiểm tra quyền và khóa BR-14 trong `mocks/guards.js`, tính trạng thái lịch trong `mocks/derive.js`.
+- **Mock:** credential và phiên đăng nhập (`authService`, `DemoSessionContext`), hồ sơ cá nhân, kịch bản demo với đồng hồ cố định, toàn bộ dữ liệu chiến dịch/hồ sơ/lịch/đánh giá/kết quả, kiểm tra quyền và khóa BR-14 trong `mocks/guards.js`, tính trạng thái lịch trong `mocks/derive.js`. Không có JWT, cookie phiên hay persistence thật.
 - **Thanh Demo** dưới header chỉ tồn tại cho mục đích trình diễn; phải gỡ hoặc ẩn trong bản production (chương 13).
 
 ## 1.5 Kiến trúc hiện tại và kiến trúc mục tiêu
@@ -100,13 +100,15 @@ Lớp thay đổi khi tích hợp là **thân các hàm trong `frontend/src/serv
 | Application Review — Final Results | `/executive/review?tab=results` | Ban tuyển dụng | Xem đánh giá, ghi nhận Pass/Fail, công bố | View Assessment, Record Pass/Fail, Publish Results | Scheduling | UI + mock |
 | Interview Scheduling | `/executive/scheduling` | Ban tuyển dụng | Lịch nháp, xử lý Conflict/Unassigned, xác nhận, xuất lịch | Tạo lại lịch nháp, Giải quyết/Sửa/+ Gán khung giờ, Lưu thay đổi, Duyệt & xác nhận lịch, Xuất lịch | Application Review | UI + mock |
 | Interviewer Workspace | `/interviewer` | Người phỏng vấn | Xem buổi được phân công, chi tiết ứng viên, gửi đánh giá | Chọn, Submit Assessment | — | UI + mock |
+| Sign In | `/login` | Khách; tài khoản đã đăng nhập bị chuyển khỏi trang | Đăng nhập bằng credential hư cấu được cấp sẵn | Đăng nhập, hiện/ẩn mật khẩu, quay về Applicant Portal | Route đích dự định hợp lệ | UI + mock |
+| My Profile | `/profile` | Ban tuyển dụng, Ứng viên, Người phỏng vấn | Xem hồ sơ và sửa họ tên hiển thị/email | Chỉnh sửa, Lưu thay đổi, Hủy thay đổi | Account menu | UI + mock |
 | Không tìm thấy trang | mọi URL khác | Tất cả | Thông báo 404 phía client | — | — | UI |
 
 ## 2.2 Màn hình, tab, hộp thoại, panel và trạng thái
 
-- **Màn hình (screen):** một route có `<h1>` riêng (6 route ở trên).
+- **Màn hình (screen):** bảy route sản phẩm có `<h1>` riêng: năm màn hình nghiệp vụ và hai màn hình tài khoản. Route `*` là trang 404 hỗ trợ, không tính vào bảy màn hình.
 - **Tab:** phần con của một màn hình, chọn bằng `?tab=` (Applicant Portal có 4 tab; Application Review có 2 tab *A CV Screening* và *B Final Results*). URL thay đổi nên có thể chia sẻ/tải lại.
-- **Hộp thoại (dialog, `organisms/Modal`, `ConfirmDialog`):** lớp phủ có focus trap, Esc để đóng: Sign In, Xem trước chiến dịch, xác nhận Công bố/Loại hồ sơ/Publish Results/Tạo lại lịch/Xác nhận lịch, sửa một hàng lịch.
+- **Hộp thoại (dialog, `organisms/Modal`, `ConfirmDialog`):** lớp phủ có focus trap, Esc để đóng: Xem trước chiến dịch, xác nhận Công bố/Loại hồ sơ/Shortlist/Publish Results/Tạo lại lịch/Xác nhận lịch/Gửi đánh giá, sửa một hàng lịch. **Sign In hiện là trang `/login`, không phải hộp thoại.**
 - **Panel chi tiết (`ApplicationDetail`, `InterviewDetailCard`):** không phải drawer trượt; hiện **bên cạnh danh sách** trên desktop và xếp bên dưới trên màn hình hẹp.
 - **Trạng thái UI:** loading (spinner `AsyncContent`), lỗi + *Thử lại*, rỗng (`EmptyState`), hạn chế quyền (`RoleGate`), chỉ đọc (sau xác nhận lịch).
 
@@ -122,29 +124,29 @@ Lớp thay đổi khi tích hợp là **thân các hàm trong `frontend/src/serv
 
 <div class="two">
 
-![Hình 2.3 — Hộp thoại Sign In (demo): chọn một tài khoản hư cấu, không có mật khẩu.](screenshots/A03-signin-dialog.png)
+![Hình 2.3 — Ảnh lịch sử trước UI-8: hộp thoại chọn tài khoản đã bị thay bằng trang `/login` có email/mật khẩu.](screenshots/A03-signin-dialog.png)
 
 ![Hình 2.4 — RoleGate: Ứng viên mở URL của Ban tuyển dụng nhận trạng thái hạn chế.](screenshots/A05-restricted-rolegate.png)
 
 </div>
 
-<p class="meta">Hình 2.3: <code>/</code> · Khách · “Đang nhận hồ sơ”. Hình 2.4: <code>/executive/review</code> · Nguyễn Minh Anh (Ứng viên) · “Đã đóng đơn”. RoleGate chỉ định hình giao diện, <strong>không phải kiểm soát truy cập</strong>.</p>
+<p class="meta">Hình 2.3 chỉ lưu lịch sử giao diện trước UI-8 và không mô tả luồng đang chạy. Hình 2.4: <code>/executive/review</code> · Nguyễn Minh Anh (Ứng viên) · “Đã đóng đơn”. RoleGate chỉ định hình giao diện, <strong>không phải kiểm soát truy cập</strong>.</p>
 
 ![Hình 2.5 — Header khi đăng nhập Ban tuyển dụng: Chiến dịch, Duyệt hồ sơ, Xếp lịch, Trang công khai.](screenshots/A04-header-executive.png)
 
 <p class="meta">Route <code>/executive/campaign</code> · Ban tuyển dụng · “Đã đóng đơn” · 1280 px</p>
 
-Tài khoản demo (`mocks/fixtures.js`): Ban tuyển dụng `exec-recruitment`; người phỏng vấn `iv-hamy` (Hà My, User Experience Design) và `iv-giahuy` (Gia Huy, Content Creation); ứng viên `ap-minhanh`, `ap-quocbao`, `ap-khanhlinh`, `ap-baongoc`, `ap-thaovy`, `ap-haidang`. Tất cả đều hư cấu.
+Tài khoản demo (`mocks/fixtures.js`): Ban tuyển dụng `exec-recruitment`; người phỏng vấn `iv-hamy` (Hà My, User Experience Design) và `iv-giahuy` (Gia Huy, Content Creation); ứng viên `ap-minhanh`, `ap-quocbao`, `ap-khanhlinh`, `ap-baongoc`, `ap-thaovy`, `ap-haidang`. Tất cả đều hư cấu. Trang `/login` công khai ba credential mẫu cho ba vai trò, cùng mật khẩu phát triển `ClubFlowDemo!`; đây không phải credential production.
 
 # Chương 3 — Sơ đồ điều hướng {#ch3}
 
 ## 3.1 Liên kết điều hướng thực tế theo vai trò
 
-Header chỉ hiện các mục trong `NAV_BY_ROLE` (`routes/navigation.js`). Sau khi đăng nhập demo, ứng dụng **tự chuyển** tới trang chủ của vai trò (`HOME_BY_ROLE`); ứng viên đang ở `/` thì ở lại. Sign Out luôn quay về `/`. Ngoài hai trường hợp này, **không có thao tác nào tự chuyển trang**: các nút “Mở …”, “Tiếp tục tới …”, “← Về …” là liên kết người dùng bấm.
+Header chỉ hiện các mục trong `NAV_BY_ROLE` (`routes/navigation.js`). Khách mở route được bảo vệ sẽ tới `/login` với `location.state.from`. Sau khi đăng nhập, `postSignInDestination` chỉ khôi phục đường dẫn nằm trong allow-list của đúng vai trò; nếu không thì chuyển tới trang chủ vai trò (`HOME_BY_ROLE`). Sign Out luôn quay về `/`. Ngoài các redirect xác thực này, các nút “Mở …”, “Tiếp tục tới …”, “← Về …” là liên kết người dùng bấm.
 
 <div class="diagram nav">
 <div class="lane"><div class="lane-h">Khách</div>
-<div class="flow wrap"><div class="box page">/ · tab Campaign</div><div class="arr">→ Apply Now / Sign In →</div><div class="box dlg">Hộp thoại Sign In</div><div class="arr">→ chọn vai trò →</div><div class="box auto">Tự chuyển tới trang chủ vai trò</div></div></div>
+<div class="flow wrap"><div class="box page">/ · tab Campaign</div><div class="arr">→ Apply Now / Đăng nhập →</div><div class="box page">/login</div><div class="arr">→ credential hợp lệ →</div><div class="box auto">Route dự định hợp lệ hoặc trang chủ vai trò</div></div></div>
 <div class="lane"><div class="lane-h">Ứng viên</div>
 <div class="flow wrap"><div class="box page">/ ?tab=campaign</div><div class="arr">⇄ tab</div><div class="box page">?tab=apply</div><div class="arr">⇄ tab</div><div class="box page">?tab=mine</div><div class="arr">⇄ tab</div><div class="box page">?tab=notifications</div></div>
 <div class="note">Gửi hồ sơ thành công: <b>ở lại tab Apply</b>, hiện thông báo; người dùng tự mở tab My Applications.</div></div>
@@ -154,15 +156,15 @@ Header chỉ hiện các mục trong `NAV_BY_ROLE` (`routes/navigation.js`). Sau
 <div class="lane"><div class="lane-h">Người phỏng vấn</div>
 <div class="flow wrap"><div class="box page">Interviewer Workspace<small>/interviewer</small></div><div class="arr">“Chọn” một buổi →</div><div class="box page">Chi tiết + Interview Assessment<small>cùng trang</small></div></div></div>
 <div class="lane"><div class="lane-h">Đổi vai trò (demo)</div>
-<div class="flow wrap"><div class="box page">Bất kỳ trang</div><div class="arr">Sign Out →</div><div class="box auto">/ (Khách)</div><div class="arr">Sign In →</div><div class="box dlg">chọn tài khoản khác</div><div class="arr">→</div><div class="box auto">trang chủ vai trò mới</div></div>
-<div class="note">Mở URL không đúng vai trò → RoleGate với nút “Sign In” hoặc “Đổi tài khoản demo”.</div></div>
+<div class="flow wrap"><div class="box page">Bất kỳ trang</div><div class="arr">Đăng xuất →</div><div class="box auto">/ (Khách)</div><div class="arr">Đăng nhập →</div><div class="box page">/login</div><div class="arr">→</div><div class="box auto">route hợp lệ của vai trò</div></div>
+<div class="note">Mở URL được bảo vệ khi là Khách → <code>/login</code>. Đã đăng nhập nhưng sai vai trò → RoleGate hiển thị trạng thái hạn chế. DemoBar còn bộ chọn account trực tiếp chỉ để phát triển.</div></div>
 </div>
 
 ## 3.2 Hộp thoại theo màn hình
 
 | Màn hình | Nút mở hộp thoại | Hộp thoại | Sau khi xác nhận |
 |---|---|---|---|
-| Header (mọi trang) | Sign In | Sign In (demo) | Tự chuyển tới trang chủ vai trò |
+| Sign In | — | Không dùng hộp thoại; đây là trang `/login` | Tới route dự định hợp lệ hoặc trang chủ vai trò |
 | Campaign | Xem trước / Xem toàn bộ bản xem trước | Xem trước chiến dịch | Đóng, ở lại trang |
 | Campaign | Công bố chiến dịch | Công bố chiến dịch? | Ở lại; hiện “Đã công bố chiến dịch (mô phỏng)” |
 | Review · Screening | Loại hồ sơ | Loại hồ sơ CF-xxx? | Ở lại; panel chi tiết cập nhật |
@@ -203,7 +205,7 @@ Các bước sau là **điều kiện nghiệp vụ**, không phải nút điề
 
 </div>
 
-<p class="meta">Hình 4.2: “bản nháp”. Hình 4.3: “Đã đóng đơn” — mỗi vị trí ghi “3 hồ sơ đang liên kết với vị trí này”; trong kịch bản này ngày, khung giờ và thời lượng cũng bị khóa vì đã có hồ sơ chọn khung giờ (giả định giao diện, chờ Q-03).</p>
+<p class="meta">Hình 4.2: “bản nháp”. Hình 4.3: “Đã đóng đơn” — mỗi vị trí ghi “3 hồ sơ đang liên kết với vị trí này”. Sau UI-7, toàn bộ cấu hình đã khóa ngay từ khi Published theo hướng nhóm chọn cho Q-03; số hồ sơ liên kết vẫn giải thích thêm ràng buộc BR-04.</p>
 
 ## 4.2 Hành động
 
@@ -238,15 +240,17 @@ Phía client, `utils/validation.js` kiểm tra trường bắt buộc, ngày m�
 
 <p class="meta">Route <code>/executive/campaign</code> · Ban tuyển dụng · “Lịch đã xác nhận · sau phỏng vấn” · 1280 px</p>
 
-Lưu ý thực tế trong UI: **công bố không tự khóa cấu hình**; trạng thái chỉ đọc chỉ áp dụng sau khi lịch phỏng vấn được xác nhận. Những trường nào được sửa sau công bố nhưng trước xác nhận là câu hỏi mở **Q-03**.
+Lưu ý thực tế trong UI sau UI-7: **công bố khóa toàn bộ cấu hình chiến dịch ngay lập tức**; trang chỉ còn Xem trước. Đây là quyết định tạm thời do nhóm chọn cho **Q-03**, vẫn chờ Product Owner xác nhận. BR-14 tiếp tục yêu cầu khóa sau khi lịch được xác nhận.
 
 ## 4.5 Cách truy cập và điều hướng
 
-**Điểm bắt đầu:** Khách ở `/`. **Bước 1:** bấm *Sign In* ở header, chọn “Ban tuyển dụng · CLB Công nghệ & Sáng tạo”, bấm *Sign In (demo)* → ứng dụng **tự chuyển** tới `/executive/campaign`. **Bước 2:** sửa trường, bấm *Lưu bản nháp* hoặc *Xem trước*. **Bước 3:** bấm *Công bố chiến dịch* → hộp thoại → *Công bố chiến dịch*. **Bước 4:** bấm *Mở Application Review →* hoặc mục *Duyệt hồ sơ* trên header (thủ công). Hành động làm thay đổi trạng thái: *Công bố chiến dịch*, *Xóa vị trí*, *Lưu*.
+**Điểm bắt đầu:** Khách ở `/`. **Bước 1:** bấm *Đăng nhập* ở header, nhập credential Executive trên `/login` → ứng dụng chuyển tới `/executive/campaign`. **Bước 2:** sửa trường, bấm *Lưu bản nháp* hoặc *Xem trước*. **Bước 3:** bấm *Công bố chiến dịch* → hộp thoại → *Công bố chiến dịch*; cấu hình chuyển sang chỉ đọc. **Bước 4:** bấm *Mở Application Review →* hoặc mục *Duyệt hồ sơ* trên header. Hành động làm thay đổi trạng thái: *Công bố chiến dịch*, *Xóa vị trí*, *Lưu*.
 
 ## 4.6 Trách nhiệm backend
 
-Lưu bản nháp và chiến dịch đã công bố; kiểm tra BR-01 khi công bố; chỉ trả chiến dịch đã công bố cho khách (BR-02); chặn xóa vị trí có hồ sơ bằng ràng buộc khóa ngoại và kiểm tra service (BR-04); từ chối mọi thay đổi sau xác nhận lịch (BR-14); `getCampaign()` chỉ dành cho Executive.
+Lưu bản nháp và chiến dịch đã công bố; kiểm tra BR-01 khi công bố; chỉ trả chiến dịch đã công bố cho khách (BR-02); chặn xóa vị trí có hồ sơ bằng ràng buộc khóa ngoại và kiểm tra service (BR-04); thực thi khóa từ Published nếu Q-03 được duyệt và luôn từ chối thay đổi sau xác nhận lịch theo BR-14; `getCampaign()` chỉ dành cho Executive.
+
+**Loading, empty, error và giới hạn:** `useCampaign` + `AsyncContent` xử lý loading/lỗi và Thử lại. Form giữ dữ liệu hợp lệ khi validation thất bại; xóa vị trí có hồ sơ trả conflict. Prototype chỉ có một campaign, không persistence, không xử lý request đồng thời và khóa ngay từ Published theo quyết định Q-03 tạm thời.
 
 # Chương 5 — Application Review {#ch5}
 
@@ -325,6 +329,8 @@ Bảng chỉ gồm hồ sơ *Qua vòng CV* có lịch *Confirmed*. Mỗi hàng: 
 
 Lọc, sắp xếp, phân trang phía server; đếm hồ sơ và ứng viên riêng (BR-06); `setScreening` chỉ đổi một hồ sơ và bị khóa sau xác nhận (BR-07, BR-14); ghi chú riêng tư chỉ Executive đọc; CSV theo bộ lọc với trường được phép (BR-09); CV qua endpoint có kiểm tra quyền; `record` cần đánh giá đã gửi và không đổi sau công bố; `publishRecorded` tạo thông báo trong cùng giao dịch.
 
+**Loading, empty, error và giới hạn:** hai tab có loader/lỗi độc lập; danh sách lọc không có kết quả và Final Results chưa có lịch/row dùng `EmptyState`. Detail chỉ hiện khi ID dữ liệu khớp selection hiện tại, tránh thao tác nhầm khi request chậm. Mock không có tải CV riêng tư thật, không gửi email và không cung cấp reversal/override cho screening, assessment hay kết quả đã công bố.
+
 # Chương 6 — Interview Scheduling {#ch6}
 
 ![Hình 6.1 — Cấu hình lịch nháp, số liệu Proposed/Conflict/Unassigned và phân công người phỏng vấn.](screenshots/D01-sched-setup-summary.png){.tall}
@@ -337,7 +343,7 @@ Lọc, sắp xếp, phân trang phía server; đếm hồ sơ và ứng viên ri
 |---|---|
 | File | `pages/InterviewSchedulingPage.jsx`; organisms `ScheduleSettingsCard`, `InterviewerAssignmentsCard`, `ScheduleTable`, `ScheduleRowDialog`, `ConfirmationChecklist`, `ConfirmDialog` |
 | Hook | `useSchedule()` → `scheduleService.getSchedule()` + `campaignService.getCampaign()` |
-| Service | `generateDraft()`, `updateSettings({ slotMinutes, roomIds })`, `updateRow(applicationId, { start, interviewerId, roomId })`, `saveDraft()`, `confirm()`, `exportTimetable()` |
+| Service | `generateDraft()`, `updateSettings({ roomIds })`, `updateRow(applicationId, { start, interviewerId, roomId })`, `saveDraft()`, `confirm()`, `exportTimetable()` |
 | Đầu vào | 4 hồ sơ *Qua vòng CV*; ngày 05/11/2026, khung 09:00–12:00; ca 15/20/30 phút; phòng A-201, B-105; Hà My (UX, rảnh 09:00–10:30), Gia Huy (Content, rảnh 09:00–11:00); giờ rảnh ứng viên |
 
 ## 6.2 Trạng thái hàng lịch
@@ -410,6 +416,8 @@ Một luồng thực tế đã chạy trong ứng dụng để có Hình 6.8–6
 
 **Điểm bắt đầu:** Ban tuyển dụng ở Application Review. **Bước 1:** bấm *Tiếp tục tới Interview Scheduling →* hoặc *Xếp lịch* trên header. **Bước 2:** xem danh sách Conflict (alert đỏ) và cột “Trạng thái và lý do”. **Bước 3:** bấm *Giải quyết* / *Sửa* / *+ Gán khung giờ* → hộp thoại → *Cập nhật ca*. **Bước 4:** *Lưu thay đổi*. **Bước 5:** khi checklist đạt, *Duyệt & xác nhận lịch* → hộp thoại → xác nhận. **Bước 6:** sau phỏng vấn, mở *Duyệt hồ sơ* → tab *Final Results* (thủ công). *← Về hồ sơ* quay lại Application Review.
 
+**Loading, empty, error và giới hạn:** `useSchedule` tải schedule và campaign song song; `AsyncContent` xử lý loading/lỗi. Không có Shortlisted thì dùng nhánh bỏ qua xác nhận; lỗi field của row hiện trong dialog và điều kiện BR-13 chưa đạt hiện trong checklist/alert. Frontend không sinh lịch: `generateDraft()` chỉ sắp và trả fixture tham chiếu; first-fit, concurrency, ownership và khóa sau xác nhận thuộc backend.
+
 # Chương 7 — Applicant Portal {#ch7}
 
 ![Hình 7.1 — Khách xem chiến dịch công khai (tab Campaign).](screenshots/E01-portal-public.png){.tall}
@@ -423,8 +431,15 @@ Một luồng thực tế đã chạy trong ứng dụng để có Hình 6.8–6
 | File | `pages/ApplicantPortalPage.jsx`; organisms `PublicCampaignPanel`, `ApplicationForm`, `MyApplicationsTable`, `NotificationList`; molecules `FileField`, `ChoiceGroup`, `PositionCard`, `Tabs` |
 | Hook | `useApplicantPortal(isApplicant)` → `portalService.getPublicCampaign()`, `listMyApplications()`, `listNotifications()` (ứng viên: tải song song) |
 | Hành động | `portalService.submitApplication(formData)`, `markNotificationsRead()` |
+| Route / vai trò | `/` với `?tab=campaign∣apply∣mine∣notifications`; Campaign công khai cho Guest/mọi role, ba tab cá nhân chỉ dùng được bởi Applicant |
 
-**Xem công khai:** mốc thời gian, trạng thái nhận hồ sơ theo giai đoạn (chưa mở / đang nhận / đã đóng), mô tả, hướng dẫn, các ban và vị trí với chỉ tiêu. Chiến dịch bản nháp không bao giờ hiển thị (BR-02). Khách bấm *Apply Now* sẽ mở hộp thoại Sign In; các tab Apply, My Applications, Notifications hiện lời nhắc đăng nhập.
+**Tab `campaign`:** mốc thời gian, trạng thái nhận hồ sơ theo giai đoạn (chưa mở / đang nhận / đã đóng), mô tả, hướng dẫn, các ban và vị trí với chỉ tiêu. Chiến dịch bản nháp không bao giờ hiển thị (BR-02). Khách bấm *Apply Now* được chuyển tới `/login` và giữ `/` làm đích dự định.
+
+**Tab `apply`:** Guest thấy gate đăng nhập; role không phải Applicant thấy trạng thái hạn chế; Applicant thấy form. Form bị vô hiệu hóa ngoài phase `open`, nhưng vẫn hiển thị để giải thích trạng thái.
+
+**Tab `mine`:** chỉ hiển thị hồ sơ thuộc account Applicant hiện tại; screening, lịch đã xác nhận và kết quả đã công bố là ba cột mốc riêng. Không có hồ sơ thì hiện `EmptyState` và liên kết tới Apply khi đang mở đơn.
+
+**Tab `notifications`:** chỉ hiển thị thông báo của account hiện tại và chỉ từ kết quả đã công bố; badge là số chưa đọc, có thao tác đánh dấu tất cả đã đọc. Không có notification thì hiện trạng thái rỗng.
 
 ## 7.2 Nộp hồ sơ
 
@@ -470,9 +485,11 @@ Prototype chỉ giữ **tên và kích thước** file CV; không có file nào 
 
 Mỗi hồ sơ được xử lý độc lập. Buổi phỏng vấn chỉ hiện sau khi lịch được xác nhận; kết quả chỉ hiện sau khi công bố. Thông báo là thông báo trong ứng dụng, không có email/SMS/push. Nếu *Đánh dấu tất cả đã đọc* thất bại, trang hiện cảnh báo lỗi.
 
+**Loading, error và giới hạn:** hook tải public campaign cho Guest; với Applicant, public campaign, own applications và notifications tải song song. `AsyncContent` xử lý loading/lỗi. Prototype chỉ giữ metadata CV, không upload file; không sửa/rút hồ sơ đã nộp; duplicate cùng Applicant + Campaign + Position trả conflict trỏ tới hồ sơ cũ; profile đổi sau đó không sửa snapshot đã nộp.
+
 ## 7.4 Cách truy cập và điều hướng
 
-**Điểm bắt đầu:** Khách ở `/`. **Bước 1:** xem tab *Campaign*. **Bước 2:** *Apply Now* → Sign In → chọn một ứng viên → ở lại `/` (đã đăng nhập). **Bước 3:** mở tab *Apply*, điền và *Submit Application* (thay đổi trạng thái). **Bước 4:** mở tab *My Applications* thủ công để thấy hồ sơ “Chờ duyệt”. **Bước 5:** khi có kết quả công bố, tab *Notifications* có số đếm; *Đánh dấu tất cả đã đọc*.
+**Điểm bắt đầu:** Khách ở `/`. **Bước 1:** xem tab *Campaign*. **Bước 2:** *Apply Now* → `/login` → nhập credential Applicant → trở lại `/` nếu đó là đích dự định hợp lệ. **Bước 3:** mở tab *Apply*, điền và *Submit Application* (thay đổi trạng thái). **Bước 4:** mở tab *My Applications* thủ công để thấy hồ sơ “Chờ duyệt”. **Bước 5:** khi có kết quả công bố, tab *Notifications* có số đếm; *Đánh dấu tất cả đã đọc*.
 
 # Chương 8 — Interviewer Workspace {#ch8}
 
@@ -510,11 +527,63 @@ Danh sách chỉ gồm buổi **Confirmed** được phân công cho người đ
 
 <p class="meta">Route <code>/interviewer</code> · Hà My · “Đã đóng đơn · duyệt hồ sơ và xếp lịch” · 1280 px</p>
 
-**Ranh giới phân quyền:** người phỏng vấn chỉ truy cập buổi được phân công và thông tin ứng viên được phép; CV phải qua endpoint kiểm tra phân công; đánh giá là **tham khảo** (*Đề xuất tiếp nhận / Cần cân nhắc / Không đề xuất*), quyết định Pass/Fail thuộc Ban tuyển dụng. Các trường đánh giá còn là câu hỏi mở **Q-04**.
+**Ranh giới phân quyền:** người phỏng vấn chỉ truy cập buổi được phân công và thông tin ứng viên được phép; CV phải qua endpoint kiểm tra phân công. Theo hướng nhóm chọn cho Q-04, nhận xét là bắt buộc và đề xuất `Pass` / `Fail` / không nêu là tùy chọn, chỉ để tham khảo; quyết định Pass/Fail thuộc Ban tuyển dụng. Q-04 vẫn chờ Product Owner xác nhận.
 
 ## 8.3 Cách truy cập và điều hướng
 
-**Điểm bắt đầu:** Khách ở `/`. **Bước 1:** Sign In → “Hà My” → **tự chuyển** tới `/interviewer`. **Bước 2:** bấm *Chọn* trên một buổi (tên nút đọc là “Chọn CF-030 · Phạm Quốc Bảo”). **Bước 3:** điền *Nhận xét phỏng vấn*, chọn *Đánh giá tổng thể*, *Submit Assessment* (thay đổi trạng thái). Không có liên kết sang màn hình khác; người phỏng vấn không thấy menu Executive.
+**Điểm bắt đầu:** Khách ở `/`. **Bước 1:** mở `/login`, nhập credential của Hà My → **tự chuyển** tới `/interviewer`. **Bước 2:** bấm *Chọn* trên một buổi (tên nút đọc là “Chọn CF-030 · Phạm Quốc Bảo”). **Bước 3:** điền *Nhận xét phỏng vấn*, chọn đề xuất tùy chọn, *Submit Assessment* và xác nhận (thay đổi trạng thái). Không có liên kết sang màn hình khác; người phỏng vấn không thấy menu Executive.
+
+**Loading, error và giới hạn:** danh sách và detail có loader/lỗi/Thử lại; không có interview Confirmed của chính account thì hiện `EmptyState`. Detail chỉ render khi `interviewId` khớp selection hiện tại. Assessment chỉ mở sau khi buổi kết thúc, notes bắt buộc, submit một lần rồi khóa; không sửa availability, không xem interview của người khác, không xem private note và không quyết định kết quả cuối.
+
+# Chương 8A — Sign In (UI-8) {#ch8a}
+
+## 8A.1 Phạm vi và hành vi
+
+| Mục | Nội dung |
+|---|---|
+| Mục đích | Cung cấp luồng đăng nhập dùng chung cho các tài khoản đã được cấp sẵn; thay thế hoàn toàn `SignInDialog` trong UX sản phẩm |
+| Route / vai trò | `/login` · Khách; tài khoản đã đăng nhập không xem form mà được chuyển tới route đích hợp lệ hoặc trang chủ vai trò |
+| Query parameter | Không có. Route dự định được giữ trong React Router `location.state.from`, không đặt trong URL |
+| Bố cục | `MainTemplate`, liên kết quay lại Applicant Portal, `SignInForm`, card credential demo và điều khiển hiện/ẩn mật khẩu |
+| Page / hook / service | `SignInPage` → `useSignIn` → `DemoSessionContext.signIn` → `authService.signIn({ email, password })`; credential mẫu qua `authService.listDemoCredentials()` |
+| Tương tác | Nhập email/mật khẩu, hiện/ẩn mật khẩu, gửi form; header cũng dẫn tới `/login` và giữ vị trí hiện tại làm đích dự định |
+| Validation | Email và mật khẩu bắt buộc; email phải đúng định dạng cơ bản; focus chuyển tới trường lỗi đầu tiên; credential sai trả `UiError('forbidden')` |
+| Loading / lỗi / rỗng | Nút đổi thành “Đang đăng nhập…” và bị khóa; lỗi service hiện trong `Alert`; danh sách credential có thể rỗng nhưng form vẫn hoạt động |
+| Mock hiện tại | Tìm profile theo **email hiện tại** (không phân biệt hoa thường) và so với mật khẩu hư cấu `ClubFlowDemo!`; chỉ account ID và scenario ID nằm trong `sessionStorage`, không lưu mật khẩu |
+| Redirect | Executive → `/executive/campaign`; Applicant → `/`; Interviewer → `/interviewer`. `postSignInDestination` chỉ khôi phục route nằm trong `PROTECTED_PATHS_BY_ROLE`; query string như `?tab=results` được giữ khi pathname hợp lệ |
+| Sign Out | Account menu → “Đăng xuất”; điều hướng về `/`, sau đó xóa account demo để tránh gate trên route cũ chuyển nhầm tới `/login` |
+| Backend cần làm | Xác thực credential, quản lý vòng đời phiên/token, khôi phục current user, giới hạn thử đăng nhập và bảo vệ mọi API theo vai trò/sở hữu; không dựa vào `AuthGate`/`RoleGate` để bảo mật |
+| Giới hạn | Không đăng ký, không quên/đặt lại mật khẩu, không đổi mật khẩu, không JWT/cookie phiên thật, không endpoint auth được nối. Credential hiển thị chỉ dành cho development |
+
+`AuthGate` bảo vệ `/profile`; `RoleGate` bảo vệ giao diện Executive/Interviewer. Khách mở route được bảo vệ được gửi tới `/login`. Tài khoản đã đăng nhập nhưng không đúng vai trò nhận trạng thái hạn chế và liên kết về trang của mình, không được tự động cấp quyền. Bộ chọn **Đổi tài khoản nhanh** trong `DemoBar` gọi `demoSessionService.signIn(accountId)` không cần credential; đây là công cụ development-only, không phải luồng đăng nhập.
+
+# Chương 8B — My Profile (UI-8) {#ch8b}
+
+## 8B.1 Phạm vi và hành vi
+
+| Mục | Nội dung |
+|---|---|
+| Mục đích | Cho Executive, Applicant và Interviewer xem hồ sơ của chính mình và chỉnh hai trường cho phép trong prototype |
+| Route / vai trò | `/profile` · được `AuthGate` bảo vệ; mọi vai trò đã đăng nhập truy cập từ account menu |
+| Query parameter | Không có |
+| Bố cục | `ProfileDetailsCard` (avatar chữ, tên, email, role, mã account và trường theo vai trò), `ProfileEditForm`, card “Bảo mật tài khoản” chỉ cung cấp thông tin |
+| Dữ liệu theo vai trò | Cả ba vai trò: `id`, `role`, `displayName`, `email`; Applicant có thêm `studentId`, `faculty`, `year`; trường không tồn tại của Executive/Interviewer không được dựng |
+| Page / hook / service | `ProfilePage` → `useProfile` → `profileService.getProfile()` / `updateProfile({ displayName, email })` |
+| Tương tác | Chỉnh sửa, Lưu thay đổi, Hủy thay đổi; Cancel bỏ draft; Save cập nhật card và header ngay trong phiên demo |
+| Validation | `displayName` và `email` bắt buộc; email đúng định dạng; email trùng account demo khác bị trả field error; focus tới trường lỗi đầu tiên |
+| Loading / lỗi / rỗng | `AsyncContent` xử lý tải/lỗi và Thử lại; mutation khóa form, hiện lỗi field/service; profile không có session trả forbidden ở service, còn route đã chặn guest |
+| Trường chỉ đọc | `id`, `role`, `studentId`, `faculty`, `year` không có trong payload update và không được sửa |
+| Đồng bộ và cô lập | `updateCurrentAccount` đồng bộ tên/email với header chỉ khi ID kết quả vẫn là account hiện tại. `sessionEpoch` remount trang sau sign-in/out, account/scenario switch hoặc reset; save đang chờ bị hủy khi account/scenario đổi, ngăn cập nhật chéo account |
+| Snapshot hồ sơ đã nộp | `Application.studentInfo` là snapshot bất biến lúc submit. Sửa profile không viết lại email/faculty/name trong hồ sơ lịch sử; đăng nhập lại dùng email profile mới trong cùng phiên/kịch bản |
+| Reset mock | Chuyển scenario, “Đặt lại dữ liệu demo” hoặc tải lại ứng dụng khôi phục profile fixture; không có persistence backend |
+| Backend cần làm | Lấy identity từ phiên/token; chỉ trả/sửa hồ sơ chính chủ; allow-list đúng hai trường; chuẩn hóa/unique email; xử lý concurrency; không cascade thay đổi sang snapshot application |
+| Giới hạn và bảo mật | Card bảo mật chỉ mang tính thông tin. Không đổi mật khẩu, không avatar, không persistence, không endpoint profile/auth đã nối và không JWT thật |
+
+## 8B.2 Trách nhiệm của `dataVersion` và `sessionEpoch`
+
+- `dataVersion` tăng khi profile được lưu hoặc dataset demo bị thay; `useServiceData` đưa nó vào request key để reload và không trả dữ liệu của account cũ.
+- `sessionEpoch` tăng khi identity hoặc dataset bị thay; `ProfilePage` dùng làm React `key` để xóa edit mode, draft, lỗi và success message cũ.
+- Hai cơ chế này chỉ bảo vệ tính nhất quán của prototype. Backend vẫn cần authorization, optimistic/concurrency checks và persistence thật.
 
 # Chương 9 — Quy trình tuyển dụng hoàn chỉnh {#ch9}
 
@@ -560,16 +629,16 @@ Danh sách chỉ gồm buổi **Confirmed** được phân công cho người đ
 | Đường dẫn | Vai trò |
 |---|---|
 | `frontend/src/main.jsx`, `App.jsx` | Điểm vào; `App` bọc `BrowserRouter` + `DemoSessionProvider` + `AppRoutes` |
-| `routes/AppRoutes.jsx`, `paths.js`, `navigation.js`, `RoleGate.jsx` | Route, tab query, menu theo vai trò, cổng giao diện theo vai trò |
-| `layouts/AppLayout.jsx` | Skip link, `AppHeader`, `DemoBar`, `<main>`, footer kiểm tra API, hộp thoại Sign In |
-| `pages/*.jsx` | 5 màn hình + `NotFoundPage`; giữ trạng thái UI, gọi hooks |
-| `components/atoms` → `molecules` → `organisms` → `templates` | Atomic Design (2 atoms, 14 molecules, 28 organisms, 1 template `MainTemplate`) |
+| `routes/AppRoutes.jsx`, `paths.js`, `navigation.js`, `AuthGate.jsx`, `RoleGate.jsx` | Route, tab query, menu theo vai trò, gate xác thực/giao diện theo vai trò và redirect đích dự định |
+| `layouts/AppLayout.jsx` | Skip link, `AppHeader`, account menu, `DemoBar`, `<main>`, footer kiểm tra API; điều phối Sign Out và điều hướng tới `/login` |
+| `pages/*.jsx` | 5 màn hình nghiệp vụ + `SignInPage` + `ProfilePage` + `NotFoundPage`; giữ trạng thái UI, gọi hooks |
+| `components/atoms` → `molecules` → `organisms` → `templates` | Atomic Design; lower level không import higher level, atoms/molecules không gọi service |
 | `hooks/*.js` | `useServiceData` (tải dữ liệu, loading/error/reload), `useAction` (mutation), hook theo màn hình |
-| `services/*.js` | Ranh giới dữ liệu: `campaignService`, `applicationService`, `resultService`, `scheduleService`, `portalService`, `interviewerService`, `demoSessionService`, `healthService`, `apiClient`, `uiError` |
-| `mocks/fixtures.js`, `scenarios.js`, `store.js`, `derive.js`, `guards.js` | Dữ liệu hư cấu, 5 kịch bản, store trong bộ nhớ + `mockRequest`, suy diễn trạng thái lịch, guard demo |
-| `contexts/DemoSessionContext.jsx`, `demoSession.js` | Phiên demo (tài khoản, kịch bản, mạng, `dataVersion`); lưu `sessionStorage` khóa `clubflow.demoSession` |
+| `services/*.js` | Ranh giới dữ liệu: service nghiệp vụ, `authService`, `profileService`, `demoSessionService`, `healthService`, `apiClient`, `uiError` |
+| `mocks/auth.js`, `fixtures.js`, `scenarios.js`, `store.js`, `derive.js`, `guards.js` | Credential phát triển, dữ liệu hư cấu, kịch bản, store + `mockRequest`, suy diễn trạng thái lịch, guard demo |
+| `contexts/DemoSessionContext.jsx`, `demoSession.js` | Nguồn account duy nhất; sign-in/out, account/scenario/network/reset, `dataVersion`, `sessionEpoch`; `sessionStorage` chỉ giữ account/scenario |
 | `constants/labels.js`, `utils/*.js`, `styles/*.css` | Nhãn tiếng Việt, định dạng/validate/CSV, design tokens |
-| `tests/` | 18 file Vitest + RTL, 166 test (lần chạy `npm run verify` gần nhất) |
+| `tests/` | Vitest + React Testing Library; bằng chứng UI-8 gần nhất: 23 file, 295 test frontend |
 
 ## 10.2 Sơ đồ phụ thuộc
 
@@ -583,8 +652,8 @@ Quy tắc (`AGENTS.md`, `frontend/AGENTS.md`): component cấp thấp không imp
 
 ## 10.3 Nơi backend developer cần sửa
 
-1. **Thân hàm trong `services/*.js`** — thay `mockRequest()` + đọc `getState()` bằng `apiClient(...)`, ánh xạ kết quả về đúng hình dạng hiện có.
-2. **`contexts/DemoSessionContext.jsx`** — thay bằng auth provider có cùng các trường `useDemoSession()` mà trang dùng.
+1. **Thân hàm trong `services/*.js`** — thay `mockRequest()` + đọc `getState()` bằng `apiClient(...)`, ánh xạ kết quả về đúng hình dạng hiện có; endpoint phải lấy từ API spec đã được nhóm duyệt.
+2. **`contexts/DemoSessionContext.jsx`** — thay bằng auth provider có cùng các trường mà pages/routes đang dùng (`account`, `accountId`, `role`, `signIn`, `signOut`, cùng version/epoch phù hợp).
 3. **`layouts/AppLayout.jsx`** — gỡ hoặc ẩn `DemoBar` trong bản production.
 4. **`.env` / `.env.example`** — `VITE_API_URL` (mặc định `http://localhost:5000/api`).
 
@@ -592,62 +661,51 @@ Không cần sửa pages, organisms hay hooks nếu service giữ nguyên chữ 
 
 # Chương 11 — Ánh xạ tích hợp backend {#ch11}
 
-Bảng sau liệt kê mọi hàm service mà trang dùng, đọc trực tiếp từ mã nguồn. **Endpoint HTTP chưa được thống nhất** cho bất kỳ hàm nghiệp vụ nào (`docs/api/README.md` mới có `GET /api/health`). Cột “Trạng thái” = *Mock* nghĩa là thân hàm đang đọc `mocks/store.js`. Cột endpoint không được đưa vào bảng vì cho mọi hàng, trừ “Kiểm tra API”, giá trị đều là: **Endpoint chưa được thống nhất**.
+Bảng sau liệt kê các hành động có ý nghĩa của bảy màn hình và shell dùng chung, đọc trực tiếp từ mã nguồn. **Endpoint HTTP chưa được thống nhất** cho bất kỳ hàm nghiệp vụ nào (`docs/api/README.md` mới có `GET /api/health`). “Mock behavior” mô tả phần đang chạy trong trình duyệt; cột cuối là trách nhiệm tương lai, không phải API đã tồn tại.
 
 <div class="landscape">
 
-| Màn hình · thao tác | Page / component · Hook | Service method | Request → Response | Backend cần · Quyền · BR | Mock hiện tại · Trạng thái |
-|---|---|---|---|---|---|
-| Đăng nhập (UI-8) | `/login` · `SignInPage` / `SignInForm` · `useSignIn`, `useDemoSession` | `authService.signIn({ email, password })`, `signOut()`, `getCurrentUser()`; đổi tài khoản nhanh trong thanh Demo: `demoSessionService.signIn(accountId)` | email + mật khẩu demo hư cấu → account `{ id, role, displayName, email, … }` | Đăng nhập thật bằng tài khoản tạo sẵn, JWT; không đăng ký | Xác thực mô phỏng trong bộ nhớ, không có token · **Mock, phải thay** |
-| Hồ sơ cá nhân (UI-8) | `/profile` · `ProfilePage` · `useProfile` | `profileService.getProfile()`, `updateProfile({ displayName, email })` | hồ sơ tài khoản hiện tại | Chỉ hồ sơ của chính người dùng theo token; email duy nhất | Lưu trong bộ nhớ, mất khi tải lại/đổi kịch bản · **Mock, phải thay** |
-| Kiểm tra API | footer `StatusBadge` · `useApiHealth` | `healthService.getHealth()` | — → `{ status, … }` | `GET /api/health` (đã có) | **Thật** |
-| Campaign · tải | `CampaignManagementPage` · `useCampaign` | `campaignService.getCampaign()` | — → `{ campaign, phase, positions[], slots[], locked, hasApplications }` | Chỉ Executive; drafts không công khai · BR-02 | Mock (guard Executive) |
-| Campaign · Lưu bản nháp / Lưu thay đổi | như trên | `campaignService.saveDraft(draft)` | draft → cùng view | Executive; khóa sau xác nhận · BR-14 | Mock |
-| Campaign · Công bố | như trên · `ConfirmDialog` | `campaignService.publish(draft)` | draft → view, hoặc `UiError('validation', fieldErrors)` | Kiểm tra BR-01 phía server | Mock |
-| Campaign · Xóa vị trí | `PositionsEditor` | `campaignService.removePosition(positionId)` | id → view, hoặc `UiError('conflict')` | BR-04 (FK, không cascade) | Mock |
-| Ban / vị trí công khai | `PublicCampaignPanel` · `useApplicantPortal` | `portalService.getPublicCampaign()` | — → `{ campaign∣null, phase, window, positions[], slots[] }` | Chỉ chiến dịch Published · BR-02 | Mock |
-| Nộp hồ sơ + CV | `ApplicationForm` · `useApplicantPortal` | `portalService.submitApplication(formData)` | FormData `positionId, email, faculty, sop, slotIds[], cv` → hồ sơ, hoặc `validation` / `conflict` + `details.existingApplicationId` | Applicant; cửa sổ nộp, duy nhất (cả đồng thời), PDF ≤ 5 MB, SOP ≤ 300 từ, lưu snapshot · BR-02/03/05 | Mock (chỉ giữ tên + kích thước file) |
-| Hồ sơ của tôi | `MyApplicationsTable` | `portalService.listMyApplications()` | — → hồ sơ của mình; `interview` chỉ khi Confirmed; `result` chỉ khi đã công bố | Sở hữu lấy từ token · BR-08 | Mock |
-| Thông báo | `NotificationList` | `listNotifications()`, `markNotificationsRead()` | — → thông báo của mình / `null` | Chỉ của mình | Mock |
-| Danh sách hồ sơ | `ScreeningPanel` · `useApplications` | `applicationService.list(query)`, `getStats(query)` | `{ search, positionId, status, sort, page, pageSize }` → `{ items[], total, page, pageSize, pageCount }`; `{ campaign, filtered, isFiltered }` | Executive; lọc/phân trang phía server · BR-06 | Mock |
-| Chi tiết hồ sơ, CV | `ApplicationDetail` · `useApplicationDetail` | `applicationService.get(id)` | id → chi tiết gồm `student` (snapshot), `sop`, `cv`, `privateNote`, `siblingIds`, `locked` | Executive; CV qua URL có kiểm quyền (Q-07) | Mock (một PDF hư cấu chung) |
-| Ghi chú nội bộ | `ApplicationDetail` | `applicationService.saveNote(id, note)` | id, text → chi tiết | Chỉ Executive | Mock |
-| Shortlist / Loại | `ApplicationDetail` · `applicationActions` | `applicationService.setScreening(id, status)` | id, `shortlisted∣rejected` → chi tiết | Một hồ sơ; khóa sau xác nhận · BR-07/14 | Mock |
-| Xuất CSV hồ sơ | `ApplicationFilters` | `applicationService.exportCsv(query)` | filters → `{ fileName, content, rowCount }` | Theo bộ lọc, trường được phép · BR-09 | Mock (tạo CSV trong trình duyệt) |
-| Lịch · tải | `InterviewSchedulingPage` · `useSchedule` | `scheduleService.getSchedule()` | — → settings, rooms, assignments, `rows[]` (status + reasons), `summary`, `conditions[]`, `canConfirm`, `zeroShortlisted` | Executive; tính trạng thái BR-10/11 | Mock (`evaluateSchedule`) |
-| Lịch · tạo nháp | `ScheduleSettingsCard` | `scheduleService.generateDraft()` | — → lịch | First-fit phía server (Q-01) | Mock (lịch cố định) |
-| Lịch · cấu hình | `ScheduleSettingsCard` | `scheduleService.updateSettings({ slotMinutes, roomIds })` | → lịch | Một thời lượng chung · BR-10 | Mock |
-| Lịch · phân công người phỏng vấn | `InterviewerAssignmentsCard` (chỉ hiển thị) | trong `getSchedule()` | `assignments[]` | Cần API quản lý phân công + giờ rảnh | **Chưa có thao tác sửa trong UI** |
-| Lịch · sửa hàng | `ScheduleRowDialog` | `scheduleService.updateRow(applicationId, { start, interviewerId, roomId })` | → lịch, hoặc `validation` + `fieldErrors` | Kiểm tra lại BR-10/11 | Mock |
-| Lịch · lưu | `ScheduleTable` | `scheduleService.saveDraft()` | → lịch | Lưu nháp | Mock |
-| Lịch · xác nhận | `ConfirmationChecklist` · `ConfirmDialog` | `scheduleService.confirm()` | → lịch, hoặc `conflict` + `details.conditions` | BR-13 trong giao dịch, rồi khóa BR-14 | Mock |
-| Xuất lịch | `ScheduleTable` | `scheduleService.exportTimetable()` | → `{ fileName, content, rowCount }` | Executive, cả sau xác nhận | Mock |
-| Buổi được phân công | `AssignedInterviewsTable` · `useAssignedInterviews` | `interviewerService.listAssignedInterviews()` | → `{ scheduleConfirmed, campaignName, interviewDate, interviews[] }` | Chỉ buổi Confirmed của mình | Mock |
-| Chi tiết buổi | `InterviewDetailCard` · `useInterviewDetail` | `interviewerService.getInterview(id)` | → chi tiết, **không** có `privateNote` | Kiểm tra phân công; CV có kiểm quyền | Mock |
-| Gửi đánh giá | `AssessmentForm` · `interviewerActions` | `interviewerService.submitAssessment(id, { recommendation, notes })` | → assessment, hoặc `validation` / `conflict` | Một đánh giá/buổi đã xong (Q-04) | Mock |
-| Kết quả cuối | `FinalResultsTable` · `useFinalResults` | `resultService.list()` | → `{ scheduleConfirmed, interviewDate, rejectedIds[], rows[] }` | Executive | Mock |
-| Xem đánh giá | `FinalDecisionPanel` · `useAssessment` | `resultService.getAssessment(applicationId)` | → assessment hoặc `null` | Executive hoặc người phỏng vấn được phân công | Mock |
-| Record Pass/Fail | `FinalDecisionPanel` · `resultActions` | `resultService.record(applicationId, 'pass'∣'fail')` | → hàng | Cần đánh giá; không sửa sau công bố · BR-08 | Mock |
-| Publish Results + thông báo | `PublishResultsCard` | `resultService.publishRecorded()` | → `{ publishedIds[] }` | Công bố + tạo thông báo trong một giao dịch | Mock |
+| Màn hình / hành động | Page / Hook | Service method | Input | Output | Mock behavior | Future backend responsibility |
+|---|---|---|---|---|---|---|
+| Sign In · tải credential mẫu | `SignInPage` / `useSignIn` | `authService.listDemoCredentials()` | — | `[{ role, displayName, email, password }]` | Đọc fixture development-only | Không có tương đương production; xóa credential công khai |
+| Sign In · đăng nhập | `SignInPage` / `useSignIn`, `DemoSessionContext` | `authService.signIn(credentials)` | `{ email, password }` | Profile hoặc `UiError(forbidden)` | So email profile hiện tại + mật khẩu chung; chọn account, không token | Xác thực account có sẵn, quản lý phiên/token/rate limit; không đăng ký/recovery |
+| Header · đăng xuất / khôi phục user | `AppLayout` / `DemoSessionContext` | `authService.signOut()`, `getCurrentUser()` | — | `null` / profile hoặc `null` | Xóa/đọc selected account trong bộ nhớ | Kết thúc và khôi phục phiên thật |
+| DemoBar · đổi account nhanh | `AppLayout` / `DemoSessionContext` | `demoSessionService.signIn(accountId)` | Account ID | Profile | Bỏ qua credential | Development-only; gỡ khỏi production |
+| DemoBar · scenario/network/reset | `AppLayout` / `DemoSessionContext` | `setScenario(id)`, `setSimulation(mode)`, `resetDemoData()` | Scenario ID / `normal`, `slow` hoặc `error` / — | `undefined` (context sau đó tăng version/epoch) | Thay toàn bộ fixture state hoặc độ trễ/lỗi của `mockRequest` | Không có tương đương production; gỡ DemoBar |
+| My Profile · tải | `ProfilePage` / `useProfile` | `profileService.getProfile()` | — | `{ id, role, displayName, email, description?, studentId?, faculty?, year? }` | Đọc profile của selected account | Identity từ phiên; chỉ chính chủ |
+| My Profile · lưu | `ProfilePage` / `useProfile` | `profileService.updateProfile(payload)` | `{ displayName, email }` | Profile hoặc `UiError` loại validation/conflict | Trim/lowercase email, kiểm trùng; hủy nếu account/scenario đổi | Allow-list hai field, email unique/concurrency; không sửa snapshot application |
+| Campaign · tải | `CampaignManagementPage` / `useCampaign` | `campaignService.getCampaign()` | — | `{ campaign, phase, positions, slots, locked, lockReason }` | Guard Executive; derive count/lock | Executive only; drafts không public |
+| Campaign · lưu nháp | `CampaignManagementPage` / `useCampaign` | `campaignService.saveDraft(draft)` | Campaign/positions form | Campaign view | Ghi store; chỉ khi Draft | Validate/authorize; enforce Q-03 direction only after approval |
+| Campaign · công bố | `CampaignManagementPage` / `useCampaign` | `campaignService.publish(draft)` | Campaign/positions form | Locked campaign view hoặc validation error | Validate BR-01, set Published, lock config | BR-01 transaction; public visibility BR-02; concurrency |
+| Campaign · xóa vị trí | `CampaignManagementPage` / `useCampaign` | `campaignService.removePosition(positionId)` | Position ID | Campaign view hoặc conflict/forbidden | Block linked applications; draft only | BR-04 service + FK, no cascade |
+| Applicant Portal · Campaign tab | `ApplicantPortalPage` / `useApplicantPortal` | `portalService.getPublicCampaign()` | — | `campaign` object hoặc `null`, cùng phase/window/positions/slots khi có | Draft returns `campaign: null`; derive phase | Published-only public read; server clock BR-02 |
+| Applicant Portal · Apply | `ApplicantPortalPage` / `useApplicantPortal` | `portalService.submitApplication(formData)` | `FormData`: position, email, faculty, SOP, repeated slot IDs, CV | Own application hoặc validation/conflict | Checks form/window/duplicate; stores snapshot + filename/bytes only | Ownership, BR-02/03/05, server validation, PDF ≤5 MB protected storage |
+| Applicant Portal · My Applications | `ApplicantPortalPage` / `useApplicantPortal` | `portalService.listMyApplications()` | — | Own application views | Filters selected Applicant; hides unconfirmed interview/unpublished result | Ownership from token; preserve three milestones BR-08 |
+| Applicant Portal · Notifications | `ApplicantPortalPage` / `useApplicantPortal` | `listNotifications()`, `markNotificationsRead()` | — | Own notifications / `undefined` | Filter/update own in-memory rows | Ownership; idempotent read update; in-app only unless Q-05 changes |
+| Review · list/stats | `ApplicationReviewPage` / `useApplications` | `applicationService.list(query)`, `getStats(query)` | `{ search, positionId, status, sort, page, pageSize? }` | Page + `{ campaign, filtered, isFiltered }` | Filter/sort/page arrays; distinct applicants | Executive only; server query/pagination and BR-06 counts |
+| Review · detail/CV | `ApplicationReviewPage` / `useApplicationDetail` | `applicationService.get(id)` | Application ID | Detail with submitted student snapshot, SOP, CV, note, siblings, lock | Shared fictional PDF; Executive guard | Record access; private note; authorized CV delivery Q-07 |
+| Review · save note | `ApplicationReviewPage` / `applicationActions` | `applicationService.saveNote(id, note)` | ID + text | Updated detail | Mutates private note | Executive only; persistence/audit policy |
+| Review · Shortlist/Reject | `ApplicationReviewPage` / `applicationActions` | `applicationService.setScreening(id, status)` | ID + `shortlisted` hoặc `rejected` | Updated detail hoặc conflict | Pending only; one application; remove rejected interview draft | BR-07/14, stale-state/concurrency, no override unless approved |
+| Review · export CSV | `ApplicationReviewPage` / `applicationActions` | `applicationService.exportCsv(query)` | Current filters | `{ fileName, content, rowCount }` | Builds CSV in browser, omits CV/note | Executive, current filters and permitted fields BR-09 |
+| Scheduling · tải | `InterviewSchedulingPage` / `useSchedule` | `getSchedule()`, `campaignService.getCampaign()` | — | `{ schedule, campaign }` at hook level | Loads in parallel; `evaluateSchedule` derives rows/conditions | Executive; compute BR-10/11/13 server-side |
+| Scheduling · tạo nháp | `InterviewSchedulingPage` / `useSchedule` | `scheduleService.generateDraft()` | — | Schedule view | Returns ordered reference fixture, not an algorithm | Deterministic first-fit transactional generator Q-01 |
+| Scheduling · chọn phòng | `InterviewSchedulingPage` / `useSchedule` | `scheduleService.updateSettings(settings)` | `{ roomIds }` | Schedule view hoặc validation/forbidden | Requires ≥1 room; rejects campaign fields | Validate rooms; date/window/duration remain campaign config Q-03 |
+| Scheduling · sửa hàng | `InterviewSchedulingPage` / `useSchedule` | `scheduleService.updateRow(applicationId, change)` | ID + `{ start, interviewerId, roomId }` | Schedule view hoặc field errors | Validates IDs/slot then re-evaluates whole draft | BR-10/11 and authorization after every edit |
+| Scheduling · lưu/xác nhận/xuất | `InterviewSchedulingPage` / `useSchedule` | `saveDraft()`, `confirm()`, `exportTimetable()` | — | Schedule view / conflict with `details.conditions` / CSV object | Tracks dirty/saved; checks conditions; creates browser CSV | Persistence; BR-13 transaction then BR-14 lock; authorized export |
+| Interviewer · list | `InterviewerWorkspacePage` / `useAssignedInterviews` | `listAssignedInterviews()` | — | `{ scheduleConfirmed, campaignName, interviewDate, interviews }` | Current Interviewer + Confirmed only | Identity/assignment ownership; minimal campaign context |
+| Interviewer · detail | `InterviewerWorkspacePage` / `useInterviewDetail` | `getInterview(interviewId)` | Interview ID | Detail without `privateNote` | Guard own assignment; fictional CV | Assignment check; field minimization; CV authorization |
+| Interviewer · submit assessment | `InterviewerWorkspacePage` / `interviewerActions` | `submitAssessment(interviewId, assessment)` | ID + `{ recommendation, notes }` | Assessment hoặc validation/conflict | Completed interview, notes required, one immutable record | End-time + assignment + uniqueness; recommendation not final Q-04/BR-08 |
+| Final Results · list | `ApplicationReviewPage` / `useFinalResults` | `resultService.list()` | — | `{ scheduleConfirmed, interviewDate, rejectedIds, rows }` | Shortlisted + Confirmed only | Executive only; keep screening/schedule/result separate |
+| Final Results · assessment | `ApplicationReviewPage` / `useAssessment` | `resultService.getAssessment(applicationId)` | Application ID | Assessment hoặc `null` | Resolves linked interview/assessment | Executive read; do not expose to Applicant |
+| Final Results · record | `ApplicationReviewPage` / `resultActions` | `resultService.record(id, decision)` | Application ID + `pass` hoặc `fail` | Updated row hoặc conflict | Requires submitted assessment; blocks published result | BR-08, stale-state and authorization; result per application |
+| Final Results · publish | `ApplicationReviewPage` / `resultActions` | `resultService.publishRecorded()` | — | `{ publishedIds }` | Publishes recorded rows + one in-app notification each; no email | Atomic/idempotent publication + notification; Q-05 conflict before any email |
+| Shared footer · API health | `AppLayout` / `useApiHealth` | `healthService.getHealth()` | — | Health response | Calls real backend | Existing `GET /api/health`; only real infrastructure call today |
 
 </div>
 
-## 11.1 Quy ước endpoint đề xuất (PROPOSED — chưa triển khai, chưa được duyệt)
+## 11.1 Trạng thái hợp đồng HTTP
 
-Các đường dẫn dưới đây chỉ là **gợi ý** để nhóm thảo luận khi viết API spec trong `docs/api/`. Không có endpoint nào trong số này tồn tại.
-
-| PROPOSED | Dùng cho |
-|---|---|
-| `POST /api/auth/login`, `GET /api/auth/me` | `signIn`, khôi phục phiên |
-| `GET/PUT /api/campaigns/current`, `POST /api/campaigns/:id/publish`, `DELETE /api/positions/:id` | Campaign |
-| `GET /api/public/campaign` | `getPublicCampaign` |
-| `POST /api/applications` (multipart), `GET /api/me/applications` | Nộp hồ sơ, hồ sơ của tôi |
-| `GET /api/applications`, `GET /api/applications/stats`, `GET /api/applications/:id`, `PATCH /api/applications/:id/note`, `PATCH /api/applications/:id/screening`, `GET /api/applications/export.csv` | Screening |
-| `GET /api/applications/:id/cv` (stream có kiểm quyền) | CV (Q-07) |
-| `GET /api/schedule`, `POST /api/schedule/draft`, `PATCH /api/schedule/settings`, `PATCH /api/schedule/rows/:applicationId`, `PUT /api/schedule`, `POST /api/schedule/confirm`, `GET /api/schedule/export.csv` | Scheduling |
-| `GET /api/me/interviews`, `GET /api/interviews/:id`, `POST /api/interviews/:id/assessment` | Interviewer |
-| `GET /api/results`, `GET /api/results/:applicationId/assessment`, `PUT /api/results/:applicationId`, `POST /api/results/publish` | Final Results |
-| `GET /api/me/notifications`, `POST /api/me/notifications/read` | Thông báo |
+Ngoài `GET /api/health`, repository chưa có API spec nghiệp vụ được thống nhất. Tài liệu này vì vậy chỉ cố định **chữ ký service, input/output và trách nhiệm backend**, không đặt tên HTTP method/path mới. Trước khi thay một mock service, nhóm phải thống nhất endpoint trong `docs/api/` rồi ánh xạ response về shape ở bảng trên.
 
 # Chương 12 — Trách nhiệm cơ sở dữ liệu và logic nghiệp vụ {#ch12}
 
@@ -717,12 +775,12 @@ export async function list(query = {}) {
 - `setAuthTokenProvider(fn)` → mọi request kèm `Authorization: Bearer <token>`.
 - 204/rỗng → `null`. Lỗi → `UiError { kind, message, fieldErrors?, details? }`: 400/422 → `validation`, 401/403 → `forbidden`, 404 → `notFound`, 409 → `conflict`, lỗi mạng → `network`. `details` luôn có `status`; khóa trong `details` của backend được đặt ngay cạnh (ví dụ `error.details.conditions`).
 
-Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trường lỗi UI đang dùng: chiến dịch `name, hostClub, description, instructions, opensOn, closesOn, interviewDate, positions, position:<id>:<field>`; hồ sơ `positionId, email, faculty, cv, sop, slotIds`; hàng lịch `start, interviewerId, roomId`; đánh giá `notes, recommendation`.
+Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trường lỗi UI đang dùng: Sign In `email, password`; Profile `displayName, email`; chiến dịch `name, hostClub, description, instructions, opensOn, closesOn, interviewDate, positions, position:<id>:<field>`; hồ sơ `positionId, email, faculty, cv, sop, slotIds`; hàng lịch `start, interviewerId, roomId`; đánh giá `notes, recommendation`.
 
 ## 13.4 Loading, lỗi, xác thực, phân quyền
 
 - **Loading/lỗi:** không cần sửa — `useServiceData` trả `status` và `AsyncContent` hiển thị spinner hoặc lỗi + *Thử lại*; `useAction().run()` trả `{ ok, value }` hoặc `{ ok: false, error }`.
-- **Xác thực:** thay `DemoSessionProvider` bằng provider thật cung cấp cùng các trường `account`, `accountId`, `role`, `signIn`, `signOut`, `status`, và giữ `dataVersion` cố định; gọi `setAuthTokenProvider(() => token)` một lần.
+- **Xác thực:** thay `DemoSessionProvider` bằng provider thật cung cấp cùng các trường `account`, `accountId`, `role`, `signIn`, `signOut`, `status`; giữ version/epoch ổn định giữa các request bình thường và tăng khi identity/dataset thực sự thay đổi; gọi `setAuthTokenProvider(() => token)` một lần nếu hợp đồng dùng Bearer token.
 - **Phân quyền:** backend quyết định mọi quyền. `RoleGate` và nút bị khoá chỉ là tiện ích UI.
 - **Thanh Demo:** gỡ `<DemoBar … />` khỏi `layouts/AppLayout.jsx` hoặc chỉ render trong build demo; form đăng nhập `/login` (UI-8, hiện là mô phỏng qua `authService`) phải gọi API đăng nhập thật (không có đăng ký/khôi phục mật khẩu).
 
@@ -739,13 +797,15 @@ Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trư�
 | Loại | Hiện có | Kết quả gần nhất |
 |---|---|---|
 | Component (RTL) | `Button`, `Modal`, `Tabs`, `ScheduleRowDialog` | Đạt |
-| Trang (RTL, render toàn app trong StrictMode) | 6 file `tests/pages/*` | Đạt |
+| Trang (RTL, render toàn app trong StrictMode) | Các business page cùng `SignInPage` và `ProfilePage` | Đạt |
 | Service mock và `apiClient` | `mockServices.test.js`, `apiClient.test.js` | Đạt |
 | Accessibility tự động | `tests/a11y/screens.a11y.test.jsx` (một `<h1>`, landmark, tên truy cập, id duy nhất) | Đạt |
 | Khác | routes, layout, labels, fixtures, utils | Đạt |
-| **Tổng frontend** | 18 file, 166 test | `npm run verify` exit 0 |
-| Backend | 5 file, 18 test (unit + integration scaffold) | Đạt |
-| Responsive | Ma trận trình duyệt UI-5 (117 kiểm tra, 360–1600 px, chữ 200 %) | Đạt (ghi trong `quickstart.md`) |
+| **Tổng frontend** | 23 file, 295 test | Bằng chứng UI-8: `npm run verify` exit 0 |
+| Backend regression | 5 file, 18 test (unit + integration scaffold) | Bằng chứng UI-8: 18/18 đạt |
+| Responsive UI-5 | Năm màn hình nghiệp vụ, 117/117 check headless ở 360–1600 CSS px và root text 200% | Đạt; không phải real browser zoom |
+| Responsive UI-7 | 8 business-screen states × 360/768/1280 CSS px | 24/24 đạt |
+| Responsive UI-8 | Sign In, My Profile, account menu, Sign Out/public portal × 360/640/768/1280 CSS px | 28/28 đạt |
 
 ## 14.2 Cần xây dựng khi tích hợp
 
@@ -753,7 +813,7 @@ Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trư�
 - **Authorization tests**: gọi trực tiếp endpoint và file CV bằng vai trò sai, tài khoản không sở hữu, người phỏng vấn không được phân công.
 - **Database integration tests**: ràng buộc UNIQUE/FK/CHECK, giao dịch xác nhận lịch và công bố kết quả, request đồng thời (BR-05, BR-13).
 - **End-to-end workflow**: đi hết 12 bước của chương 9 trên backend thật.
-- **Responsive, zoom (125/150/200 %), bàn phím và trình đọc màn hình** trên trình duyệt thật — chưa từng chạy zoom thật hay kiểm tra bàn phím thủ công.
+- **Responsive, zoom (125/150/200 %), bàn phím và trình đọc màn hình** trên trình duyệt thật — viewport/headless và test tự động đã có, nhưng real browser zoom và screen-reader manual verification vẫn chưa có bằng chứng. Một số keyboard behavior có test/headless evidence; vẫn cần manual pass đầy đủ.
 
 **Chưa có tích hợp backend nào được kiểm thử.** Mọi kết quả ở 14.1 đều chạy trên mock.
 
@@ -771,6 +831,21 @@ Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trư�
 - [ ] `npm run verify` đạt; ghi `AI-LOG.md` nếu có hỗ trợ AI
 
 </div>
+
+## 14.4 Checklist kiểm tra tay sau UI-8
+
+Các mục sau **chưa được tuyên bố là đã kiểm tra thủ công** chỉ vì test tự động/headless đạt:
+
+- [ ] Đăng nhập lần lượt bằng credential Executive, Applicant, Interviewer; xác nhận đúng route home và menu theo role.
+- [ ] Mở `/profile` bằng cả ba role; kiểm tra trường chung và các trường sinh viên chỉ có ở Applicant.
+- [ ] Profile: Cancel không đổi dữ liệu; Save cập nhật card/header; thử tên/email trống, email sai định dạng và email đã thuộc account khác.
+- [ ] Đổi email, Đăng xuất, đăng nhập lại bằng email mới; email cũ bị từ chối trong cùng phiên/kịch bản.
+- [ ] Thử credential sai, loading và simulated network error; mật khẩu không xuất hiện trong web storage.
+- [ ] Dùng account switch development-only và Reset/đổi scenario; draft/error không đi theo account, profile fixture được khôi phục, application snapshot giữ nguyên.
+- [ ] Đăng xuất từ route được bảo vệ; kết thúc ở `/`. Mở `/profile` và route role-protected khi là Guest; kiểm tra `/login` và chỉ khôi phục đích hợp lệ cho role.
+- [ ] Ở 360/640/768/1280 CSS px và real zoom 125/150/200%: navigation/account menu không tràn, focus nhìn thấy, Escape đóng menu/dialog và trả focus đúng.
+- [ ] Chạy lại năm luồng nghiệp vụ: Campaign; Screening + Final Results; Scheduling; bốn tab Applicant Portal; Interviewer assessment.
+- [ ] Dùng keyboard-only và screen reader thật cho Sign In, Profile, menu, tab, dialog, lỗi form và thông báo live.
 
 # Chương 15 — Checklist bàn giao và câu hỏi mở {#ch15}
 
@@ -795,17 +870,17 @@ Backend nên trả lỗi dạng `{ error, fieldErrors?, details? }`. Tên trư�
 
 ## 15.2 Câu hỏi mở cho Product Owner (Q-01…Q-07)
 
-Nguồn: `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md` (dòng 38–44). Tài liệu ghi rõ: chưa có giải đáp công khai nào; không được đánh dấu *Approved* khi chưa có quyết định.
+Nguồn: `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`. Cả Q-01…Q-07 đều có trạng thái **TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION**; không mục nào là *Approved*. “Yêu cầu chính thức” bên dưới là ranh giới không được lựa chọn tạm thời làm suy yếu.
 
-| Mã | Câu hỏi (tóm tắt) | Ảnh hưởng tới |
-|---|---|---|
-| Q-01 | Thứ tự chính xác của thuật toán “first available” (hồ sơ, slot, người phỏng vấn, phòng)? | Sinh lịch xác định, test |
-| Q-02 | Biểu diễn ngày giờ, múi giờ, độ chính xác của mở/đóng đơn? | Ranh giới `open <= now < close` |
-| Q-03 | Trường nào được sửa sau Published nhưng trước Confirmed? | Khoá cấu hình chiến dịch |
-| Q-04 | Trường của đánh giá phỏng vấn; có được sửa trước quyết định cuối? | `AssessmentForm`, lưu trữ |
-| Q-05 | Hình thức và vị trí thông báo trong ứng dụng đủ yêu cầu? | Tab Notifications |
-| Q-06 | Ứng viên có được sửa hồ sơ, người phỏng vấn có được sửa giờ rảnh/đánh giá? | Quyền bổ sung |
-| Q-07 | Chiến lược lưu trữ và phân phối CV riêng tư? | Upload, endpoint CV |
+| Mã | Yêu cầu chính thức / phần còn mở | Hướng nhóm chọn tạm thời | Mock đã làm | Backend sau này |
+|---|---|---|---|---|
+| Q-01 | Phải first-available hợp lệ; tie-break chưa được nguồn xác định | application `submittedAt`/ID → slot thời gian → interviewer ID → room ID; không backtrack | Chỉ sắp fixture theo order, **không sinh lịch** | Thuật toán transactional, deterministic; chờ PO xác nhận policy |
+| Q-02 | BR-02 yêu cầu `open <= now < close`; wire/time zone chưa xác định | UTC instant + date/time theo `Asia/Ho_Chi_Minh`, closing date tính hết ngày | Clock fixture và formatter theo hướng đã chọn | Chốt trong API/data spec trước coding time logic |
+| Q-03 | BR-04/14 bắt buộc giữ liên kết và khóa sau Confirmed; edit sau Published còn mở | Khóa toàn bộ campaign config ngay khi Published | Đã khóa và Scheduling chỉ sửa room IDs | Enforce server-side nếu hướng này được duyệt |
+| Q-04 | Interviewer đánh giá; field/edit policy còn mở | Notes bắt buộc, recommendation tùy chọn, submit một lần | Đã triển khai và khóa sau submit | Ownership, ended-time, uniqueness; chờ PO xác nhận fields |
+| Q-05 | Canonical scope yêu cầu in-app notification và loại email/SMS/push | Nhóm đề xuất in-app + Brevo common-template outbox | Chỉ in-app, không email | **Xung đột cần PO xác nhận trước khi thêm email**; publication/notification phải idempotent |
+| Q-06 | Nguồn không cấp quyền edit ngoại lệ | Không sửa/withdraw application, availability hay assessment; transition bất biến | Đã ẩn/chặn các thao tác đó | Không thêm endpoint override nếu chưa được duyệt |
+| Q-07 | CV riêng tư; phương thức kỹ thuật chưa xác định | Multer + protected Cloudinary + stream/short-lived URL có authorization | Một PDF hư cấu dùng chung | Validate PDF ≤5 MB, metadata, cleanup orphan, kiểm role/assignment; xác minh khả năng Cloudinary |
 
 ## Phụ lục A — Giao diện 360 px
 

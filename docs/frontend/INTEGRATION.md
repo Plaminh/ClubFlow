@@ -1,7 +1,7 @@
 # ClubFlow Frontend — Backend Integration Guide
 
 **Audience:** team members who connect the React UI to the Express API.
-**Status:** All five screens are built UI-first against an in-memory mock layer. No backend endpoint is called except `GET /api/health` (footer status). Business rules are **not** enforced by the frontend; the backend must enforce BR-01…BR-14 ([Business Rules](../requirements/BUSINESS_RULES.md)).
+**Status:** Five business screens plus the shared Sign In and My Profile screens are built UI-first against an in-memory mock layer. No backend endpoint is called except `GET /api/health` (footer status). Business rules are **not** enforced by the frontend; the backend must enforce BR-01…BR-14 ([Business Rules](../requirements/BUSINESS_RULES.md)).
 
 Related: [UI spec](../../specs/001-frontend-ui/spec.md) · [Service contracts (planned)](../../specs/001-frontend-ui/contracts/ui-services.md) · [Decisions](../../specs/001-frontend-ui/research.md) · [Manual QA checklist](../../specs/001-frontend-ui/quickstart.md) · [Open questions](../requirements/DECISIONS_AND_OPEN_QUESTIONS.md)
 
@@ -27,7 +27,7 @@ Page (layout + UI state) → hook (loading / error / data) → service (Promise)
 | `/executive/review?tab=screening` | `ApplicationReviewPage` (CV Screening) | Executive | `useApplications`, `useApplicationDetail`, `useCampaign` | `applicationService`, `campaignService` |
 | `/executive/review?tab=results` | `ApplicationReviewPage` (Final Results) | Executive | `useFinalResults`, `useAssessment` | `resultService` |
 | `/executive/scheduling` | `InterviewSchedulingPage` | Executive | `useSchedule` | `scheduleService`, `campaignService` |
-| `/interviewer` | `InterviewerWorkspacePage` | Interviewer | `useAssignedInterviews`, `useInterviewDetail`, `useCampaign` | `interviewerService` |
+| `/interviewer` | `InterviewerWorkspacePage` | Interviewer | `useAssignedInterviews`, `useInterviewDetail` | `interviewerService` |
 | `/login` | `SignInPage` (simulated Sign In) | Visitor; a signed-in account is redirected to its role home | `useSignIn` | `authService` |
 | `/profile` | `ProfilePage` (My Profile) behind `AuthGate` | Executive, Applicant, Interviewer | `useProfile` | `profileService` |
 | `*` | `NotFoundPage` | any | — | — |
@@ -53,7 +53,7 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `resultService.list()` | `{ scheduleConfirmed, interviewDate, rejectedIds[], rows[] }` | only shortlisted + confirmed interviews |
 | `resultService.getAssessment(applicationId)` | assessment or `null` | Executive or the assigned interviewer only |
 | `resultService.record(applicationId, 'pass'\|'fail')` | row | needs a submitted assessment; not after publication |
-| `resultService.publishRecorded()` | `{ publishedIds[] }` | create one in-app notification per application |
+| `resultService.publishRecorded()` | `{ publishedIds[] }` | publish idempotently and create one in-app notification per application; email is not authorized by canonical scope (Q-05 conflict, §12.5) |
 | `scheduleService.getSchedule()` | settings, rooms, assignments, `rows[]` (status + reasons), `summary`, `conditions[]`, `canConfirm`, `zeroShortlisted` | compute statuses with BR-10/BR-11; first-fit order is Q-01 |
 | `scheduleService.generateDraft()` | schedule view | first-fit generation (server); ask-before-replace is in the UI |
 | `scheduleService.updateSettings({ roomIds })` | schedule view, or `UiError('validation')` / `UiError('forbidden')` | rooms only, at least one; the date, window and common duration (BR-10) are campaign configuration and must be rejected here (Q-03) |
@@ -96,16 +96,18 @@ If the API returns a different shape, **map it inside the service** so pages sta
   - Application: `positionId`, `email`, `faculty`, `cv`, `sop`, `slotIds`.
   - Schedule row: `start`, `interviewerId`, `roomId`.
   - Assessment: `notes`, `recommendation`.
+  - Sign In: `email`, `password` (current mock returns one form-level invalid-credential error).
+  - My Profile: `displayName`, `email`.
 - `useServiceData` exposes `status: 'idle' | 'loading' | 'success' | 'error'`; pages render `AsyncContent` (spinner, or error + "Thử lại") and their own empty states. `useAction().run()` never throws: it resolves `{ ok, value }` or `{ ok: false, error }`.
 - To preview these states without a backend, use the demo bar: **Mạng → Chậm / Lỗi mạng**.
 - While refreshing, `useServiceData` keeps the previous data on screen (no flicker). For a **detail of a selected item**, only render it when the loaded data's ID matches the current selection, and take IDs for actions from the displayed data (see `current` in `ApplicationReviewPage.jsx` and `InterviewerWorkspacePage.jsx`). Otherwise, with real latency, a user can act on the previous item.
 
 ## 6. Authentication and authorization
 
-- `contexts/DemoSessionContext.jsx` (demo accounts, scenarios, reset) is **not** authentication. Replace it with an auth provider that exposes the same `useDemoSession()` fields the pages use: `account`, `accountId`, `role`, `signIn`, `signOut`, and keep `dataVersion` constant.
+- `contexts/DemoSessionContext.jsx` (demo accounts, scenarios, reset) is **not** authentication. Replace it with an auth provider that exposes the same identity fields the pages/routes use: `account`, `accountId`, `role`, `signIn`, `signOut`. Keep `dataVersion`/`sessionEpoch` stable during ordinary requests and change the relevant key when identity or the loaded dataset genuinely changes.
 - Register the token once: `setAuthTokenProvider(() => currentAccessToken)`; every request then sends `Authorization: Bearer <token>`.
 - Remove `organisms/DemoBar` from `layouts/AppLayout.jsx` (or show it only in a demo build) once real data is used.
-- UI-8 added the credential form (`/login`, `SignInForm`) and My Profile (`/profile`). Both are **simulated**: `authService` and `profileService` read and write the in-memory mock store. There is no token, no hashing, no backend call, and no registration, recovery, or password change (out of scope). The old account-picker `SignInDialog` was removed.
+- UI-8 added the credential form (`/login`, `SignInForm`) and My Profile (`/profile`). Both are **simulated**: `authService` and `profileService` read and write the in-memory mock store. There is no token/JWT, hashing, backend auth/profile call or durable profile persistence, and no registration, forgot/reset password, or change-password flow. The old account-picker `SignInDialog` was removed.
 - Simulated Sign In: the account is found by its profile's current email and the single fictional development password in `mocks/auth.js` (shown on the Sign In page; example logins: `executive@clubflow.demo.example`, `minh.anh@demo.example`, `ha.my@clubflow.demo.example`). Only the selected account ID and scenario ID are kept in `sessionStorage`; the password is never stored. Replace the `authService` bodies with real requests and delete `mocks/auth.js` and `listDemoCredentials`.
 - Redirects: Executive → `/executive/campaign`, Applicant → `/`, Interviewer → `/interviewer`. A guest opening a protected route goes to `/login` and returns to that route after Sign In only if `routes/navigation.js` → `canAccessProtectedPath(role, pathname)` allows it (a fixed allow-list of in-app paths; anything else falls back to the role home). Sign Out ("Đăng xuất" in the header account menu) clears the session and returns to `/`.
 - My Profile edits only `displayName` and `email`; account ID, role, student ID, faculty, and academic year are read-only. A changed email becomes the Sign In email for that account within the current scenario; an email of another demo account is rejected. Edits live in memory only: a page reload, scenario switch, or "Đặt lại dữ liệu demo" restores the fixture values (and the original Sign In email). Submitted applications keep the student snapshot taken at submission; lists that show a person's name by account ID (`mocks/derive.js` → `accountName`) keep showing the fixture name.
@@ -143,7 +145,7 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 | Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12.2 |
 | Q-03 | Editable fields after publication | Team-selected: none. The whole campaign configuration is read-only from publication; Scheduling shows date/window/duration as text and edits rooms only. See §12.3 |
 | Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.4 |
-| Q-05 | Notification UI and email | In-app list with unread badge and "mark all read"; mock sends no email. Backend queues one common Brevo email on publication. See §12.5 |
+| Q-05 | Notification UI and email | Canonical scope requires in-app notification and excludes email/SMS/push. The mock implements only the in-app list. The team's Brevo proposal conflicts with that scope and must not be implemented without Product Owner confirmation. See §12.5 |
 | Q-06 | Editing submissions / availability | Not offered. See §12.6 |
 | Q-07 | Private CV delivery | Demo uses one fictional file; backend uses Multer + protected Cloudinary storage + authorized short-lived retrieval. See §7 and §12.7 |
 | — | Screening reversal | Only Pending Review applications can be decided (WORKFLOWS §3 does not settle reversal) |
@@ -206,14 +208,11 @@ Use explicit `ORDER BY`; database row order and JavaScript array insertion order
 - Read access: the assigned interviewer and the Executive (Business §2). Applicants never receive assessments or recommendations.
 - Field errors use the names `notes` and `recommendation`.
 
-### 12.5 Result notifications and Brevo delivery (Q-05)
+### 12.5 Result notifications; unresolved Brevo proposal (Q-05)
 
-- `resultService.publishRecorded()` remains the only trigger. For each application, one database transaction must: set `published_at`, insert the applicant's in-app notification, and insert one email outbox/delivery record for the common transactional result template.
-- Protect each logical side effect with a unique key, for example the application/result ID plus notification kind/template kind. Repeating publication must not create another notification or email job.
-- A background worker calls Brevo with server-side credentials. Store delivery state (`queued`, `sent`, `failed`), attempt count, provider message ID, a safe last-error summary and the next retry time. Never put the Brevo key in a `VITE_` variable or React bundle.
-- Retry only a `failed`/retryable delivery record. Reuse its idempotency key and never call publication again. A manual operational retry endpoint, if added, must be backend-authorized and is not a new product screen in this frontend task.
-- The API may return delivery-queue status for operational use, but the current applicant UI needs only the published result and in-app notification. Email failure must not hide or duplicate those records.
-- Use one common result-email template for Pass and Fail with data fields rather than separate marketing templates. Sender identity, exact content, retry schedule and Brevo account capabilities remain backend integration decisions.
+- Canonical requirements require an in-app notification and explicitly exclude email/SMS/push. Therefore `resultService.publishRecorded()` must at minimum publish each result and insert exactly one applicant notification in one transaction; repeating publication must not duplicate either record.
+- The development team recorded a provisional Brevo common-template/outbox design, but there is no Product Owner approval and it conflicts with the canonical exclusion. **Do not implement or treat Brevo as part of the backend contract until that conflict is authoritatively resolved.**
+- If Product Owner confirmation later adds email, use an idempotent outbox/worker with server-side credentials, delivery state and retry controls. Email failure must never hide or duplicate the published result or in-app notification, and no provider secret may use a `VITE_` variable.
 
 ### 12.6 Immutable workflow transitions (Q-06)
 
