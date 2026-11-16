@@ -153,12 +153,33 @@ describe('scheduling', () => {
     ).rejects.toMatchObject({ kind: 'validation', fieldErrors: { start: expect.any(String) } });
   });
 
+  it('keeps the campaign interview configuration out of the scheduling settings; rooms stay editable (Q-03)', async () => {
+    await asExecutive();
+    await expect(scheduleService.updateSettings({ slotMinutes: 30 })).rejects.toMatchObject({ kind: 'forbidden' });
+    await expect(scheduleService.updateSettings({ roomIds: [] })).rejects.toMatchObject({ kind: 'validation' });
+    const before = await scheduleService.getSchedule();
+    expect(before.settings.slotMinutes).toBe(15);
+    expect(before.rows.find((row) => row.applicationId === 'CF-026')).toMatchObject({ end: '2026-11-05T02:15:00.000Z' });
+
+    const schedule = await scheduleService.updateSettings({ roomIds: ['room-a201'] });
+    expect(schedule.settings.roomIds).toEqual(['room-a201']);
+    expect(schedule.hasUnsavedChanges).toBe(true);
+    expect(schedule.rows.find((row) => row.applicationId === 'CF-027').reasons).toContain(
+      'Phòng không nằm trong danh sách phòng đã chọn.',
+    );
+  });
+
   it('locks screening, schedule, and campaign configuration after confirmation (BR-14)', async () => {
     demoSessionService.setScenario('confirmed');
     await asExecutive();
     await expect(scheduleService.generateDraft()).rejects.toMatchObject({ kind: 'forbidden' });
     await expect(applicationService.setScreening('CF-028', 'shortlisted')).rejects.toMatchObject({ kind: 'forbidden' });
     await expect(campaignService.saveDraft({ name: 'X' })).rejects.toMatchObject({ kind: 'forbidden' });
+    await expect(scheduleService.updateSettings({ roomIds: ['room-a201'] })).rejects.toMatchObject({ kind: 'forbidden' });
+    await expect(
+      scheduleService.updateRow('CF-026', { start: '2026-11-05T02:30:00.000Z', interviewerId: 'iv-hamy', roomId: 'room-a201' }),
+    ).rejects.toMatchObject({ kind: 'forbidden' });
+    await expect(scheduleService.confirm()).rejects.toMatchObject({ kind: 'forbidden' });
   });
 
   it('keeps getCampaign Executive-only; interviewers get campaign context from their own list', async () => {
@@ -188,6 +209,45 @@ describe('campaign', () => {
   it('blocks removing a position that has applications (BR-04)', async () => {
     await asExecutive();
     await expect(campaignService.removePosition('pos-ux')).rejects.toMatchObject({ kind: 'conflict' });
+  });
+
+  it('lets the Executive edit a draft and reports why a campaign is locked (Q-03)', async () => {
+    demoSessionService.setScenario('draft');
+    await asExecutive();
+    expect(await campaignService.getCampaign()).toMatchObject({ locked: false, lockReason: null });
+
+    const saved = await campaignService.saveDraft({
+      name: 'Tên nháp mới',
+      interviewDate: '2026-11-06',
+      interviewWindow: { start: '13:00', end: '17:00' },
+      slotMinutes: 20,
+    });
+    expect(saved.campaign).toMatchObject({ name: 'Tên nháp mới', interviewDate: '2026-11-06', slotMinutes: 20, status: 'draft' });
+    // 13:00 in Vietnam on the new interview date.
+    expect(saved.slots[0]).toMatchObject({ id: 'slot-1300', start: '2026-11-06T06:00:00.000Z' });
+
+    demoSessionService.setScenario('screening');
+    expect(await campaignService.getCampaign()).toMatchObject({ locked: true, lockReason: 'published' });
+    demoSessionService.setScenario('confirmed');
+    expect(await campaignService.getCampaign()).toMatchObject({ locked: true, lockReason: 'scheduleConfirmed' });
+  });
+
+  it('makes the configuration read-only as soon as the campaign is published (Q-03)', async () => {
+    demoSessionService.setScenario('draft');
+    await asExecutive();
+    const { campaign, positions } = await campaignService.getCampaign();
+    const draft = { ...campaign, positions: positions.map((position) => ({ ...position, key: position.id })) };
+    const published = await campaignService.publish(draft);
+    expect(published).toMatchObject({ locked: true, lockReason: 'published' });
+
+    await expect(campaignService.saveDraft({ ...draft, name: 'Đổi tên sau công bố' })).rejects.toMatchObject({ kind: 'forbidden' });
+    await expect(campaignService.publish({ ...draft, slotMinutes: 30 })).rejects.toMatchObject({ kind: 'forbidden' });
+    // Not even a position without any application can be removed any more.
+    await expect(campaignService.removePosition('pos-ux')).rejects.toMatchObject({ kind: 'forbidden' });
+
+    const after = await campaignService.getCampaign();
+    expect(after.campaign).toMatchObject({ name: campaign.name, slotMinutes: 15, publishedAt: published.campaign.publishedAt });
+    expect(after.positions).toHaveLength(2);
   });
 });
 

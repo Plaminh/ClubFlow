@@ -106,6 +106,28 @@ describe('Interview Scheduling', () => {
     expect(screen.getByRole('button', { name: 'Xuất lịch' })).toBeEnabled();
   });
 
+  it('summarizes the campaign interview configuration as text and keeps only the rooms editable (Q-03)', async () => {
+    await openScheduling();
+
+    const configuration = screen.getByRole('region', { name: 'Cấu hình phỏng vấn của chiến dịch' });
+    expect(within(configuration).getByText('05/11/2026 · một ngày cho cả chiến dịch')).toBeInTheDocument();
+    expect(within(configuration).getByText('09:00–12:00')).toBeInTheDocument();
+    expect(within(configuration).getByText('15 phút · dùng chung cho mọi buổi phỏng vấn')).toBeInTheDocument();
+    expect(within(configuration).getByText(/đã khóa từ khi chiến dịch được công bố/)).toBeInTheDocument();
+    // No form control pretends the campaign configuration could be changed here.
+    const page = within(screen.getByRole('main'));
+    expect(page.queryAllByRole('combobox')).toEqual([]);
+    expect(page.queryAllByRole('textbox')).toEqual([]);
+
+    const roomB = screen.getByRole('checkbox', { name: 'B-105' });
+    expect(roomB).toBeEnabled();
+    expect(roomB).toBeChecked();
+    fireEvent.click(roomB);
+
+    expect((await screen.findAllByText(/Phòng không nằm trong danh sách phòng đã chọn\./)).length).toBeGreaterThan(0);
+    expect(screen.getByText('Có thay đổi chưa lưu')).toBeInTheDocument();
+  });
+
   it('asks before replacing an existing draft', async () => {
     await openScheduling();
 
@@ -123,6 +145,11 @@ describe('Interview Scheduling', () => {
     expect(screen.getByText('Confirmed · chỉ đọc')).toBeInTheDocument();
     expect(tableRows()).toHaveLength(4);
     expect(screen.queryByRole('button', { name: 'Duyệt & xác nhận lịch' })).not.toBeInTheDocument();
+    // Rooms are part of the locked schedule now: shown as text, not as disabled checkboxes.
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.getByText('A-201, B-105')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^(Sửa|Giải quyết|Gán khung giờ) / })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeDisabled();
   });
 
   it('explains the skipped confirmation when no application is shortlisted', async () => {

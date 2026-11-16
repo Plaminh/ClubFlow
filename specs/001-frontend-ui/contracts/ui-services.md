@@ -35,9 +35,9 @@
 | Function | Input | Returns |
 |---|---|---|
 | `campaignService.getCampaign()` | — | campaign with positions, slots, phase, lock state — **Executive only** |
-| `campaignService.saveDraft(draft)` | campaign draft | saved campaign |
-| `campaignService.publish(draft)` | campaign draft (saved, then published) | published campaign, or `UiError(validation)` |
-| `campaignService.removePosition(positionId)` | id | ok, or `UiError(conflict)` when applications are linked (BR-04) |
+| `campaignService.saveDraft(draft)` | campaign draft | saved campaign, or `UiError(forbidden)` once the campaign is published (Q-03) |
+| `campaignService.publish(draft)` | campaign draft (saved, then published) | published campaign (`locked: true`, `lockReason: 'published'`), `UiError(validation)`, or `UiError(forbidden)` if it is already published |
+| `campaignService.removePosition(positionId)` | id | ok, `UiError(conflict)` when applications are linked (BR-04), or `UiError(forbidden)` once the campaign is published (Q-03) |
 
 ## Applications and results (UI-2, US2)
 
@@ -60,7 +60,7 @@
 |---|---|---|
 | `scheduleService.getSchedule()` | — | `{ settings, assignments, rooms, rows, summary, conditions, status }` |
 | `scheduleService.generateDraft()` | — | schedule (demo: scenario data) |
-| `scheduleService.updateSettings(settings)` | `{ slotMinutes, roomIds }` | schedule |
+| `scheduleService.updateSettings(settings)` | `{ roomIds }` (date, window and duration are campaign configuration, Q-03) | schedule, or `UiError(forbidden)` for a campaign-configuration field |
 | `scheduleService.updateRow(applicationId, change)` | `{ start, interviewerId, roomId }` | schedule, or `UiError(validation, fieldErrors)` |
 | `scheduleService.saveDraft()` | — | schedule |
 | `scheduleService.confirm()` | — | confirmed schedule, or `UiError(conflict, details: unmetConditions)` |

@@ -9,6 +9,18 @@ async function openAs(scenarioId) {
   await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' });
 }
 
+// A locked campaign shows text only: no form field and no save, publish, add, or remove action.
+// (Queries are limited to <main>: the demo bar above it has its own selects.)
+function expectNoEditingControls() {
+  const page = within(screen.getByRole('main'));
+  expect(page.queryAllByRole('textbox')).toEqual([]);
+  expect(page.queryAllByRole('combobox')).toEqual([]);
+  expect(page.queryByLabelText('Ngày mở đơn')).not.toBeInTheDocument();
+  for (const name of ['Lưu bản nháp', 'Công bố chiến dịch', 'Lưu thay đổi', '+ Thêm vị trí', 'Xóa vị trí']) {
+    expect(page.queryAllByRole('button', { name })).toEqual([]);
+  }
+}
+
 describe('Campaign Management', () => {
   it('shows a restricted state to visitors', async () => {
     renderApp(PATH);
@@ -30,6 +42,17 @@ describe('Campaign Management', () => {
       'Content Creation',
     ]);
     expect(screen.getByText('Bản nháp')).toBeInTheDocument();
+  });
+
+  it('keeps a draft editable and does not label the informational preview card as locked', async () => {
+    await openAs('draft');
+
+    expect(screen.getByLabelText('Tên chiến dịch')).toBeEnabled();
+    expect(screen.getByLabelText('Thời lượng mỗi ca')).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Công bố chiến dịch' })).toBeEnabled();
+    expect(screen.getByRole('heading', { level: 2, name: 'Xem trước chiến dịch' })).toBeInTheDocument();
+    expect(screen.queryByText(/chỉ đọc/i)).not.toBeInTheDocument();
   });
 
   it('blocks publication with specific errors, keeps valid input, and focuses the first error (BR-01)', async () => {
@@ -84,29 +107,53 @@ describe('Campaign Management', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
     const confirm = await screen.findByRole('dialog', { name: 'Công bố chiến dịch?' });
+    expect(within(confirm).getByText(/Sau khi công bố, cấu hình chiến dịch chỉ đọc/)).toBeInTheDocument();
     fireEvent.click(within(confirm).getByRole('button', { name: 'Công bố chiến dịch' }));
 
     expect(await screen.findByText('Đã công bố chiến dịch (mô phỏng)')).toBeInTheDocument();
-    expect(screen.getByText('Chiến dịch đã được công bố')).toBeInTheDocument();
+    expect(screen.getByText('Chiến dịch đã được công bố · cấu hình chỉ đọc')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Mở Application Review →' })).toHaveAttribute('href', '/executive/review');
+    // Publishing locks the configuration at once (team-selected Q-03).
+    expectNoEditingControls();
+    expect(screen.getByText('Event Coordinator', { selector: '.position-card__details p' })).toBeInTheDocument();
   });
 
-  it('blocks removing a position that already has applications (BR-04)', async () => {
+  it('cancelling the publish confirmation keeps the draft editable', async () => {
+    await openAs('draft');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
+    const confirm = await screen.findByRole('dialog', { name: 'Công bố chiến dịch?' });
+    fireEvent.click(within(confirm).getByRole('button', { name: 'Hủy' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Bản nháp')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tên chiến dịch')).toBeEnabled();
+  });
+
+  it('shows a published campaign as read-only text and explains why (Q-03)', async () => {
     await openAs('screening');
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Xóa vị trí' })[0]);
-    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Xóa vị trí' }));
+    const alert = screen.getByText('Chiến dịch đã được công bố · cấu hình chỉ đọc').closest('.alert');
+    expect(within(alert).getByText(/Ứng viên dựa vào thông tin đã công bố/)).toBeInTheDocument();
+    expect(screen.getByText('Đã công bố · chỉ đọc')).toBeInTheDocument();
+    expectNoEditingControls();
 
-    expect(await screen.findByText(/Không thể xóa vị trí này vì đã có 3 hồ sơ ứng tuyển/)).toBeInTheDocument();
-    expect(screen.getAllByLabelText('Tên vị trí (Position)')).toHaveLength(2);
+    // The configuration stays visible as text, with the application links that BR-04 protects.
+    expect(screen.getByText('Từ 12/10/2026 đến hết ngày 30/10/2026 (giờ Việt Nam)')).toBeInTheDocument();
+    expect(screen.getByText('15 phút, dùng chung cho mọi buổi phỏng vấn')).toBeInTheDocument();
+    expect(screen.getAllByText('3 hồ sơ đang liên kết với vị trí này.')).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Xem trước' }));
+    const preview = await screen.findByRole('dialog', { name: 'Xem trước chiến dịch' });
+    expect(within(preview).getByText('Nội dung ứng viên sẽ thấy')).toBeInTheDocument();
   });
 
-  it('is read-only after the schedule is confirmed (BR-14)', async () => {
+  it('stays read-only after the schedule is confirmed (BR-14)', async () => {
     await openAs('confirmed');
 
     expect(screen.getByText('Cấu hình chiến dịch đang ở chế độ chỉ đọc')).toBeInTheDocument();
-    expect(screen.getByLabelText('Tên chiến dịch')).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Lưu thay đổi' })).toBeDisabled();
+    expect(screen.getByText(/lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa \(BR-14\)/)).toBeInTheDocument();
+    expectNoEditingControls();
     expect(screen.getByRole('button', { name: 'Xem trước' })).toBeEnabled();
   });
 });

@@ -108,3 +108,29 @@ How to read this section:
 - **Known limitations:** One hard-coded time zone (the product serves one club). Seconds are not displayed. The prototype has no server clock; its time-dependent behavior uses the scenario clock only.
 - **Relation to source requirements:** Consistent with BR-01 and BR-02. The sources do not name a time zone or a storage format, so this adds detail and contradicts nothing.
 - **Source files and tests:** `utils/format.js`, `utils/campaignPhase.js`, `mocks/fixtures.js`, `mocks/scenarios.js`, `mocks/derive.js` (`submissionWindow`, `campaignPhase`), `services/scheduleService.js` (`updateRow`), `components/organisms/CampaignDetailsCard`. Tests: `tests/utils/format.test.js`, `tests/mocks/fixtures.test.js` ("date and time convention (Q-02)"), `tests/services/mockServices.test.js` (opening/closing boundary, UTC row edit).
+
+### Q-03 — Lock the campaign configuration when the campaign is published
+
+- **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Selected decision:**
+  - `Draft`: the Executive edits the whole configuration; Save Draft and Preview are available; Publish is available after validation (BR-01) and asks for confirmation.
+  - `Published`: the campaign configuration is read-only. The Executive still reviews applications, enters interviewer availability, chooses rooms and prepares the draft schedule.
+  - `Confirmed` schedule: configuration, submitted applications, screening decisions and the schedule stay locked (BR-14).
+  - "Campaign configuration" means: name, host club, description, instructions, opening and closing dates, departments and positions with their quotas, and the campaign-level interview configuration (interview date, interview window, common slot duration).
+- **Business rationale:** Applicants decide whether to apply, and which availability slots to choose, from the published information. Changing a position, a deadline or the interview window afterwards would change what they agreed to and could invalidate slots they already chose. A single rule ("published = fixed") is also easier to explain and to enforce than a per-field list.
+- **Implementation scope:** Campaign Management and Interview Scheduling screens, the mock campaign and schedule services, and tests.
+- **Frontend behavior (prototype):**
+  - Campaign Management in a draft is an editable form. After publication the same three cards show the values as text (no disabled fields), the header offers only Preview, and an alert explains why the configuration is locked. After schedule confirmation the alert gives the BR-14 reason.
+  - The Publish confirmation dialog states that the configuration becomes read-only and that this cannot be undone.
+  - The small "Xem trước chiến dịch" summary card no longer carries a "Chỉ đọc" badge: it is informational in every state, and the badge could be read as a campaign-wide lock. The full Preview dialog is unchanged.
+  - Interview Scheduling shows the interview date, window and duration as a short text summary labelled as campaign configuration. Rooms stay editable until the schedule is confirmed; after confirmation they are text too. Draft generation, manual row edits, conflict and Unassigned reasons, Save Changes and confirmation are unchanged.
+  - Three things that share the interview window are kept apart: the campaign configuration (Campaign Management), the availability each applicant chose (Applicant Portal, shown per row in the schedule table), and the interview assignment (Interview Scheduling).
+- **Backend responsibility (not implemented):** Reject every write to the campaign configuration unless the campaign is a draft, including a second publish, position changes and a change of date, window or duration sent to a scheduling endpoint. Keep the BR-04 constraint in the database and the service. Keep the BR-14 guards.
+- **Known limitations:**
+  - There is no way to correct a published campaign (see Q-06). A mistake found after publication cannot be fixed in the product.
+  - The prototype has no editor for interviewer–position assignments and interviewer availability; the Scheduling screen displays fixture values. That editor is part of the scheduling work, not of this decision.
+  - BR-04 ("explain why a position cannot be removed") can no longer be reached from the UI, because no position can be removed after publication and a draft has no applications. The mock service still enforces it and a test covers it.
+- **Relation to source requirements — needs Product Owner confirmation:**
+  - The sources lock the configuration at schedule **confirmation** (Brief §3.2 Step 5, BR-14). They do not say that it must stay editable between publication and confirmation, so locking earlier is **stricter than, not contrary to,** the sources. `SCREEN_REQUIREMENTS.md` Screen 1 currently says "publication alone does not immediately lock all edits"; that sentence is the team's earlier reading and was **not changed**. If the Product Owners confirm this decision, update it through the §5 process.
+  - Brief §3.2 Step 4 and Business §5 describe the Executive choosing the date, time window and duration when generating the draft. Under this decision those three values are chosen in Campaign Management before publication and are only displayed on the Scheduling screen. The single common duration (BR-10) is unaffected. This placement should be confirmed with the Product Owners.
+- **Source files and tests:** `pages/CampaignManagementPage.jsx`, `pages/InterviewSchedulingPage.jsx`, `components/organisms/CampaignDetailsCard`, `PositionsEditor`, `InterviewSetupCard`, `ScheduleSettingsCard`, `services/campaignService.js`, `services/scheduleService.js` (`updateSettings`), `mocks/guards.js` (`assertCampaignConfigEditable`). Tests: `tests/pages/CampaignManagementPage.test.jsx`, `tests/pages/InterviewSchedulingPage.test.jsx`, `tests/services/mockServices.test.js` (campaign and scheduling groups).

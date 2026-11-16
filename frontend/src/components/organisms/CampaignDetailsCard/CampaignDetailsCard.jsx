@@ -6,8 +6,45 @@ import { formatDate } from '../../../utils/format.js';
 // Native date inputs display in the browser's locale; show dd/MM/yyyy too.
 const chosen = (value) => (value ? `Ngày đã chọn: ${formatDate(value)}.` : undefined);
 
-/** Campaign information fields (reference "Thông tin chiến dịch"). */
-export default function CampaignDetailsCard({ values, errors, statusLabel, statusTone, disabled, onChange }) {
+/**
+ * Campaign information (reference "Thông tin chiến dịch"). A draft is an
+ * editable form; with `readOnly` (published campaign) the same values are
+ * shown as text, not as disabled fields.
+ */
+export default function CampaignDetailsCard({ values, errors, statusLabel, statusTone, disabled, readOnly, onChange }) {
+  const status = <Badge tone={statusTone}>{statusLabel}</Badge>;
+
+  if (readOnly) {
+    return (
+      <Card title="Thông tin chiến dịch" actions={status}>
+        <dl className="summary-list">
+          <div>
+            <dt>Tên chiến dịch</dt>
+            <dd>{values.name || '—'}</dd>
+          </div>
+          <div>
+            <dt>Câu lạc bộ chủ trì</dt>
+            <dd>{values.hostClub || '—'}</dd>
+          </div>
+          <div>
+            <dt>Mô tả chiến dịch</dt>
+            <dd>{values.description || '—'}</dd>
+          </div>
+          <div>
+            <dt>Thời gian nhận đơn</dt>
+            <dd>
+              Từ {formatDate(values.opensOn)} đến hết ngày {formatDate(values.closesOn)} (giờ Việt Nam)
+            </dd>
+          </div>
+          <div>
+            <dt>Hướng dẫn ứng tuyển</dt>
+            <dd>{values.instructions || '—'}</dd>
+          </div>
+        </dl>
+      </Card>
+    );
+  }
+
   const bind = (field) => ({
     value: values[field] ?? '',
     onChange: (event) => onChange(field, event.target.value),
@@ -15,7 +52,7 @@ export default function CampaignDetailsCard({ values, errors, statusLabel, statu
   });
 
   return (
-    <Card title="Thông tin chiến dịch" actions={<Badge tone={statusTone}>{statusLabel}</Badge>}>
+    <Card title="Thông tin chiến dịch" actions={status}>
       <div className="stack">
         <div className="field-grid">
           <FormField id="campaign-name" label="Tên chiến dịch" error={errors.name}>

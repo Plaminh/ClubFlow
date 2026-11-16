@@ -38,10 +38,10 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 
 | Service function | Returns (see the function's JSDoc for fields) | Backend must |
 |---|---|---|
-| `campaignService.getCampaign()` | `{ campaign, phase, positions[], slots[], locked, hasApplications }` | Executive only; drafts never public |
-| `campaignService.saveDraft(draft)` | same view | reject after schedule confirmation (BR-14) |
-| `campaignService.publish(draft)` | same view, or `UiError('validation', fieldErrors)` | validate BR-01 server-side |
-| `campaignService.removePosition(id)` | same view, or `UiError('conflict')` | BR-04: block when applications exist |
+| `campaignService.getCampaign()` | `{ campaign, phase, positions[], slots[], locked, lockReason }` (`lockReason`: `null` for a draft, `'published'`, or `'scheduleConfirmed'`) | Executive only; drafts never public |
+| `campaignService.saveDraft(draft)` | same view, or `UiError('forbidden')` | only while the campaign is a draft (Q-03, §12.2); also rejected after schedule confirmation (BR-14) |
+| `campaignService.publish(draft)` | same view, or `UiError('validation', fieldErrors)` / `UiError('forbidden')` | validate BR-01 server-side; only a draft can be published; publishing locks the configuration (Q-03) |
+| `campaignService.removePosition(id)` | same view, or `UiError('conflict')` / `UiError('forbidden')` | BR-04: block when applications exist; only while the campaign is a draft (Q-03) |
 | `applicationService.list(query)` | `{ items[], total, page, pageSize, pageCount }` | filter/sort/paginate server-side; Executive only |
 | `applicationService.getStats(query)` | `{ campaign, filtered, isFiltered }` counts | BR-06: applications vs distinct applicants |
 | `applicationService.get(id)` | detail incl. `student` (the `{ name, studentId, email, faculty, year }` submitted with the application, not the current profile), `sop`, `cv`, `privateNote`, `siblingIds`, `locked` | private note Executive-only; CV via authorized URL |
@@ -54,7 +54,7 @@ HTTP methods and paths are **not decided here** (they belong to the API spec in 
 | `resultService.publishRecorded()` | `{ publishedIds[] }` | create one in-app notification per application |
 | `scheduleService.getSchedule()` | settings, rooms, assignments, `rows[]` (status + reasons), `summary`, `conditions[]`, `canConfirm`, `zeroShortlisted` | compute statuses with BR-10/BR-11; first-fit order is Q-01 |
 | `scheduleService.generateDraft()` | schedule view | first-fit generation (server); ask-before-replace is in the UI |
-| `scheduleService.updateSettings({ slotMinutes, roomIds })` | schedule view | one common duration (BR-10) |
+| `scheduleService.updateSettings({ roomIds })` | schedule view, or `UiError('validation')` / `UiError('forbidden')` | rooms only, at least one; the date, window and common duration (BR-10) are campaign configuration and must be rejected here (Q-03) |
 | `scheduleService.updateRow(applicationId, { start, interviewerId, roomId })` | schedule view, or `UiError('validation', fieldErrors)` | revalidate BR-10/BR-11 after every edit |
 | `scheduleService.saveDraft()` | schedule view | — |
 | `scheduleService.confirm()` | schedule view, or `UiError('conflict', details.conditions)` | BR-13 recheck; then BR-14 locks |
@@ -127,7 +127,7 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 |---|---|---|
 | Q-01 | First-fit order | Not implemented in the UI; "Generate draft" shows the server's (today: demo) result |
 | Q-02 | Time zone / precision | Team-selected: instants are UTC ISO 8601 (`TIMESTAMPTZ`), shown in `Asia/Ho_Chi_Minh` as `dd/MM/yyyy` and `HH:mm` (`utils/format.js`); `opensOn`/`closesOn`/`interviewDate` are date-only; window is `openAt <= now < closeAt` with `closeAt` = 00:00 after the closing date. See §12 |
-| Q-03 | Editable fields after publication | Campaign stays editable until confirmation; interview date/window/duration locked once applications exist |
+| Q-03 | Editable fields after publication | Team-selected: none. The whole campaign configuration is read-only from publication; Scheduling shows date/window/duration as text and edits rooms only. See §12.2 |
 | Q-04 | Assessment fields | Notes + three-option recommendation, both required; no scores |
 | Q-05 | Notification UI | List in the Applicant Portal with unread badge and "mark all read" |
 | Q-06 | Editing submissions / availability | Not offered |
@@ -157,3 +157,16 @@ These decisions are team-selected and still wait for Product Owner confirmation;
 - The frontend only **displays** these values (`utils/format.js`); it does not decide whether the window is open. The server compares its own clock with `openAt <= now < closeAt`, where `openAt` is 00:00 on `opensOn` and `closeAt` is 00:00 on the day after `closesOn`, both in `Asia/Ho_Chi_Minh`.
 - Send instants with `Z` or an explicit offset. A string without an offset would be read in the browser's local time.
 - `scheduleService.updateRow` sends back one of the `sessionStarts` values it received, so the server can match it by instant.
+
+### 12.2 Campaign configuration lock (Q-03)
+
+| Campaign state | `locked` / `lockReason` | Campaign Management | Interview Scheduling |
+|---|---|---|---|
+| Draft | `false` / `null` | editable form; Save Draft, Preview, Publish (with confirmation) | no schedule yet |
+| Published, schedule not confirmed | `true` / `'published'` | text only + the reason; Preview only | date, window, duration as text; rooms, draft generation, row edits, save and confirm are available |
+| Schedule confirmed | `true` / `'scheduleConfirmed'` | text only + the BR-14 reason; Preview only | everything is text; export only |
+
+- "Campaign configuration" = name, host club, description, instructions, opening and closing dates, departments and positions (including quota), interview date, interview window, and slot duration.
+- The server must reject `saveDraft`, `publish`, `removePosition` and any change of date/window/duration for a campaign that is not a draft, whatever the UI shows. The pages only hide the controls.
+- Three different things use the interview window and must stay separate in the API: the **campaign configuration** (owned by Campaign Management), the **applicant's chosen availability slots** (stored with each application, collected by the Applicant Portal), and the **interview assignment** (start, interviewer, room; owned by Interview Scheduling).
+- BR-04 still needs a database constraint and a service check. In the UI it can no longer be reached, because positions cannot be removed after publication and a draft has no applications.

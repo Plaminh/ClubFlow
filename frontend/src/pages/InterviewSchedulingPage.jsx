@@ -138,8 +138,8 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
           settings={schedule.settings}
           rooms={schedule.rooms}
           hasDraft={schedule.status !== 'none'}
-          disabled={confirmed || action.pending}
-          onDurationChange={(slotMinutes) => run(() => actions.updateSettings({ slotMinutes }))}
+          disabled={action.pending}
+          readOnly={confirmed}
           onRoomsChange={(roomIds) => run(() => actions.updateSettings({ roomIds }))}
           onGenerate={() => (hasDraft ? setRegenerateOpen(true) : generate())}
         />

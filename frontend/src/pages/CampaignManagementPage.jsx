@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import Badge from '../components/atoms/Badge/index.js';
 import Button from '../components/atoms/Button/index.js';
 import Alert from '../components/molecules/Alert/index.js';
 import AsyncContent from '../components/molecules/AsyncContent/index.js';
@@ -24,6 +23,18 @@ const HEADING = {
   eyebrow: 'Bước 1 / 3 · Thiết lập chiến dịch',
   title: SCREEN_LABELS.campaignManagement,
   description: 'Chuẩn bị thông tin tuyển thành viên và cấu hình phỏng vấn cho cùng một chiến dịch.',
+};
+
+// Team-selected Q-03: the configuration is editable only while the campaign is a draft.
+const LOCK_MESSAGES = {
+  published: {
+    title: 'Chiến dịch đã được công bố · cấu hình chỉ đọc',
+    text: 'Ứng viên dựa vào thông tin đã công bố, nên thông tin chiến dịch, thời gian nhận đơn, vị trí tuyển và cấu hình phỏng vấn không còn chỉnh sửa được. Bạn vẫn duyệt hồ sơ và chuẩn bị lịch nháp ở các bước tiếp theo.',
+  },
+  scheduleConfirmed: {
+    title: 'Cấu hình chiến dịch đang ở chế độ chỉ đọc',
+    text: 'Chiến dịch đã được công bố và lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa (BR-14). Bạn vẫn có thể xem trước.',
+  },
 };
 
 function toForm(view) {
@@ -65,9 +76,8 @@ function CampaignWorkspace({ view, actions }) {
   const newPositionCounter = useRef(0);
   const action = useAction();
 
-  const { campaign, locked, hasApplications } = current;
-  const published = campaign.status === 'published';
-  const disabled = locked || action.pending;
+  const { campaign, locked, lockReason } = current;
+  const disabled = action.pending;
 
   // Move focus to the first invalid field after a failed save or publish.
   useEffect(() => {
@@ -142,29 +152,24 @@ function CampaignWorkspace({ view, actions }) {
     setBanner(null);
     const fieldErrors = validateCampaignForPublish(form);
     if (Object.keys(fieldErrors).length > 0) {
-      showValidation(fieldErrors, published ? 'Chưa thể lưu thay đổi' : 'Chưa thể công bố chiến dịch');
+      showValidation(fieldErrors, 'Chưa thể công bố chiến dịch');
       return;
     }
     setErrors({});
     setListError('');
-    if (published) {
-      submitPublish();
-    } else {
-      setPublishOpen(true);
-    }
+    setPublishOpen(true);
   }
 
   async function submitPublish() {
-    const wasPublished = published;
     const result = await action.run(() => actions.publish(form));
     setPublishOpen(false);
     if (result.ok) {
       applyView(result.value);
-      setBanner(
-        wasPublished
-          ? { tone: 'success', title: 'Đã lưu thay đổi (mô phỏng)', text: 'Chiến dịch vẫn đang được công bố.' }
-          : { tone: 'success', title: 'Đã công bố chiến dịch (mô phỏng)', text: 'Chiến dịch hiển thị công khai trên Applicant Portal.' },
-      );
+      setBanner({
+        tone: 'success',
+        title: 'Đã công bố chiến dịch (mô phỏng)',
+        text: 'Chiến dịch hiển thị công khai trên Applicant Portal. Cấu hình chiến dịch từ giờ chỉ đọc.',
+      });
     } else {
       handleFailure(result.error);
     }
@@ -191,27 +196,27 @@ function CampaignWorkspace({ view, actions }) {
     }
   }
 
+  // A locked campaign offers no save or publish action at all, only the preview.
   const headerActions = (
     <>
-      {!published ? (
+      {locked ? null : (
         <Button variant="secondary" onClick={saveDraft} disabled={disabled}>
           Lưu bản nháp
         </Button>
-      ) : null}
+      )}
       <Button variant="secondary" onClick={() => setPreviewOpen(true)}>
         Xem trước
       </Button>
-      <Button onClick={requestPublish} disabled={disabled}>
-        {published ? 'Lưu thay đổi' : 'Công bố chiến dịch'}
-      </Button>
+      {locked ? null : (
+        <Button onClick={requestPublish} disabled={disabled}>
+          Công bố chiến dịch
+        </Button>
+      )}
     </>
   );
 
-  const statusBadge = locked
-    ? { label: 'Chỉ đọc', tone: 'neutral' }
-    : published
-      ? { label: 'Đã công bố', tone: 'success' }
-      : { label: 'Bản nháp', tone: 'warning' };
+  const statusBadge = locked ? { label: 'Đã công bố · chỉ đọc', tone: 'success' } : { label: 'Bản nháp', tone: 'warning' };
+  const lockMessage = LOCK_MESSAGES[lockReason];
 
   return (
     <MainTemplate {...HEADING} actions={headerActions} context={form.name} step={1}>
@@ -221,18 +226,18 @@ function CampaignWorkspace({ view, actions }) {
             <p>{banner.text}</p>
           </Alert>
         ) : null}
-        {locked ? (
-          <Alert tone="info" title="Cấu hình chiến dịch đang ở chế độ chỉ đọc">
-            <p>Lịch phỏng vấn đã được xác nhận nên cấu hình chiến dịch được khóa (BR-14). Bạn vẫn có thể xem trước.</p>
-          </Alert>
-        ) : null}
-        {published && !locked ? (
-          <Alert tone="success" title="Chiến dịch đã được công bố">
-            <p>
-              Ứng viên có thể nộp hồ sơ từ {formatDate(campaign.opensOn)} đến hết {formatDate(campaign.closesOn)}. Công
-              bố không tự khóa cấu hình; trạng thái chỉ đọc chỉ áp dụng sau khi lịch phỏng vấn được xác nhận.
-            </p>
-            <Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review →</Button>
+        {lockMessage ? (
+          <Alert tone="info" title={lockMessage.title}>
+            <p>{lockMessage.text}</p>
+            {lockReason === 'published' ? (
+              <>
+                <p>
+                  Ứng viên nộp hồ sơ từ {formatDate(campaign.opensOn)} đến hết ngày {formatDate(campaign.closesOn)} (giờ Việt
+                  Nam).
+                </p>
+                <Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review →</Button>
+              </>
+            ) : null}
           </Alert>
         ) : null}
 
@@ -255,6 +260,7 @@ function CampaignWorkspace({ view, actions }) {
               statusLabel={statusBadge.label}
               statusTone={statusBadge.tone}
               disabled={disabled}
+              readOnly={locked}
               onChange={change}
             />
             <PositionsEditor
@@ -262,6 +268,7 @@ function CampaignWorkspace({ view, actions }) {
               errors={errors}
               listError={listError}
               disabled={disabled}
+              readOnly={locked}
               onAdd={addPosition}
               onChange={changePosition}
               onRemove={requestRemove}
@@ -271,15 +278,11 @@ function CampaignWorkspace({ view, actions }) {
             <InterviewSetupCard
               values={form}
               errors={errors}
-              disabled={disabled || hasApplications}
-              lockedHint={
-                hasApplications && !locked
-                  ? 'Đã có hồ sơ chọn khung giờ nên không đổi ngày, khung giờ và thời lượng tại đây (giả định giao diện, chờ trả lời Q-03).'
-                  : null
-              }
+              disabled={disabled}
+              readOnly={locked}
               onChange={change}
             />
-            <Card title="Xem trước chiến dịch" actions={<Badge>Chỉ đọc</Badge>}>
+            <Card title="Xem trước chiến dịch" subtitle="Tóm tắt nội dung ứng viên sẽ thấy.">
               <dl className="summary-list">
                 <div>
                   <dt>Thời gian nhận đơn</dt>
@@ -319,8 +322,12 @@ function CampaignWorkspace({ view, actions }) {
         onCancel={() => setPublishOpen(false)}
       >
         <p>
-          Chiến dịch sẽ hiển thị công khai. Ứng viên chỉ nộp được hồ sơ từ {formatDate(form.opensOn)} đến hết{' '}
-          {formatDate(form.closesOn)}.
+          Chiến dịch sẽ hiển thị công khai. Ứng viên chỉ nộp được hồ sơ từ {formatDate(form.opensOn)} đến hết ngày{' '}
+          {formatDate(form.closesOn)} (giờ Việt Nam).
+        </p>
+        <p>
+          <strong>Sau khi công bố, cấu hình chiến dịch chỉ đọc:</strong> thông tin chiến dịch, thời gian nhận đơn, vị trí
+          tuyển và cấu hình phỏng vấn không thể chỉnh sửa hay hoàn tác. Hãy dùng “Xem trước” để kiểm tra trước khi công bố.
         </p>
       </ConfirmDialog>
       <ConfirmDialog

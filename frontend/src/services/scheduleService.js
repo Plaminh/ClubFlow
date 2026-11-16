@@ -81,28 +81,27 @@ export async function generateDraft() {
   return clone(scheduleView(state));
 }
 
-/** Common duration and available rooms (BR-10: one duration for the whole campaign). */
-export async function updateSettings({ slotMinutes, roomIds }) {
+/**
+ * Scheduling-level settings: the rooms available for the draft. The interview
+ * date, window, and common duration (BR-10) are campaign configuration; they
+ * are read-only here because a schedule only exists for a published campaign
+ * (team-selected Q-03).
+ */
+export async function updateSettings({ roomIds, ...campaignConfiguration }) {
   await mockRequest();
   requireRole('executive');
   assertNotLockedBySchedule('lịch phỏng vấn');
+  if (Object.keys(campaignConfiguration).length > 0) {
+    throw createUiError(
+      'forbidden',
+      'Ngày, khung giờ và thời lượng mỗi ca là cấu hình chiến dịch, đã khóa từ khi chiến dịch được công bố.',
+    );
+  }
+  if (!roomIds || roomIds.length === 0) {
+    throw createUiError('validation', 'Chọn ít nhất một phòng.');
+  }
   const state = getState();
-  if (slotMinutes) {
-    if (![15, 20, 30].includes(Number(slotMinutes))) {
-      throw createUiError('validation', 'Thời lượng mỗi ca phải là 15, 20 hoặc 30 phút.');
-    }
-    state.campaign.slotMinutes = Number(slotMinutes);
-    state.interviews = state.interviews.map((interview) => ({
-      ...interview,
-      end: addMinutes(interview.start, state.campaign.slotMinutes),
-    }));
-  }
-  if (roomIds) {
-    if (roomIds.length === 0) {
-      throw createUiError('validation', 'Chọn ít nhất một phòng.');
-    }
-    state.schedule.roomIds = roomIds;
-  }
+  state.schedule.roomIds = roomIds;
   markEdited(state);
   return clone(scheduleView(state));
 }

@@ -19,6 +19,20 @@ export function requireRole(role) {
   return account;
 }
 
+/**
+ * Campaign configuration is editable only while the campaign is a draft
+ * (team-selected Q-03). After schedule confirmation the BR-14 lock applies too.
+ */
+export function assertCampaignConfigEditable() {
+  assertNotLockedBySchedule('cấu hình chiến dịch');
+  if (getState().campaign.status === 'published') {
+    throw createUiError(
+      'forbidden',
+      'Chiến dịch đã được công bố nên cấu hình chiến dịch chỉ đọc. Chỉ bản nháp mới chỉnh sửa được.',
+    );
+  }
+}
+
 /** BR-14: after schedule confirmation these records are read-only. */
 export function assertNotLockedBySchedule(what) {
   if (isScheduleConfirmed(getState())) {

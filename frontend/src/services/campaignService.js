@@ -2,15 +2,28 @@
  * Campaign service (Executive). Demo implementation over the mock store.
  * Backend integration: replace each function body with apiClient calls that
  * return the same shapes (see docs/frontend/INTEGRATION.md).
+ *
+ * Team-selected Q-03: campaign configuration (details, dates, positions,
+ * interview date/window/duration) is editable only while the campaign is a
+ * draft and becomes read-only when it is published.
  */
 import { campaignPhase, departmentById, isScheduleConfirmed } from '../mocks/derive.js';
 import { at } from '../mocks/fixtures.js';
-import { assertNotLockedBySchedule, requireRole } from '../mocks/guards.js';
+import { assertCampaignConfigEditable, requireRole } from '../mocks/guards.js';
 import { clone, getState, mockRequest } from '../mocks/store.js';
 import { isPositiveInteger, validateCampaignForPublish } from '../utils/validation.js';
 import { createUiError } from './uiError.js';
 
+// Why the configuration is read-only, or null while it is an editable draft.
+function lockReasonOf(state) {
+  if (isScheduleConfirmed(state)) {
+    return 'scheduleConfirmed';
+  }
+  return state.campaign.status === 'published' ? 'published' : null;
+}
+
 function campaignView(state) {
+  const lockReason = lockReasonOf(state);
   const positions = state.positions.map((position) => ({
     ...position,
     departmentName: departmentById(state, position.departmentId)?.name ?? '',
@@ -21,8 +34,8 @@ function campaignView(state) {
     phase: campaignPhase(state),
     positions,
     slots: state.slots,
-    locked: isScheduleConfirmed(state),
-    hasApplications: state.applications.length > 0,
+    locked: lockReason !== null,
+    lockReason,
   };
 }
 
@@ -69,20 +82,17 @@ function applyDraft(state, draft) {
       campaign[field] = draft[field];
     }
   }
-  // Interview configuration cannot change once applicants have chosen slots
-  // (UI assumption pending Q-03; see specs/001-frontend-ui/research.md).
-  if (state.applications.length === 0) {
-    if (draft.interviewDate) {
-      campaign.interviewDate = draft.interviewDate;
-    }
-    if (draft.interviewWindow) {
-      campaign.interviewWindow = draft.interviewWindow;
-    }
-    if (draft.slotMinutes) {
-      campaign.slotMinutes = Number(draft.slotMinutes);
-    }
-    state.slots = hourlySlots(campaign);
+  // Campaign-level interview configuration; applicants later choose from the slots derived here.
+  if (draft.interviewDate) {
+    campaign.interviewDate = draft.interviewDate;
   }
+  if (draft.interviewWindow) {
+    campaign.interviewWindow = draft.interviewWindow;
+  }
+  if (draft.slotMinutes) {
+    campaign.slotMinutes = Number(draft.slotMinutes);
+  }
+  state.slots = hourlySlots(campaign);
 
   for (const input of draft.positions ?? []) {
     const values = {
@@ -110,33 +120,31 @@ export async function getCampaign() {
 export async function saveDraft(draft) {
   await mockRequest();
   requireRole('executive');
-  assertNotLockedBySchedule('cấu hình chiến dịch');
+  assertCampaignConfigEditable();
   const state = getState();
   applyDraft(state, draft);
   return clone(campaignView(state));
 }
 
+/** Validates and publishes a draft (BR-01). Publishing locks the configuration and cannot be repeated. */
 export async function publish(draft) {
   await mockRequest();
   requireRole('executive');
-  assertNotLockedBySchedule('cấu hình chiến dịch');
+  assertCampaignConfigEditable();
   const fieldErrors = validateCampaignForPublish(draft);
   if (Object.keys(fieldErrors).length > 0) {
     throw createUiError('validation', 'Chưa thể công bố chiến dịch. Hãy sửa các trường được đánh dấu.', { fieldErrors });
   }
   const state = getState();
   applyDraft(state, draft);
-  if (state.campaign.status !== 'published') {
-    state.campaign.status = 'published';
-    state.campaign.publishedAt = state.now;
-  }
+  state.campaign.status = 'published';
+  state.campaign.publishedAt = state.now;
   return clone(campaignView(state));
 }
 
 export async function removePosition(positionId) {
   await mockRequest();
   requireRole('executive');
-  assertNotLockedBySchedule('cấu hình chiến dịch');
   const state = getState();
   const linked = state.applications.filter((application) => application.positionId === positionId).length;
   if (linked > 0) {
@@ -145,6 +153,7 @@ export async function removePosition(positionId) {
       `Không thể xóa vị trí này vì đã có ${linked} hồ sơ ứng tuyển. Xóa vị trí sẽ làm mất liên kết của các hồ sơ đó (BR-04).`,
     );
   }
+  assertCampaignConfigEditable();
   state.positions = state.positions.filter((position) => position.id !== positionId);
   return clone(campaignView(state));
 }

@@ -7,9 +7,43 @@ const INTERVIEW_WINDOWS = Object.freeze([
   { value: '13:00-17:00', start: '13:00', end: '17:00' },
 ]);
 
-/** Interview preparation (reference "Chuẩn bị phỏng vấn"): one date, window, common duration. */
-export default function InterviewSetupCard({ values, errors, disabled, lockedHint, onChange }) {
+/**
+ * Campaign-level interview configuration (reference "Chuẩn bị phỏng vấn"):
+ * one date, the window applicants choose availability from, and the common
+ * duration. Editable in a draft; shown as text with `readOnly` (published).
+ * It is not applicant availability and not an interview assignment.
+ */
+export default function InterviewSetupCard({ values, errors, disabled, readOnly, onChange }) {
   const windowValue = `${values.interviewWindow.start}-${values.interviewWindow.end}`;
+
+  if (readOnly) {
+    return (
+      <Card title="Chuẩn bị phỏng vấn">
+        <div className="stack">
+          <dl className="summary-list">
+            <div>
+              <dt>Ngày phỏng vấn</dt>
+              <dd>{formatDate(values.interviewDate)}</dd>
+            </div>
+            <div>
+              <dt>Khung giờ ứng viên chọn</dt>
+              <dd>
+                {values.interviewWindow.start}–{values.interviewWindow.end}
+              </dd>
+            </div>
+            <div>
+              <dt>Thời lượng mỗi ca</dt>
+              <dd>{values.slotMinutes} phút, dùng chung cho mọi buổi phỏng vấn</dd>
+            </div>
+          </dl>
+          <p className="hint">
+            Ứng viên chọn giờ rảnh theo cấu hình này khi nộp hồ sơ. Việc phân công từng buổi phỏng vấn thực hiện ở Interview
+            Scheduling.
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card title="Chuẩn bị phỏng vấn">
@@ -70,7 +104,7 @@ export default function InterviewSetupCard({ values, errors, disabled, lockedHin
             </select>
           )}
         </FormField>
-        {lockedHint ? <p className="hint">{lockedHint}</p> : null}
+        <p className="hint">Ba thông tin này sẽ khóa khi chiến dịch được công bố, vì ứng viên chọn giờ rảnh dựa trên chúng.</p>
       </div>
     </Card>
   );

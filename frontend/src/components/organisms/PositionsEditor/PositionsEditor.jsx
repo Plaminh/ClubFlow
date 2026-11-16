@@ -2,13 +2,35 @@ import Button from '../../atoms/Button/index.js';
 import Alert from '../../molecules/Alert/index.js';
 import Card from '../../molecules/Card/index.js';
 import FormField from '../../molecules/FormField/index.js';
+import PositionCard from '../../molecules/PositionCard/index.js';
 import './PositionsEditor.css';
 
 /**
- * Editable departments/positions list (reference "Ban và vị trí tuyển").
+ * Departments/positions list (reference "Ban và vị trí tuyển"). Editable in a
+ * draft; with `readOnly` (published campaign) positions are shown as cards
+ * without add, edit, or remove controls.
  * positions: [{ key, id?, departmentName, name, quota, description, requirements, applicationCount }]
  */
-export default function PositionsEditor({ positions, errors, listError, disabled, onAdd, onChange, onRemove }) {
+export default function PositionsEditor({ positions, errors, listError, disabled, readOnly, onAdd, onChange, onRemove }) {
+  if (readOnly) {
+    return (
+      <Card title="Ban và vị trí tuyển">
+        <div className="stack">
+          {positions.map(({ key, applicationCount, ...position }) => (
+            <div key={key} className="stack stack--tight">
+              <PositionCard {...position} />
+              <p className="hint">
+                {applicationCount > 0
+                  ? `${applicationCount} hồ sơ đang liên kết với vị trí này.`
+                  : 'Chưa có hồ sơ nào cho vị trí này.'}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card
       title="Ban và vị trí tuyển"
