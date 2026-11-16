@@ -503,3 +503,27 @@ Verified:
 - Headless Microsoft Edge at 360, 768 and 1280 CSS px: Publish Results confirmation fit the viewport with Cancel initially focused; after confirmation, the updated success alert containing the Brevo/mock disclaimer fit the viewport and the page had no horizontal overflow at all three widths. This was viewport simulation, not real browser zoom. No external email was sent.
 
 By hand: Backend developers must review the outbox/idempotency model and verify the Brevo account, sender, template, retry policy and credential handling before implementation.
+
+---
+
+## 2026-11-16 — UI-7.4 — Q-07 protected Cloudinary readiness
+
+Tool: Codex using the `speckit-implement` skill.
+
+Asked for: Preserve the existing FileField, FormData and mock PDF behavior; verify PDF/5 MB boundaries; document protected Cloudinary upload/retrieval and authorization without integrating Cloudinary or exposing secrets.
+
+Kept: `FileField`, `ApplicationForm`, `portalService.submitApplication(FormData)`, the shared `apiClient` FormData behavior, the fictional sample PDF and all current layouts. No backend, dependency, environment or Cloudinary SDK change was made.
+
+Changed:
+
+- Added a service regression proving an exact 5 MB PDF is accepted while 6 MB is rejected; existing page tests continue to reject non-PDF input and preserve form data.
+- Added the Q-07 decision record and integration contract: Express/Multer one-file/size enforcement, actual PDF content inspection, protected Cloudinary storage, PostgreSQL asset metadata, JWT plus Executive/assigned-interviewer authorization, short-lived signed delivery or backend streaming, and orphan cleanup.
+- Explicitly documented that a public `secure_url` is not authorization, Cloudinary secrets must never use `VITE_`, the repository's fictional PDF is not a real-data delivery model, and account delivery capabilities must be verified. Tasks T080–T082 are complete; Product Owner/team confirmation remains pending.
+
+Verified:
+
+- Targeted lint and upload tests: lint exit 0; 49/49 tests passed (3 files: API client, Applicant Portal, mock services).
+- Full `npm run verify` exit 0: frontend 195/195 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
+- No browser check was repeated because this phase changed only a service boundary test and documentation; the upload UI and rendered copy were unchanged from the previously verified screen.
+
+By hand: Backend developers must verify the Cloudinary account's protected/authenticated PDF delivery features and review retention, malware scanning, applicant self-access and recovery policy before implementation.

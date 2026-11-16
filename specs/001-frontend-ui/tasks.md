@@ -166,6 +166,9 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T077 [US2] [US4] Keep Q-05 publication and applicant notification visibility consistent, and state accurately that mock mode sends no real email
 - [x] T078 [US2] Add Q-05 regression coverage that repeat publication cannot duplicate an in-app notification
 - [x] T079 Document the deferred Brevo outbox, idempotent retry, credential boundary, common template and pending approval status
+- [x] T080 [US4] Audit Q-07 `FileField`, FormData, API-client and mock validation behavior; add an exact 5 MB acceptance boundary regression
+- [x] T081 Confirm the prototype exposes only the fictional sample PDF and makes no public-URL security claim; no real Cloudinary upload implemented
+- [x] T082 Document Multer/PDF-content validation, protected Cloudinary metadata, authorized retrieval, short-lived delivery, cleanup and pending capability/approval decisions
 
 ---
 

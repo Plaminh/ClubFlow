@@ -287,10 +287,14 @@ describe('applicant portal', () => {
       kind: 'conflict',
       details: { existingApplicationId: 'CF-032' },
     });
+    const boundary = await portalService.submitApplication(
+      applicationForm({ positionId: 'pos-content', cv: pdf('cv.pdf', 5 * 1024 * 1024) }),
+    );
+    expect(boundary).toMatchObject({ id: 'CF-033', screeningStatus: 'pendingReview' });
     await expect(
-      portalService.submitApplication(applicationForm({ positionId: 'pos-content', cv: pdf('cv.pdf', 6 * 1024 * 1024) })),
+      portalService.submitApplication(applicationForm({ positionId: 'pos-content', cv: pdf('another.pdf', 6 * 1024 * 1024) })),
     ).rejects.toMatchObject({ kind: 'validation', fieldErrors: { cv: 'CV tối đa 5 MB; tệp hiện tại 6,0 MB.' } });
-    expect(await portalService.listMyApplications()).toHaveLength(1);
+    expect(await portalService.listMyApplications()).toHaveLength(2);
   });
 
   it('shows reviewers and interviewers the email and faculty submitted with the application', async () => {

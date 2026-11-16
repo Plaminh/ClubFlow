@@ -72,7 +72,7 @@
 |---|---|---|
 | `portalService.getPublicCampaign()` | — | public campaign view (no drafts) |
 | `portalService.listMyApplications()` | — | own applications with screening, confirmed interview, **published** result only |
-| `portalService.submitApplication(formData)` | `FormData`: `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, `cv` file | created immutable application, `UiError(validation)`, or `UiError(conflict, details: existingApplicationId)`; no update/withdraw contract (Q-06) |
+| `portalService.submitApplication(formData)` | `FormData`: `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, `cv` file | created immutable application, `UiError(validation)`, or `UiError(conflict, details: existingApplicationId)`; PDF ≤ 5 MB is revalidated server-side and stored behind protected retrieval (Q-07); no update/withdraw contract (Q-06) |
 | `portalService.listNotifications()` | — | own notifications |
 | `portalService.markNotificationsRead()` | — | nothing; own unread notifications become read |
 

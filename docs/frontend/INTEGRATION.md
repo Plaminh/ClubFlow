@@ -104,8 +104,10 @@ If the API returns a different shape, **map it inside the service** so pages sta
 ## 7. CV upload and viewing
 
 - Upload boundary: `ApplicationForm` builds `FormData` with `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, and `cv` (the `File`). `apiClient` sends it without a JSON content type.
-- Client checks (`.pdf`, ≤ 5 MB) are for feedback only; the server must re-check type and size.
-- Viewing: the demo links to one fictional file, `/demo/fictional-sample-cv.pdf` (`SAMPLE_CV_URL` in `mocks/fixtures.js`). Real CVs must come from an endpoint that checks the Executive role or the interview assignment; never return a public storage URL (Q-07).
+- Client checks (`.pdf`, ≤ 5 MB) are for feedback only. Express/Multer must accept one file with a 5 MB limit and the backend must inspect the actual PDF signature/content rather than trust the extension or MIME header.
+- Upload the validated file to a non-public/protected Cloudinary delivery/access mode supported by the team's account. Store the asset/public identifier, version, resource/delivery type, format, byte size and safe original name against the application. Never store a permanent public URL as the authorization boundary.
+- Viewing: the demo links to one fictional file, `/demo/fictional-sample-cv.pdf` (`SAMPLE_CV_URL` in `mocks/fixtures.js`). A real retrieval endpoint authenticates with JWT and authorizes the Executive or the interviewer assigned to the application, then streams the file or returns a short-lived signed/authenticated delivery URL. Verify the exact Cloudinary delivery mode and account capability during backend integration (Q-07, §12.7).
+- Keep Cloudinary API secret/key material server-side. Do not introduce a `VITE_` Cloudinary secret. If upload succeeds but the application transaction fails, delete the orphaned asset.
 
 ## 8. Mock-only logic — do not reuse as business rules
 
@@ -131,7 +133,7 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 | Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.4 |
 | Q-05 | Notification UI and email | In-app list with unread badge and "mark all read"; mock sends no email. Backend queues one common Brevo email on publication. See §12.5 |
 | Q-06 | Editing submissions / availability | Not offered. See §12.6 |
-| Q-07 | Private CV delivery | Demo uses one fictional file; see §7 |
+| Q-07 | Private CV delivery | Demo uses one fictional file; backend uses Multer + protected Cloudinary storage + authorized short-lived retrieval. See §7 and §12.7 |
 | — | Screening reversal | Only Pending Review applications can be decided (WORKFLOWS §3 does not settle reversal) |
 
 ## 11. Integration checklist (per service)
@@ -214,3 +216,18 @@ Use explicit `ORDER BY`; database row order and JavaScript array insertion order
 - The frontend confirmations improve intent and prevent accidental duplicate clicks; they are not concurrency control. The server must check the expected state and authorization in the same transaction as each write and return `409 Conflict` for stale or duplicate transitions.
 - The application ID or interview ID in the request is the action target. Never infer it from a previously selected browser row. Idempotency keys may be added for network retries, but they must not enable a second domain record.
 - No override, correction, undo, update or delete endpoint is part of the selected contract. A future exception workflow requires Product Owner approval and an audit trail.
+
+### 12.7 Protected CV upload and retrieval (Q-07)
+
+```text
+React FileField → FormData → Express/Multer limit → PDF content validation
+  → protected Cloudinary upload → PostgreSQL asset metadata linked to Application
+
+Authorized CV request → JWT role/assignment check → short-lived signed URL or backend stream
+```
+
+- Upload request fields stay exactly as the current `portalService.submitApplication(formData)` contract. Respond with application data, not Cloudinary credentials or a permanent public URL.
+- Enforce one file, PDF-only content and `bytes <= 5 * 1024 * 1024` on the server. Return `UiError(validation)`-compatible `fieldErrors.cv` for rejected files.
+- The metadata record needs enough information to address and verify the asset without treating its URL as permission: asset/public ID, version, resource type, delivery/access type, format, bytes and safe original filename.
+- Retrieval authorization is record-level: Executive access or the interviewer assigned to that application's confirmed interview. The frontend's hidden controls are not security. Applicant-owner retrieval is not in the current UI contract and needs an explicit decision if added.
+- Verify Cloudinary protected/authenticated PDF delivery, signed-URL support and account restrictions before fixing an implementation. If short-lived URLs are used, keep expiry brief and do not expose them in logs; proxy streaming is the fallback when account delivery features are insufficient.
