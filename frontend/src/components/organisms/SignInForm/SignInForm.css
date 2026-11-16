@@ -1,0 +1,27 @@
+.sign-in-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  max-width: 64rem;
+  margin-inline: auto;
+}
+
+.sign-in-form__toggle {
+  min-height: var(--control-min-height);
+  margin-top: var(--space-1);
+}
+
+.sign-in-form__examples {
+  margin-top: var(--space-4);
+}
+
+.sign-in-form__examples code {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 48rem) {
+  .sign-in-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.8fr);
+    gap: var(--space-6);
+  }
+}

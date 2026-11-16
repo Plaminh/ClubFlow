@@ -26,13 +26,34 @@ export function renderApp(path = '/', { accountId, scenarioId } = {}) {
   );
 }
 
-/** Signs in through the shared demo dialog, choosing the option by its visible label. */
+/** Development-only account switch in the DemoBar, choosing the option by its visible label. */
 export async function signInAs(accountLabel) {
-  fireEvent.click(await screen.findByRole('button', { name: 'Sign In' }));
-  const dialog = await screen.findByRole('dialog', { name: 'Sign In' });
-  const select = within(dialog).getByLabelText('Chọn tài khoản demo');
-  const option = within(select).getByRole('option', { name: accountLabel });
+  const demo = await screen.findByRole('region', { name: 'Điều khiển bản demo' });
+  const select = within(demo).getByLabelText(/Đổi tài khoản nhanh/);
+  const option = await within(select).findByRole('option', { name: accountLabel });
   fireEvent.change(select, { target: { value: option.value } });
-  fireEvent.click(within(dialog).getByRole('button', { name: 'Sign In (demo)' }));
-  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByRole('link', { name: 'Đăng nhập' })).not.toBeInTheDocument());
+}
+
+export const DEMO_PASSWORD = 'ClubFlowDemo!';
+
+/** Fills and submits the simulated Sign In form on /login. */
+export async function submitSignIn(email, password = DEMO_PASSWORD) {
+  fireEvent.change(await screen.findByLabelText('Email'), { target: { value: email } });
+  fireEvent.change(screen.getByLabelText('Mật khẩu'), { target: { value: password } });
+  fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
+}
+
+/** Opens the header account menu (signed-in users only). */
+export async function openAccountMenu() {
+  const trigger = await screen.findByRole('button', { name: /^Tài khoản của/ });
+  if (trigger.getAttribute('aria-expanded') !== 'true') {
+    fireEvent.click(trigger);
+  }
+  return trigger;
+}
+
+export async function signOut() {
+  await openAccountMenu();
+  fireEvent.click(screen.getByRole('button', { name: 'Đăng xuất' }));
 }

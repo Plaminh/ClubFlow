@@ -78,6 +78,7 @@ function baseState(scenario) {
   return {
     scenarioId: scenario.id,
     now: scenario.now,
+    profiles: structuredClone(ACCOUNTS),
     campaign: base.campaign,
     departments: base.departments,
     positions: base.positions,

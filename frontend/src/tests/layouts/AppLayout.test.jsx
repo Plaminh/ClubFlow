@@ -1,6 +1,8 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { renderApp, signInAs } from '../helpers/renderApp.jsx';
+import { openAccountMenu, renderApp, signInAs, signOut } from '../helpers/renderApp.jsx';
+
+const who = (text) => screen.getByText(text, { selector: '.app-header__who' });
 
 function navLinks() {
   const nav = screen.getByRole('navigation', { name: 'Điều hướng chính' });
@@ -16,9 +18,11 @@ describe('AppLayout', () => {
     expect(await screen.findByText('Khách (chưa đăng nhập)')).toBeInTheDocument();
     expect(navLinks()).toEqual(['Applicant Portal']);
     expect(screen.getByRole('link', { name: 'Applicant Portal' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Đăng nhập' })).toHaveAttribute('href', '/login');
+    expect(screen.queryByRole('button', { name: /^Tài khoản của/ })).not.toBeInTheDocument();
   });
 
-  it('switches to Executive navigation after a demo sign-in and lands on the campaign screen', async () => {
+  it('switches to Executive navigation after a DemoBar account switch and lands on the campaign screen', async () => {
     renderApp('/');
 
     await signInAs('Ban tuyển dụng · CLB Công nghệ & Sáng tạo');
@@ -26,7 +30,7 @@ describe('AppLayout', () => {
     await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(navLinks()).toEqual(['Chiến dịch', 'Duyệt hồ sơ', 'Xếp lịch', 'Trang công khai']);
     expect(screen.getByRole('link', { name: 'Chiến dịch' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByText('Ban tuyển dụng · CLB Công nghệ & Sáng tạo')).toBeInTheDocument();
+    expect(who('Ban tuyển dụng · CLB Công nghệ & Sáng tạo')).toBeInTheDocument();
   });
 
   it('marks the active link and focuses the main region when navigating', async () => {
@@ -48,7 +52,7 @@ describe('AppLayout', () => {
     await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
     expect(navLinks()).toEqual(['Interviewer Workspace']);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sign Out' }));
+    await signOut();
 
     await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
     expect(await screen.findByText('Khách (chưa đăng nhập)')).toBeInTheDocument();
@@ -59,23 +63,48 @@ describe('AppLayout', () => {
     await signInAs('Nguyễn Minh Anh');
 
     expect(screen.getByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
-    expect(screen.getByText('Nguyễn Minh Anh · Ứng viên')).toBeInTheDocument();
+    expect(who('Nguyễn Minh Anh · Ứng viên')).toBeInTheDocument();
   });
 
-  it('labels the sign-in dialog as a demo, focuses it, and returns focus on Escape', async () => {
+  it('switches between demo accounts and back to guest from the DemoBar', async () => {
     renderApp('/');
-    const opener = await screen.findByRole('button', { name: 'Sign In' });
-    opener.focus();
+    await signInAs('Hà My · User Experience Design');
+    await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
 
-    fireEvent.click(opener);
-    const dialog = await screen.findByRole('dialog', { name: 'Sign In' });
-    expect(within(dialog).getByText(/không có xác thực thật/)).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('Chọn tài khoản demo')).toHaveFocus();
+    await signInAs('Nguyễn Minh Anh');
+    await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
+    expect(who('Nguyễn Minh Anh · Ứng viên')).toBeInTheDocument();
 
-    fireEvent.keyDown(dialog, { key: 'Escape' });
+    const demo = screen.getByRole('region', { name: 'Điều khiển bản demo' });
+    fireEvent.change(within(demo).getByLabelText(/Đổi tài khoản nhanh/), { target: { value: '' } });
+    expect(await screen.findByText('Khách (chưa đăng nhập)')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Đăng nhập' })).toBeInTheDocument();
+  });
 
+  it('opens the Sign In page from the header instead of an account-picker dialog', async () => {
+    renderApp('/');
+
+    fireEvent.click(await screen.findByRole('link', { name: 'Đăng nhập' }));
+
+    await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(opener).toHaveFocus();
+  });
+
+  it('offers My Profile and Sign Out in a keyboard-operable account menu', async () => {
+    renderApp('/', { accountId: 'ap-minhanh' });
+    const trigger = await openAccountMenu();
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole('link', { name: 'Hồ sơ cá nhân' }), { key: 'Escape' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveFocus();
+    expect(screen.queryByRole('link', { name: 'Hồ sơ cá nhân' })).not.toBeInTheDocument();
+
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('link', { name: 'Hồ sơ cá nhân' }));
+    await screen.findByRole('heading', { level: 1, name: 'Hồ sơ cá nhân' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('labels the demo controls and switches scenario with its fixed demo clock', async () => {

@@ -19,6 +19,13 @@ export function formatMegabytes(bytes) {
 
 const isBlank = (value) => !String(value ?? '').trim();
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Basic email shape check shared by the Sign In and My Profile forms and their mock services. */
+export function isEmail(value) {
+  return EMAIL_PATTERN.test(String(value ?? '').trim());
+}
+
 /** Positive whole number, given as typed (string) or as a number. */
 export function isPositiveInteger(value) {
   return /^\d+$/.test(String(value ?? '').trim()) && Number(value) > 0;
@@ -83,7 +90,7 @@ export function validateApplicationInput({ positionId, email, faculty, sop, slot
   }
   if (isBlank(email)) {
     errors.email = 'Vui lòng nhập email liên hệ.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  } else if (!isEmail(email)) {
     errors.email = 'Email chưa đúng định dạng.';
   }
   if (isBlank(faculty)) {

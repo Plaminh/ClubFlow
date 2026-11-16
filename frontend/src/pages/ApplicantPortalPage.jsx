@@ -26,7 +26,7 @@ const HEADING = {
 function SignInGate({ role, title, text, onSignIn }) {
   if (role === 'visitor') {
     return (
-      <EmptyState title={title} actions={<Button onClick={onSignIn}>Sign In</Button>}>
+      <EmptyState title={title} actions={<Button onClick={onSignIn}>Đăng nhập</Button>}>
         <p>{text}</p>
       </EmptyState>
     );

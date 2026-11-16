@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ROUTES } from '../../routes/paths.js';
 import { getHealth } from '../../services/healthService.js';
-import { renderApp } from '../helpers/renderApp.jsx';
+import { EXECUTIVE, renderApp, submitSignIn } from '../helpers/renderApp.jsx';
 
 describe('AppRoutes', () => {
   beforeEach(() => {
@@ -10,19 +10,62 @@ describe('AppRoutes', () => {
   });
 
   it.each([
-    [ROUTES.EXECUTIVE_CAMPAIGN, 'Create Recruitment Campaign'],
-    [ROUTES.EXECUTIVE_REVIEW, 'Application Review'],
-    [`${ROUTES.EXECUTIVE_REVIEW}?tab=results`, 'Application Review'],
-    [ROUTES.EXECUTIVE_SCHEDULING, 'Interview Scheduling'],
-    [ROUTES.INTERVIEWER, 'Interviewer Workspace'],
-    [`${ROUTES.HOME}?tab=apply`, 'Applicant Portal'],
-  ])('renders %s inside the app shell with exactly one h1', async (path, title) => {
-    renderApp(path);
+    [ROUTES.EXECUTIVE_CAMPAIGN, 'Create Recruitment Campaign', EXECUTIVE],
+    [ROUTES.EXECUTIVE_REVIEW, 'Application Review', EXECUTIVE],
+    [`${ROUTES.EXECUTIVE_REVIEW}?tab=results`, 'Application Review', EXECUTIVE],
+    [ROUTES.EXECUTIVE_SCHEDULING, 'Interview Scheduling', EXECUTIVE],
+    [ROUTES.INTERVIEWER, 'Interviewer Workspace', 'iv-hamy'],
+    [`${ROUTES.HOME}?tab=apply`, 'Applicant Portal', undefined],
+    [ROUTES.LOGIN, 'Đăng nhập', undefined],
+    [ROUTES.PROFILE, 'Hồ sơ cá nhân', 'ap-minhanh'],
+  ])('renders %s inside the app shell with exactly one h1', async (path, title, accountId) => {
+    renderApp(path, { accountId });
 
     await screen.findByRole('heading', { level: 1, name: title });
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getAllByRole('main')).toHaveLength(1);
     expect(screen.getByRole('banner')).toBeInTheDocument();
+  });
+
+  it.each([
+    ROUTES.PROFILE,
+    ROUTES.EXECUTIVE_CAMPAIGN,
+    ROUTES.EXECUTIVE_REVIEW,
+    ROUTES.EXECUTIVE_SCHEDULING,
+    ROUTES.INTERVIEWER,
+  ])('redirects a guest from protected %s to Sign In', async (path) => {
+    renderApp(path);
+
+    await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+  });
+
+  it('returns a guest to the intended protected route after signing in with a role that may open it', async () => {
+    renderApp(`${ROUTES.EXECUTIVE_REVIEW}?tab=results`);
+
+    await submitSignIn('executive@clubflow.demo.example');
+
+    await screen.findByRole('heading', { level: 1, name: 'Application Review' });
+    expect(screen.getByRole('tab', { name: /Final Results/, selected: true })).toBeInTheDocument();
+  });
+
+  it('ignores an intended route the signed-in role may not open and uses the role home instead', async () => {
+    renderApp(ROUTES.EXECUTIVE_CAMPAIGN);
+
+    await submitSignIn('ha.my@clubflow.demo.example');
+
+    await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
+  });
+
+  it.each([
+    ['ap-minhanh', 'Applicant Portal'],
+    [EXECUTIVE, 'Create Recruitment Campaign'],
+    ['iv-hamy', 'Interviewer Workspace'],
+  ])('sends signed-in %s away from /login to the role home', async (accountId, title) => {
+    renderApp(ROUTES.LOGIN, { accountId });
+
+    await screen.findByRole('heading', { level: 1, name: title });
+    expect(screen.queryByLabelText('Mật khẩu')).not.toBeInTheDocument();
   });
 
   it('keeps the API health check in the shell footer', async () => {

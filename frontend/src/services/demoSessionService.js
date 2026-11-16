@@ -11,6 +11,7 @@ import {
   getScenarioId,
   getSessionAccountId,
   getSimulation,
+  getState,
   loadScenario,
   mockRequest,
   setSessionAccountId,
@@ -20,12 +21,12 @@ import { createUiError } from './uiError.js';
 
 /** Demo account list. Not affected by the simulated network modes. */
 export async function listAccounts() {
-  return clone(ACCOUNTS);
+  return clone(getState().profiles);
 }
 
 export async function signIn(accountId) {
   await mockRequest();
-  const account = ACCOUNTS.find((item) => item.id === accountId);
+  const account = getState().profiles.find((item) => item.id === accountId);
   if (!account) {
     throw createUiError('notFound', 'Không tìm thấy tài khoản demo.');
   }
@@ -47,7 +48,7 @@ export function listScenarios() {
 /** Current demo selection; the account object is included so the role is known on first render. */
 export function getDemoState() {
   const accountId = getSessionAccountId();
-  const account = ACCOUNTS.find((item) => item.id === accountId) ?? null;
+  const account = getState().profiles.find((item) => item.id === accountId) ?? null;
   return { accountId, account: account ? clone(account) : null, scenarioId: getScenarioId(), simulation: getSimulation() };
 }
 

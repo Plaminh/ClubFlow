@@ -23,7 +23,7 @@ describe('Interviewer Workspace', () => {
     await openAs('iv-hamy');
 
     expect(rowIds()).toEqual(['CF-026', 'CF-030']);
-    expect(screen.getByText('Hà My · User Experience Design')).toBeInTheDocument();
+    expect(screen.getByText('Hà My · User Experience Design', { ignore: 'option' })).toBeInTheDocument();
   });
 
   it('shows the campaign context without the Executive-only campaign request', async () => {
