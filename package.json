@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "frontend",
+    "client",
     "backend"
   ],
   "scripts": {
-    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:frontend": "npm run dev --workspace client",
     "dev:backend": "npm run dev --workspace backend",
-    "build": "npm run build --workspace frontend",
-    "test": "npm run test:run --workspace frontend && npm run test:run --workspace backend",
-    "test:frontend": "npm run test --workspace frontend",
+    "build": "npm run build --workspace client",
+    "test": "npm run test:run --workspace client && npm run test:run --workspace backend",
+    "test:frontend": "npm run test --workspace client",
     "test:backend": "npm run test --workspace backend",
     "lint": "eslint .",
     "verify": "npm run lint && npm run test && npm run build",

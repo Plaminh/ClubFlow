@@ -16,9 +16,9 @@ export default [
       '.svelte-kit/**',
       'pgdata/**',
       'postgres-data/**',
-      'frontend/dist/**',
+      'client/dist/**',
       'backend/dist/**',
-      'frontend/coverage/**',
+      'client/coverage/**',
       'backend/coverage/**',
       // Static HTML UI reference package (browser demo scripts), not application code.
       'docs/reference/ui/assets/**',
@@ -51,7 +51,7 @@ export default [
   
   // 4. Frontend Configuration
   {
-    files: ['frontend/**/*.js', 'frontend/**/*.jsx'],
+    files: ['client/**/*.js', 'client/**/*.jsx'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -101,7 +101,7 @@ export default [
 
   // 6. Frontend Test Configuration
   {
-    files: ['frontend/**/*.test.js', 'frontend/**/*.test.jsx', 'frontend/**/*.spec.js', 'frontend/**/*.spec.jsx'],
+    files: ['client/**/*.test.js', 'client/**/*.test.jsx', 'client/**/*.spec.js', 'client/**/*.spec.jsx'],
     languageOptions: {
       globals: {
         ...globals.browser,
