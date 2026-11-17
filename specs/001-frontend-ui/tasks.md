@@ -18,6 +18,7 @@ description: "Task list for the ClubFlow UI-first frontend"
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: User story from spec.md (US1…US5)
 - Paths are relative to the repository root.
+- Historical tasks T005–T098 retain the `frontend/` paths that existed when they were completed. PA#3 Phase 1 moved that workspace to `client/`; current source paths start with `client/`.
 
 ---
 
@@ -204,6 +205,14 @@ Source: team-selected decisions dated 2026-11-16 in `docs/requirements/DECISIONS
 - [x] T096 Add Sign In/Profile accessibility coverage and update existing five-screen expectations in `frontend/src/tests/a11y/screens.a11y.test.jsx` and affected frontend tests
 - [x] T097 Document routes, mock credentials, editability, future service replacement, prototype limitations, and 360/768/1280 results in `docs/frontend/INTEGRATION.md` and `specs/001-frontend-ui/quickstart.md`
 - [x] T098 Run `npm run lint`, `npm test`, `npm run build`, and `npm run verify`; inspect the final diff; update `AI-LOG.md`, `specs/001-frontend-ui/spec.md`, and this task list without committing
+
+---
+
+## Phase 14: PA#3 Phase 1 Repository Alignment
+
+- [x] T099 Move the unchanged React workspace from `frontend/` to `client/` with `git mv`; update workspace, lockfile, ESLint, ignore, and current path references
+- [x] T100 Add verified PA#3 requirements to `AGENTS.md`, `brief.md`, and `FRONTEND.md` without implementing the API contract, HTTP mock, or domain HTTP integration
+- [x] T101 Run `npm run lint`, `npm test`, and `npm run build`; verify 214/214 tracked frontend files are 100% renames and review the final diff without committing
 
 ---
 

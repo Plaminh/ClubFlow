@@ -2,6 +2,8 @@
 
 **Branch**: `001-frontend-ui` (spec directory) | **Date**: 2026-11-14 | **Spec**: [spec.md](spec.md)
 
+> **Migration note (2026-11-17):** This plan preserves the `frontend/` paths and workspace name used when the UI decisions were made and implemented. PA#3 Phase 1 later moved the unchanged React workspace to `client/`. Current paths use `client/`; the historical decisions below were not rewritten retroactively.
+
 **Input**: Feature specification from `specs/001-frontend-ui/spec.md`
 
 ## Summary

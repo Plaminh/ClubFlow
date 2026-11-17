@@ -12,7 +12,7 @@ ma trận màn hình → service → API và checklist tích hợp.</p>
 <table class="cover-meta">
 <tr><th>Phạm vi</th><td>Frontend React (UI-first prototype, dữ liệu mock) và kế hoạch nối với backend Express + PostgreSQL</td></tr>
 <tr><th>Đối tượng đọc</th><td>Nhóm sinh viên phát triển ClubFlow, đặc biệt là thành viên làm API và cơ sở dữ liệu</td></tr>
-<tr><th>Nguồn sự thật</th><td>Mã nguồn hiện tại trong <code>frontend/src</code>, <code>docs/frontend/INTEGRATION.md</code>, <code>docs/requirements/</code>, <code>specs/001-frontend-ui/</code></td></tr>
+<tr><th>Nguồn sự thật</th><td>Mã nguồn hiện tại trong <code>client/src</code>, <code>docs/frontend/INTEGRATION.md</code>, <code>docs/requirements/</code>, <code>specs/001-frontend-ui/</code></td></tr>
 <tr><th>Ảnh chụp</th><td>Bộ ảnh của năm màn hình nghiệp vụ được chụp ngày 15/11/2026 từ <code>http://localhost:3000</code> bằng Microsoft Edge headless; ảnh Sign In kiểu hộp thoại là bằng chứng lịch sử trước UI-8, không còn là luồng hiện tại</td></tr>
 <tr><th>Đồng bộ tài liệu</th><td>16/11/2026 · đối chiếu mã nguồn sau UI-8 (Sign In và My Profile)</td></tr>
 </table>
@@ -42,7 +42,7 @@ Frontend hiện là một **prototype React được chuẩn bị để tích h�
 |---|---|---|
 | Giao diện React (5 màn hình nghiệp vụ + 2 màn hình tài khoản) | **Đã triển khai** | Atomic Design, responsive 360 px → desktop |
 | Tương tác mock (đăng nhập, hồ sơ, lọc, quyết định, xếp lịch, công bố…) | **Đã triển khai** | Chạy trên store trong bộ nhớ; tải lại trang khôi phục fixture của kịch bản và chỉ giữ lựa chọn account/scenario |
-| Dữ liệu và service mock | **Đã triển khai** | `frontend/src/mocks/`, thân hàm trong `frontend/src/services/` |
+| Dữ liệu và service mock | **Đã triển khai** | `client/src/mocks/`, thân hàm trong `client/src/services/` |
 | `apiClient` (HTTP, Bearer token, ánh xạ lỗi) | **Đã triển khai, chưa dùng cho nghiệp vụ** | Chỉ `GET /health` đang gọi thật |
 | Xác thực, phân quyền thật | **Chưa triển khai** | `/login` kiểm credential hư cấu; `DemoSessionContext`, `AuthGate`, `RoleGate` chỉ mô phỏng UI, không phải bảo mật |
 | API nghiệp vụ, lưu trữ PostgreSQL | **Chưa triển khai** | Backend mới có scaffold và `/api/health` |
@@ -84,13 +84,13 @@ Frontend hiện là một **prototype React được chuẩn bị để tích h�
 <div class="dg-legend"><span class="sw stable"></span>Giữ nguyên: Pages, Hooks, chữ ký hàm service &nbsp; <span class="sw change"></span>Thay đổi: thân hàm service, DemoSessionContext → auth provider &nbsp; <span class="sw new"></span>Mới: API backend, CSDL</div>
 </div>
 
-Lớp thay đổi khi tích hợp là **thân các hàm trong `frontend/src/services/`** (từ đọc `mocks/store.js` sang gọi `apiClient`) và **`DemoSessionContext`** (sang provider xác thực thật). Pages, hooks, component và chữ ký hàm service được giữ ổn định; nếu API trả dữ liệu khác hình dạng, service phải ánh xạ lại để trang không phải sửa.
+Lớp thay đổi khi tích hợp là **thân các hàm trong `client/src/services/`** (từ đọc `mocks/store.js` sang gọi `apiClient`) và **`DemoSessionContext`** (sang provider xác thực thật). Pages, hooks, component và chữ ký hàm service được giữ ổn định; nếu API trả dữ liệu khác hình dạng, service phải ánh xạ lại để trang không phải sửa.
 
 # Chương 2 — Tổng quan các màn hình {#ch2}
 
 ## 2.1 Danh mục màn hình
 
-Định tuyến được khai báo trong `frontend/src/routes/AppRoutes.jsx` và `routes/paths.js`. Tab là **tham số truy vấn** `?tab=` trên cùng một route, không phải route riêng.
+Định tuyến được khai báo trong `client/src/routes/AppRoutes.jsx` và `routes/paths.js`. Tab là **tham số truy vấn** `?tab=` trên cùng một route, không phải route riêng.
 
 | Màn hình (`<h1>`) | URL | Vai trò | Mục đích chính | Thao tác chính | Liên quan | Trạng thái |
 |---|---|---|---|---|---|---|
@@ -628,7 +628,7 @@ Danh sách chỉ gồm buổi **Confirmed** được phân công cho người đ
 
 | Đường dẫn | Vai trò |
 |---|---|
-| `frontend/src/main.jsx`, `App.jsx` | Điểm vào; `App` bọc `BrowserRouter` + `DemoSessionProvider` + `AppRoutes` |
+| `client/src/main.jsx`, `App.jsx` | Điểm vào; `App` bọc `BrowserRouter` + `DemoSessionProvider` + `AppRoutes` |
 | `routes/AppRoutes.jsx`, `paths.js`, `navigation.js`, `AuthGate.jsx`, `RoleGate.jsx` | Route, tab query, menu theo vai trò, gate xác thực/giao diện theo vai trò và redirect đích dự định |
 | `layouts/AppLayout.jsx` | Skip link, `AppHeader`, account menu, `DemoBar`, `<main>`, footer kiểm tra API; điều phối Sign Out và điều hướng tới `/login` |
 | `pages/*.jsx` | 5 màn hình nghiệp vụ + `SignInPage` + `ProfilePage` + `NotFoundPage`; giữ trạng thái UI, gọi hooks |
@@ -648,7 +648,7 @@ Danh sách chỉ gồm buổi **Confirmed** được phân công cho người đ
 <div class="flow wrap"><div class="box svc">services</div><div class="arr">→</div><div class="box api">apiClient (khi tích hợp)</div><div class="arr">→</div><div class="box be">/api/*</div></div>
 </div>
 
-Quy tắc (`AGENTS.md`, `frontend/AGENTS.md`): component cấp thấp không import cấp cao; atoms/molecules không gọi API; mọi truy cập backend qua `services` và `apiClient`; không thêm Redux. Component chỉ nhận props và callback; không component nào import `mocks/`.
+Quy tắc (`AGENTS.md`, `client/AGENTS.md`): component cấp thấp không import cấp cao; atoms/molecules không gọi API; mọi truy cập backend qua `services` và `apiClient`; không thêm Redux. Component chỉ nhận props và callback; không component nào import `mocks/`.
 
 ## 10.3 Nơi backend developer cần sửa
 
@@ -740,7 +740,7 @@ Scaffold backend hiện có: `routes/health.routes.js` → `controllers/health.c
 Ví dụ `Application Review → useApplications(query) → applicationService.list(query)`:
 
 ```js
-// frontend/src/services/applicationService.js — hiện tại (rút gọn)
+// client/src/services/applicationService.js — hiện tại (rút gọn)
 export async function list(query = {}) {
   await mockRequest();                 // độ trễ / lỗi mô phỏng; huỷ nếu đổi tài khoản/kịch bản
   requireRole('executive');            // guard demo — KHÔNG phải bảo mật
@@ -754,7 +754,7 @@ export async function list(query = {}) {
 ## 13.2 Sau khi tích hợp
 
 ```js
-// frontend/src/services/applicationService.js — sau tích hợp (VÍ DỤ)
+// client/src/services/applicationService.js — sau tích hợp (VÍ DỤ)
 import { apiClient } from './apiClient.js';
 
 // PLACEHOLDER: đường dẫn thật phải lấy từ API spec trong docs/api/ — chưa được thống nhất.

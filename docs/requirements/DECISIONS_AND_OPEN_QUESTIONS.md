@@ -81,7 +81,7 @@ How to read this section:
 - Every record has the status `TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION`. It becomes `Approved` only through the process in §5, with a public source.
 - These records do **not** change the canonical requirements (`BUSINESS_RULES`, `WORKFLOWS_AND_STATES`, `ACCEPTANCE_CRITERIA`, `TRACEABILITY`, `SCREEN_REQUIREMENTS`). Where a selection is stricter than, or conflicts with, those documents, the record says so and the canonical text stays as it is.
 - "Frontend behavior" describes the React prototype, which runs on an in-memory mock layer. "Backend responsibility" is **not implemented**; it is the contract the Express/PostgreSQL work has to meet.
-- Paths are relative to `frontend/src/` unless they start with `docs/` or `specs/`.
+- Paths are relative to `client/src/` unless they start with `docs/` or `specs/`.
 
 ### Q-01 — Deterministic first-fit scheduling
 

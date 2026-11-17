@@ -1,5 +1,7 @@
 # Data Model (UI Demo Records): ClubFlow UI-First Frontend
 
+> **Migration note (2026-11-17):** This artifact preserves source paths from the original UI implementation under `frontend/`. PA#3 Phase 1 later moved that workspace to `client/` without changing the demo data model. For the current tree, replace the leading `frontend/` segment with `client/`.
+
 **Purpose**: Shape of the frontend demo records and view state. This is **not** a database schema; backend tables and columns are decided in later phases ([PRODUCT_SPEC §5](../../docs/requirements/PRODUCT_SPEC.md)). Field names are English camelCase; display labels come from `constants/labels.js`.
 
 ## Status identifiers (English, internal)

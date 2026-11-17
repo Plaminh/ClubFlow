@@ -1,5 +1,7 @@
 # UI Service Contracts: ClubFlow UI-First Frontend
 
+> **Migration note (2026-11-17):** This artifact preserves source paths from the original UI implementation under `frontend/`. PA#3 Phase 1 later moved that workspace to `client/` without changing these service contracts. For the current tree, replace the leading `frontend/` segment with `client/`.
+
 **Purpose**: The boundary between pages/hooks and data. Hooks call these functions; pages consume hooks. Through UI-8 they are implemented with demo data; during backend integration, teammates replace the function bodies with `apiClient` calls.
 
 **Not defined here**: HTTP methods, URL paths, headers, or database fields. Those belong to the backend API specification ([`docs/api/README.md`](../../../docs/api/README.md)).

@@ -85,7 +85,7 @@ backend/
 │   └── api/
 └── tests/
 
-frontend/
+client/
 ├── src/
 │   ├── components/
 │   ├── pages/

@@ -598,3 +598,60 @@ Evidence used:
 - Documentation verification for this task: all relative Markdown targets in the modified files resolve; Markdown table column counts pass; stale-term search leaves only clearly historical five-business-screen/`SignInDialog` references; `git diff --check` passes; the changed-file scope contains documentation only.
 
 Scope: Documentation only. No file under `frontend/src/`, `backend/`, database, environment, dependency or canonical requirement documentation was modified. No branch, commit, add or push operation was performed.
+
+---
+
+## 2026-11-17 — PA#3 Phase 1 — Requirements and repository alignment
+
+Tool: Codex.
+
+Asked for: Verify Git state, inventory all dependencies on the `frontend/` path, move the existing React workspace to `client/`, align PA#3 rules and required documentation, run the real quality gates, review the diff, and stop before commit. The request explicitly excluded API contract implementation, an HTTP mock server, domain service changes, C1–C11 business changes, backend/database changes, dependency installation, commit, and push.
+
+Rejected: None
+
+Kept:
+
+- Preserved all 214 tracked React workspace files with 100% rename similarity, including components, hooks, services, browser fixtures, tests, Vite/Vitest configuration, and the fictional PDF asset.
+- Preserved current UI behavior, browser-mock behavior, business logic, dependencies, backend, database, and the historical T005–T098 task paths.
+
+Changed:
+
+- Moved `frontend/` to `client/` with `git mv` and updated root workspaces/scripts, `package-lock.json`, ESLint globs, ignore paths, Spec Kit templates, active design documentation, and current source-path references.
+- Extended `AGENTS.md` with PA#3 contract-first, HTTP mock-first, relative `/api`, loading/error/empty/success, change-control, dependency-approval, UI-preservation, C1–C11, mock-mode, direct-route, responsive, and semantic constraints.
+- Added `brief.md` with only the verified audit and Phase 1 prompts, plus `FRONTEND.md` with the seven required rubric sections. Unverified team IDs, canonical PA#3 accounts, public decision links, endpoints, and runtime evidence remain explicitly marked as missing or requiring team input.
+
+Verified:
+
+- Initial state: branch `pa3-finalize`, HEAD `9144868`, clean working tree; `frontend/` existed and `client/` did not.
+- `npm run lint` exited 0.
+- `npm test` exited 0: frontend 295/295 tests passed in 23 files and backend 18/18 tests passed in 5 files.
+- `npm run build` exited 0 from the `client` workspace; Vite transformed 202 modules and produced `client/dist`. The existing non-blocking warning for a minified chunk over 500 kB remains.
+- Diff audit found 214 tracked files before and after the move, every staged workspace rename at 100% similarity, no React source content change, no whitespace error, and `client/dist` still ignored.
+
+Limitations: The API contract, HTTP mock server/data/modes, canonical PA#3 demo handles, relative `/api` proxy configuration, domain HTTP integration, contract checker, C4 editor gaps, team details, and current browser/responsive/W3C evidence remain for later reviewed phases. No commit or push was performed.
+
+---
+
+## 2026-11-17 — PA#3 Phase 1 documentation finalization
+
+Tool: Codex.
+
+Asked for: Review and finalize Phase 1 documentation only; preserve verbatim prompt history, add the Phase 1 `Rejected` field, distinguish required PA#3 accounts from browser-demo accounts, restore historical Spec Kit accuracy with dated migration notes, verify documentation consistency and diff checks, and avoid source, configuration, dependency, contract, mock, commit, or push changes.
+
+Rejected: None
+
+Changed:
+
+- Rebuilt `brief.md` as a chronological request history with four clearly labeled exact prompts and separate non-verbatim summaries. The two attached audit prompts are reproduced verbatim after line-ending normalization; no missing prompt was reconstructed.
+- Added `Rejected: None.` to the existing Phase 1 entry and verified its `Tool: Codex.` field. Existing earlier AI log entries were not edited.
+- Split `FRONTEND.md` demo accounts into required PA#3 names in examples and existing browser-demo credentials. Required HTTP credentials remain explicitly unverified, and browser-demo mappings remain unapproved.
+- Restored the original `frontend/` paths in the UI feature plan, research, data model, and service contract, with explicit 2026-11-17 notes explaining the later move to `client/`.
+
+Verified:
+
+- `brief.md` contains four exact-prompt blocks in conversation order; the first two blocks match their attached UTF-8 prompt files exactly after line-ending normalization.
+- `FRONTEND.md` retains all seven required numbered sections and documents `exec`, `studentA`, `int-content`, and `int-comms` under the `Name in examples` convention without claiming HTTP availability.
+- The documentation-only worktree diff contains only `AI-LOG.md`, `FRONTEND.md`, `brief.md`, and four `specs/001-frontend-ui/` Markdown artifacts. No React, backend, database, dependency, or configuration file was changed during this finalization.
+- `git diff --check` and `git diff --cached --check` both exited 0. The unrelated untracked `a.txt` present at the start of this review was left untouched.
+
+Limitations: This task did not rerun application tests or builds because it changed documentation only. It did not implement or modify the API contract, HTTP mock, application source, backend, database, or dependencies. No commit or push was performed.

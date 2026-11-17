@@ -19,7 +19,7 @@ It is built on the team's reusable full-stack course scaffold, which was origina
 ## Project structure
 
 ```text
-frontend/    React UI using Atomic Design
+client/      React UI using Atomic Design
 backend/     Express API using layered architecture
 database/    bootstrap SQL, migrations, and seeds
 docs/        architecture and project documentation
@@ -105,7 +105,7 @@ Open another terminal:
 npm run dev:frontend
 ```
 
-Frontend URL (port `3000` is set in `frontend/vite.config.js` and must match `FRONTEND_ORIGIN`):
+Frontend URL (port `3000` is set in `client/vite.config.js` and must match `FRONTEND_ORIGIN`):
 
 ```text
 http://localhost:3000

@@ -2,6 +2,8 @@
 
 **Feature**: [spec.md](spec.md) · **Plan**: [plan.md](plan.md) · **Date**: 2026-11-14
 
+> **Migration note (2026-11-17):** This decision record preserves the `frontend/` paths used when D-UI-01…D-UI-08 were proposed and implemented. PA#3 Phase 1 later moved the unchanged React workspace to `client/`. Current paths use `client/`; the original decision text remains historical.
+
 Each decision records what was chosen, why, and what was rejected. Decisions D-UI-01…D-UI-07 are **proposed** in UI-0 and become binding when the team approves this plan.
 
 ## D-UI-01 — Language

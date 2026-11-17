@@ -56,7 +56,7 @@ Models act as domain objects rather than a sequential processing layer.
 - **Restriction**: DO NOT generate tests only to increase test count or coverage.
 
 ### VI. Environment Configuration
-- **Files**: The repository uses ONE root `.env` file only. DO NOT create `frontend/.env`, `backend/.env`, `.env.test`, `.env.development`, or `.env.production`.
+- **Files**: The repository uses ONE root `.env` file only. DO NOT create `client/.env`, `backend/.env`, `.env.test`, `.env.development`, or `.env.production`.
 - **Visibility**: Browser-visible configuration MUST use the `VITE_` prefix.
 - **Security**: Secrets MUST NEVER be exposed through `VITE_` variables.
 - **Git Safety**: `.env` MUST NOT be committed.

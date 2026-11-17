@@ -4,7 +4,7 @@ Start here to find the right document for your task. This page only links to exi
 
 | I need to… | Read |
 |---|---|
-| Follow project conventions and coding rules | [`AGENTS.md`](../AGENTS.md), [`frontend/AGENTS.md`](../frontend/AGENTS.md), [Constitution](../.specify/memory/constitution.md) |
+| Follow project conventions and coding rules | [`AGENTS.md`](../AGENTS.md), [`client/AGENTS.md`](../client/AGENTS.md), [Constitution](../.specify/memory/constitution.md) |
 | Understand business scope, rules (BR-01…BR-14), roles, states, and acceptance criteria | [Requirements index](requirements/README.md) |
 | See the original source documents | [`requirements/sources/`](requirements/sources/) |
 | Check course PA deliverables | [PA requirements summary](course/PA_REQUIREMENTS.md) |

@@ -18,7 +18,7 @@ Use exactly one local environment file:
 
 `.env`
 
-Do NOT create additional environment files inside `frontend/`, `backend/`, or for separate environments.
+Do NOT create additional environment files inside `client/`, `backend/`, or for separate environments.
 
 Rules:
 
@@ -39,10 +39,20 @@ Rules:
 
 - Lower-level components MUST NOT import higher-level components.
 - Atoms and molecules MUST NOT perform backend API calls.
-- Reusable API calls MUST go through `frontend/src/services`.
+- Reusable API calls MUST go through `client/src/services`.
 - Shared HTTP behavior and configuration MUST go through `apiClient`.
 - Components MUST NOT contain unrelated data-access logic.
 - Do NOT introduce Redux or another global state library without an approved requirement.
+
+### PA#3 Frontend Delivery Constraints
+
+- React source MUST remain in `client/`, and existing UI behavior and business logic MUST be preserved during structural or integration work.
+- PA#3 work MUST follow contract-first, then HTTP mock-first delivery: define and review `docs/api/` before implementing `mock/`, and implement/review the HTTP mock before connecting domain services.
+- Runtime domain requests MUST use relative `/api` paths. Do not hardcode hosts, ports, or absolute API URLs in application source.
+- Main-flow business data MUST NOT be hardcoded in components. API-backed screens MUST provide loading, error with Retry, empty, and successful states.
+- Do not add or change API contract endpoints, mock behavior/data, or dependencies without explicit approval and coordinated review.
+- C1-C11 flows, the `normal`/`slow`/`error`/`empty` HTTP mock modes, direct-route access, and responsive checks at 360 px, 768 px, and 1280 px are PA#3 acceptance gates.
+- Preserve semantic HTML, one `h1` per screen, labeled form controls, link/button semantics, 44 px mobile targets, and no horizontal page scroll.
 
 ---
 
