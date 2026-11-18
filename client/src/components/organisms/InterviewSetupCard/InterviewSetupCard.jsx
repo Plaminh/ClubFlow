@@ -1,6 +1,7 @@
 import Card from '../../molecules/Card/index.js';
 import FormField from '../../molecules/FormField/index.js';
 import { formatDate } from '../../../utils/format.js';
+import './InterviewSetupCard.css';
 
 const WINDOWS = [
   { value: '09:00-12:00', start: '09:00', end: '12:00' },
