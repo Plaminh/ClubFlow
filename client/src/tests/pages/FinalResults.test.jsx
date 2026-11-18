@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import * as demoSessionService from '../../services/demoSessionService.js';
-import * as portalService from '../../services/portalService.js';
+import { getState } from '../../mocks/store.js';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
 
 const PATH = '/executive/review?tab=results';
@@ -101,7 +101,7 @@ describe('Application Review — Final Results', () => {
     expect(await screen.findByText('Không có kết quả nào đang chờ công bố.')).toBeInTheDocument();
 
     await demoSessionService.signIn('ap-minhanh');
-    const notifications = await portalService.listNotifications();
+    const notifications = getState().notifications.filter((item) => item.accountId === 'ap-minhanh');
     expect(notifications.map((item) => item.applicationId).sort()).toEqual(['CF-026', 'CF-027']);
   });
 

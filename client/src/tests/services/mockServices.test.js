@@ -2,31 +2,12 @@ import { describe, expect, it } from 'vitest';
 import * as applicationService from '../../services/applicationService.js';
 import * as demoSessionService from '../../services/demoSessionService.js';
 import * as interviewerService from '../../services/interviewerService.js';
-import * as portalService from '../../services/portalService.js';
 import * as resultService from '../../services/resultService.js';
 import * as scheduleService from '../../services/scheduleService.js';
 import { getState, setSimulation } from '../../mocks/store.js';
 
 const asExecutive = () => demoSessionService.signIn('exec-recruitment');
 
-function pdf(name = 'cv.pdf', size = 1024) {
-  return new File([new Uint8Array(size)], name, { type: 'application/pdf' });
-}
-
-function applicationForm(fields) {
-  const form = new FormData();
-  form.set('positionId', fields.positionId ?? 'pos-ux');
-  form.set('email', fields.email ?? 'hai.dang@demo.example');
-  form.set('faculty', fields.faculty ?? 'Thiết kế');
-  form.set('sop', fields.sop ?? 'Em muốn tham gia câu lạc bộ.');
-  for (const slot of fields.slotIds ?? ['slot-0900']) {
-    form.append('slotIds', slot);
-  }
-  if (fields.cv !== null) {
-    form.set('cv', fields.cv ?? pdf());
-  }
-  return form;
-}
 
 describe('demo session and scenarios', () => {
   it('reset restores the scenario fixtures after demo changes', async () => {
@@ -208,96 +189,6 @@ describe('scheduling', () => {
   });
 });
 
-describe('applicant portal', () => {
-  it('hides draft campaigns from the public (BR-02)', async () => {
-    demoSessionService.setScenario('draft');
-    expect((await portalService.getPublicCampaign()).campaign).toBeNull();
-  });
-
-  it('accepts a valid submission, rejects duplicates and invalid files (BR-03, BR-05)', async () => {
-    demoSessionService.setScenario('accepting');
-    await demoSessionService.signIn('ap-haidang');
-
-    const created = await portalService.submitApplication(applicationForm({}));
-    expect(created).toMatchObject({ id: 'CF-032', screeningStatus: 'pendingReview' });
-
-    await expect(portalService.submitApplication(applicationForm({}))).rejects.toMatchObject({
-      kind: 'conflict',
-      details: { existingApplicationId: 'CF-032' },
-    });
-    const boundary = await portalService.submitApplication(
-      applicationForm({ positionId: 'pos-content', cv: pdf('cv.pdf', 5 * 1024 * 1024) }),
-    );
-    expect(boundary).toMatchObject({ id: 'CF-033', screeningStatus: 'pendingReview' });
-    await expect(
-      portalService.submitApplication(applicationForm({ positionId: 'pos-content', cv: pdf('another.pdf', 6 * 1024 * 1024) })),
-    ).rejects.toMatchObject({ kind: 'validation', fieldErrors: { cv: 'CV tối đa 5 MB; tệp hiện tại 6,0 MB.' } });
-    expect(await portalService.listMyApplications()).toHaveLength(2);
-  });
-
-  it('shows reviewers and interviewers the email and faculty submitted with the application', async () => {
-    demoSessionService.setScenario('accepting');
-    await demoSessionService.signIn('ap-haidang');
-    const created = await portalService.submitApplication(
-      applicationForm({ email: 'dang.moi@demo.example', faculty: 'Truyền thông' }),
-    );
-
-    await asExecutive();
-    const detail = await applicationService.get(created.id);
-    expect(detail.student).toMatchObject({ email: 'dang.moi@demo.example', faculty: 'Truyền thông' });
-    const csv = await applicationService.exportCsv({});
-    expect(csv.content).toContain('dang.moi@demo.example');
-  });
-
-  it('requires a faculty on submission', async () => {
-    demoSessionService.setScenario('accepting');
-    await demoSessionService.signIn('ap-haidang');
-    await expect(portalService.submitApplication(applicationForm({ faculty: ' ' }))).rejects.toMatchObject({
-      kind: 'validation',
-      fieldErrors: { faculty: 'Vui lòng chọn khoa.' },
-    });
-  });
-
-  it('rejects submissions outside the window (BR-02)', async () => {
-    await demoSessionService.signIn('ap-haidang');
-    await expect(portalService.submitApplication(applicationForm({}))).rejects.toMatchObject({ kind: 'validation' });
-  });
-
-  it('accepts at the opening instant and until just before 00:00 after the closing day, Vietnam time (Q-02)', async () => {
-    demoSessionService.setScenario('accepting');
-    await demoSessionService.signIn('ap-haidang');
-    const submitAt = (now, positionId) => {
-      getState().now = now;
-      return portalService.submitApplication(applicationForm({ positionId }));
-    };
-
-    // 12/10/2026 00:00 and 30/10/2026 23:59:59.999 in Vietnam.
-    await expect(submitAt('2026-10-11T17:00:00.000Z', 'pos-ux')).resolves.toMatchObject({
-      submittedAt: '2026-10-11T17:00:00.000Z',
-    });
-    await expect(submitAt('2026-10-30T16:59:59.999Z', 'pos-content')).resolves.toMatchObject({ id: 'CF-033' });
-
-    await demoSessionService.signIn('ap-khanhlinh');
-    // 31/10/2026 00:00 in Vietnam: the closing instant itself is already too late.
-    await expect(submitAt('2026-10-30T17:00:00.000Z', 'pos-ux')).rejects.toMatchObject({ kind: 'validation' });
-    // 11/10/2026 23:59:59.999 in Vietnam: one millisecond before opening.
-    await expect(submitAt('2026-10-11T16:59:59.999Z', 'pos-ux')).rejects.toMatchObject({ kind: 'validation' });
-  });
-
-  it('never shows unconfirmed interviews or unpublished results to the applicant (BR-08)', async () => {
-    await demoSessionService.signIn('ap-minhanh');
-    let mine = await portalService.listMyApplications();
-    expect(mine.every((application) => application.interview === null && application.result === null)).toBe(true);
-
-    demoSessionService.setScenario('confirmed');
-    await demoSessionService.signIn('ap-minhanh');
-    mine = await portalService.listMyApplications();
-    expect(mine.find((application) => application.id === 'CF-026').result).toMatchObject({ decision: 'pass' });
-    expect(mine.find((application) => application.id === 'CF-027').result).toBeNull();
-    expect(mine.find((application) => application.id === 'CF-027').interview).toMatchObject({ roomName: 'B-105' });
-  });
-});
-
 describe('assessments and results', () => {
   it('requires notes, keeps the recommendation optional, and accepts only Pass or Fail for it (Q-04)', async () => {
     demoSessionService.setScenario('confirmed');
@@ -360,7 +251,7 @@ describe('assessments and results', () => {
     expect(publishedIds.sort()).toEqual(['CF-027', 'CF-030']);
 
     await demoSessionService.signIn('ap-quocbao');
-    const [notification] = await portalService.listNotifications();
+    const [notification] = getState().notifications.filter((item) => item.accountId === 'ap-quocbao');
     expect(notification.message).toContain('CF-030');
   });
 
@@ -372,7 +263,7 @@ describe('assessments and results', () => {
     await expect(resultService.publishRecorded()).rejects.toMatchObject({ kind: 'conflict' });
 
     await demoSessionService.signIn('ap-minhanh');
-    const notifications = await portalService.listNotifications();
+    const notifications = getState().notifications.filter((item) => item.accountId === 'ap-minhanh');
     expect(notifications.filter((notification) => notification.applicationId === 'CF-027')).toHaveLength(1);
   });
 });

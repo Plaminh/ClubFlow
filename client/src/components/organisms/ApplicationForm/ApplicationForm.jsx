@@ -85,8 +85,8 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
       setErrors({});
       setBanner({
         tone: 'success',
-        title: `Đã gửi hồ sơ ${result.value.id} (mô phỏng)`,
-        text: 'Hồ sơ mới xuất hiện trong tab My Applications với trạng thái Chờ duyệt. Đây chỉ là demo trong bộ nhớ.',
+        title: `Đã gửi hồ sơ ${result.value.id}`,
+        text: 'Hồ sơ mới xuất hiện trong tab My Applications với trạng thái Chờ duyệt.',
       });
     } else if (result.error?.fieldErrors) {
       fail(result.error.fieldErrors, result.error.message);
@@ -162,7 +162,7 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
               accept="application/pdf,.pdf"
               file={values.cv}
               error={errors.cv}
-              hint="Bản demo chỉ kiểm tra tên, định dạng và dung lượng tệp; không tải hay lưu tệp thật."
+              hint="Tệp được gửi bằng multipart tới dịch vụ ClubFlow và phải là PDF tối đa 5 MB."
               disabled={disabled}
               onChange={(file) => set('cv', file)}
             />
@@ -229,7 +229,7 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
             <p className="hint">
               Kiểm tra kỹ trước khi gửi: sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn.
             </p>
-            <p className="hint">Gửi hồ sơ không bảo đảm kết quả. Đây là mô phỏng, không ghi dữ liệu thật.</p>
+            <p className="hint">Gửi hồ sơ không bảo đảm kết quả. Mỗi vị trí chỉ nhận một hồ sơ từ cùng tài khoản.</p>
           </div>
         </Card>
       </div>

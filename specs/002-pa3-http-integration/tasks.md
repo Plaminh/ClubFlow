@@ -119,15 +119,15 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 ### Tests for User Story 2
 
-- [ ] T046 [P] [US2] Add failing public/applicant/notification HTTP adapter tests in `client/src/tests/services/portalHttpService.test.js`
-- [ ] T047 [P] [US2] Extend `client/src/tests/pages/ApplicantPortalPage.test.jsx` for loading/retry/empty, exact PDF and SOP boundaries, multi-position submission, duplicate existing ID, closed-during-submit value retention, and published-only results
+- [x] T046 [P] [US2] Add failing public/applicant/notification HTTP adapter tests in `client/src/tests/services/portalHttpService.test.js`
+- [x] T047 [P] [US2] Extend `client/src/tests/pages/ApplicantPortalPage.test.jsx` for loading/retry/empty, exact PDF and SOP boundaries, multi-position submission, duplicate existing ID, closed-during-submit value retention, and published-only results
 
 ### Implementation for User Story 2
 
-- [ ] T048 [US2] Replace public campaign, multipart submission, own applications, and notification browser-store calls with HTTP adapters in `client/src/services/portalService.js`
-- [ ] T049 [US2] Add cancellation/refetch and mutation response handling in `client/src/hooks/useApplicantPortal.js`
-- [ ] T050 [US2] Adapt `client/src/pages/ApplicantPortalPage.jsx` and `client/src/components/organisms/ApplicationForm/`, `MyApplicationsTable/`, `NotificationList/`, and `PublicCampaignPanel/` for contract errors and HTTP state without losing valid drafts
-- [ ] T051 [US2] Run focused Applicant tests and fresh multi-position flow, then full lint/test/build/diff checks; append `AI-LOG.md` evidence and create `feat: integrate campaign and applicant API flows`
+- [x] T048 [US2] Replace public campaign, multipart submission, own applications, and notification browser-store calls with HTTP adapters in `client/src/services/portalService.js`
+- [x] T049 [US2] Add cancellation/refetch and mutation response handling in `client/src/hooks/useApplicantPortal.js`
+- [x] T050 [US2] Adapt `client/src/pages/ApplicantPortalPage.jsx` and `client/src/components/organisms/ApplicationForm/`, `MyApplicationsTable/`, `NotificationList/`, and `PublicCampaignPanel/` for contract errors and HTTP state without losing valid drafts
+- [x] T051 [US2] Run focused Applicant tests and fresh multi-position flow, then full lint/test/build/diff checks; append `AI-LOG.md` evidence and create `feat: integrate campaign and applicant API flows`
 
 ---
 

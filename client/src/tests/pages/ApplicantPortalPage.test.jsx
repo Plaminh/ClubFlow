@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { setSimulation } from '../../mocks/store.js';
 import { renderApp } from '../helpers/renderApp.jsx';
+import { setMockApiMode, setMockApiScenario } from '../helpers/mockApi.js';
 
 const MINH_ANH = 'ap-minhanh';
 const HAI_DANG = 'ap-haidang';
@@ -93,6 +93,16 @@ describe('Applicant Portal', () => {
     expect(screen.getByText('CV tối đa 5 MB; tệp hiện tại 6,0 MB.')).toBeInTheDocument();
   });
 
+  it('accepts the exact 5 MB PDF and 300-word boundaries', async () => {
+    await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
+    fillValidForm({ sop: Array(300).fill('từ').join(' ') });
+    fireEvent.change(screen.getByLabelText('CV (PDF, tối đa 5 MB)'), { target: { files: [pdf('boundary.pdf', 5 * 1024 * 1024)] } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
+
+    expect(await screen.findByText('Đã gửi hồ sơ CF-032')).toBeInTheDocument();
+  });
+
   it('submits a valid application that then appears in My Applications as Pending Review', async () => {
     await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
     fillValidForm();
@@ -100,7 +110,7 @@ describe('Applicant Portal', () => {
     expect(screen.getByText(/sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
 
-    expect(await screen.findByText('Đã gửi hồ sơ CF-032 (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã gửi hồ sơ CF-032')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /My Applications/ }));
     const table = await screen.findByRole('table', { name: 'Hồ sơ của tôi' });
     expect(within(table).getByText('CF-032')).toBeInTheDocument();
@@ -154,12 +164,41 @@ describe('Applicant Portal', () => {
   it('reports a failed "mark all read" instead of failing silently', async () => {
     await openTab('notifications', { scenarioId: 'confirmed', accountId: MINH_ANH });
     const button = await screen.findByRole('button', { name: 'Đánh dấu tất cả đã đọc' });
-    setSimulation('error');
+    setMockApiMode('error');
     fireEvent.click(button);
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Chưa thể đánh dấu đã đọc');
-    expect(alert).toHaveTextContent('mô phỏng lỗi mạng');
+    expect(alert).toHaveTextContent('The mock service is unavailable.');
     expect(screen.getByText('Mới')).toBeInTheDocument();
+  });
+
+  it('retains a valid draft when the campaign closes during submission', async () => {
+    await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
+    fillValidForm({ sop: 'Nội dung cần được giữ lại khi máy chủ từ chối.' });
+    setMockApiScenario('screening');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
+
+    expect(await screen.findByText('Applications are closed.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue('Nội dung cần được giữ lại khi máy chủ từ chối.');
+  });
+
+  it('shows retryable HTTP errors and recovers in place', async () => {
+    setMockApiMode('error');
+    renderApp('/', { scenarioId: 'accepting' });
+    expect(await screen.findByText('The mock service is unavailable.')).toBeInTheDocument();
+    setMockApiMode('normal');
+    fireEvent.click(screen.getByRole('button', { name: /Thử lại/ }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
+
+  });
+
+  it('renders genuine empty HTTP collections without fixture fallbacks', async () => {
+    setMockApiMode('empty');
+    await openTab('mine', { scenarioId: 'accepting', accountId: HAI_DANG });
+    expect(screen.getByText('Bạn chưa có hồ sơ nào')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Notifications/ }));
+    expect(screen.getByText('Chưa có thông báo')).toBeInTheDocument();
   });
 });

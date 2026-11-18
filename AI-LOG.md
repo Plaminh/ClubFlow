@@ -773,3 +773,28 @@ Verified:
 - `git diff --check` passed. The official course checker remains NOT RUN because its exact file is unavailable.
 
 Limitations: Applicant, review, and scheduling UI services remain on the temporary browser bridge for their subsequent ordered phases.
+
+---
+
+## 2026-11-18 — PA#3 Phase 5 — Public Campaign and Applicant HTTP integration
+
+Tool: Codex.
+
+Changed:
+
+- Replaced public Campaign, multipart Application submission, own Application list, Notification list, and mark-read browser calls with relative `/api` adapters.
+- Added contract-to-UI mapping for response wrappers and `confirmedInterview`, while preserving the rule that unpublished Results remain absent.
+- Submission now adds the stable Campaign ID to a fresh FormData body without overriding the browser multipart boundary. Product copy now describes actual HTTP/file behavior instead of browser-only simulation.
+- Added cancellation-aware parallel loading and stable mutation callbacks. Successful submissions/refetches reset the form; duplicate, validation, and closed-during-submit failures preserve valid draft values.
+- Migrated obsolete browser-service Applicant tests into dedicated HTTP adapter/page coverage while leaving unrelated downstream browser services isolated until Phase 6.
+
+Verified:
+
+- Applicant HTTP/page coverage includes exact 5 MB PDF and 300-word SOP acceptance, over-limit refusal, two independent Position submissions, duplicate existing IDs, closed-during-submit retention, ownership isolation, confirmed interview visibility, published-only Results, Notifications/read state, retry, and empty collections.
+- `npm run lint` passed.
+- `npm test` passed: frontend 264/264 in 26 files, backend 18/18 in 5 files, and mock 10/10 in 6 files.
+- `npm run build` passed with the existing non-blocking Vite chunk-size warning.
+- `npm run verify:mock-http` passed the non-official fresh-state 24-endpoint workflow; `node tools/validate-api-docs.mjs` passed 9 files, 37 endpoints, and 52 request examples.
+- `git diff --check` passed. The official course checker remains NOT RUN because its exact file is unavailable.
+
+Limitations: Executive review and scheduling services still use the temporary browser bridge until Phase 6.

@@ -98,6 +98,38 @@ function updatePositions(inputs = []) {
   });
 }
 
+function publicCampaignView() {
+  if (campaignState.campaign.status === 'draft') return null;
+  const phase = campaignState.scenarioId === 'accepting' ? 'open' : campaignState.scenarioId === 'before-open' ? 'before-open' : 'closed';
+  return {
+    campaign: { ...campaignState.campaign, applicationsClosedAt: phase === 'closed' ? campaignState.now : null },
+    phase,
+    acceptingApplications: phase === 'open',
+    positions: mode === 'empty' ? [] : campaignView().positions.map(({ applicationCount: _count, ...position }) => position),
+    slots: mode === 'empty' ? [] : campaignState.slots,
+  };
+}
+
+function applicantApplication(application) {
+  const position = campaignState.positions.find((item) => item.id === application.positionId);
+  const interview = campaignState.schedule.status === 'confirmed'
+    ? campaignState.interviews.find((item) => item.applicationId === application.id)
+    : null;
+  const result = campaignState.results.find((item) => item.applicationId === application.id && item.publishedAt);
+  const room = interview ? campaignState.rooms.find((item) => item.id === interview.roomId) : null;
+  return {
+    id: application.id,
+    campaignId: campaignState.campaign.id,
+    campaignName: campaignState.campaign.name,
+    positionId: application.positionId,
+    positionName: position?.name ?? '—',
+    submittedAt: application.submittedAt,
+    screeningStatus: application.screeningStatus,
+    confirmedInterview: interview ? { interviewId: interview.id, start: interview.start, end: interview.end, roomName: room?.name ?? '—' } : null,
+    result: result ? { decision: result.decision, publishedAt: result.publishedAt } : null,
+  };
+}
+
 async function handleFetch(input, init = {}) {
   if (init.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
   if (delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -110,6 +142,11 @@ async function handleFetch(input, init = {}) {
     const user = users.find((candidate) => candidate.handle === body.username);
     if (!user || body.password !== 'ClubFlowDemo!') return response(401, { error: 'Username or password is incorrect.', code: 'INVALID_CREDENTIALS' });
     return response(200, { token: `mock-token-${user.handle}`, user });
+  }
+  if (url.pathname === '/api/campaigns/current' && method === 'GET') {
+    if (mode === 'error') return response(503, { error: 'The mock service is unavailable.', code: 'MOCK_ERROR' });
+    const view = publicCampaignView();
+    return view ? response(200, view) : response(404, { error: 'No published campaign is available.', code: 'NO_PUBLIC_CAMPAIGN' });
   }
   const user = userForToken(tokenFrom(init));
   if (!user) return response(401, { error: 'A valid bearer token is required.', code: 'INVALID_TOKEN' });
@@ -132,6 +169,49 @@ async function handleFetch(input, init = {}) {
     return response(200, profile);
   }
   if (mode === 'error') return response(503, { error: 'The mock service is unavailable.', code: 'MOCK_ERROR' });
+  if (url.pathname === '/api/applications' && method === 'POST') {
+    if (user.role !== 'applicant') return response(403, { error: 'Applicant role required.', code: 'ROLE_FORBIDDEN' });
+    const form = init.body;
+    const positionId = form.get('positionId');
+    if (campaignState.scenarioId !== 'accepting') return response(409, { error: 'Applications are closed.', code: 'APPLICATIONS_CLOSED' });
+    const duplicate = campaignState.applications.find((item) => item.applicantId === user.id && item.positionId === positionId);
+    if (duplicate) return response(409, { error: 'An application for this position already exists.', code: 'DUPLICATE_APPLICATION', details: { existingApplicationId: duplicate.id }, fieldErrors: { positionId: `Application ${duplicate.id} already exists for this position.` } });
+    const fieldErrors = {};
+    if (!form.get('campaignId')) fieldErrors.campaignId = 'Campaign is required.';
+    if (!campaignState.positions.some((item) => item.id === positionId)) fieldErrors.positionId = 'Choose a campaign position.';
+    if (!form.get('slotIds')) fieldErrors.slotIds = 'Choose at least one slot.';
+    if (!form.get('cv')) fieldErrors.cv = 'Upload one PDF.';
+    if (Object.keys(fieldErrors).length) return response(400, { error: 'Application fields are invalid.', code: 'VALIDATION_ERROR', fieldErrors });
+    const id = `CF-${String(Math.max(31, ...campaignState.applications.map((item) => Number(item.id.replace(/\D/gu, '')) || 0)) + 1).padStart(3, '0')}`;
+    const application = {
+      id,
+      applicantId: user.id,
+      positionId,
+      submittedAt: campaignState.now,
+      slotIds: form.getAll('slotIds'),
+      sop: form.get('sop'),
+      screeningStatus: 'pendingReview',
+      reviewedAt: null,
+      privateNote: '',
+      cv: { fileName: form.get('cv').name, sizeBytes: form.get('cv').size },
+    };
+    campaignState.applications.push(application);
+    return response(201, { ...applicantApplication(application), applicantId: user.id, slotIds: application.slotIds, sop: application.sop, cv: application.cv });
+  }
+  if (url.pathname === '/api/me/applications' && method === 'GET') {
+    if (user.role !== 'applicant') return response(403, { error: 'Applicant role required.', code: 'ROLE_FORBIDDEN' });
+    const items = mode === 'empty' ? [] : campaignState.applications.filter((item) => item.applicantId === user.id).map(applicantApplication);
+    return response(200, { items });
+  }
+  if (url.pathname === '/api/me/notifications' && method === 'GET') {
+    if (user.role !== 'applicant') return response(403, { error: 'Applicant role required.', code: 'ROLE_FORBIDDEN' });
+    const items = mode === 'empty' ? [] : campaignState.notifications.filter((item) => item.accountId === user.id);
+    return response(200, { items, unreadCount: items.filter((item) => !item.readAt).length });
+  }
+  if (url.pathname === '/api/me/notifications' && method === 'PATCH') {
+    campaignState.notifications.filter((item) => item.accountId === user.id).forEach((item) => { item.readAt = campaignState.now; });
+    return response(204);
+  }
   const campaignMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)$/u);
   if (campaignMatch && method === 'GET') {
     if (user.role !== 'executive') return response(403, { error: 'Executive role required.', code: 'ROLE_FORBIDDEN' });
