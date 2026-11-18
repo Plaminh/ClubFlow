@@ -80,6 +80,12 @@ function userForToken(token) {
   return users.find((user) => user.handle === handle) ?? null;
 }
 
+function phaseOf() {
+  if (campaignState.campaign.status === 'draft') return 'draft';
+  if (campaignState.closedEarlyAt) return 'closed';
+  return campaignState.scenarioId === 'accepting' ? 'open' : campaignState.scenarioId === 'before-open' ? 'before-open' : 'closed';
+}
+
 function campaignView() {
   const applications = campaignState.applications;
   const confirmed = campaignState.schedule.status === 'confirmed';
@@ -96,8 +102,8 @@ function campaignView() {
     availabilityText: assignment.availability.map(({ start, end }) => `${start.slice(11, 16)}-${end.slice(11, 16)}`).join(', '),
   }));
   return {
-    campaign: { ...campaignState.campaign, applicationsClosedAt: null },
-    phase: campaignState.scenarioId,
+    campaign: { ...campaignState.campaign, applicationsClosedAt: campaignState.closedEarlyAt ?? null },
+    phase: phaseOf(),
     positions: mode === 'empty' ? [] : positions,
     slots: campaignState.slots,
     interviewSetup: {
@@ -124,7 +130,7 @@ function updatePositions(inputs = []) {
 
 function publicCampaignView() {
   if (campaignState.campaign.status === 'draft') return null;
-  const phase = campaignState.scenarioId === 'accepting' ? 'open' : campaignState.scenarioId === 'before-open' ? 'before-open' : 'closed';
+  const phase = phaseOf();
   return {
     campaign: { ...campaignState.campaign, applicationsClosedAt: phase === 'closed' ? campaignState.now : null },
     phase,
@@ -275,7 +281,7 @@ async function handleFetch(input, init = {}) {
     if (user.role !== 'applicant') return response(403, { error: 'Applicant role required.', code: 'ROLE_FORBIDDEN' });
     const form = init.body;
     const positionId = form.get('positionId');
-    if (campaignState.scenarioId !== 'accepting') return response(409, { error: 'Applications are closed.', code: 'APPLICATIONS_CLOSED' });
+    if (phaseOf() !== 'open') return response(409, { error: 'Applications are closed.', code: 'APPLICATIONS_CLOSED' });
     const duplicate = campaignState.applications.find((item) => item.applicantId === user.id && item.positionId === positionId);
     if (duplicate) return response(409, { error: 'An application for this position already exists.', code: 'DUPLICATE_APPLICATION', details: { existingApplicationId: duplicate.id }, fieldErrors: { positionId: `Application ${duplicate.id} already exists for this position.` } });
     const fieldErrors = {};
@@ -429,6 +435,14 @@ async function handleFetch(input, init = {}) {
     campaignState.schedule.roomIds = body.roomIds;
     campaignState.assignments = body.assignments;
     return response(200, campaignView());
+  }
+  const closeMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/close-applications$/u);
+  if (closeMatch && method === 'POST') {
+    if (user.role !== 'executive') return response(403, { error: 'Executive role required.', code: 'ROLE_FORBIDDEN' });
+    if (campaignState.schedule.status === 'confirmed') return response(409, { error: 'The confirmed campaign is locked.', code: 'CAMPAIGN_LOCKED' });
+    if (phaseOf() !== 'open') return response(409, { error: 'Campaign is not accepting applications.', code: 'CAMPAIGN_NOT_ACCEPTING' });
+    campaignState.closedEarlyAt = campaignState.now;
+    return response(200, { campaign: { id: campaignState.campaign.id, status: 'published', applicationsClosedAt: campaignState.now }, phase: 'closed', acceptingApplications: false });
   }
   const publishMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/publish$/u);
   if (publishMatch && method === 'POST') {

@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
-import { setMockApiMode } from '../helpers/mockApi.js';
+import { getMockApiState, setMockApiMode } from '../helpers/mockApi.js';
 
 const PATH = '/executive/campaign';
 
@@ -164,6 +164,22 @@ describe('Campaign Management', () => {
     expect(screen.getByText(/lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa \(BR-14\)/)).toBeInTheDocument();
     expectNoEditingControls();
     expect(screen.getByRole('button', { name: 'Xem trước' })).toBeEnabled();
+  });
+
+  it('closes applications early after confirmation (Q-03) and hides the action afterwards', async () => {
+    await openAs('accepting');
+    fireEvent.click(screen.getByRole('button', { name: 'Đóng nhận hồ sơ sớm' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Đóng nhận hồ sơ sớm?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Đóng nhận hồ sơ' }));
+
+    expect(await screen.findByText('Đã đóng nhận hồ sơ')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Đóng nhận hồ sơ sớm' })).not.toBeInTheDocument();
+    expect(getMockApiState().closedEarlyAt).toEqual(expect.any(String));
+  });
+
+  it('offers early close only while applications are open', async () => {
+    await openAs('screening');
+    expect(screen.queryByRole('button', { name: 'Đóng nhận hồ sơ sớm' })).not.toBeInTheDocument();
   });
 
   it('shows a retryable HTTP error and recovers without leaving the route', async () => {

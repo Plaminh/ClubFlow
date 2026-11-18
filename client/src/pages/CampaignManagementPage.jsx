@@ -83,6 +83,7 @@ function CampaignWorkspace({ view, actions }) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [removing, setRemoving] = useState(null);
+  const [closeOpen, setCloseOpen] = useState(false);
   const [focusErrors, setFocusErrors] = useState(0);
   const containerRef = useRef(null);
   const newPositionCounter = useRef(0);
@@ -193,6 +194,21 @@ function CampaignWorkspace({ view, actions }) {
     }
   }
 
+  async function submitClose() {
+    const result = await action.run(() => actions.closeApplications());
+    setCloseOpen(false);
+    if (result.ok) {
+      setCurrent(result.value);
+      setBanner({
+        tone: 'success',
+        title: 'Đã đóng nhận hồ sơ',
+        text: 'Ứng viên không thể nộp thêm hồ sơ. Bạn có thể bắt đầu duyệt hồ sơ và xếp lịch phỏng vấn.',
+      });
+    } else if (result.error) {
+      setBanner({ tone: 'error', title: 'Chưa đóng được nhận hồ sơ', text: result.error.message });
+    }
+  }
+
   function requestRemove(position) {
     setListError('');
     if (!position.id) {
@@ -230,6 +246,11 @@ function CampaignWorkspace({ view, actions }) {
           Công bố chiến dịch
         </Button>
       )}
+      {!locked && current.phase === 'open' ? (
+        <Button variant="secondary" onClick={() => setCloseOpen(true)} disabled={disabled}>
+          Đóng nhận hồ sơ sớm
+        </Button>
+      ) : null}
     </>
   );
 
@@ -344,6 +365,17 @@ function CampaignWorkspace({ view, actions }) {
         <p>
           Sau khi công bố, chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03; Interview Setup khóa sau hồ sơ hợp lệ đầu tiên và toàn bộ cấu hình khóa khi lịch được xác nhận.
         </p>
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={closeOpen}
+        title="Đóng nhận hồ sơ sớm?"
+        confirmLabel="Đóng nhận hồ sơ"
+        tone="danger"
+        busy={action.pending}
+        onConfirm={submitClose}
+        onCancel={() => setCloseOpen(false)}
+      >
+        <p>Ứng viên sẽ không thể nộp thêm hồ sơ cho chiến dịch này (Q-03). Các hồ sơ đã nộp được giữ nguyên.</p>
       </ConfirmDialog>
       <ConfirmDialog
         open={Boolean(removing)}

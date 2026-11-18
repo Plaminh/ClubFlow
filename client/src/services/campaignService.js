@@ -60,6 +60,12 @@ export async function publish(campaignId, draft, options = {}) {
   return apiClient(`/campaigns/${campaignId}/publish`, { ...options, method: 'POST' });
 }
 
+/** Q-03 early close: a real Executive action; returns the refreshed campaign view. */
+export async function closeApplications(campaignId, options = {}) {
+  await apiClient(`/campaigns/${campaignId}/close-applications`, { ...options, method: 'POST' });
+  return getCampaign(campaignId, options);
+}
+
 export function removePosition(campaignId, positionId, options = {}) {
   return apiClient(`/campaigns/${campaignId}/positions/${positionId}`, { ...options, method: 'DELETE' });
 }
