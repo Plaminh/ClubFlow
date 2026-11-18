@@ -16,6 +16,24 @@ function statValue(label) {
   return within(stats).getByText(label).previousSibling.textContent;
 }
 
+describe('Application Review — search debounce', () => {
+  it('waits for typing to pause, then requests only the final search term', async () => {
+    await openScreening();
+    const searchRequests = () => fetch.mock.calls.map(([url]) => String(url)).filter((url) => url.includes('/applications?') && url.includes('search='));
+    expect(searchRequests()).toEqual([]);
+
+    const input = screen.getByLabelText('Tìm tên hoặc mã hồ sơ');
+    for (const value of ['C', 'CF', 'CF-0', 'CF-03', 'CF-031']) fireEvent.change(input, { target: { value } });
+    // The input updates immediately, but nothing is requested mid-typing.
+    expect(input).toHaveValue('CF-031');
+    expect(searchRequests()).toEqual([]);
+
+    await waitFor(() => expect(searchRequests()).toHaveLength(1));
+    expect(searchRequests()[0]).toContain('search=CF-031');
+    await waitFor(() => expect(listHeading()).toHaveTextContent('đang hiển thị 1'));
+  });
+});
+
 describe('Application Review — CV Screening', () => {
   it('shows a loading state while HTTP data is pending', async () => {
     setMockApiDelay(50);

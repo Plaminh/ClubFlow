@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Button from '../components/atoms/Button/index.js';
 import Alert from '../components/molecules/Alert/index.js';
@@ -22,6 +22,7 @@ import useAction from '../hooks/useAction.js';
 import useCampaign from '../hooks/useCampaign.js';
 import { resultActions, useAssessment, useFinalResults } from '../hooks/useFinalResults.js';
 import { applicationActions, useApplicationDetail, useApplications } from '../hooks/useApplications.js';
+import useDebouncedValue from '../hooks/useDebouncedValue.js';
 import { ROUTES, TAB_QUERY_PARAM } from '../routes/paths.js';
 import { downloadText } from '../utils/csv.js';
 import { formatDate } from '../utils/format.js';
@@ -32,6 +33,7 @@ const TABS = [
 ];
 
 const INITIAL_QUERY = { search: '', positionId: '', status: '', sort: 'newest', page: 1 };
+const SEARCH_DEBOUNCE_MS = 300;
 
 /** `campaign` is the page's single useCampaign() resource (positions for the filter). */
 function ScreeningPanel({ campaign }) {
@@ -43,7 +45,11 @@ function ScreeningPanel({ campaign }) {
   // Pin both the application and decision while confirmation is open. A later
   // selection must never retarget an irreversible action (Q-06).
   const [confirming, setConfirming] = useState(null);
-  const overview = useApplications(query);
+  // Typing waits ~300 ms before requesting; useServiceData aborts superseded
+  // requests and ignores late responses, so older results never overwrite newer ones.
+  const debouncedSearch = useDebouncedValue(query.search, SEARCH_DEBOUNCE_MS);
+  const requestQuery = useMemo(() => ({ ...query, search: debouncedSearch }), [query, debouncedSearch]);
+  const overview = useApplications(requestQuery);
   const detail = useApplicationDetail(selectedId);
   const action = useAction();
   // Never show (or act on) the previous application while the newly selected one loads.
@@ -111,7 +117,7 @@ function ScreeningPanel({ campaign }) {
   }
 
   async function exportCsv() {
-    const result = await action.run(() => applicationActions.exportCsv(query));
+    const result = await action.run(() => applicationActions.exportCsv(requestQuery));
     if (result.ok) {
       downloadText(result.value.fileName, result.value.content);
       setExportMessage({
