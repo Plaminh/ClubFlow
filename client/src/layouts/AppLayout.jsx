@@ -22,12 +22,6 @@ export default function AppLayout() {
     accounts,
     selectDemoAccount,
     signOut,
-    scenarios,
-    scenarioId,
-    setScenario,
-    simulation,
-    setSimulation,
-    resetDemo,
   } = useDemoSession();
   const { status: apiStatus } = useApiHealth();
   const navigate = useNavigate();
@@ -108,12 +102,6 @@ export default function AppLayout() {
         accounts={accounts}
         accountId={account?.id ?? ''}
         onAccountChange={handleDemoAccountChange}
-        scenarios={scenarios}
-        scenarioId={scenarioId}
-        onScenarioChange={setScenario}
-        simulation={simulation}
-        onSimulationChange={setSimulation}
-        onReset={resetDemo}
       />
       <main id="main-content" ref={mainRef} className="container app-layout__main" tabIndex={-1}>
         <Outlet context={{ openSignIn }} />

@@ -107,16 +107,15 @@ describe('AppLayout', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('labels the demo controls and switches scenario with its fixed demo clock', async () => {
+  it('labels the demo controls without browser-only data, scenario, or reset controls', async () => {
     renderApp('/');
     const demo = await screen.findByRole('region', { name: 'Điều khiển bản demo' });
     expect(within(demo).getByText('Demo')).toBeInTheDocument();
-    expect(within(demo).getByText('31/10/2026, 09:00')).toBeInTheDocument();
-
-    fireEvent.change(within(demo).getByLabelText('Kịch bản'), { target: { value: 'confirmed' } });
-
-    expect(within(demo).getByText('05/11/2026, 13:00')).toBeInTheDocument();
-    expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession'))).toMatchObject({ scenarioId: 'confirmed' });
+    expect(within(demo).getByText('Dữ liệu từ HTTP mock')).toBeInTheDocument();
+    expect(within(demo).getByLabelText(/Đổi tài khoản nhanh/)).toBeInTheDocument();
+    expect(within(demo).queryByLabelText('Kịch bản')).not.toBeInTheDocument();
+    expect(within(demo).queryByRole('button', { name: /Đặt lại/ })).not.toBeInTheDocument();
+    expect(within(demo).queryByText(/bộ nhớ trình duyệt/)).not.toBeInTheDocument();
   });
 
   it('does not move focus into the page on first load (StrictMode double effects)', async () => {

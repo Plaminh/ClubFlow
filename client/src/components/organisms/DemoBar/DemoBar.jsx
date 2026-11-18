@@ -1,53 +1,32 @@
 import { useId } from 'react';
 import Badge from '../../atoms/Badge/index.js';
-import Button from '../../atoms/Button/index.js';
 import { ROLE_LABELS } from '../../../constants/labels.js';
-import { formatDateTime } from '../../../utils/format.js';
 import './DemoBar.css';
 
-const SIMULATIONS = [
-  { id: 'normal', label: 'Bình thường' },
-  { id: 'slow', label: 'Chậm (xem trạng thái tải)' },
-  { id: 'error', label: 'Lỗi mạng (xem trạng thái lỗi)' },
-];
-
 /**
- * Demo controls: development-only account switch (no credentials; the real
- * sign-in flow is the /login page), scenario (fixed demo clock), simulated network mode, reset.
- * Clearly labeled so nobody mistakes it for product functionality; collapsed
- * by default so it does not push page content down on small screens.
+ * Development-only demo controls: a quick account switch that still signs in
+ * through the HTTP login endpoint (the product flow is the /login page). All
+ * data comes from the HTTP mock; its mode and reset are controlled when the
+ * mock is started, never from the browser. Collapsed by default so it does
+ * not push page content down on small screens.
  */
 const ROLE_ORDER = ['applicant', 'executive', 'interviewer'];
 
-export default function DemoBar({
-  accounts = [],
-  accountId = '',
-  onAccountChange,
-  scenarios,
-  scenarioId,
-  onScenarioChange,
-  simulation,
-  onSimulationChange,
-  onReset,
-}) {
+export default function DemoBar({ accounts = [], accountId = '', onAccountChange }) {
   const accountFieldId = useId();
-  const scenarioFieldId = useId();
-  const simulationFieldId = useId();
-  const scenario = scenarios.find((item) => item.id === scenarioId);
 
   return (
     <section className="demo-bar" aria-label="Điều khiển bản demo">
       <details className="container demo-bar__details">
         <summary className="demo-bar__summary">
           <Badge tone="warning">Demo</Badge>
-          <span>
-            {scenario?.label ?? '—'} · thời điểm demo <strong>{scenario ? formatDateTime(scenario.now) : '—'}</strong>
-          </span>
+          <span>Dữ liệu từ HTTP mock</span>
           <span className="demo-bar__toggle">Tùy chọn demo</span>
         </summary>
         <div className="demo-bar__panel">
           <p className="hint">
-            Dữ liệu hư cấu trong bộ nhớ trình duyệt; tải lại trang sẽ khôi phục dữ liệu ban đầu của kịch bản.
+            Mọi dữ liệu đến từ HTTP mock qua <code>/api</code>. Chọn chế độ normal/slow/error/empty bằng biến{' '}
+            <code>MOCK_MODE</code> khi khởi động mock; khởi động lại mock để đặt lại dữ liệu.
           </p>
           <div className="demo-bar__controls">
             <label className="demo-bar__field" htmlFor={accountFieldId}>
@@ -68,37 +47,6 @@ export default function DemoBar({
                 ))}
               </select>
             </label>
-            <label className="demo-bar__field" htmlFor={scenarioFieldId}>
-              <span>Kịch bản</span>
-              <select
-                id={scenarioFieldId}
-                value={scenarioId}
-                onChange={(event) => onScenarioChange(event.target.value)}
-              >
-                {scenarios.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label} ({formatDateTime(item.now)})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="demo-bar__field" htmlFor={simulationFieldId}>
-              <span>Mạng</span>
-              <select
-                id={simulationFieldId}
-                value={simulation}
-                onChange={(event) => onSimulationChange(event.target.value)}
-              >
-                {SIMULATIONS.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <Button variant="secondary" onClick={onReset}>
-              Đặt lại dữ liệu demo
-            </Button>
           </div>
         </div>
       </details>
