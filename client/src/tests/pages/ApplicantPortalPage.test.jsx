@@ -130,6 +130,13 @@ describe('Applicant Portal', () => {
     expect(screen.getByText(/Bạn đã nộp hồ sơ CF-026 cho vị trí này/)).toBeInTheDocument();
   });
 
+  it('shows the account faculty as the selected option, matching what is submitted', async () => {
+    await openTab('apply', { scenarioId: 'accepting', accountId: MINH_ANH });
+    const faculty = screen.getByLabelText('Khoa');
+    expect(faculty).toHaveValue('Information Technology');
+    expect(faculty.selectedOptions[0]).toHaveTextContent('Information Technology');
+  });
+
   it('handles a server-side 409 duplicate: keeps the input and links to the existing application', async () => {
     await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
     fillValidForm({ sop: 'Nội dung phải được giữ lại.' });

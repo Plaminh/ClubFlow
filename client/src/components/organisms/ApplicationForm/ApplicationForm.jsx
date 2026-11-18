@@ -30,6 +30,8 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
   const [focusErrors, setFocusErrors] = useState(0);
   const formRef = useRef(null);
   const words = countWords(values.sop);
+  // The account's own faculty must be selectable, or the select would show a different value than it submits.
+  const facultyOptions = account.faculty && !FACULTIES.includes(account.faculty) ? [account.faculty, ...FACULTIES] : FACULTIES;
   const appliedByPosition = Object.fromEntries(applications.map((application) => [application.positionId, application.id]));
 
   useEffect(() => {
@@ -168,7 +170,7 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
               <FormField id="apply-faculty" label="Khoa" error={errors.faculty}>
                 {(props) => (
                   <select {...props} value={values.faculty} disabled={disabled} onChange={(event) => set('faculty', event.target.value)}>
-                    {FACULTIES.map((faculty) => (
+                    {facultyOptions.map((faculty) => (
                       <option key={faculty} value={faculty}>
                         {faculty}
                       </option>
