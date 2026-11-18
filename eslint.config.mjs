@@ -48,6 +48,16 @@ export default [
       },
     },
   },
+
+  // 3b. Repository Node tooling and the built-in PA#3 HTTP mock
+  {
+    files: ['tools/**/*.mjs', 'mock/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
   
   // 4. Frontend Configuration
   {

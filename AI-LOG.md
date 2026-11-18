@@ -655,3 +655,39 @@ Verified:
 - `git diff --check` and `git diff --cached --check` both exited 0. The unrelated untracked `a.txt` present at the start of this review was left untouched.
 
 Limitations: This task did not rerun application tests or builds because it changed documentation only. It did not implement or modify the API contract, HTTP mock, application source, backend, database, or dependencies. No commit or push was performed.
+
+---
+
+## 2026-11-18 — PA#3 Phase 2B/2C — API contract and independent review
+
+Tool: Codex.
+
+Asked for: Autonomously complete PA#3 from Phase 2B through Phase 6 using the order audit, plan, implement, verify, fix, reverify, commit, and continue; begin with a complete C1-C11 API contract, preserve existing UI/backend work, use local commits only after green gates, never push, and report final evidence in Vietnamese.
+
+Rejected:
+
+- Rejected the older prototype rule that publication makes the entire Campaign read-only. The supplied PA#3 Q-03 direction instead permits constrained published details/Position/quota/window edits, locks Interview Setup after the first valid Application, blocks linked Position deletion, and locks required records after Schedule confirmation.
+- Rejected an auxiliary upload-only primary Campaign and any clock-control endpoint. The contract uses one primary Campaign, a real early-close business action, and internal deterministic workflow timestamps that callers cannot manipulate.
+- Rejected creating a homemade `tools/contract-check.mjs`. The exact official course checker was not present in the repository or available attachments, so its status remains NOT RUN; the repository validator is explicitly structural and non-official.
+
+Kept:
+
+- Existing React pages, Atomic Design structure, hooks/service interfaces where practical, browser fixture identities, Express/PostgreSQL scaffold, one root environment-file policy, and all unrelated working-tree content.
+- Existing canonical browser identities are mapped rather than silently renamed. A01/A02 are new canonical HTTP records while legacy `CF-*` fixtures remain historical.
+
+Changed:
+
+- Added the dedicated Spec Kit feature `specs/002-pa3-http-integration/` with specification, clarification result, plan, research, data model, HTTP boundary map, quickstart, two completed requirement-quality checklists, and dependency-ordered tasks. The agent-context script failed because the machine exposes a nonfunctional Microsoft Store `python3` alias and has no PowerShell YAML parser; the documented managed block was applied directly to `AGENTS.md`.
+- Completed `docs/api/README.md` and resource documents `00` through `07`: 37 inventory endpoints, common success/error conventions, canonical accounts/tokens, one coherent Campaign journey, three multipart Applications, review/files/CSV, Conflict/Unassigned scheduling, meaningful Save Changes, confirmation locks, assigned assessments, results/notifications, constrained Q-03 edits, and `## Changes` history.
+- Added `tools/validate-api-docs.mjs` plus a Vitest contract-document test. The validator checks required files, inventory/heading links, C1-C11 trace, request/response fence pairing, endpoint example coverage, token/file placeholders, Markdown links, and username-based login examples.
+- Updated `FRONTEND.md` with approved contract credentials, route-to-endpoint mapping, decision status, libraries, and honest remaining work. Updated the frontend integration guide where the historical Q-03 service assumptions conflicted with the approved PA#3 direction. Appended the exact current master prompt to `brief.md`.
+
+Verified:
+
+- Baseline before Phase 2B changes: `npm run lint` passed; frontend 295/295 tests in 23 files and backend 18/18 tests in 5 files passed; `npm run build` passed with the existing non-blocking chunk-size warning.
+- The first structural validator/test run failed because its broad login regex crossed from a request into the response-only `handle` field. The validator was fixed to inspect only the login request fence; the direct rerun then passed with 9 files, 37 endpoints, and 52 request examples, and the focused Vitest test passed 1/1.
+- Official `contract-check.mjs`: NOT RUN — exact official file unavailable. No substitute is labeled official.
+
+Limitations: This phase defines and statically validates the contract only. No HTTP mock route or frontend domain HTTP consumer exists yet, multipart/file behavior is not runtime-proven, and current browser services still read in-memory fixtures. Team names, student IDs, and public Product Owner links still require human input.
+
+Commit: planned scoped local commit `docs: define PA3 API contract`; hash is recorded after successful final phase verification and commit creation.

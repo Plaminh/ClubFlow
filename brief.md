@@ -1523,3 +1523,1110 @@ Do not commit or push.
 
 Return the final documentation diff for review.
 `````
+
+## 2026-11-18 — Request 5 — Autonomous PA#3 Phase 2B–6 Implementation
+
+**Record type:** Exact prompt supplied in the attached user request that authorized implementation, verification, local commits, and final reporting.
+
+**Exact prompt (verbatim):**
+
+`````text
+
+# CLUBFLOW PA#3 — AUTONOMOUS IMPLEMENTATION MASTER PROMPT
+
+You are the Lead Software Engineer, API Architect, QA Engineer, and Technical Auditor responsible for completing ClubFlow PA#3.
+
+Project: ClubFlow
+Course: CSC13008 — 24KTPM1
+Milestone: PA#3 — Front end in React
+Deadline: November 30, 2026, 22:00
+Weight: 7%
+Rubric: 100 points
+
+MISSION:
+Autonomously complete every remaining phase of PA#3, starting from Phase 2B through Phase 6.
+
+WORKFLOW:
+AUDIT → PLAN → IMPLEMENT → VERIFY → FIX → REVERIFY → COMMIT → NEXT PHASE.
+
+You are authorized to:
+- Inspect the full repository.
+- Create, edit, refactor, and remove files within the approved PA#3 scope.
+- Run development servers and automated tests.
+- Run official contract-checking tools.
+- Fix implementation defects.
+- Update truthful documentation.
+- Create LOCAL Git commits after successful verification.
+
+Do not request approval between ordinary implementation steps.
+
+Do not stop merely because one phase has been completed. Continue until all phases are finished, unless a genuine blocker or safety condition requires stopping.
+
+DO NOT:
+- Push to remote.
+- Merge, rebase, reset, or rewrite Git history.
+- Delete or overwrite unrelated work.
+- Change branches without authorization.
+- Commit secrets, real student data, or credentials.
+- Weaken tests or validation to obtain green results.
+- Falsify test output, screenshots, logs, or commit history.
+- Implement unrelated features.
+- Rewrite the React frontend unnecessarily.
+- Claim unverified behavior is working.
+
+If a major specification conflict cannot be resolved using authoritative sources, stop at the affected boundary and report the blocker. Never silently invent policy.
+
+==================================================
+0. INITIAL REPOSITORY AUDIT
+==================================================
+
+Before changing any file, inspect:
+
+- Git branch, HEAD, working tree and recent commits.
+- AGENTS.md and client/AGENTS.md.
+- brief.md.
+- FRONTEND.md.
+- AI-LOG.md.
+- Official PA#3 rubric, if available.
+- ClubFlow final project brief.
+- Product Owner Q-01–Q-07.
+- docs/requirements/.
+- docs/frontend/INTEGRATION.md.
+- docs/api/.
+- specs/001-frontend-ui/.
+- client/src/routes/.
+- client/src/pages/.
+- client/src/hooks/.
+- client/src/services/.
+- client/src/contexts/.
+- client/src/mocks/.
+- client/src/tests/.
+- Root package.json, lockfile, Vite and Vitest configs.
+
+Expected prior state:
+- Branch: pa3-finalize.
+- Phase 1 completed.
+- React workspace located in client/.
+- Existing React 19 + Vite frontend.
+- Atomic Design architecture.
+- Five business screens plus account screens.
+- Domain services still primarily use browser mocks.
+- Phase 2A API design completed.
+- Complete domain HTTP contract and mock not yet implemented.
+
+VERIFY these assumptions against the actual HEAD.
+
+If earlier work has already completed a task, do not redo it. Preserve working implementations.
+
+Run the existing baseline checks where practical:
+- npm run lint
+- npm test
+- npm run build
+
+Record actual results.
+
+Working-tree safety:
+- If unrelated uncommitted changes exist, preserve them.
+- Never use git clean, reset --hard, or force checkout.
+- Stage only files belonging to the current verified phase.
+- Do not use unrestricted git add . or git add -A.
+
+==================================================
+1. SOURCE OF TRUTH AND SCOPE
+==================================================
+
+Priority order:
+
+1. Official PA#3 rubric.
+2. ClubFlow final project brief.
+3. Published Product Owner decisions Q-01–Q-07.
+4. Approved API contract after Phase 2B.
+5. Existing business requirements.
+6. Existing service interfaces and UI implementation.
+
+Where sources disagree, document the conflict and follow the highest-authority applicable source.
+
+PA#3 requires:
+- React + Vite in client/.
+- C1–C11.
+- Three roles.
+- API contract in docs/api/.
+- HTTP mock in mock/server.mjs.
+- Four mock modes.
+- Relative /api requests.
+- Loading/error/empty states.
+- Forms and validation.
+- Responsive/semantic HTML.
+- Documentation and evidence.
+- Appropriate Git history.
+
+NOT REQUIRED FOR PA#3:
+- Express domain implementation.
+- PostgreSQL persistence.
+- Production JWT.
+- Real Cloudinary integration.
+- Production first-fit scheduling algorithm.
+- Email/Brevo integration.
+- Production concurrency transactions.
+
+These belong to PA#4 or optional future work.
+
+Preserve the existing backend/database scaffold unless a strictly necessary nonbehavioral compatibility adjustment is justified. Do not implement PA#4.
+
+==================================================
+2. PHASE 2B — WRITE API CONTRACT
+==================================================
+
+GOAL:
+Create the complete HTTP API contract for ClubFlow C1–C11.
+
+Use the existing Phase 2A design as a blueprint, but independently audit it before implementation.
+
+Read existing domain service signatures and DTOs.
+
+Preserve current page/component interfaces whenever feasible.
+
+Create or update:
+
+docs/api/README.md
+docs/api/00-resource-models.md
+docs/api/01-auth-profile.md
+docs/api/02-public-applicant.md
+docs/api/03-review-files.md
+docs/api/04-scheduling.md
+docs/api/05-interviewer.md
+docs/api/06-results-notifications.md
+docs/api/07-campaign-management.md
+
+Adjust filenames and order if necessary for the official checker.
+
+API CONTRACT REQUIREMENTS:
+
+Base path:
+  /api
+
+Authorization:
+  Authorization: Bearer <token>
+
+Response conventions:
+- Direct success DTOs.
+- Consistent JSON error shape.
+- Appropriate 200/201/204/400/401/403/404/409.
+- 200 and empty arrays for empty collections.
+- Explicit required fields, types and limits.
+- Stable resource IDs.
+- Role ownership and visibility.
+- Deterministic examples.
+
+Common error shape:
+{
+  "error": "Human-readable message",
+  "code": "MACHINE_READABLE_CODE",
+  "fieldErrors": {},
+  "details": {}
+}
+
+fieldErrors and details may be optional, but each documented response must accurately reflect which keys are present.
+
+README.md must include:
+- Base path.
+- Authentication.
+- Status conventions.
+- Common error shape.
+- Complete endpoint inventory.
+- Method, path, allowed role, and resource document.
+
+Every endpoint must include:
+- Purpose.
+- Allowed roles.
+- Path/query fields.
+- Request fields, types and limits.
+- Success response.
+- Applicable error responses.
+- At least one executable request/response example.
+
+Every resource contract file must contain:
+## Changes
+
+Record actual changes only.
+
+MANDATORY DESIGN CORRECTIONS:
+
+A. Login:
+Use username and password.
+
+Do not use "handle" as the login request field.
+
+B. Required accounts:
+- exec
+- studentA
+- int-content
+- int-comms
+
+Add studentB when needed for testing ownership or application submission.
+
+FRONTEND.md must have:
+Name in examples | Role | User name | Password
+
+C. Canonical example:
+- A01: Student A → Content.
+- A02: Student A → Communications.
+- Separate screening, interview, assessment, result.
+
+Preserve unrelated legacy fixture identities.
+
+D. Multipart upload examples:
+Use fenced sh/curl request blocks, immediately followed by fenced http response blocks.
+
+Support:
+{{token:studentA}}
+{{file:cv.pdf:200KB}}
+
+Use only example syntax the official checker understands.
+
+E. Campaign timeline:
+Support a coherent journey from draft → published → accepting applications → closed → schedule confirmed → assessments → results.
+
+Use one primary campaign.
+
+Do not add a test-only production endpoint to manipulate time.
+
+If closure must be demonstrated, use a real business action allowed by Q-03, such as closing applications early, or a deterministic valid fixture state. Document the approach precisely.
+
+F. Endpoint minimization:
+Remove redundant endpoints if their behavior can safely be supported through an existing composite endpoint.
+
+Do not remove required capabilities.
+
+G. Schedule semantics:
+Clearly distinguish Generate Draft, Edit/Resolve, Save Changes, and Confirm.
+
+Save Changes must have meaningful behavior if exposed as a separate API action.
+
+CONTRACT COVERAGE:
+C1 Public campaign
+C2 Sign-in and roles
+C3 Create, draft, preview, publish
+C4 Interviewer setup
+C5 Applicant submission
+C6 My applications
+C7 Application review
+C8 Draft scheduling
+C9 Confirmation
+C10 Interviewer assessments
+C11 Final results and notifications
+
+PHASE 2B VERIFICATION:
+
+Audit every endpoint against:
+- Existing frontend services.
+- C1–C11.
+- Required roles.
+- Request/response field names.
+- Error cases.
+- State transitions.
+- HTTP example order.
+- Checker parser requirements.
+
+Ensure every example maps to an endpoint in README.
+
+Run appropriate static/documentation checks.
+
+Do not implement the mock yet.
+
+If the official checker is unavailable, mark checker execution as NOT RUN rather than claiming PASS.
+
+==================================================
+3. PHASE 2C — CONTRACT REVIEW AND COMMIT
+==================================================
+
+Perform an independent contract review.
+
+Check:
+- No missing C1–C11 operation.
+- No undocumented frontend-required operation.
+- No contradictory status codes.
+- No inconsistent DTO fields.
+- No unauthorized data leakage.
+- No missing error shape.
+- No unpaired request/response examples.
+- No invented production requirements.
+- No impossible fixture transitions.
+- No contradictory application IDs.
+- No duplicate active campaign assumption.
+- No malformed token placeholders.
+
+Review git diff carefully.
+
+Keep contract implementation independent from mock implementation.
+
+Update brief.md and AI-LOG.md truthfully.
+
+Do not fabricate historical prompts.
+
+Verification:
+- git diff --check
+- Contract structural validation
+- Markdown/reference consistency
+- Coverage matrices
+
+If Phase 2B/2C checks pass, create a scoped local commit:
+
+docs: define PA3 API contract
+
+After committing:
+- Verify the commit exists.
+- Verify the expected files were committed.
+- Preserve unrelated untracked files.
+- Record the commit hash.
+
+Then automatically proceed to Phase 3.
+
+==================================================
+4. PHASE 3 — IMPLEMENT HTTP MOCK SERVER
+==================================================
+
+GOAL:
+Implement a stateful HTTP mock server that satisfies the committed contract.
+
+Required structure:
+mock/server.mjs
+mock/data/
+
+Runtime:
+node mock/server.mjs
+
+Default PORT:
+3001
+
+Use only Node.js built-in modules.
+
+No Express, third-party router, database, or extra npm installation for the mock.
+
+MOCK BEHAVIOR:
+
+- Start from deterministic mock/data fixtures.
+- Keep mutations in memory.
+- Reset state when the process restarts.
+- Preserve valid deterministic tokens across restart.
+- Authenticate demo accounts.
+- Determine role/identity from token.
+- Apply role and ownership rules.
+- Return exact documented status codes and response fields.
+- Log method, request path, and response status.
+- Handle JSON and required multipart uploads.
+- Handle CSV and PDF endpoints correctly.
+
+Four modes are mandatory:
+
+NORMAL:
+- Approximately 150 ms response.
+- Functional data and mutations.
+
+SLOW:
+- Approximately 2 seconds response.
+- Same API behavior.
+- React must display loading.
+
+ERROR:
+- Return HTTP 500 with the documented error shape.
+- Sign-in remains available.
+- React must display error and Retry.
+
+EMPTY:
+- All arrays in responses become [].
+- Nested arrays also become [].
+- Single-resource endpoints continue to return valid objects.
+- React must display correct empty states and zero counts.
+
+BUSINESS BEHAVIOR:
+
+- Draft/publish campaign.
+- Published campaign editing per Q-03.
+- Add/update/remove eligible positions.
+- Configure interview setup.
+- Apply for multiple positions.
+- Detect duplicate applications.
+- Keep A01/A02 independent.
+- Screen each application independently.
+- Generate deterministic draft schedule.
+- Show Proposed/Conflict/Unassigned correctly.
+- Edit/resolve assignments and recalculate conflicts.
+- Refuse invalid confirmation.
+- Confirm valid schedule.
+- Lock confirmed campaign/schedule.
+- Show assigned interviewer work.
+- Accept assigned assessments.
+- Record and publish final results.
+- Create applicant notifications.
+
+Real first-fit optimization is not required.
+Use fixed deterministic generation where appropriate.
+
+Do not use arbitrary fake success responses that break state continuity.
+
+Preserve application, interviewer and room conflict checks in draft edits.
+
+==================================================
+5. PHASE 3 — CONTRACT VERIFICATION
+==================================================
+
+Locate the OFFICIAL contract-check.mjs supplied for the course.
+
+If not present in the repository, look for the exact official file in the available project/course attachments.
+
+Copy the official checker into tools/contract-check.mjs when accessible.
+
+Do not replace it with a simplified homemade checker.
+
+If the exact tool is unavailable, report that limitation and run equivalent manual HTTP checks, but do not claim the official checker passed.
+
+For the normal run:
+
+Terminal/process A:
+node mock/server.mjs
+
+Terminal/process B:
+node tools/contract-check.mjs --base http://localhost:3001
+
+IMPORTANT:
+Restart the mock from fresh seed before every full checker run because examples mutate state.
+
+Verify:
+- All examples covered.
+- All status codes match.
+- All JSON field names match.
+- All endpoint inventory entries covered.
+- No undocumented example endpoints.
+- Login placeholders resolve correctly.
+- Multipart uploads work.
+- No unintentional value NOTE inconsistencies.
+
+Run strict-values separately where compatible and investigate mismatches rather than ignoring them.
+
+Test each of the four mock modes using safe startup/restart procedures.
+
+Write tests for:
+- Login/role handling.
+- Campaign publishing and validation.
+- Duplicate application.
+- A01/A02 independence.
+- Review mutations.
+- Conflict/Unassigned.
+- Confirmation refusal and lock.
+- Assessment ownership.
+- Result publication and notification.
+- Mock restart/reset behavior.
+
+Use Node built-in testing tools if helpful.
+
+Do not weaken the contract to make implementation tests pass.
+
+If the code violates a correct contract:
+FIX THE CODE.
+
+If the contract itself is genuinely wrong:
+Document why, add an accurate Changes entry, and keep a separate explicit corrective commit before proceeding. Do not silently change the approved contract.
+
+Run:
+npm run lint
+npm test
+npm run build
+
+Run additional mock tests as appropriate.
+
+If any required gate fails:
+- Diagnose the cause.
+- Fix implementation.
+- Re-run the failing gate.
+- Re-run all relevant regression gates.
+
+Commit only once verified.
+
+Suggested commit:
+feat: implement contract-driven PA3 HTTP mock
+
+Record the commit hash.
+
+Then proceed to Phase 4.
+
+==================================================
+6. PHASE 4 — REACT HTTP INTEGRATION
+==================================================
+
+GOAL:
+Convert all main-flow domain services from browser mock state to HTTP API.
+
+PRESERVE:
+- Existing pages.
+- Atomic Design components.
+- Existing CSS/design tokens.
+- Existing route structure where possible.
+- Existing hooks.
+- Existing form validation.
+- Existing service interfaces where feasible.
+
+Do not rewrite the frontend.
+
+Use:
+client/src/services/apiClient.js
+
+All domain calls must use relative /api paths.
+
+Configure client/vite.config.js:
+
+server.proxy:
+  /api → http://localhost:3001
+
+preview.proxy:
+  /api → http://localhost:3001
+
+Avoid absolute API URLs in runtime.
+
+AUTH INTEGRATION:
+
+- Login via HTTP.
+- Token returned by mock.
+- Shared user/token auth context.
+- Register token provider for API client.
+- Sign-out clears token.
+- Protected routes work.
+- Return to intended route after sign-in.
+- Role navigation is correct.
+- Bearer header attached after login.
+- Mock restart does not incorrectly invalidate valid demo tokens.
+
+DATA INTEGRATION:
+
+Replace browser mock imports in:
+- authService
+- profileService
+- campaignService
+- portalService
+- applicationService
+- scheduleService
+- interviewerService
+- resultService
+
+Keep service adapters where response mapping is needed.
+
+No page should read domain data directly from client-side fixtures.
+
+No domain service should depend on client/src/mocks/store.js as the runtime source of truth.
+
+Handle:
+- JSON.
+- FormData.
+- PDF downloads.
+- CSV exports.
+- Pagination.
+- Search/filter/sort.
+- 400 field errors.
+- 401 unauthenticated.
+- 403 forbidden.
+- 404 not found.
+- 409 conflict.
+- 500/server errors.
+- Empty list responses.
+- Aborted/stale requests.
+
+UI REQUIREMENTS:
+
+Every data screen:
+- Loading.
+- Error with Retry.
+- Empty.
+- Success.
+
+After a mutation, update UI using API response or an API refetch.
+
+Avoid full page reloads.
+
+Search must use debounce or request cancellation.
+
+Preserve filters when closing application drawer.
+
+Do not create repeated requests while the UI is simply waiting.
+
+INTEGRATION ORDER:
+
+1. Relative API client and Vite proxy.
+2. Authentication/shared session.
+3. Public campaign.
+4. Campaign management.
+5. Applicant submission and My Applications.
+6. Application review.
+7. Interview setup and scheduling.
+8. Interviewer workspace.
+9. Final results and notifications.
+
+For each group:
+
+AUDIT → IMPLEMENT → TEST → FIX → REVERIFY → COMMIT.
+
+Use separate local commits for meaningful groups, such as:
+
+feat: integrate PA3 authentication and API client
+feat: integrate campaign and applicant API flows
+feat: integrate application review and scheduling APIs
+feat: integrate interviewer and results APIs
+
+You may split commits further when justified.
+
+Do not mix unrelated domains merely to reduce commit count.
+
+==================================================
+7. PHASE 5 — FUNCTIONAL COMPLETION
+==================================================
+
+GOAL:
+Close all remaining C1–C11 gaps identified by the original audits and new integration tests.
+
+MANDATORY AREAS:
+
+A. C4 Interview Setup:
+- Edit interviewer-position assignments.
+- Edit interviewer availability.
+- Choose existing rooms.
+- Configure date/window.
+- Configure duration 15/20/30.
+- Save changes via HTTP.
+- Validate invalid combinations.
+
+B. Q-03 Published Campaign:
+- Published campaigns allow valid edits.
+- Add position when permitted.
+- Update quotas.
+- Extend or close application window.
+- Do not delete positions with applications.
+- Lock relevant interview configuration after the first valid application.
+- Confirmed campaigns and schedules become read-only.
+
+C. Applicant:
+- Multi-position applications.
+- Duplicate opens existing application.
+- PDF <= 5 MB.
+- SOP <= 300 words.
+- Availability from club slots.
+- Closed campaign preserves form data on error.
+- Own records only.
+
+D. Executive:
+- Application search/filter/sort/pagination.
+- Statistics.
+- CSV.
+- Drawer/detail/CV.
+- Internal notes.
+- Independent screening decisions.
+
+E. Scheduling:
+- Proposed, Conflict and Unassigned.
+- Correct overlap checks.
+- Reasons displayed.
+- Draft edits/save/export.
+- Confirmation refusal.
+- Confirmed read-only.
+
+F. Interviewer:
+- Assigned interviews only.
+- Assigned CVs only.
+- No private screening notes.
+- One assessment per assigned completed interview.
+
+G. Results:
+- Pass/Fail per application.
+- Publish results.
+- Applicant sees published results only.
+- In-app notifications.
+
+H. UI:
+- No hardcoded domain counts.
+- No false conflicts.
+- No inconsistent dates.
+- No incorrect page titles.
+- No applicant/interviewer identity overlap.
+- No prohibited "verified" claims.
+- No template footer.
+- Responsive drawer/list behavior.
+
+PRODUCT OWNER DECISIONS:
+
+Q-01:
+First-fit real engine deferred to PA#4.
+PA#3 mock may generate fixed valid drafts.
+
+Q-02:
+Use Vietnam time UTC+7.
+Date-only closing closes at 00:00 the next day.
+
+Q-03:
+Published campaigns allow constrained edits.
+Confirmed state locks required records.
+
+Q-04:
+Simple assessment form sufficient.
+Executive controls final result.
+
+Q-05:
+In-app notifications required.
+Email optional.
+
+Q-06:
+Applicant withdrawal/edit and assessment editing optional.
+Do not implement unless needed for already-approved scope.
+
+Q-07:
+Respect role-specific CV visibility in the mock contract.
+Real direct-URL enforcement belongs to PA#4.
+
+VERIFICATION:
+
+Create or extend tests that prove each previously missing behavior.
+
+For every C-step:
+- Working UI.
+- HTTP request.
+- Correct mock response.
+- Correct state update.
+- Required error case.
+- Role visibility.
+
+Re-run relevant automated gates.
+
+Commit distinct functional fixes after verification.
+
+Suggested messages:
+feat: complete PA3 interview setup
+fix: align published campaign editing with PO decisions
+test: cover PA3 workflow and error states
+
+==================================================
+8. PHASE 6 — FULL QA AND SUBMISSION
+==================================================
+
+GOAL:
+Verify PA#3 as the lecturer will grade it and prepare the required submission artifacts.
+
+OFFICIAL RUBRIC:
+
+1. Whole Main Flow: 25
+2. Routing, Sign-in, Shared State: 10
+3. Data from API: 10
+4. Forms: 10
+5. Contract and Mock: 15
+6. Responsive, Semantic, Valid: 5
+7. Brief and Rules File: 10
+8. AI-LOG.md: 10
+9. Commit History: 5
+
+Total: 100.
+
+A. AUTOMATED CHECKS
+
+Run:
+npm run lint
+npm test
+npm run build
+
+Run the official contract-check against a freshly started normal mock.
+
+Check:
+- All documented examples.
+- HTTP status codes.
+- Response fields.
+- Endpoint coverage.
+- Demo credentials.
+- State changes.
+- Upload behavior.
+
+B. MOCK MODES
+
+Test:
+- normal
+- slow
+- error
+- empty
+
+Verify UI responses.
+
+C. FULL C1–C11 FLOW
+
+Walk through the application using its own links/buttons:
+
+1. Executive creates/publishes campaign.
+2. Visitor sees published campaign.
+3. Student A signs in.
+4. Student A submits Content application.
+5. Student A submits Communications application.
+6. Executive reviews A01 and A02 separately.
+7. Executive shortlists them.
+8. Applications close.
+9. Executive generates draft schedule.
+10. Conflict is displayed where appropriate.
+11. Executive resolves conflicts.
+12. Executive confirms.
+13. Applicant sees confirmed schedule.
+14. Interviewer sees assigned interviews.
+15. Interviewer submits assessment.
+16. Executive records and publishes results.
+17. Applicant sees result and notification.
+
+Check the failure cases in the official brief.
+
+Use a clean deterministic mock state for each independent test.
+
+D. ROUTES
+
+Open all routes directly.
+Reload each route.
+Test Browser Back.
+Test unknown route.
+Test protected routes when signed out.
+Test cross-role route access.
+
+E. RESPONSIVE
+
+Check all important routes at:
+- 360px
+- 768px
+- 1280px
+
+No page horizontal scrolling.
+No clipped UI.
+Buttons/links at least 44px tall at 360px.
+Tables handle overflow.
+Drawer and list stay readable.
+Semantic landmarks and one h1 per screen.
+
+Use browser automation if available.
+
+If browser tooling is unavailable, explicitly mark manual browser verification as NOT EXECUTED. Do not fabricate screenshots or W3C results.
+
+F. W3C VALIDATION
+
+Validate rendered HTML of main screens, not just dist/index.html.
+
+Aim for 0 errors.
+
+G. DOCUMENTATION
+
+Complete:
+- FRONTEND.md
+- brief.md
+- AI-LOG.md
+- SELF_ASSESSMENT_REPORT.md
+- AGENTS.md
+- docs/api/
+
+FRONTEND.md:
+1. Team.
+2. How to run.
+3. Demo accounts.
+4. Routes.
+5. Product Owner decisions.
+6. Libraries.
+7. Not done.
+
+Write required documentation in English.
+
+Do not invent member names, student IDs or public PO links.
+
+If information is unavailable, mark it explicitly as requiring human input.
+
+brief.md must preserve real prompts, not reconstructed prompts.
+
+AI-LOG.md:
+- Preserve history.
+- Add truthful PA#3 entries.
+- Record tool, request, kept, changed, rejected and verification.
+- Record only real incidents and checks.
+- Do not claim a rejected suggestion existed when none did.
+
+SELF_ASSESSMENT_REPORT.md:
+- One row per rubric criterion.
+- Claimed score.
+- Evidence path/route/test/commit.
+- Total.
+- Limitations/not done.
+
+Do not overclaim unverified points.
+
+H. BUILD
+
+Ensure:
+client/dist/
+
+is rebuilt from the latest source.
+
+Verify the production preview against the HTTP mock.
+
+I. SUBMISSION AUDIT
+
+Required:
+- Repository source.
+- Hidden .git directory.
+- client/ and client/dist/.
+- mock/server.mjs and mock/data/.
+- docs/api/.
+- AGENTS.md or approved rules file.
+- FRONTEND.md.
+- brief.md.
+- AI-LOG.md.
+- SELF_ASSESSMENT_REPORT.md.
+
+Exclude:
+- node_modules/.
+- .env with real secrets.
+- Temporary artifacts and real uploaded CVs.
+
+Do not use GitHub Download ZIP or git archive when .git must be included.
+
+Prepare a local submission ZIP only if all required identity fields and submission checks can be completed accurately.
+
+If not, produce the exact missing-field checklist instead.
+Do not invent student IDs or scores.
+
+Do not push or submit externally.
+
+==================================================
+9. CONTINUOUS QUALITY GATES
+==================================================
+
+After every implementation phase:
+
+1. Inspect git diff.
+2. Check for unexpected files.
+3. Run focused tests.
+4. Run full relevant quality gates.
+5. Investigate all failures.
+6. Fix underlying implementation.
+7. Re-run tests.
+8. Validate the contract when affected.
+9. Review security and behavior regressions.
+10. Update truthful AI-LOG/documentation.
+11. Stage only phase-related files.
+12. Review staged diff.
+13. Commit locally.
+14. Record commit hash.
+15. Continue to next phase.
+
+Do not commit if required gates fail.
+
+Do not silently skip a failing check.
+
+Do not create a passing test that cannot detect the targeted defect.
+
+Do not weaken expectations, mock behavior, contract, or validation just to pass.
+
+If a dependency is genuinely necessary:
+- Check whether the existing stack can solve the problem.
+- Explain why the dependency is necessary.
+- Respect repository approval rules.
+- Avoid packages with unnecessary install scripts.
+
+==================================================
+10. PHASE COMPLETION RULES
+==================================================
+
+A phase is DONE only when:
+
+- Its functional acceptance criteria are met.
+- Its required files exist.
+- Applicable tests pass.
+- No unresolved critical regression exists.
+- Documentation is truthful.
+- Diff has been reviewed.
+- A scoped Git commit has been created.
+- Commit hash has been recorded.
+
+If a phase cannot be completed:
+- Explain the exact blocker.
+- Preserve working code.
+- Do not commit an incomplete phase as DONE.
+- Do not continue into dependent phases that require the missing behavior.
+- You may complete independent safe work, but never mask the blocker.
+
+Avoid unnecessary back-and-forth questions.
+Resolve ordinary technical decisions from the rubric, source and tests.
+
+Stop only for genuine blockers, unsafe/destructive operations, unavailable authoritative inputs that materially affect correctness, or irreconcilable requirements.
+
+==================================================
+11. FINAL REPORT
+==================================================
+
+After all possible work is complete, return a comprehensive report IN VIETNAMESE:
+
+I. Executive Summary
+- PA#3 completion status
+- Implemented features
+- Remaining limitations
+
+II. Git History
+- Branch
+- Final HEAD
+- All new commits and messages
+- Working-tree status
+
+III. Phase Results
+For Phase 2B/2C, 3, 4, 5 and 6:
+- Changes
+- Checks
+- Results
+- Commit hash
+
+IV. C1–C11 Coverage Matrix
+- UI
+- HTTP API
+- Mock
+- Validation
+- Tests
+- Status
+
+V. Official Rubric Assessment
+- Nine criteria
+- Max points
+- Evidence-based estimate
+- Total /100
+- Confidence and missing verification
+
+VI. Quality Gates
+- Lint
+- Frontend tests
+- Mock tests
+- Build
+- Official contract-check
+- Four modes
+- Browser tests
+- Responsive
+- W3C
+
+For every check, distinguish PASS, FAIL and NOT RUN.
+
+VII. Submission Readiness
+- Required files
+- Missing artifacts
+- Build output
+- ZIP status
+- Remaining human inputs
+
+VIII. PA#4 Handoff
+- Confirmed API contract
+- Backend rules still to implement
+- Mock behavior to replace with Express
+- Known technical risks
+
+FINAL INSTRUCTION:
+
+Start immediately at Phase 2B.
+
+Work autonomously through Phase 6.
+
+Verify before every commit.
+
+Commit only successful, reviewed work.
+
+NEVER PUSH.
+
+Do not stop after one phase unless a genuine blocker prevents safe continuation.
+`````

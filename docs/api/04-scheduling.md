@@ -1,0 +1,367 @@
+# Interview Scheduling
+
+These Executive endpoints cover C8 and C9. Generate Draft, Edit/Resolve, Save Changes, export, and Confirm are distinct actions.
+
+## Schedule View Shape
+
+The canonical `GET` schedule view contains:
+
+- `settings`: `{ interviewDate, interviewWindow, slotMinutes, roomIds }`.
+- `assignments`: Interviewer Assignment array.
+- `rooms`: available Room array.
+- `rows`: Interview array with `status`, `reasons`, and `conflictWith` arrays.
+- `summary`: `{ total, proposed, conflict, unassigned }`.
+- `conditions`: `{ code, label, met, detail }[]` confirmation conditions.
+- `status`: `none`, `draft`, or `confirmed`.
+- `dirty`, `generatedAt`, `savedAt`, `confirmedAt`, `canConfirm`, and `zeroShortlisted`.
+
+Mutation responses return the action projection shown by their example. The frontend may use that result immediately and refetch this canonical `GET` view. Empty mode sets every array in either projection to `[]` and all summary counts to zero while retaining valid settings/status scalars.
+
+## GET /api/campaigns/{campaignId}/schedule
+
+**Purpose**: Read current settings, resources, draft/confirmed rows, summary, and confirmation readiness.
+
+**Allowed roles**: Executive.
+
+**Success**: `200`. Errors: `401 INVALID_TOKEN`; `403 ROLE_FORBIDDEN`; `404 CAMPAIGN_NOT_FOUND`.
+
+```http
+GET /api/campaigns/cmp-2026-hk1/schedule HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Accept: application/json
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "settings": {
+    "interviewDate": "2026-12-02",
+    "interviewWindow": { "start": "09:00", "end": "12:00" },
+    "slotMinutes": 30,
+    "roomIds": ["room-a201", "room-b105"]
+  },
+  "assignments": [
+    {
+      "interviewerId": "iv-giahuy",
+      "interviewerName": "Gia Huy",
+      "positionIds": ["pos-content"],
+      "positionNames": ["Content"],
+      "availability": [
+        { "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T12:00:00+07:00" }
+      ],
+      "availabilityText": "09:00-12:00"
+    },
+    {
+      "interviewerId": "iv-comms",
+      "interviewerName": "Linh Tran",
+      "positionIds": ["pos-comms"],
+      "positionNames": ["Communications"],
+      "availability": [
+        { "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T12:00:00+07:00" }
+      ],
+      "availabilityText": "09:00-12:00"
+    }
+  ],
+  "rooms": [
+    { "id": "room-a201", "name": "A-201" },
+    { "id": "room-b105", "name": "B-105" }
+  ],
+  "rows": [],
+  "summary": { "total": 0, "proposed": 0, "conflict": 0, "unassigned": 0 },
+  "conditions": [
+    { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed early at 2026-11-17T10:00:00+07:00." },
+    { "code": "ALL_REVIEWED", "label": "All applications are reviewed", "met": true, "detail": "3 of 3 applications reviewed." },
+    { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": false, "detail": "Generate and save a draft." },
+    { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": false, "detail": "3 shortlisted applications need assignments." },
+    { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": false, "detail": "Generate and review a draft." }
+  ],
+  "status": "none",
+  "dirty": false,
+  "generatedAt": null,
+  "savedAt": null,
+  "confirmedAt": null,
+  "canConfirm": false,
+  "zeroShortlisted": false
+}
+```
+
+## POST /api/campaigns/{campaignId}/schedule/draft/generate
+
+**Purpose**: Replace any unconfirmed draft with the deterministic PA#3 draft for current shortlisted Applications.
+
+**Allowed roles**: Executive.
+
+**Request body**: None.
+
+**Behavior**: Only shortlisted Applications enter. PA#3 may use fixed deterministic generation; the endpoint does not claim a production first-fit optimizer. It evaluates position eligibility, Applicant and Interviewer availability, Campaign window, selected rooms, and overlaps.
+
+**Success**: `200` draft action projection with recalculated rows, summary, readiness, and timestamps. Errors: `401`; `403`; `404`; `409 APPLICATIONS_STILL_OPEN`; `409 UNREVIEWED_APPLICATIONS`; `409 SCHEDULE_CONFIRMED`; `409 NO_SHORTLISTED_APPLICATIONS`.
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/draft/generate HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Accept: application/json
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "rows": [
+    {
+      "interviewId": "int-A01",
+      "applicationId": "A01",
+      "applicantId": "ap-minhanh",
+      "applicantName": "Nguyen Minh Anh",
+      "positionId": "pos-content",
+      "positionName": "Content",
+      "start": "2026-12-02T09:00:00+07:00",
+      "end": "2026-12-02T09:30:00+07:00",
+      "interviewerId": "iv-giahuy",
+      "interviewerName": "Gia Huy",
+      "roomId": "room-a201",
+      "roomName": "A-201",
+      "status": "conflict",
+      "reasons": ["Applicant Nguyen Minh Anh overlaps with application A02."],
+      "conflictWith": ["A02"]
+    },
+    {
+      "interviewId": "int-A02",
+      "applicationId": "A02",
+      "applicantId": "ap-minhanh",
+      "applicantName": "Nguyen Minh Anh",
+      "positionId": "pos-comms",
+      "positionName": "Communications",
+      "start": "2026-12-02T09:00:00+07:00",
+      "end": "2026-12-02T09:30:00+07:00",
+      "interviewerId": "iv-comms",
+      "interviewerName": "Linh Tran",
+      "roomId": "room-b105",
+      "roomName": "B-105",
+      "status": "conflict",
+      "reasons": ["Applicant Nguyen Minh Anh overlaps with application A01."],
+      "conflictWith": ["A01"]
+    },
+    {
+      "interviewId": "int-A03",
+      "applicationId": "A03",
+      "applicantId": "ap-quocbao",
+      "applicantName": "Pham Quoc Bao",
+      "positionId": "pos-comms",
+      "positionName": "Communications",
+      "start": null,
+      "end": null,
+      "interviewerId": null,
+      "interviewerName": null,
+      "roomId": null,
+      "roomName": null,
+      "status": "unassigned",
+      "reasons": ["The deterministic draft left this application for manual assignment."],
+      "conflictWith": []
+    }
+  ],
+  "summary": { "total": 3, "proposed": 0, "conflict": 2, "unassigned": 1 },
+  "status": "draft",
+  "dirty": true,
+  "generatedAt": "2026-11-17T10:20:00+07:00",
+  "savedAt": null,
+  "confirmedAt": null,
+  "canConfirm": false,
+  "zeroShortlisted": false,
+  "conditions": [
+    { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed." },
+    { "code": "ALL_REVIEWED", "label": "All applications are reviewed", "met": true, "detail": "3 of 3 applications reviewed." },
+    { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": false, "detail": "Unsaved generated draft." },
+    { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": false, "detail": "A03 is unassigned." },
+    { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": false, "detail": "A01 and A02 conflict." }
+  ]
+}
+```
+
+## PATCH /api/campaigns/{campaignId}/schedule/draft/rows/{applicationId}
+
+**Purpose**: Edit or resolve one draft row, then recalculate every row affected by Applicant, Interviewer, and Room conflicts.
+
+**Allowed roles**: Executive.
+
+| Request field | Type | Rules |
+| --- | --- | --- |
+| `start` | timestamp | Required; aligned to duration within Campaign window and Applicant/Interviewer availability. |
+| `interviewerId` | string | Required; Interviewer is eligible for the Position. |
+| `roomId` | string | Required selected Campaign Room. |
+
+All three fields are required for a manual assignment. **Success**: `200` draft action projection with all recalculated rows and `dirty: true`. Errors: `400 VALIDATION_ERROR` with field keys; `401`; `403`; `404 APPLICATION_NOT_FOUND`; `409 NO_DRAFT`; `409 APPLICATION_NOT_SHORTLISTED`; `409 SCHEDULE_CONFIRMED`.
+
+```http
+PATCH /api/campaigns/cmp-2026-hk1/schedule/draft/rows/A02 HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "start": "2026-12-02T09:30:00+07:00",
+  "interviewerId": "iv-comms",
+  "roomId": "room-b105"
+}
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "rows": [
+    { "applicationId": "A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "interviewerId": "iv-giahuy", "roomId": "room-a201", "status": "proposed", "reasons": [], "conflictWith": [] },
+    { "applicationId": "A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [] },
+    { "applicationId": "A03", "start": null, "end": null, "interviewerId": null, "roomId": null, "status": "unassigned", "reasons": ["The deterministic draft left this application for manual assignment."], "conflictWith": [] }
+  ],
+  "summary": { "total": 3, "proposed": 2, "conflict": 0, "unassigned": 1 },
+  "status": "draft",
+  "dirty": true,
+  "canConfirm": false
+}
+```
+
+```http
+PATCH /api/campaigns/cmp-2026-hk1/schedule/draft/rows/A03 HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "start": "2026-12-02T10:00:00+07:00",
+  "interviewerId": "iv-comms",
+  "roomId": "room-b105"
+}
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "rows": [
+    { "applicationId": "A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "interviewerId": "iv-giahuy", "roomId": "room-a201", "status": "proposed", "reasons": [], "conflictWith": [] },
+    { "applicationId": "A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [] },
+    { "applicationId": "A03", "start": "2026-12-02T10:00:00+07:00", "end": "2026-12-02T10:30:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [] }
+  ],
+  "summary": { "total": 3, "proposed": 3, "conflict": 0, "unassigned": 0 },
+  "status": "draft",
+  "dirty": true,
+  "canConfirm": false
+}
+```
+
+## POST /api/campaigns/{campaignId}/schedule/draft/save
+
+**Purpose**: Persist the current staged draft in mock process state by clearing `dirty` and setting `savedAt`. It does not confirm or notify anyone.
+
+**Allowed roles**: Executive.
+
+**Request body**: None.
+
+**Success**: `200` saved-draft action projection. Errors: `401`; `403`; `404`; `409 NO_DRAFT`; `409 SCHEDULE_CONFIRMED`.
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/draft/save HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Accept: application/json
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "draft",
+  "dirty": false,
+  "savedAt": "2026-11-17T10:30:00+07:00",
+  "summary": { "total": 3, "proposed": 3, "conflict": 0, "unassigned": 0 },
+  "canConfirm": true,
+  "conditions": [
+    { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed." },
+    { "code": "ALL_REVIEWED", "label": "All applications are reviewed", "met": true, "detail": "3 of 3 applications reviewed." },
+    { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": true, "detail": "Saved." },
+    { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": true, "detail": "3 of 3 assigned." },
+    { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": true, "detail": "No conflicts." }
+  ],
+  "rows": [
+    { "applicationId": "A01", "status": "proposed", "reasons": [], "conflictWith": [] },
+    { "applicationId": "A02", "status": "proposed", "reasons": [], "conflictWith": [] },
+    { "applicationId": "A03", "status": "proposed", "reasons": [], "conflictWith": [] }
+  ]
+}
+```
+
+## GET /api/campaigns/{campaignId}/schedule.csv
+
+**Purpose**: Export current draft or confirmed timetable without private notes, CV content, or assessments.
+
+**Allowed roles**: Executive.
+
+**Success**: `200 text/csv; charset=utf-8`; no rows produces the header only. Errors: `401`; `403`; `404`; `409 NO_SCHEDULE`.
+
+```http
+GET /api/campaigns/cmp-2026-hk1/schedule.csv HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Accept: text/csv
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: text/csv; charset=utf-8
+Content-Disposition: attachment; filename="clubflow-schedule.csv"
+
+Application ID,Applicant,Position,Start,End,Interviewer,Room,Status
+A01,Nguyen Minh Anh,Content,2026-12-02T09:00:00+07:00,2026-12-02T09:30:00+07:00,Gia Huy,A-201,proposed
+A02,Nguyen Minh Anh,Communications,2026-12-02T09:30:00+07:00,2026-12-02T10:00:00+07:00,Linh Tran,B-105,proposed
+A03,Pham Quoc Bao,Communications,2026-12-02T10:00:00+07:00,2026-12-02T10:30:00+07:00,Linh Tran,B-105,proposed
+```
+
+## POST /api/campaigns/{campaignId}/schedule/confirm
+
+**Purpose**: Atomically validate and confirm the saved schedule. Confirmation locks Campaign, setup, screening, and schedule records and makes own/assigned interviews visible.
+
+**Allowed roles**: Executive.
+
+**Request body**: None.
+
+**Success**: `200` confirmation action projection with every row `confirmed`. Errors: `401`; `403`; `404`; `409 SCHEDULE_NOT_READY` with `details.conditions`; `409 SCHEDULE_ALREADY_CONFIRMED`.
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/confirm HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Accept: application/json
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "confirmed",
+  "dirty": false,
+  "confirmedAt": "2026-11-17T10:40:00+07:00",
+  "summary": { "total": 3, "proposed": 0, "conflict": 0, "unassigned": 0 },
+  "canConfirm": false,
+  "conditions": [
+    { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed." },
+    { "code": "ALL_REVIEWED", "label": "All applications are reviewed", "met": true, "detail": "3 of 3 applications reviewed." },
+    { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": true, "detail": "Saved." },
+    { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": true, "detail": "3 of 3 assigned." },
+    { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": true, "detail": "No conflicts." }
+  ],
+  "rows": [
+    { "interviewId": "int-A01", "applicationId": "A01", "status": "confirmed", "reasons": [], "conflictWith": [] },
+    { "interviewId": "int-A02", "applicationId": "A02", "status": "confirmed", "reasons": [], "conflictWith": [] },
+    { "interviewId": "int-A03", "applicationId": "A03", "status": "confirmed", "reasons": [], "conflictWith": [] }
+  ]
+}
+```
+
+## Changes
+
+- 2026-11-18: Defined complete schedule DTOs, deterministic Conflict/Unassigned generation, recalculated row edits, meaningful dirty/save semantics, CSV, readiness conditions, refusal behavior, confirmation, and locks.

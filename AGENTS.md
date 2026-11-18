@@ -185,3 +185,9 @@ A task is complete only when:
 AI-assisted specification, planning, task generation, implementation, review, or code generation MUST be recorded in `AI-LOG.md`.
 
 AI-generated or AI-modified code MUST be reviewed and understood by the team before it is considered complete.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at specs/002-pa3-http-integration/plan.md
+<!-- SPECKIT END -->
