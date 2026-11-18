@@ -5,7 +5,7 @@ import { expect } from 'vitest';
 import { DemoSessionProvider } from '../../contexts/DemoSessionContext.jsx';
 import AppRoutes from '../../routes/AppRoutes.jsx';
 import { DEMO_CREDENTIALS } from '../../services/authService.js';
-import { setMockApiScenario } from './mockApi.js';
+import { sessionUserFor, setMockApiScenario } from './mockApi.js';
 import { restoreDemoState } from '../../services/demoSessionService.js';
 
 export const EXECUTIVE = 'exec-recruitment';
@@ -19,12 +19,12 @@ export function renderApp(path = '/', { accountId, scenarioId } = {}) {
   restoreDemoState({ accountId, scenarioId });
   const credential = DEMO_CREDENTIALS.find((item) => item.id === accountId);
   if (credential) {
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-token-${credential.username}`, scenarioId }));
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-token-${credential.username}`, scenarioId, user: sessionUserFor(accountId) }));
   } else if (accountId) {
     // Legacy fixture identities remain available only to domain-screen tests
     // while those screens are migrated in later phases. Product sign-in never
     // accepts these test-only tokens.
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-test-token-${accountId}`, scenarioId }));
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-test-token-${accountId}`, scenarioId, user: sessionUserFor(accountId) }));
   }
   // StrictMode as in main.jsx, so effects run twice like in development.
   return render(

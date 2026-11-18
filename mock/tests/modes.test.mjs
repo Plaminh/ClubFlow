@@ -13,9 +13,15 @@ describe('deterministic mock modes and lifecycle', () => {
     await mock.close();
 
     mock = await startMock('error');
-    expect(await login(mock.baseUrl, 'exec')).toBe('mock-token-exec');
+    const errorToken = await login(mock.baseUrl, 'exec');
+    expect(errorToken).toBe('mock-token-exec');
     const domainError = await request(mock.baseUrl, '/api/campaigns/current');
+    expect(domainError.response.status).toBe(500);
     expect(domainError.body).toEqual({ error: 'The mock is running in deterministic error mode.', code: 'MOCK_ERROR_MODE' });
+    // Only sign-in is exempt: health, current user and logout fail too.
+    expect((await request(mock.baseUrl, '/api/health')).response.status).toBe(500);
+    expect((await request(mock.baseUrl, '/api/auth/me', { headers: bearer(errorToken) })).response.status).toBe(500);
+    expect((await request(mock.baseUrl, '/api/auth/logout', { method: 'POST', headers: bearer(errorToken) })).response.status).toBe(500);
     await mock.close();
 
     mock = await startMock('empty');
@@ -24,6 +30,15 @@ describe('deterministic mock modes and lifecycle', () => {
     expect(campaign.body.positions).toEqual([]);
     expect(campaign.body.interviewSetup.interviewers).toEqual([]);
     expect(campaign.body.campaign.id).toBe('cmp-2026-hk1');
+  });
+
+  it('adds roughly 150 ms of latency in normal mode by default', async () => {
+    mock = await startMock('normal', { normalDelayMs: undefined });
+    const started = performance.now();
+    await request(mock.baseUrl, '/api/health');
+    const elapsed = performance.now() - started;
+    expect(elapsed).toBeGreaterThanOrEqual(140);
+    expect(elapsed).toBeLessThan(1000);
   });
 
   it('records structured requests and resets mutable state without changing tokens', async () => {

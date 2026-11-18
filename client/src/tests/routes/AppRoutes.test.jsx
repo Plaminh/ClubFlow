@@ -1,7 +1,8 @@
-import { screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ROUTES } from '../../routes/paths.js';
 import { getHealth } from '../../services/healthService.js';
+import { setMockApiMode } from '../helpers/mockApi.js';
 import { EXECUTIVE, renderApp, submitSignIn } from '../helpers/renderApp.jsx';
 
 describe('AppRoutes', () => {
@@ -81,6 +82,20 @@ describe('AppRoutes', () => {
 
     await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
     expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBeNull();
+  });
+
+  it('keeps a saved session through a server error on reload and shows Retry instead of signing out', async () => {
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: 'invalid-token', user: { id: 'x', role: 'executive' } }));
+    renderApp(ROUTES.PROFILE);
+    // 401 still ends a session even when a user snapshot exists.
+    await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
+    cleanup();
+
+    setMockApiMode('error');
+    renderApp(ROUTES.EXECUTIVE_CAMPAIGN, { accountId: EXECUTIVE, scenarioId: 'draft' });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Thử lại/ })).toBeInTheDocument();
+    expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBe('mock-token-exec');
   });
 
   it('shows the API error state when the health check fails', async () => {

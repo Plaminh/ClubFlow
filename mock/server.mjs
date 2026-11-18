@@ -31,6 +31,7 @@ export function createMockServer(options = {}) {
   const mode = options.mode ?? process.env.MOCK_MODE ?? 'normal';
   if (!VALID_MODES.has(mode)) throw new Error(`Invalid MOCK_MODE "${mode}". Expected normal, slow, error, or empty.`);
   const slowDelayMs = options.slowDelayMs ?? 2000;
+  const normalDelayMs = options.normalDelayMs ?? 150;
   const state = options.state ?? createState();
   const logger = options.logger ?? console;
   const logs = [];
@@ -41,10 +42,12 @@ export function createMockServer(options = {}) {
     try {
       request = await toRequest(incoming, `http://${incoming.headers.host ?? 'localhost'}`);
       const pathname = new URL(request.url).pathname;
-      if (mode === 'slow') await delay(slowDelayMs);
+      await delay(mode === 'slow' ? slowDelayMs : normalDelayMs);
+      const isSignIn = request.method === 'POST' && pathname === '/api/auth/login';
       if (request.method === 'OPTIONS') {
         response = new Response(null, { status: 204 });
-      } else if (mode === 'error' && pathname !== '/api/health' && !pathname.startsWith('/api/auth/')) {
+      } else if (mode === 'error' && !isSignIn) {
+        // Brief: error mode returns 500 for every request except sign-in.
         response = json(500, { error: 'The mock is running in deterministic error mode.', code: 'MOCK_ERROR_MODE' });
       } else {
         response = await routeRequest({ request, state });

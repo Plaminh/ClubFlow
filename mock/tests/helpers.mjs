@@ -3,7 +3,8 @@ import { createMockServer } from '../server.mjs';
 export const silentLogger = { info() {} };
 
 export async function startMock(mode = 'normal', options = {}) {
-  const mock = createMockServer({ mode, logger: silentLogger, ...options });
+  // Tests skip the ~150 ms normal latency unless they measure it explicitly.
+  const mock = createMockServer({ mode, logger: silentLogger, normalDelayMs: 0, ...options });
   const baseUrl = await mock.listen();
   return { ...mock, baseUrl };
 }

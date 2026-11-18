@@ -169,7 +169,7 @@ describe('Campaign Management', () => {
   it('shows a retryable HTTP error and recovers without leaving the route', async () => {
     setMockApiMode('error');
     renderApp(PATH, { accountId: EXECUTIVE, scenarioId: 'draft' });
-    expect(await screen.findByText('The mock service is unavailable.')).toBeInTheDocument();
+    expect(await screen.findByText('The mock is running in deterministic error mode.')).toBeInTheDocument();
 
     setMockApiMode('normal');
     fireEvent.click(screen.getByRole('button', { name: /Thử lại/ }));

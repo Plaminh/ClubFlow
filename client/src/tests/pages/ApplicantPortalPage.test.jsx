@@ -169,7 +169,7 @@ describe('Applicant Portal', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Chưa thể đánh dấu đã đọc');
-    expect(alert).toHaveTextContent('The mock service is unavailable.');
+    expect(alert).toHaveTextContent('The mock is running in deterministic error mode.');
     expect(screen.getByText('Mới')).toBeInTheDocument();
   });
 
@@ -187,7 +187,7 @@ describe('Applicant Portal', () => {
   it('shows retryable HTTP errors and recovers in place', async () => {
     setMockApiMode('error');
     renderApp('/', { scenarioId: 'accepting' });
-    expect(await screen.findByText('The mock service is unavailable.')).toBeInTheDocument();
+    expect(await screen.findByText('The mock is running in deterministic error mode.')).toBeInTheDocument();
     setMockApiMode('normal');
     fireEvent.click(screen.getByRole('button', { name: /Thử lại/ }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();

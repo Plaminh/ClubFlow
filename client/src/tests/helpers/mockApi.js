@@ -29,6 +29,11 @@ export function setMockApiScenario(scenarioId) {
   campaignState = buildScenarioState(scenarioId);
 }
 
+/** The user a real sign-in would have saved for this demo account id. */
+export function sessionUserFor(accountId) {
+  return users.find((user) => user.id === accountId) ?? legacyUsers.find((user) => user.id === accountId) ?? null;
+}
+
 export function setMockApiMode(nextMode) {
   mode = nextMode;
 }
@@ -223,6 +228,10 @@ async function handleFetch(input, init = {}) {
   if (mode === 'network-error') throw new TypeError('Failed to fetch');
   const url = new URL(String(input), 'http://clubflow.test');
   const method = init.method ?? 'GET';
+  // Brief: error mode returns 500 for every request except sign-in.
+  if (mode === 'error' && !(url.pathname === '/api/auth/login' && method === 'POST')) {
+    return response(500, { error: 'The mock is running in deterministic error mode.', code: 'MOCK_ERROR_MODE' });
+  }
   if (url.pathname === '/api/health') return response(200, { status: 'ok' });
   if (url.pathname === '/api/auth/login' && method === 'POST') {
     const body = JSON.parse(init.body ?? '{}');
@@ -231,7 +240,6 @@ async function handleFetch(input, init = {}) {
     return response(200, { token: `mock-token-${user.handle}`, user });
   }
   if (url.pathname === '/api/campaigns/current' && method === 'GET') {
-    if (mode === 'error') return response(503, { error: 'The mock service is unavailable.', code: 'MOCK_ERROR' });
     const view = publicCampaignView();
     return view ? response(200, view) : response(404, { error: 'No published campaign is available.', code: 'NO_PUBLIC_CAMPAIGN' });
   }
@@ -255,7 +263,6 @@ async function handleFetch(input, init = {}) {
     const { handle: _handle, description: _description, ...profile } = user;
     return response(200, profile);
   }
-  if (mode === 'error') return response(503, { error: 'The mock service is unavailable.', code: 'MOCK_ERROR' });
   if (url.pathname === '/api/applications' && method === 'POST') {
     if (user.role !== 'applicant') return response(403, { error: 'Applicant role required.', code: 'ROLE_FORBIDDEN' });
     const form = init.body;

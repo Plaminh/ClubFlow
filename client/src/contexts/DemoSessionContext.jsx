@@ -26,7 +26,9 @@ export function DemoSessionProvider({ children }) {
   const [initial] = useState(() => {
     const saved = readSaved();
     demoSessionService.restoreDemoState({ scenarioId: saved.scenarioId });
-    return { ...demoSessionService.getDemoState(), token: typeof saved.token === 'string' ? saved.token : null };
+    const token = typeof saved.token === 'string' ? saved.token : null;
+    const user = token && saved.user && typeof saved.user.id === 'string' ? saved.user : null;
+    return { ...demoSessionService.getDemoState(), token, user };
   });
   const [status, setStatus] = useState(initial.token ? 'loading' : 'ready');
   const [account, setAccount] = useState(null);
@@ -70,6 +72,14 @@ export function DemoSessionProvider({ children }) {
       },
       (error) => {
         if (!active || error?.name === 'AbortError') return;
+        // Only an invalid token ends the session. A server error (e.g. mock
+        // error mode) keeps the saved identity so each screen can show its own
+        // Error + Retry; the API still authorizes every request.
+        if (error?.details?.status !== 401 && initial.user) {
+          applyIdentity(initial.user);
+          setStatus('ready');
+          return;
+        }
         clearSession();
       },
     );
@@ -77,11 +87,11 @@ export function DemoSessionProvider({ children }) {
       active = false;
       controller.abort();
     };
-  }, [applyIdentity, clearSession, initial.token]);
+  }, [applyIdentity, clearSession, initial.token, initial.user]);
 
   useEffect(() => {
-    save({ token, scenarioId });
-  }, [token, scenarioId]);
+    save({ token, scenarioId, user: token && account ? account : null });
+  }, [token, scenarioId, account]);
 
   const signIn = useCallback(async (credentials) => {
     const session = await authService.signIn(credentials);
