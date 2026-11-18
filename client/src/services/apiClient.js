@@ -63,7 +63,8 @@ export async function apiClient(path, { method = 'GET', query, body, headers = {
     throw new UiError('network', 'Không kết nối được tới máy chủ. Vui lòng thử lại.');
   }
 
-  const data = await readBody(response, responseType);
+  // Error bodies are JSON even for blob/text downloads, so read them as such.
+  const data = await readBody(response, response.ok ? responseType : 'auto');
   if (!response.ok) {
     const kind = STATUS_KINDS[response.status] ?? 'unknown';
     const message = (data && typeof data === 'object' && (data.error || data.message)) || DEFAULT_MESSAGES[kind];

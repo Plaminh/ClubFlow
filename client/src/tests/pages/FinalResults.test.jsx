@@ -1,7 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import * as demoSessionService from '../../services/demoSessionService.js';
-import { getState } from '../../mocks/store.js';
+import { getMockApiState } from '../helpers/mockApi.js';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
 
 const PATH = '/executive/review?tab=results';
@@ -89,20 +88,21 @@ describe('Application Review — Final Results', () => {
     await openResults();
     fireEvent.click(await screen.findByRole('button', { name: 'Mở CF-027 · Nguyễn Minh Anh' }));
     fireEvent.click(screen.getByRole('button', { name: 'Record Pass' }));
-    expect(await screen.findByText('Đã ghi nhận Pass cho CF-027 (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã ghi nhận Pass cho CF-027')).toBeInTheDocument();
     expect(await screen.findByText(/1 kết quả đã ghi nhận nhưng chưa công bố \(CF-027\)/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Publish Results' }));
     const dialog = await screen.findByRole('dialog', { name: 'Công bố kết quả?' });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Publish Results' }));
 
-    expect(await screen.findByText('Đã công bố CF-027 (mô phỏng)')).toBeInTheDocument();
-    expect(screen.getByText(/Bản mô phỏng không gửi email thật; backend sau này gửi một mẫu email kết quả chung qua Brevo/)).toBeInTheDocument();
+    expect(await screen.findByText('Đã công bố CF-027')).toBeInTheDocument();
+    expect(screen.queryByText(/mô phỏng/)).not.toBeInTheDocument();
     expect(await screen.findByText('Không có kết quả nào đang chờ công bố.')).toBeInTheDocument();
 
-    await demoSessionService.signIn('ap-minhanh');
-    const notifications = getState().notifications.filter((item) => item.accountId === 'ap-minhanh');
-    expect(notifications.map((item) => item.applicationId).sort()).toEqual(['CF-026', 'CF-027']);
+    // Notifications are created server-side, once per published application, only for its applicant.
+    const notifications = getMockApiState().notifications;
+    expect(notifications.filter((item) => item.applicationId === 'CF-027').map((item) => item.accountId)).toEqual(['ap-minhanh']);
+    expect(getMockApiState().results.find((item) => item.applicationId === 'CF-027')).toMatchObject({ decision: 'pass', publishedAt: expect.any(String) });
   });
 
   it('explains that results start after schedule confirmation', async () => {

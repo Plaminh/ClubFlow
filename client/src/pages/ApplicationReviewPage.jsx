@@ -308,7 +308,7 @@ function ResultsPanel() {
     if (result.ok) {
       setDecisionMessage({
         tone: 'success',
-        title: `Đã ghi nhận ${decision === 'pass' ? 'Pass' : 'Fail'} cho ${id} (mô phỏng)`,
+        title: `Đã ghi nhận ${decision === 'pass' ? 'Pass' : 'Fail'} cho ${id}`,
         text: 'Kết quả chưa hiển thị cho ứng viên cho đến khi được công bố.',
       });
       results.reload();
@@ -321,12 +321,16 @@ function ResultsPanel() {
     const result = await action.run(() => resultActions.publishRecorded());
     setPublishOpen(false);
     if (result.ok) {
-      setPublishMessage({
-        tone: 'success',
-        title: `Đã công bố ${result.value.publishedIds.join(', ')} (mô phỏng)`,
-        text:
-          'Mỗi hồ sơ tạo một thông báo trong ứng dụng. Bản mô phỏng không gửi email thật; backend sau này gửi một mẫu email kết quả chung qua Brevo. Không có SMS hay push.',
-      });
+      const ids = result.value?.publishedIds ?? [];
+      setPublishMessage(
+        ids.length
+          ? {
+              tone: 'success',
+              title: `Đã công bố ${ids.join(', ')}`,
+              text: 'Mỗi hồ sơ được công bố tạo một thông báo trong ứng dụng cho đúng ứng viên. HTTP mock không gửi email; không có SMS hay push.',
+            }
+          : { tone: 'info', title: 'Không có kết quả mới để công bố', text: 'Các kết quả đã công bố trước đó không bị gửi thông báo lần hai.' },
+      );
       results.reload();
     } else {
       setPublishMessage({ tone: 'error', title: 'Chưa công bố được kết quả', text: result.error?.message });

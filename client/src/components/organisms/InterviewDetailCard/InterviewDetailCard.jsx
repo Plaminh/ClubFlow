@@ -7,7 +7,7 @@ import { formatDate, formatTimeRange } from '../../../utils/format.js';
  * Read-only application details for the assigned interviewer. Executive-only
  * screening notes are never part of this data.
  */
-export default function InterviewDetailCard({ interview }) {
+export default function InterviewDetailCard({ interview, onOpenCv, cvPending = false }) {
   return (
     <Card
       as="article"
@@ -41,12 +41,11 @@ export default function InterviewDetailCard({ interview }) {
         </div>
         <div>
           <p className="section-kicker">CV</p>
-          <Button variant="secondary" href={interview.cv.url} target="_blank" rel="noreferrer">
-            Mở CV mẫu hư cấu (PDF)
+          <Button variant="secondary" onClick={onOpenCv} disabled={cvPending}>
+            Mở CV (PDF)
           </Button>
           <p className="hint">
-            {interview.cv.fileName} · mẫu hư cấu dùng chung cho bản demo. Bản triển khai chỉ cấp quyền xem CV cho người
-            phỏng vấn được phân công.
+            {interview.cv.fileName} · chỉ người phỏng vấn được phân công mới được tải CV này.
           </p>
         </div>
       </div>

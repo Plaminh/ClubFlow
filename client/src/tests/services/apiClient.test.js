@@ -57,6 +57,15 @@ describe('apiClient', () => {
     await expect(apiClient('/auth/logout', { method: 'POST' })).resolves.toBeNull();
   });
 
+  it('reads JSON error bodies for blob downloads (e.g. a forbidden CV)', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(403, { error: 'You cannot access this CV.', code: 'CV_FORBIDDEN' }));
+    await expect(apiDownload('/applications/A02/cv')).rejects.toMatchObject({
+      kind: 'forbidden',
+      code: 'CV_FORBIDDEN',
+      message: 'You cannot access this CV.',
+    });
+  });
+
   it('preserves structured error code, fields, details, and status', async () => {
     fetchMock.mockResolvedValue(jsonResponse(409, {
       error: 'Duplicate.',

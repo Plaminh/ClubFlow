@@ -60,12 +60,23 @@ export default function InterviewerWorkspacePage() {
 
   const done = interviews.filter((item) => item.assessmentStatus === 'submitted').length;
 
+  async function openCv(applicationId) {
+    const result = await action.run(() => interviewerActions.downloadCv(applicationId));
+    if (!result.ok) {
+      setMessage({ tone: 'error', title: 'Chưa mở được CV', text: result.error?.message });
+      return;
+    }
+    const url = URL.createObjectURL(result.value);
+    window.open(url, '_blank', 'noopener,noreferrer');
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
   async function submitAssessment(id, values) {
     const result = await action.run(() => interviewerActions.submitAssessment(id, values));
     if (result.ok) {
       setMessage({
         tone: 'success',
-        title: 'Đã gửi đánh giá (mô phỏng)',
+        title: 'Đã gửi đánh giá',
         text: 'Mỗi buổi phỏng vấn chỉ có một đánh giá. Quyết định Pass/Fail do Ban tuyển dụng ghi nhận ở màn hình Application Review, không phải ở đây.',
       });
       assigned.reload();
@@ -100,7 +111,7 @@ export default function InterviewerWorkspacePage() {
               }}
             />
             <p className="hint">
-              Bạn chỉ thấy các buổi được phân công cho mình. Quyền truy cập thật sẽ do backend thực thi.
+              Bạn chỉ thấy các buổi được phân công cho mình; máy chủ từ chối truy cập buổi phỏng vấn của người khác.
             </p>
           </div>
         </Card>
@@ -113,7 +124,11 @@ export default function InterviewerWorkspacePage() {
 
         {current ? (
           <div className="two-column">
-            <InterviewDetailCard interview={current} />
+            <InterviewDetailCard
+              interview={current}
+              onOpenCv={() => openCv(current.applicationId)}
+              cvPending={action.pending}
+            />
             <AssessmentForm key={current.interviewId} interview={current} onSubmit={submitAssessment} />
           </div>
         ) : (

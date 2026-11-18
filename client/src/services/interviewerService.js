@@ -1,118 +1,57 @@
 /*
- * Interviewer Workspace service. Demo implementation.
- * An interviewer sees only their own CONFIRMED interviews and never the
- * Executive's private screening notes (ROLES_AND_PERMISSIONS §3).
+ * Interviewer Workspace service (C10) over the documented HTTP contract
+ * (docs/api/05-interviewer.md). The server scopes every response to the
+ * signed-in interviewer's confirmed assignments and omits Executive-only
+ * screening notes; this adapter only maps DTOs to the UI view model.
  */
-import { accountName, isScheduleConfirmed, positionById, roomName, toMs } from '../mocks/derive.js';
-import { SAMPLE_CV_URL } from '../mocks/fixtures.js';
-import { requireRole } from '../mocks/guards.js';
-import { clone, getState, mockRequest } from '../mocks/store.js';
-import { validateAssessmentInput } from '../utils/validation.js';
-import { createUiError } from './uiError.js';
+import { apiClient, apiDownload } from './apiClient.js';
+import { PRIMARY_CAMPAIGN_ID } from './campaignService.js';
 
-function timingOf(state, interview) {
-  const now = toMs(state.now);
-  if (now < toMs(interview.start)) {
-    return 'upcoming';
-  }
-  return now < toMs(interview.end) ? 'inProgress' : 'completed';
+function timingOf(interview) {
+  return interview.completed ? 'completed' : 'upcoming';
 }
 
-function summaryOf(state, interview) {
-  const application = state.applications.find((item) => item.id === interview.applicationId);
-  const assessment = state.assessments.find((item) => item.interviewId === interview.id) ?? null;
-  const timing = timingOf(state, interview);
+function summaryOf(interview, submitted) {
+  const timing = timingOf(interview);
   return {
-    interviewId: interview.id,
-    applicationId: application.id,
-    applicantName: accountName(application.applicantId),
-    positionName: positionById(state, application.positionId)?.name ?? '—',
-    start: interview.start,
-    end: interview.end,
-    roomName: roomName(state, interview.roomId),
+    ...interview,
     timing,
-    assessmentStatus: assessment ? 'submitted' : 'awaiting',
-    canAssess: timing === 'completed' && !assessment,
+    assessmentStatus: submitted ? 'submitted' : 'awaiting',
+    canAssess: timing === 'completed' && !submitted,
   };
 }
 
-function myInterviews(state, account) {
-  if (!isScheduleConfirmed(state)) {
-    return [];
-  }
-  return state.interviews
-    .filter((interview) => interview.interviewerId === account.id && interview.start)
-    .sort((a, b) => a.start.localeCompare(b.start));
+export async function listAssignedInterviews(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  const view = await apiClient('/me/interviews', { ...options, query: { campaignId } });
+  return {
+    ...view,
+    interviews: (view.interviews ?? []).map((item) => summaryOf(item, Boolean(item.assessmentSubmitted))),
+  };
 }
 
-export async function listAssignedInterviews() {
-  await mockRequest();
-  const account = requireRole('interviewer');
-  const state = getState();
-  return clone({
-    scheduleConfirmed: isScheduleConfirmed(state),
-    // Minimal campaign context: interviewers may not call the Executive-only getCampaign().
-    campaignName: state.campaign.name,
-    interviewDate: state.campaign.interviewDate,
-    interviews: myInterviews(state, account).map((interview) => summaryOf(state, interview)),
-  });
+export async function getInterview(interviewId, options = {}) {
+  const detail = await apiClient(`/interviews/${encodeURIComponent(interviewId)}`, options);
+  return {
+    ...summaryOf(detail, Boolean(detail.assessment)),
+    faculty: detail.student?.faculty ?? '—',
+    year: detail.student?.year ?? '—',
+  };
 }
 
-function findMine(state, account, interviewId) {
-  const interview = myInterviews(state, account).find((item) => item.id === interviewId);
-  if (!interview) {
-    throw createUiError('forbidden', 'Buổi phỏng vấn này không được phân công cho bạn.');
-  }
-  return interview;
-}
-
-export async function getInterview(interviewId) {
-  await mockRequest();
-  const account = requireRole('interviewer');
-  const state = getState();
-  const interview = findMine(state, account, interviewId);
-  const application = state.applications.find((item) => item.id === interview.applicationId);
-  const assessment = state.assessments.find((item) => item.interviewId === interview.id) ?? null;
-  // No privateNote here: screening notes are Executive-only.
-  return clone({
-    ...summaryOf(state, interview),
-    faculty: application.studentInfo.faculty,
-    year: application.studentInfo.year,
-    sop: application.sop,
-    cv: { ...application.cv, url: SAMPLE_CV_URL },
-    assessment,
-  });
+/** Authorized CV download: the bearer token is sent, so a plain link cannot be used. */
+export function downloadCv(applicationId, options = {}) {
+  return apiDownload(`/applications/${encodeURIComponent(applicationId)}/cv`, options);
 }
 
 /**
- * One assessment per completed, assigned interview (team-selected Q-04):
- * required notes plus an optional advisory recommendation ('pass' | 'fail' |
- * null). It never creates or changes the final result; the Executive records
- * Pass/Fail separately (resultService.record).
+ * One immutable assessment per completed, assigned interview (Q-04): required
+ * notes plus an optional advisory recommendation. It never creates a final
+ * result; the Executive records Pass/Fail separately.
  */
-export async function submitAssessment(interviewId, { recommendation, notes }) {
-  await mockRequest();
-  const account = requireRole('interviewer');
-  const state = getState();
-  const interview = findMine(state, account, interviewId);
-  if (timingOf(state, interview) !== 'completed') {
-    throw createUiError('conflict', 'Buổi phỏng vấn chưa diễn ra xong nên chưa thể đánh giá.');
-  }
-  if (state.assessments.some((item) => item.interviewId === interviewId)) {
-    throw createUiError('conflict', 'Buổi phỏng vấn này đã có đánh giá; không thể gửi lần hai.');
-  }
-  const fieldErrors = validateAssessmentInput({ recommendation, notes });
-  if (Object.keys(fieldErrors).length > 0) {
-    throw createUiError('validation', 'Chưa thể gửi đánh giá. Hãy nhập nhận xét phỏng vấn.', { fieldErrors });
-  }
-  const assessment = {
-    id: `as-${interview.applicationId.toLowerCase()}`,
-    interviewId,
-    interviewerId: account.id,
-    recommendation: recommendation || null,
-    notes: notes.trim(),
-    submittedAt: state.now,
-  };
-  state.assessments.push(assessment);
-  return clone(assessment);
+export function submitAssessment(interviewId, { recommendation, notes }, options = {}) {
+  return apiClient(`/interviews/${encodeURIComponent(interviewId)}/assessment`, {
+    ...options,
+    method: 'POST',
+    body: { notes, recommendation: recommendation || null },
+  });
 }

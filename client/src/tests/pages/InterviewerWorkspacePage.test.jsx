@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { getState } from '../../mocks/store.js';
+import { getMockApiState, setMockApiClock } from '../helpers/mockApi.js';
 import { renderApp } from '../helpers/renderApp.jsx';
 
 const PATH = '/interviewer';
@@ -101,8 +101,11 @@ describe('Interviewer Workspace', () => {
     dialog = await screen.findByRole('dialog', { name: 'Gửi đánh giá cho CF-030?' });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Gửi đánh giá' }));
 
-    expect(await screen.findByText('Đã gửi đánh giá (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã gửi đánh giá', { selector: 'strong, p, h2, h3, span' })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Submit Assessment' })).toBeDisabled());
+    // The assessment was persisted by the HTTP API, not by browser state.
+    expect(getMockApiState().assessments.find((item) => item.interviewId === getMockApiState().interviews.find((iv) => iv.applicationId === 'CF-030').id))
+      .toMatchObject({ notes: 'Tư duy thiết kế tốt.', recommendation: 'fail', interviewerId: 'iv-hamy' });
     expect(screen.getByText('Tư duy thiết kế tốt.')).toBeInTheDocument();
     expect(screen.getByText('Đề xuất của bạn · chỉ để tham khảo').nextSibling).toHaveTextContent('Đề xuất Fail');
   });
@@ -116,7 +119,6 @@ describe('Interviewer Workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit Assessment' }));
     fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Gửi đánh giá' }));
 
-    expect(await screen.findByText('Đã gửi đánh giá (mô phỏng)')).toBeInTheDocument();
     await waitFor(() =>
       expect(screen.getByText('Đề xuất của bạn · chỉ để tham khảo').nextSibling).toHaveTextContent('Không nêu đề xuất'),
     );
@@ -141,7 +143,7 @@ describe('Interviewer Workspace', () => {
 
   it('keeps the form locked for an interview that has not happened yet', async () => {
     renderApp(PATH, { accountId: 'iv-giahuy', scenarioId: 'confirmed' });
-    getState().now = '2026-11-05T02:10:00.000Z';
+    setMockApiClock('2026-11-05T02:10:00.000Z');
     await screen.findByRole('heading', { level: 2, name: /Assigned Interviews/ });
 
     expect(rowIds()).toEqual(['CF-031', 'CF-027']);

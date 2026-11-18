@@ -1,129 +1,61 @@
 /*
- * Final results service (Executive, Final Results tab). Demo implementation.
- * Pass/Fail is per application and separate from screening and scheduling (BR-08).
+ * Final results service (C11) over the documented HTTP contract
+ * (docs/api/06-results-notifications.md). Pass/Fail is recorded per
+ * application, separate from screening and scheduling (BR-08).
+ *
+ * Result rows do not carry interview time/room/interviewer, so they are joined
+ * with the Executive's confirmed schedule (docs/api/04-scheduling.md).
  */
-import { accountName, isScheduleConfirmed, positionById, roomName, toMs } from '../mocks/derive.js';
-import { requireRole } from '../mocks/guards.js';
-import { clone, getState, mockRequest } from '../mocks/store.js';
-import { createUiError } from './uiError.js';
+import { apiClient } from './apiClient.js';
+import { PRIMARY_CAMPAIGN_ID } from './campaignService.js';
 
-function assessmentFor(state, interviewId) {
-  return state.assessments.find((assessment) => assessment.interviewId === interviewId) ?? null;
+const base = (campaignId) => `/campaigns/${encodeURIComponent(campaignId)}`;
+
+export async function list(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  const [view, schedule] = await Promise.all([
+    apiClient(`${base(campaignId)}/results`, options),
+    apiClient(`${base(campaignId)}/schedule`, options),
+  ]);
+  const scheduleRows = new Map((schedule?.rows ?? []).map((row) => [row.applicationId, row]));
+  return {
+    ...view,
+    rejectedIds: [...(view.rejectedIds ?? [])].sort(),
+    rows: (view.rows ?? [])
+      .map((row) => {
+        const slot = scheduleRows.get(row.applicationId) ?? {};
+        return {
+          ...row,
+          start: slot.start ?? null,
+          end: slot.end ?? null,
+          roomName: slot.roomName ?? '—',
+          interviewerName: slot.interviewerName ?? '—',
+          interviewEnded: true,
+          assessmentStatus: row.assessmentSubmitted ? 'submitted' : 'awaiting',
+        };
+      })
+      .sort((a, b) => a.applicationId.localeCompare(b.applicationId)),
+  };
 }
 
-function resultFor(state, applicationId) {
-  return state.results.find((result) => result.applicationId === applicationId) ?? null;
+export async function getAssessment(applicationId, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  const [assessment, schedule] = await Promise.all([
+    apiClient(`${base(campaignId)}/applications/${encodeURIComponent(applicationId)}/assessment`, options),
+    apiClient(`${base(campaignId)}/schedule`, options),
+  ]);
+  if (!assessment) return null;
+  const row = (schedule?.rows ?? []).find((item) => item.interviewerId === assessment.interviewerId);
+  return { ...assessment, interviewerName: row?.interviewerName ?? assessment.interviewerId };
 }
 
-/** Only shortlisted applications with a confirmed interview; CV-rejected ones never appear. */
-function rowsOf(state) {
-  if (!isScheduleConfirmed(state)) {
-    return [];
-  }
-  return state.applications
-    .filter((application) => application.screeningStatus === 'shortlisted')
-    .map((application) => {
-      const interview = state.interviews.find((item) => item.applicationId === application.id);
-      if (!interview) {
-        return null;
-      }
-      const result = resultFor(state, application.id);
-      return {
-        applicationId: application.id,
-        applicantName: accountName(application.applicantId),
-        positionName: positionById(state, application.positionId)?.name ?? '—',
-        interviewId: interview.id,
-        start: interview.start,
-        end: interview.end,
-        roomName: roomName(state, interview.roomId),
-        interviewerName: accountName(interview.interviewerId),
-        interviewEnded: toMs(state.now) >= toMs(interview.end),
-        assessmentStatus: assessmentFor(state, interview.id) ? 'submitted' : 'awaiting',
-        decision: result?.decision ?? null,
-        recordedAt: result?.recordedAt ?? null,
-        publishedAt: result?.publishedAt ?? null,
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.applicationId.localeCompare(b.applicationId));
-}
-
-export async function list() {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  return clone({
-    scheduleConfirmed: isScheduleConfirmed(state),
-    interviewDate: state.campaign.interviewDate,
-    // CV-rejected applications never become result candidates (WORKFLOWS §5).
-    rejectedIds: state.applications
-      .filter((application) => application.screeningStatus === 'rejected')
-      .map((application) => application.id)
-      .sort(),
-    rows: rowsOf(state),
+export function record(applicationId, decision, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return apiClient(`${base(campaignId)}/applications/${encodeURIComponent(applicationId)}/final-result`, {
+    ...options,
+    method: 'PUT',
+    body: { decision },
   });
 }
 
-export async function getAssessment(applicationId) {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  const interview = state.interviews.find((item) => item.applicationId === applicationId);
-  const assessment = interview ? assessmentFor(state, interview.id) : null;
-  return assessment ? clone({ ...assessment, interviewerName: accountName(assessment.interviewerId) }) : null;
-}
-
-export async function record(applicationId, decision) {
-  await mockRequest();
-  requireRole('executive');
-  if (!['pass', 'fail'].includes(decision)) {
-    throw createUiError('validation', 'Quyết định không hợp lệ.');
-  }
-  const state = getState();
-  const row = rowsOf(state).find((item) => item.applicationId === applicationId);
-  if (!row) {
-    throw createUiError('conflict', `Hồ sơ ${applicationId} chưa có buổi phỏng vấn đã xác nhận.`);
-  }
-  if (row.assessmentStatus !== 'submitted') {
-    throw createUiError('conflict', 'Cần có đánh giá phỏng vấn trước khi ghi nhận quyết định.');
-  }
-  if (row.publishedAt) {
-    throw createUiError('conflict', 'Kết quả đã công bố, không thể thay đổi.');
-  }
-  const existing = resultFor(state, applicationId);
-  if (existing) {
-    Object.assign(existing, { decision, recordedAt: state.now });
-  } else {
-    state.results.push({ applicationId, decision, recordedAt: state.now, publishedAt: null });
-  }
-  return clone(rowsOf(state).find((item) => item.applicationId === applicationId));
-}
-
-/**
- * Publishes every recorded, unpublished decision and creates one in-app
- * notification each. Mock mode never sends email; the future backend owns the
- * Brevo outbox and retry contract documented for Q-05.
- */
-export async function publishRecorded() {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  const toPublish = state.results.filter((result) => result.decision && !result.publishedAt);
-  if (toPublish.length === 0) {
-    throw createUiError('conflict', 'Không có kết quả nào đang chờ công bố.');
-  }
-  for (const result of toPublish) {
-    result.publishedAt = state.now;
-    const application = state.applications.find((item) => item.id === result.applicationId);
-    const position = positionById(state, application.positionId);
-    state.notifications.push({
-      id: `nt-${result.applicationId.toLowerCase()}-${state.notifications.length + 1}`,
-      accountId: application.applicantId,
-      applicationId: application.id,
-      message: `Kết quả hồ sơ ${application.id} (${position?.name ?? '—'}) đã được công bố: ${result.decision === 'pass' ? 'Pass' : 'Fail'}.`,
-      createdAt: state.now,
-      readAt: null,
-    });
-  }
-  return clone({ publishedIds: toPublish.map((result) => result.applicationId) });
+/** Publishes every recorded, unpublished decision; the server creates one notification each, idempotently. */
+export function publishRecorded(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return apiClient(`${base(campaignId)}/results/publish`, { ...options, method: 'POST' });
 }

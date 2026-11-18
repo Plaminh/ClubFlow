@@ -33,6 +33,16 @@ export function setMockApiMode(nextMode) {
   mode = nextMode;
 }
 
+/** Moves the mock clock (e.g. before an interview ends). */
+export function setMockApiClock(now) {
+  campaignState.now = now;
+}
+
+/** Read-only snapshot of server-side state, to assert real HTTP mutations. */
+export function getMockApiState() {
+  return structuredClone(campaignState);
+}
+
 export function setMockApiDelay(milliseconds) {
   delayMs = milliseconds;
 }
@@ -418,7 +428,125 @@ async function handleFetch(input, init = {}) {
     campaignState.positions = campaignState.positions.filter((item) => item.id !== positionId);
     return response(200, campaignView());
   }
+  const outcome = outcomeRoutes(url, method, init, user);
+  if (outcome) return outcome;
   return response(404, { error: 'Endpoint not found.', code: 'NOT_FOUND' });
+}
+
+/* C10/C11 routes, shaped like docs/api/05-interviewer.md and 06-results-notifications.md. */
+const confirmedInterviews = () => (campaignState.schedule.status === 'confirmed' ? campaignState.interviews.filter((item) => item.start) : []);
+const assessmentOf = (interviewId) => campaignState.assessments.find((item) => item.interviewId === interviewId) ?? null;
+
+function interviewSummary(interview) {
+  const summary = reviewSummary(campaignState.applications.find((item) => item.id === interview.applicationId));
+  return {
+    interviewId: interview.id,
+    applicationId: summary.id,
+    applicantName: summary.applicantName,
+    positionId: summary.positionId,
+    positionName: summary.positionName,
+    start: interview.start,
+    end: interview.end,
+    roomId: interview.roomId,
+    roomName: campaignState.rooms.find((item) => item.id === interview.roomId)?.name ?? '—',
+    completed: Date.parse(campaignState.now) >= Date.parse(interview.end),
+  };
+}
+
+function outcomeRoutes(url, method, init, user) {
+  const role = (expected) => (user.role === expected ? null : response(403, { error: `${expected} role required.`, code: 'ROLE_FORBIDDEN' }));
+  if (url.pathname === '/api/me/interviews' && method === 'GET') {
+    const denied = role('interviewer');
+    if (denied) return denied;
+    const own = mode === 'empty' ? [] : confirmedInterviews().filter((item) => item.interviewerId === user.id);
+    return response(200, {
+      scheduleConfirmed: campaignState.schedule.status === 'confirmed',
+      campaignId: campaignState.campaign.id,
+      campaignName: campaignState.campaign.name,
+      interviewDate: campaignState.campaign.interviewDate,
+      interviews: own.sort((a, b) => a.start.localeCompare(b.start)).map((item) => ({ ...interviewSummary(item), assessmentSubmitted: Boolean(assessmentOf(item.id)) })),
+    });
+  }
+  const assessmentMatch = url.pathname.match(/^\/api\/interviews\/([^/]+)(\/assessment)?$/u);
+  if (assessmentMatch) {
+    const denied = role('interviewer');
+    if (denied) return denied;
+    const interview = campaignState.interviews.find((item) => item.id === assessmentMatch[1] && item.start);
+    if (!interview) return response(404, { error: 'Interview not found.', code: 'INTERVIEW_NOT_FOUND' });
+    if (interview.interviewerId !== user.id || campaignState.schedule.status !== 'confirmed') return response(403, { error: 'Interview is not assigned to you.', code: 'INTERVIEW_NOT_ASSIGNED' });
+    const application = campaignState.applications.find((item) => item.id === interview.applicationId);
+    if (!assessmentMatch[2] && method === 'GET') {
+      return response(200, {
+        ...interviewSummary(interview),
+        student: application.studentInfo,
+        sop: application.sop,
+        cv: { fileName: application.cv.fileName, sizeBytes: application.cv.sizeBytes, downloadPath: `/api/applications/${application.id}/cv` },
+        assessment: assessmentOf(interview.id),
+      });
+    }
+    if (assessmentMatch[2] && method === 'POST') {
+      if (!interviewSummary(interview).completed) return response(409, { error: 'The interview has not finished yet.', code: 'INTERVIEW_NOT_COMPLETED' });
+      if (assessmentOf(interview.id)) return response(409, { error: 'An assessment was already submitted.', code: 'ASSESSMENT_ALREADY_SUBMITTED' });
+      const body = JSON.parse(init.body ?? '{}');
+      const fieldErrors = {};
+      if (typeof body.notes !== 'string' || !body.notes.trim() || body.notes.trim().length > 2000) fieldErrors.notes = 'Vui lòng nhập nhận xét phỏng vấn.';
+      if (body.recommendation != null && !['pass', 'fail'].includes(body.recommendation)) fieldErrors.recommendation = 'Must be pass, fail, or null.';
+      if (Object.keys(fieldErrors).length) return response(400, { error: 'Assessment fields are invalid.', code: 'VALIDATION_ERROR', fieldErrors });
+      const assessment = { id: `as-${application.id}`, interviewId: interview.id, interviewerId: user.id, notes: body.notes.trim(), recommendation: body.recommendation ?? null, submittedAt: campaignState.now };
+      campaignState.assessments.push(assessment);
+      return response(201, assessment);
+    }
+  }
+  const resultsMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/results(\/publish)?$/u);
+  const finalMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/applications\/([^/]+)\/(assessment|final-result)$/u);
+  if (resultsMatch || finalMatch) {
+    const denied = role('executive');
+    if (denied) return denied;
+  }
+  if (resultsMatch && !resultsMatch[2] && method === 'GET') {
+    const confirmed = campaignState.schedule.status === 'confirmed';
+    const rows = mode === 'empty' ? [] : confirmedInterviews().map((interview) => {
+      const result = campaignState.results.find((item) => item.applicationId === interview.applicationId);
+      const { start: _start, end: _end, roomId: _roomId, roomName: _roomName, completed: _completed, ...row } = interviewSummary(interview);
+      return { ...row, assessmentSubmitted: Boolean(assessmentOf(interview.id)), decision: result?.decision ?? null, recordedAt: result?.recordedAt ?? null, publishedAt: result?.publishedAt ?? null };
+    });
+    const rejectedIds = mode === 'empty' ? [] : campaignState.applications.filter((item) => item.screeningStatus === 'rejected').map((item) => item.id);
+    return response(200, { scheduleConfirmed: confirmed, interviewDate: campaignState.campaign.interviewDate, rejectedIds, rows });
+  }
+  if (resultsMatch?.[2] && method === 'POST') {
+    if (!campaignState.results.length) return response(409, { error: 'No final results have been recorded.', code: 'NO_RECORDED_RESULTS' });
+    const publishedIds = [];
+    for (const result of campaignState.results.filter((item) => item.decision && !item.publishedAt)) {
+      result.publishedAt = campaignState.now;
+      publishedIds.push(result.applicationId);
+      const application = campaignState.applications.find((item) => item.id === result.applicationId);
+      if (!campaignState.notifications.some((item) => item.applicationId === result.applicationId && item.createdAt === result.publishedAt)) {
+        campaignState.notifications.push({ id: `nt-${result.applicationId}`, accountId: application.applicantId, applicationId: result.applicationId, message: `Kết quả hồ sơ ${result.applicationId} đã được công bố: ${result.decision === 'pass' ? 'Pass' : 'Fail'}.`, createdAt: campaignState.now, readAt: null });
+      }
+    }
+    return response(200, { publishedIds });
+  }
+  if (finalMatch) {
+    const application = campaignState.applications.find((item) => item.id === finalMatch[2]);
+    if (!application) return response(404, { error: 'Application not found.', code: 'APPLICATION_NOT_FOUND' });
+    const interview = confirmedInterviews().find((item) => item.applicationId === application.id);
+    if (finalMatch[3] === 'assessment' && method === 'GET') return response(200, interview ? assessmentOf(interview.id) : null);
+    if (finalMatch[3] === 'final-result' && method === 'PUT') {
+      if (!interview) return response(409, { error: 'Confirm the schedule first.', code: 'SCHEDULE_NOT_CONFIRMED' });
+      if (!assessmentOf(interview.id)) return response(409, { error: 'Cần có đánh giá phỏng vấn trước khi ghi nhận quyết định.', code: 'ASSESSMENT_REQUIRED' });
+      const { decision } = JSON.parse(init.body ?? '{}');
+      if (!['pass', 'fail'].includes(decision)) return response(400, { error: 'Decision is invalid.', code: 'VALIDATION_ERROR', fieldErrors: { decision: 'Must be pass or fail.' } });
+      let result = campaignState.results.find((item) => item.applicationId === application.id);
+      if (result?.publishedAt) return response(409, { error: 'Kết quả đã công bố, không thể thay đổi.', code: 'RESULT_ALREADY_PUBLISHED' });
+      if (!result) {
+        result = { applicationId: application.id, publishedAt: null };
+        campaignState.results.push(result);
+      }
+      Object.assign(result, { decision, recordedAt: campaignState.now });
+      return response(200, result);
+    }
+  }
+  return null;
 }
 
 export function installMockApi() {
