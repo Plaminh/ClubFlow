@@ -19,6 +19,7 @@ export const SCREEN_LABELS = Object.freeze({
   applicationReview: 'Application Review',
   interviewScheduling: 'Interview Scheduling',
   interviewerWorkspace: 'Interviewer Workspace',
+  profile: 'Hồ sơ cá nhân',
   notFound: 'Không tìm thấy trang',
 });
 

@@ -1,3 +1,4 @@
+import { SCREEN_LABELS } from '../constants/labels.js';
 import { useState } from 'react';
 import Alert from '../components/molecules/Alert/index.js';
 import AsyncContent from '../components/molecules/AsyncContent/index.js';
@@ -33,7 +34,7 @@ function ProfileContent() {
   return (
     <MainTemplate
       eyebrow="Tài khoản ClubFlow"
-      title="Hồ sơ cá nhân"
+      title={SCREEN_LABELS.profile}
       description="Xem thông tin tài khoản và cập nhật họ tên, email qua dịch vụ ClubFlow."
     >
       <AsyncContent status={profile.status} error={profile.error} onRetry={profile.reload}>

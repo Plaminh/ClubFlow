@@ -2,7 +2,7 @@ import { cleanup, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ROUTES } from '../../routes/paths.js';
 import { getHealth } from '../../services/healthService.js';
-import { setMockApiMode } from '../helpers/mockApi.js';
+import { setMockApiDelay, setMockApiMode } from '../helpers/mockApi.js';
 import { EXECUTIVE, renderApp, submitSignIn } from '../helpers/renderApp.jsx';
 
 describe('AppRoutes', () => {
@@ -93,9 +93,18 @@ describe('AppRoutes', () => {
 
     setMockApiMode('error');
     renderApp(ROUTES.EXECUTIVE_CAMPAIGN, { accountId: EXECUTIVE, scenarioId: 'draft' });
-    expect(await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
     expect(await screen.findByRole('button', { name: /Thử lại/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
     expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBe('mock-token-exec');
+  });
+
+  it('shows the screen heading and a loading state while a saved session is restored', async () => {
+    setMockApiDelay(200);
+    renderApp(ROUTES.INTERVIEWER, { accountId: 'iv-giahuy', scenarioId: 'confirmed' });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Interviewer Workspace' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Đang khôi phục phiên đăng nhập…');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
   it('shows the API error state when the health check fails', async () => {

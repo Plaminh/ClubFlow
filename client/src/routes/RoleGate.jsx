@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import Button from '../components/atoms/Button/index.js';
+import AsyncContent from '../components/molecules/AsyncContent/index.js';
 import EmptyState from '../components/molecules/EmptyState/index.js';
 import MainTemplate from '../components/templates/MainTemplate/index.js';
 import { ROLE_LABELS } from '../constants/labels.js';
@@ -16,8 +17,13 @@ export default function RoleGate({ role, title, children }) {
   const { role: currentRole, status } = useDemoSession();
   const location = useLocation();
 
+  // While a saved session is restored, keep the screen's heading and show the shared loading state.
   if (status === 'loading') {
-    return null;
+    return (
+      <MainTemplate title={title}>
+        <AsyncContent status="loading" loadingLabel="Đang khôi phục phiên đăng nhập…" />
+      </MainTemplate>
+    );
   }
   if (currentRole === role) {
     return children;

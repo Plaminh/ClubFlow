@@ -54,7 +54,7 @@ export default function AppRoutes() {
         <Route
           path={ROUTES.PROFILE}
           element={
-            <AuthGate>
+            <AuthGate title={SCREEN_LABELS.profile}>
               <ProfilePage />
             </AuthGate>
           }
