@@ -1,13 +1,14 @@
+import { useCallback } from 'react';
 import * as campaignService from '../services/campaignService.js';
 import useServiceData from './useServiceData.js';
 
-/** Campaign Management data and actions (Executive). */
-export default function useCampaign() {
-  const resource = useServiceData(() => campaignService.getCampaign(), []);
+export default function useCampaign(campaignId = campaignService.PRIMARY_CAMPAIGN_ID) {
+  const resource = useServiceData(({ signal }) => campaignService.getCampaign(campaignId, { signal }), [campaignId]);
   return {
     ...resource,
-    saveDraft: campaignService.saveDraft,
-    publish: campaignService.publish,
-    removePosition: campaignService.removePosition,
+    saveDraft: useCallback((draft, options) => campaignService.saveDraft(campaignId, draft, options), [campaignId]),
+    publish: useCallback((draft, options) => campaignService.publish(campaignId, draft, options), [campaignId]),
+    saveInterviewSetup: useCallback((draft, options) => campaignService.saveInterviewSetup(campaignId, draft, options), [campaignId]),
+    removePosition: useCallback((positionId, options) => campaignService.removePosition(campaignId, positionId, options), [campaignId]),
   };
 }

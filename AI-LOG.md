@@ -748,3 +748,28 @@ Verified:
 - `git diff --check` passed after removing the obsolete `.env.example` trailing blank line.
 
 Limitations: Story-specific Campaign, Applicant, review, scheduling, assessment, and results services remain on the temporary browser fixture bridge until their ordered integration phases. The official course checker remains NOT RUN because its exact file is unavailable.
+
+---
+
+## 2026-11-18 — PA#3 Phase 4 — Campaign management and Interview Setup HTTP integration
+
+Tool: Codex.
+
+Changed:
+
+- Replaced the Campaign browser store with contract adapters for composite read, create, detail/Position save, Position delete, Interview Setup save, and publish. DTO mapping strips UI fields and converts quotas/durations to contract numbers.
+- Added request cancellation to shared service loading and stable campaign-scoped mutation callbacks.
+- Corrected Q-03 behavior: published details and Positions remain constrained-editable until Schedule confirmation; Interview Setup locks after the first valid Application, and linked Positions cannot be deleted.
+- Expanded Interview Setup UI to select Rooms, map Interviewers to Positions, capture availability intervals, and use only 15/20/30-minute durations.
+- Added HTTP adapter and page coverage for composite setup, field errors, retry, empty Positions, linked deletion, publication, constrained edits, application locks, and confirmed locks. Removed obsolete browser-service tests that asserted the superseded publication lock.
+
+Verified:
+
+- Focused campaign/setup and retained browser-service regression tests passed: 42/42.
+- `npm run lint` passed.
+- `npm test` passed: frontend 263/263 in 25 files, backend 18/18 in 5 files, and mock 10/10 in 6 files.
+- `npm run build` passed with the existing non-blocking Vite chunk-size warning.
+- `npm run verify:mock-http` passed the non-official fresh-state 24-endpoint workflow with three Applications, three confirmed Interviews, and two published Results.
+- `git diff --check` passed. The official course checker remains NOT RUN because its exact file is unavailable.
+
+Limitations: Applicant, review, and scheduling UI services remain on the temporary browser bridge for their subsequent ordered phases.

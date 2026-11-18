@@ -31,7 +31,8 @@ export default function useServiceData(loader, deps = [], { enabled = true } = {
       return undefined;
     }
     let active = true;
-    loaderRef.current().then(
+    const controller = new AbortController();
+    loaderRef.current({ signal: controller.signal }).then(
       (data) => {
         if (active) {
           setResult({ key: requestKey, accountId, data, error: null });
@@ -45,6 +46,7 @@ export default function useServiceData(loader, deps = [], { enabled = true } = {
     );
     return () => {
       active = false;
+      controller.abort();
     };
     // accountId and enabled are part of requestKey.
     // eslint-disable-next-line react-hooks/exhaustive-deps

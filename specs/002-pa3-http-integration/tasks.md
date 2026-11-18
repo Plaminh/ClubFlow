@@ -98,16 +98,16 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 ### Tests for User Story 1A
 
-- [ ] T039 [P] [US1] Add failing HTTP adapter tests for campaign and composite setup in `client/src/tests/services/campaignHttpService.test.js`
-- [ ] T040 [P] [US1] Extend `client/src/tests/pages/CampaignManagementPage.test.jsx` for loading, retryable error, empty positions, API field errors, constrained published edits, setup validation, and confirmation locks
+- [x] T039 [P] [US1] Add failing HTTP adapter tests for campaign and composite setup in `client/src/tests/services/campaignHttpService.test.js`
+- [x] T040 [P] [US1] Extend `client/src/tests/pages/CampaignManagementPage.test.jsx` for loading, retryable error, empty positions, API field errors, constrained published edits, setup validation, and confirmation locks
 
 ### Implementation for User Story 1A
 
-- [ ] T041 [US1] Replace campaign browser-store calls with HTTP adapters, including composite interview setup and Q-03 DTO mapping, in `client/src/services/campaignService.js`
-- [ ] T042 [US1] Add cancellation, refetch-safe mutation handling, and setup actions in `client/src/hooks/useCampaign.js`
-- [ ] T043 [US1] Adapt `client/src/pages/CampaignManagementPage.jsx`, `client/src/components/organisms/CampaignDetailsCard/`, `PositionsEditor/`, and `CampaignPreview/` for HTTP loading/error/empty/success and contract-driven mutations
-- [ ] T044 [US1] Complete editable Interviewer-position assignments, availability, room selection, date/window, 15/20/30-minute validation, and lock behavior in `client/src/components/organisms/InterviewSetupCard/`
-- [ ] T045 [US1] Run focused campaign/setup tests and fresh-state flow, then full lint/test/build/diff checks; append `AI-LOG.md` evidence and create `feat: integrate PA3 campaign management APIs`
+- [x] T041 [US1] Replace campaign browser-store calls with HTTP adapters, including composite interview setup and Q-03 DTO mapping, in `client/src/services/campaignService.js`
+- [x] T042 [US1] Add cancellation, refetch-safe mutation handling, and setup actions in `client/src/hooks/useCampaign.js`
+- [x] T043 [US1] Adapt `client/src/pages/CampaignManagementPage.jsx`, `client/src/components/organisms/CampaignDetailsCard/`, `PositionsEditor/`, and `CampaignPreview/` for HTTP loading/error/empty/success and contract-driven mutations
+- [x] T044 [US1] Complete editable Interviewer-position assignments, availability, room selection, date/window, 15/20/30-minute validation, and lock behavior in `client/src/components/organisms/InterviewSetupCard/`
+- [x] T045 [US1] Run focused campaign/setup tests and fresh-state flow, then full lint/test/build/diff checks; append `AI-LOG.md` evidence and create `feat: integrate PA3 campaign management APIs`
 
 ---
 

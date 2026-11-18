@@ -25,12 +25,7 @@ const HEADING = {
   description: 'Chuẩn bị thông tin tuyển thành viên và cấu hình phỏng vấn cho cùng một chiến dịch.',
 };
 
-// Team-selected Q-03: the configuration is editable only while the campaign is a draft.
 const LOCK_MESSAGES = {
-  published: {
-    title: 'Chiến dịch đã được công bố · cấu hình chỉ đọc',
-    text: 'Ứng viên dựa vào thông tin đã công bố, nên thông tin chiến dịch, thời gian nhận đơn, vị trí tuyển và cấu hình phỏng vấn không còn chỉnh sửa được. Bạn vẫn duyệt hồ sơ và chuẩn bị lịch nháp ở các bước tiếp theo.',
-  },
   scheduleConfirmed: {
     title: 'Cấu hình chiến dịch đang ở chế độ chỉ đọc',
     text: 'Chiến dịch đã được công bố và lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa (BR-14). Bạn vẫn có thể xem trước.',
@@ -39,7 +34,9 @@ const LOCK_MESSAGES = {
 
 function toForm(view) {
   const { campaign } = view;
+  const existing = new Map(view.interviewSetup.assignments.map((assignment) => [assignment.interviewerId, assignment]));
   return {
+    id: campaign.id,
     name: campaign.name,
     hostClub: campaign.hostClub,
     description: campaign.description,
@@ -49,6 +46,21 @@ function toForm(view) {
     interviewDate: campaign.interviewDate,
     interviewWindow: campaign.interviewWindow,
     slotMinutes: campaign.slotMinutes,
+    rooms: view.interviewSetup.rooms,
+    roomIds: view.interviewSetup.roomIds,
+    assignments: view.interviewSetup.interviewers.map((interviewer) => {
+      const assignment = existing.get(interviewer.id);
+      return assignment ?? {
+        interviewerId: interviewer.id,
+        interviewerName: interviewer.name,
+        positionIds: [],
+        positionNames: [],
+        availability: [{
+          start: `${campaign.interviewDate}T${campaign.interviewWindow.start}:00+07:00`,
+          end: `${campaign.interviewDate}T${campaign.interviewWindow.end}:00+07:00`,
+        }],
+      };
+    }),
     positions: view.positions.map((position) => ({
       key: position.id,
       id: position.id,
@@ -122,7 +134,13 @@ function CampaignWorkspace({ view, actions }) {
   }
 
   function showValidation(fieldErrors, message) {
-    setErrors(fieldErrors);
+    const mapped = Object.fromEntries(Object.entries(fieldErrors).map(([field, value]) => {
+      const match = field.match(/^positions\.(\d+)\.(.+)$/u);
+      if (!match) return [field, value];
+      const position = form.positions[Number(match[1])];
+      return [position ? `position:${position.key}:${match[2]}` : field, value];
+    }));
+    setErrors(mapped);
     setListError(fieldErrors.positions ?? '');
     setBanner({ tone: 'error', title: message ?? 'Chưa thể công bố chiến dịch', text: 'Hãy sửa các trường được đánh dấu. Dữ liệu hợp lệ bạn đã nhập vẫn được giữ lại.' });
     setFocusErrors((count) => count + 1);
@@ -142,7 +160,7 @@ function CampaignWorkspace({ view, actions }) {
     if (result.ok) {
       applyView(result.value);
       setErrors({});
-      setBanner({ tone: 'success', title: 'Đã lưu bản nháp (mô phỏng)', text: 'Bản nháp chỉ hiển thị với Ban tuyển dụng.' });
+      setBanner({ tone: 'success', title: 'Đã lưu thay đổi', text: 'Dữ liệu chiến dịch đã được dịch vụ ClubFlow xác nhận.' });
     } else {
       handleFailure(result.error);
     }
@@ -167,8 +185,8 @@ function CampaignWorkspace({ view, actions }) {
       applyView(result.value);
       setBanner({
         tone: 'success',
-        title: 'Đã công bố chiến dịch (mô phỏng)',
-        text: 'Chiến dịch hiển thị công khai trên Applicant Portal. Cấu hình chiến dịch từ giờ chỉ đọc.',
+        title: 'Đã công bố chiến dịch',
+        text: 'Chiến dịch hiển thị công khai trên Applicant Portal. Chi tiết vẫn có thể chỉnh sửa theo giới hạn Q-03 cho đến khi lịch được xác nhận.',
       });
     } else {
       handleFailure(result.error);
@@ -196,18 +214,18 @@ function CampaignWorkspace({ view, actions }) {
     }
   }
 
-  // A locked campaign offers no save or publish action at all, only the preview.
+  const draft = campaign.status === 'draft';
   const headerActions = (
     <>
       {locked ? null : (
         <Button variant="secondary" onClick={saveDraft} disabled={disabled}>
-          Lưu bản nháp
+          {draft ? 'Lưu bản nháp' : 'Lưu thay đổi'}
         </Button>
       )}
       <Button variant="secondary" onClick={() => setPreviewOpen(true)}>
         Xem trước
       </Button>
-      {locked ? null : (
+      {locked || !draft ? null : (
         <Button onClick={requestPublish} disabled={disabled}>
           Công bố chiến dịch
         </Button>
@@ -215,7 +233,7 @@ function CampaignWorkspace({ view, actions }) {
     </>
   );
 
-  const statusBadge = locked ? { label: 'Đã công bố · chỉ đọc', tone: 'success' } : { label: 'Bản nháp', tone: 'warning' };
+  const statusBadge = campaign.status === 'published' ? { label: 'Đã công bố', tone: 'success' } : { label: 'Bản nháp', tone: 'warning' };
   const lockMessage = LOCK_MESSAGES[lockReason];
 
   return (
@@ -229,15 +247,13 @@ function CampaignWorkspace({ view, actions }) {
         {lockMessage ? (
           <Alert tone="info" title={lockMessage.title}>
             <p>{lockMessage.text}</p>
-            {lockReason === 'published' ? (
-              <>
-                <p>
-                  Ứng viên nộp hồ sơ từ {formatDate(campaign.opensOn)} đến hết ngày {formatDate(campaign.closesOn)} (giờ Việt
-                  Nam).
-                </p>
-                <Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review →</Button>
-              </>
-            ) : null}
+            <Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review →</Button>
+          </Alert>
+        ) : null}
+        {!locked && campaign.status === 'published' ? (
+          <Alert tone="info" title="Chiến dịch đã được công bố">
+            <p>Chi tiết và vị trí vẫn chỉnh sửa được theo Q-03; vị trí đã có hồ sơ không thể xóa. Interview Setup khóa sau hồ sơ hợp lệ đầu tiên.</p>
+            <Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review →</Button>
           </Alert>
         ) : null}
 
@@ -279,7 +295,7 @@ function CampaignWorkspace({ view, actions }) {
               values={form}
               errors={errors}
               disabled={disabled}
-              readOnly={locked}
+              readOnly={locked || current.interviewSetup.locked}
               onChange={change}
             />
             <Card title="Xem trước chiến dịch" subtitle="Tóm tắt nội dung ứng viên sẽ thấy.">
@@ -326,8 +342,7 @@ function CampaignWorkspace({ view, actions }) {
           {formatDate(form.closesOn)} (giờ Việt Nam).
         </p>
         <p>
-          <strong>Sau khi công bố, cấu hình chiến dịch chỉ đọc:</strong> thông tin chiến dịch, thời gian nhận đơn, vị trí
-          tuyển và cấu hình phỏng vấn không thể chỉnh sửa hay hoàn tác. Hãy dùng “Xem trước” để kiểm tra trước khi công bố.
+          Sau khi công bố, chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03; Interview Setup khóa sau hồ sơ hợp lệ đầu tiên và toàn bộ cấu hình khóa khi lịch được xác nhận.
         </p>
       </ConfirmDialog>
       <ConfirmDialog

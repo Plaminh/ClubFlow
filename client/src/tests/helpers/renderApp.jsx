@@ -5,6 +5,7 @@ import { expect } from 'vitest';
 import { DemoSessionProvider } from '../../contexts/DemoSessionContext.jsx';
 import AppRoutes from '../../routes/AppRoutes.jsx';
 import { DEMO_CREDENTIALS } from '../../services/authService.js';
+import { setMockApiScenario } from './mockApi.js';
 import { restoreDemoState } from '../../services/demoSessionService.js';
 
 export const EXECUTIVE = 'exec-recruitment';
@@ -14,6 +15,7 @@ export const EXECUTIVE = 'exec-recruitment';
  * already signed in as a demo account and in a given scenario.
  */
 export function renderApp(path = '/', { accountId, scenarioId } = {}) {
+  if (scenarioId) setMockApiScenario(scenarioId);
   restoreDemoState({ accountId, scenarioId });
   const credential = DEMO_CREDENTIALS.find((item) => item.id === accountId);
   if (credential) {

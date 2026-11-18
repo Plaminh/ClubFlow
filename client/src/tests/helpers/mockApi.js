@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { ACCOUNTS } from '../../mocks/fixtures.js';
+import { buildScenarioState } from '../../mocks/scenarios.js';
 
 const BASE_USERS = [
   { id: 'exec-recruitment', handle: 'exec', role: 'executive', displayName: 'Recruitment Executive', email: 'executive@clubflow.demo.example', description: 'Technology and Innovation Club' },
@@ -13,12 +14,18 @@ let users;
 let legacyUsers;
 let mode;
 let delayMs;
+let campaignState;
 
 export function resetMockApi() {
   users = structuredClone(BASE_USERS);
   legacyUsers = structuredClone(ACCOUNTS);
   mode = 'normal';
   delayMs = 0;
+  campaignState = buildScenarioState('screening');
+}
+
+export function setMockApiScenario(scenarioId) {
+  campaignState = buildScenarioState(scenarioId);
 }
 
 export function setMockApiMode(nextMode) {
@@ -47,6 +54,48 @@ function userForToken(token) {
   }
   const handle = token?.replace(/^mock-token-/u, '');
   return users.find((user) => user.handle === handle) ?? null;
+}
+
+function campaignView() {
+  const applications = campaignState.applications;
+  const confirmed = campaignState.schedule.status === 'confirmed';
+  const setupLocked = confirmed || applications.length > 0;
+  const positions = campaignState.positions.map((position) => ({
+    ...position,
+    departmentName: campaignState.departments.find((item) => item.id === position.departmentId)?.name ?? '',
+    applicationCount: applications.filter((item) => item.positionId === position.id).length,
+  }));
+  const assignments = campaignState.assignments.map((assignment) => ({
+    ...assignment,
+    interviewerName: legacyUsers.find((item) => item.id === assignment.interviewerId)?.displayName ?? assignment.interviewerId,
+    positionNames: assignment.positionIds.map((id) => positions.find((item) => item.id === id)?.name).filter(Boolean),
+    availabilityText: assignment.availability.map(({ start, end }) => `${start.slice(11, 16)}-${end.slice(11, 16)}`).join(', '),
+  }));
+  return {
+    campaign: { ...campaignState.campaign, applicationsClosedAt: null },
+    phase: campaignState.scenarioId,
+    positions: mode === 'empty' ? [] : positions,
+    slots: campaignState.slots,
+    interviewSetup: {
+      interviewers: legacyUsers.filter((item) => item.role === 'interviewer').slice(0, 2).map((item) => ({ id: item.id, name: item.displayName })),
+      rooms: campaignState.rooms,
+      assignments,
+      roomIds: campaignState.schedule.roomIds,
+      locked: setupLocked,
+      lockReason: confirmed ? 'scheduleConfirmed' : applications.length ? 'applicationExists' : null,
+    },
+    locked: confirmed,
+    lockReason: confirmed ? 'scheduleConfirmed' : null,
+  };
+}
+
+function updatePositions(inputs = []) {
+  campaignState.positions = inputs.map((input, index) => {
+    const existing = input.id ? campaignState.positions.find((item) => item.id === input.id) : null;
+    const department = campaignState.departments.find((item) => item.name === input.departmentName) ?? { id: `dep-test-${index}`, name: input.departmentName };
+    if (!campaignState.departments.some((item) => item.id === department.id)) campaignState.departments.push(department);
+    return { ...(existing ?? {}), ...input, id: existing?.id ?? `pos-test-${index + 1}`, departmentId: department.id };
+  });
 }
 
 async function handleFetch(input, init = {}) {
@@ -81,6 +130,49 @@ async function handleFetch(input, init = {}) {
     user.email = body.email.trim().toLowerCase();
     const { handle: _handle, description: _description, ...profile } = user;
     return response(200, profile);
+  }
+  if (mode === 'error') return response(503, { error: 'The mock service is unavailable.', code: 'MOCK_ERROR' });
+  const campaignMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)$/u);
+  if (campaignMatch && method === 'GET') {
+    if (user.role !== 'executive') return response(403, { error: 'Executive role required.', code: 'ROLE_FORBIDDEN' });
+    return response(200, campaignView());
+  }
+  if (campaignMatch && method === 'PATCH') {
+    const body = JSON.parse(init.body ?? '{}');
+    const fieldErrors = {};
+    if (!body.name?.trim()) fieldErrors.name = 'Name is required.';
+    if (body.positions && !body.positions.length) fieldErrors.positions = 'At least one position is required.';
+    if (Object.keys(fieldErrors).length) return response(400, { error: 'Campaign fields are invalid.', code: 'VALIDATION_ERROR', fieldErrors });
+    Object.assign(campaignState.campaign, body);
+    if (body.positions) updatePositions(body.positions);
+    return response(200, campaignView());
+  }
+  const setupMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/interview-setup$/u);
+  if (setupMatch && method === 'PATCH') {
+    if (campaignState.applications.length || campaignState.schedule.status === 'confirmed') return response(409, { error: 'Interview setup is locked.', code: 'INTERVIEW_SETUP_LOCKED' });
+    const body = JSON.parse(init.body ?? '{}');
+    const fieldErrors = {};
+    if (![15, 20, 30].includes(body.slotMinutes)) fieldErrors.slotMinutes = 'Must be 15, 20, or 30.';
+    if (!body.roomIds?.length) fieldErrors.roomIds = 'Select at least one room.';
+    if (!body.assignments?.length) fieldErrors.assignments = 'Assign at least one interviewer.';
+    if (Object.keys(fieldErrors).length) return response(400, { error: 'Interview setup is invalid.', code: 'VALIDATION_ERROR', fieldErrors });
+    Object.assign(campaignState.campaign, { interviewDate: body.interviewDate, interviewWindow: body.interviewWindow, slotMinutes: body.slotMinutes });
+    campaignState.schedule.roomIds = body.roomIds;
+    campaignState.assignments = body.assignments;
+    return response(200, campaignView());
+  }
+  const publishMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/publish$/u);
+  if (publishMatch && method === 'POST') {
+    campaignState.campaign.status = 'published';
+    campaignState.campaign.publishedAt = '2026-11-18T12:00:00+07:00';
+    return response(200, campaignView());
+  }
+  const positionMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/positions\/([^/]+)$/u);
+  if (positionMatch && method === 'DELETE') {
+    const positionId = positionMatch[2];
+    if (campaignState.applications.some((item) => item.positionId === positionId)) return response(409, { error: 'A linked position cannot be deleted.', code: 'POSITION_HAS_APPLICATIONS' });
+    campaignState.positions = campaignState.positions.filter((item) => item.id !== positionId);
+    return response(200, campaignView());
   }
   return response(404, { error: 'Endpoint not found.', code: 'NOT_FOUND' });
 }

@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
+import { setMockApiMode } from '../helpers/mockApi.js';
 
 const PATH = '/executive/campaign';
 
@@ -106,7 +107,7 @@ describe('Campaign Management', () => {
     fireEvent.change(last('Yêu cầu'), { target: { value: 'Chủ động.' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Lưu bản nháp' }));
-    expect(await screen.findByText('Đã lưu bản nháp (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã lưu thay đổi')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Xem trước' }));
     const preview = await screen.findByRole('dialog', { name: 'Xem trước chiến dịch' });
@@ -115,15 +116,14 @@ describe('Campaign Management', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
     const confirm = await screen.findByRole('dialog', { name: 'Công bố chiến dịch?' });
-    expect(within(confirm).getByText(/Sau khi công bố, cấu hình chiến dịch chỉ đọc/)).toBeInTheDocument();
+    expect(within(confirm).getByText(/chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03/)).toBeInTheDocument();
     fireEvent.click(within(confirm).getByRole('button', { name: 'Công bố chiến dịch' }));
 
-    expect(await screen.findByText('Đã công bố chiến dịch (mô phỏng)')).toBeInTheDocument();
-    expect(screen.getByText('Chiến dịch đã được công bố · cấu hình chỉ đọc')).toBeInTheDocument();
+    expect(await screen.findByText('Đã công bố chiến dịch')).toBeInTheDocument();
+    expect(screen.getByText(/Chi tiết vẫn có thể chỉnh sửa theo giới hạn Q-03/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Mở Application Review →' })).toHaveAttribute('href', '/executive/review');
-    // Publishing locks the configuration at once (team-selected Q-03).
-    expectNoEditingControls();
-    expect(screen.getByText('Event Coordinator', { selector: '.position-card__details p' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lưu thay đổi' })).toBeEnabled();
+    expect(screen.getAllByLabelText('Tên vị trí (Position)').at(-1)).toHaveValue('Event Coordinator');
   });
 
   it('cancelling the publish confirmation keeps the draft editable', async () => {
@@ -138,17 +138,18 @@ describe('Campaign Management', () => {
     expect(screen.getByLabelText('Tên chiến dịch')).toBeEnabled();
   });
 
-  it('shows a published campaign as read-only text and explains why (Q-03)', async () => {
+  it('keeps constrained published details editable but locks Interview Setup after applications (Q-03)', async () => {
     await openAs('screening');
 
-    const alert = screen.getByText('Chiến dịch đã được công bố · cấu hình chỉ đọc').closest('.alert');
-    expect(within(alert).getByText(/Ứng viên dựa vào thông tin đã công bố/)).toBeInTheDocument();
-    expect(screen.getByText('Đã công bố · chỉ đọc')).toBeInTheDocument();
-    expectNoEditingControls();
+    const alert = screen.getByText('Chiến dịch đã được công bố').closest('.alert');
+    expect(within(alert).getByText(/Interview Setup khóa sau hồ sơ hợp lệ đầu tiên/)).toBeInTheDocument();
+    expect(screen.getByText('Đã công bố')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tên chiến dịch')).toBeEnabled();
+    expect(screen.queryByLabelText('Ngày phỏng vấn')).not.toBeInTheDocument();
 
-    // The configuration stays visible as text, with the application links that BR-04 protects.
-    expect(screen.getByText('Từ 12/10/2026 đến hết ngày 30/10/2026 (giờ Việt Nam)')).toBeInTheDocument();
-    expect(screen.getByText('15 phút, dùng chung cho mọi buổi phỏng vấn')).toBeInTheDocument();
+    // Constrained detail fields remain editable while setup is shown read-only.
+    expect(screen.getByLabelText('Ngày mở đơn')).toHaveValue('2026-10-12');
+    expect(screen.getByText('15 phút/ca')).toBeInTheDocument();
     expect(screen.getAllByText('3 hồ sơ đang liên kết với vị trí này.')).toHaveLength(2);
 
     fireEvent.click(screen.getByRole('button', { name: 'Xem trước' }));
@@ -163,5 +164,23 @@ describe('Campaign Management', () => {
     expect(screen.getByText(/lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa \(BR-14\)/)).toBeInTheDocument();
     expectNoEditingControls();
     expect(screen.getByRole('button', { name: 'Xem trước' })).toBeEnabled();
+  });
+
+  it('shows a retryable HTTP error and recovers without leaving the route', async () => {
+    setMockApiMode('error');
+    renderApp(PATH, { accountId: EXECUTIVE, scenarioId: 'draft' });
+    expect(await screen.findByText('The mock service is unavailable.')).toBeInTheDocument();
+
+    setMockApiMode('normal');
+    fireEvent.click(screen.getByRole('button', { name: /Thử lại/ }));
+    expect(await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' })).toBeInTheDocument();
+  });
+
+  it('renders an empty Position collection without inventing business data', async () => {
+    setMockApiMode('empty');
+    renderApp(PATH, { accountId: EXECUTIVE, scenarioId: 'draft' });
+    await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' });
+    expect(screen.queryByLabelText('Tên vị trí (Position)')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+ Thêm vị trí' })).toBeEnabled();
   });
 });
