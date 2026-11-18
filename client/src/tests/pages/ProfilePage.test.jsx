@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { setMockApiMode } from '../helpers/mockApi.js';
+import { setMockApiDelay, setMockApiMode } from '../helpers/mockApi.js';
 import { EXECUTIVE, renderApp, submitSignIn } from '../helpers/renderApp.jsx';
 
 const PATH = '/profile';
@@ -59,6 +59,32 @@ describe('My Profile over HTTP', () => {
     expect(within(card).getByRole('heading', { name: 'Minh Anh Updated' })).toBeInTheDocument();
     expect(within(card).getByText('anh.moi@demo.example')).toBeInTheDocument();
     expect(who('Minh Anh Updated · Ứng viên')).toBeInTheDocument();
+  });
+
+  it('discards edits on Cancel without calling the API', async () => {
+    await openProfile('ap-minhanh');
+    await startEditing();
+    fill('Không lưu', 'khong.luu@demo.example');
+    const before = fetch.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: 'Hủy thay đổi' }));
+
+    expect(screen.queryByRole('region', { name: 'Chỉnh sửa hồ sơ' })).not.toBeInTheDocument();
+    const card = screen.getByRole('region', { name: 'Thông tin cá nhân' });
+    expect(within(card).getByRole('heading', { name: 'Nguyen Minh Anh' })).toBeInTheDocument();
+    expect(within(card).queryByText('khong.luu@demo.example')).not.toBeInTheDocument();
+    expect(fetch.mock.calls.slice(before).some(([, init]) => init?.method === 'PATCH')).toBe(false);
+  });
+
+  it('sends a double-clicked Save only once', async () => {
+    await openProfile('ap-minhanh');
+    await startEditing();
+    fill('Minh Anh', 'minh.anh@demo.example');
+    setMockApiDelay(50);
+    const button = screen.getByRole('button', { name: 'Lưu thay đổi' });
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(await screen.findByText('Đã lưu thay đổi')).toBeInTheDocument();
+    expect(fetch.mock.calls.filter(([url, init]) => String(url).includes('/api/me/profile') && init?.method === 'PATCH')).toHaveLength(1);
   });
 
   it('validates required fields locally and focuses the first error', async () => {
