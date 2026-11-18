@@ -1,80 +1,36 @@
-import { describe, expect, it } from 'vitest';
-import { DEMO_PASSWORD } from '../../mocks/auth.js';
-import { getSessionAccountId, loadScenario, setSimulation } from '../../mocks/store.js';
+import { afterEach, describe, expect, it } from 'vitest';
+import { setAuthTokenProvider } from '../../services/apiClient.js';
 import * as authService from '../../services/authService.js';
 
-describe('authService (simulated sign-in)', () => {
+afterEach(() => setAuthTokenProvider(null));
+
+describe('authService HTTP adapter', () => {
   it.each([
-    ['executive@clubflow.demo.example', 'exec-recruitment', 'executive'],
-    ['minh.anh@demo.example', 'ap-minhanh', 'applicant'],
-    ['ha.my@clubflow.demo.example', 'iv-hamy', 'interviewer'],
-  ])('signs %s in as %s', async (email, id, role) => {
-    const user = await authService.signIn({ email, password: DEMO_PASSWORD });
-
-    expect(user).toMatchObject({ id, role, email });
-    expect(getSessionAccountId()).toBe(id);
-    expect(await authService.getCurrentUser()).toMatchObject({ id });
+    ['exec', 'exec-recruitment', 'executive'],
+    ['studentA', 'ap-minhanh', 'applicant'],
+    ['studentB', 'ap-quocbao', 'applicant'],
+    ['int-content', 'iv-giahuy', 'interviewer'],
+    ['int-comms', 'iv-comms', 'interviewer'],
+  ])('signs %s in through the canonical endpoint', async (username, id, role) => {
+    const session = await authService.signIn({ username, password: authService.DEMO_PASSWORD });
+    expect(session).toMatchObject({ token: `mock-token-${username}`, user: { id, role, handle: username } });
+    expect(JSON.stringify(session.user)).not.toContain(authService.DEMO_PASSWORD);
   });
 
-  it('ignores email case and surrounding spaces', async () => {
-    const user = await authService.signIn({ email: '  Minh.Anh@Demo.Example ', password: DEMO_PASSWORD });
-
-    expect(user.id).toBe('ap-minhanh');
+  it('trims usernames and rejects invalid credentials with the backend code', async () => {
+    await expect(authService.signIn({ username: ' studentA ', password: authService.DEMO_PASSWORD })).resolves.toMatchObject({ user: { id: 'ap-minhanh' } });
+    await expect(authService.signIn({ username: 'studentA', password: 'wrong' })).rejects.toMatchObject({ kind: 'forbidden', code: 'INVALID_CREDENTIALS' });
   });
 
-  it.each([
-    [{ email: 'minh.anh@demo.example', password: 'wrong' }],
-    [{ email: 'nobody@demo.example', password: DEMO_PASSWORD }],
-    [{ email: '', password: '' }],
-    [{}],
-  ])('rejects invalid credentials %o without starting a session', async (credentials) => {
-    await expect(authService.signIn(credentials)).rejects.toMatchObject({ kind: 'forbidden' });
-    expect(getSessionAccountId()).toBeNull();
+  it('restores the current user and logs out with the registered bearer token', async () => {
+    setAuthTokenProvider(() => 'mock-token-studentA');
+    await expect(authService.getCurrentUser()).resolves.toMatchObject({ id: 'ap-minhanh', role: 'applicant' });
+    await expect(authService.signOut()).resolves.toBeNull();
   });
 
-  it('rejects the old signIn(accountId) call shape instead of treating an id as credentials', async () => {
-    await expect(authService.signIn('ap-minhanh')).rejects.toThrow(/expects \{ email, password \}/);
-    expect(getSessionAccountId()).toBeNull();
-  });
-
-  it('never returns the password with the user and reports the simulated network failure', async () => {
-    const user = await authService.signIn({ email: 'minh.anh@demo.example', password: DEMO_PASSWORD });
-    expect(JSON.stringify(user)).not.toContain(DEMO_PASSWORD);
-
-    await authService.signOut();
-    setSimulation('error');
-    await expect(authService.signIn({ email: 'minh.anh@demo.example', password: DEMO_PASSWORD })).rejects.toMatchObject({
-      kind: 'network',
-    });
-    expect(getSessionAccountId()).toBeNull();
-  });
-
-  it('signs out and reports no current user', async () => {
-    await authService.signIn({ email: 'minh.anh@demo.example', password: DEMO_PASSWORD });
-
-    await authService.signOut();
-
-    expect(getSessionAccountId()).toBeNull();
-    expect(await authService.getCurrentUser()).toBeNull();
-  });
-
-  it('lists one fictional example login per role', async () => {
-    const examples = await authService.listDemoCredentials();
-
-    expect(examples.map((item) => item.role).sort()).toEqual(['applicant', 'executive', 'interviewer']);
-    for (const example of examples) {
-      expect(example.email).toMatch(/demo\.example$/);
-      await expect(authService.signIn({ email: example.email, password: example.password })).resolves.toMatchObject({
-        role: example.role,
-      });
-    }
-  });
-
-  it('cancels a sign-in that is still in flight when the scenario is replaced', async () => {
-    const pending = authService.signIn({ email: 'minh.anh@demo.example', password: DEMO_PASSWORD });
-    loadScenario('confirmed');
-
-    await expect(pending).rejects.toMatchObject({ kind: 'conflict' });
-    expect(getSessionAccountId()).toBeNull();
+  it('lists all canonical fictional credentials without an API round trip', async () => {
+    const credentials = await authService.listDemoCredentials();
+    expect(credentials.map((item) => item.username)).toEqual(['exec', 'studentA', 'studentB', 'int-content', 'int-comms']);
+    expect(credentials.every((item) => item.password === authService.DEMO_PASSWORD)).toBe(true);
   });
 });

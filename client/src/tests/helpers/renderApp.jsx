@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { expect } from 'vitest';
 import { DemoSessionProvider } from '../../contexts/DemoSessionContext.jsx';
 import AppRoutes from '../../routes/AppRoutes.jsx';
+import { DEMO_CREDENTIALS } from '../../services/authService.js';
 import { restoreDemoState } from '../../services/demoSessionService.js';
 
 export const EXECUTIVE = 'exec-recruitment';
@@ -14,6 +15,15 @@ export const EXECUTIVE = 'exec-recruitment';
  */
 export function renderApp(path = '/', { accountId, scenarioId } = {}) {
   restoreDemoState({ accountId, scenarioId });
+  const credential = DEMO_CREDENTIALS.find((item) => item.id === accountId);
+  if (credential) {
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-token-${credential.username}`, scenarioId }));
+  } else if (accountId) {
+    // Legacy fixture identities remain available only to domain-screen tests
+    // while those screens are migrated in later phases. Product sign-in never
+    // accepts these test-only tokens.
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-test-token-${accountId}`, scenarioId }));
+  }
   // StrictMode as in main.jsx, so effects run twice like in development.
   return render(
     <StrictMode>
@@ -38,8 +48,8 @@ export async function signInAs(accountLabel) {
 export const DEMO_PASSWORD = 'ClubFlowDemo!';
 
 /** Fills and submits the simulated Sign In form on /login. */
-export async function submitSignIn(email, password = DEMO_PASSWORD) {
-  fireEvent.change(await screen.findByLabelText('Email'), { target: { value: email } });
+export async function submitSignIn(username, password = DEMO_PASSWORD) {
+  fireEvent.change(await screen.findByLabelText('Tên đăng nhập'), { target: { value: username } });
   fireEvent.change(screen.getByLabelText('Mật khẩu'), { target: { value: password } });
   fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
 }

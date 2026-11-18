@@ -8,9 +8,13 @@ import { postSignInDestination } from '../routes/navigation.js';
 import { ROUTES } from '../routes/paths.js';
 
 export default function SignInPage() {
-  const { account, role } = useDemoSession();
+  const { account, role, status } = useDemoSession();
   const location = useLocation();
   const auth = useSignIn();
+
+  if (status === 'loading') {
+    return null;
+  }
 
   // Signed-in users never see the form: they go to the role-safe intended route
   // (after a successful sign-in) or to their role home (when opening /login).

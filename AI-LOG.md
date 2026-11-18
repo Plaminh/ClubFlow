@@ -724,3 +724,27 @@ Verified:
 Incidents: The first combined documentation/tool patch used an outdated `package.json` context because the required mock scripts had already been applied in an earlier scoped edit. The patch failed atomically; the tool file was then added against the actual state. No source content was lost or partially staged.
 
 Limitations: The provider is intentionally an in-memory deterministic PA#3 mock, not the Express/PostgreSQL production backend. The React domain services still use browser fixtures until the subsequent consumer phases. Browser route/responsive/accessibility evidence is therefore still pending. The official course checker remains NOT RUN.
+
+---
+
+## 2026-11-18 — PA#3 Phase 3 — Shared HTTP client and authentication
+
+Tool: Codex.
+
+Changed:
+
+- Reworked the shared client to enforce relative `/api` requests, bearer-token injection, JSON/FormData handling, CSV/PDF/204 responses, abort preservation, and structured contract errors without `VITE_API_URL`.
+- Added matching Vite development and preview proxies to the committed mock at port 3001 and removed the obsolete browser-visible API URL from `.env.example`.
+- Replaced browser-only authentication and profile persistence with `/auth/login`, `/auth/me`, `/auth/logout`, and `/me/profile` adapters. The session context now owns the bearer token, restores it safely on reload, clears invalid/logout sessions, and preserves intended-route and role navigation.
+- Kept scenario controls and legacy browser domain identity as an explicitly temporary migration bridge; non-canonical identities are available only through the test harness, never through product sign-in.
+- Updated sign-in/profile UI copy and tests for the five approved username credentials, HTTP errors, token storage/clearing, reload, deep links, role navigation, profile validation, and ownership.
+
+Verified:
+
+- Focused auth/client/route/profile tests passed, including the 36 legacy domain regressions initially exposed by the migration.
+- `npm run lint` passed.
+- `npm test` passed: frontend 261/261 in 24 files, backend 18/18 in 5 files, and mock 10/10 in 6 files.
+- `npm run build` passed with the existing non-blocking Vite chunk-size warning.
+- `git diff --check` passed after removing the obsolete `.env.example` trailing blank line.
+
+Limitations: Story-specific Campaign, Applicant, review, scheduling, assessment, and results services remain on the temporary browser fixture bridge until their ordered integration phases. The official course checker remains NOT RUN because its exact file is unavailable.

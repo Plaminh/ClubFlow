@@ -1,105 +1,84 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient, setAuthTokenProvider } from '../../services/apiClient.js';
+import { apiClient, apiDownload, setAuthTokenProvider } from '../../services/apiClient.js';
 
 function jsonResponse(status, body) {
-  return new Response(body === undefined ? null : JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(body === undefined ? null : JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 }
 
 describe('apiClient', () => {
   let fetchMock;
 
   beforeEach(() => {
-    vi.stubEnv('VITE_API_URL', 'http://api.test/api');
     fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
   });
 
   afterEach(() => {
     setAuthTokenProvider(null);
-    vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 
-  it('calls the configured base URL with query parameters and parses JSON', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(200, { status: 'ok' }));
-
-    const data = await apiClient('/health', { query: { page: 2, search: '', status: ['a', 'b'] } });
-
-    expect(data).toEqual({ status: 'ok' });
-    const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('http://api.test/api/health?page=2&status=a&status=b');
-    expect(init.method).toBe('GET');
-    expect(init.headers.Authorization).toBeUndefined();
+  it('always builds a relative /api URL with repeated query fields', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(200, { status: 'ok' })));
+    await expect(apiClient('/health', { query: { page: 2, search: '', status: ['a', 'b'] } })).resolves.toEqual({ status: 'ok' });
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/health?page=2&status=a&status=b');
+    await apiClient('/api/health');
+    expect(fetchMock.mock.calls[1][0]).toBe('/api/health');
+    await expect(apiClient('https://example.test/api/health')).rejects.toThrow(/relative API path/);
   });
 
-  it('serializes JSON bodies and adds the bearer token when a provider is set', async () => {
+  it('serializes JSON and attaches the bearer token', async () => {
     fetchMock.mockResolvedValue(jsonResponse(200, { ok: true }));
     setAuthTokenProvider(() => 'token-123');
-
     await apiClient('/example', { method: 'POST', body: { name: 'A' } });
-
     const [, init] = fetchMock.mock.calls[0];
-    expect(init.body).toBe('{"name":"A"}');
-    expect(init.headers['Content-Type']).toBe('application/json');
-    expect(init.headers.Authorization).toBe('Bearer token-123');
+    expect(init).toMatchObject({ method: 'POST', body: '{"name":"A"}' });
+    expect(init.headers).toMatchObject({ 'Content-Type': 'application/json', Authorization: 'Bearer token-123' });
   });
 
-  it('sends FormData without forcing a JSON content type (CV upload boundary)', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(201, { id: 'CF-032' }));
+  it('sends FormData without overriding the multipart boundary', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(201, { id: 'A01' }));
     const form = new FormData();
     form.set('cv', new File(['%PDF'], 'cv.pdf', { type: 'application/pdf' }));
-
-    await apiClient('/example-upload', { method: 'POST', body: form });
-
+    await apiClient('/applications', { method: 'POST', body: form });
     const [, init] = fetchMock.mock.calls[0];
     expect(init.body).toBe(form);
     expect(init.headers['Content-Type']).toBeUndefined();
   });
 
-  it('resolves 204 No Content to null', async () => {
-    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
-
-    await expect(apiClient('/example', { method: 'DELETE' })).resolves.toBeNull();
+  it('supports PDF blobs, CSV text, and 204 responses', async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response('%PDF', { headers: { 'content-type': 'application/pdf' } }))
+      .mockResolvedValueOnce(new Response('A,B\n1,2\n', { headers: { 'content-type': 'text/csv' } }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const pdf = await apiDownload('/applications/A01/cv');
+    expect(pdf).toBeInstanceOf(Blob);
+    await expect(apiClient('/campaigns/cmp/schedule.csv', { responseType: 'text' })).resolves.toBe('A,B\n1,2\n');
+    await expect(apiClient('/auth/logout', { method: 'POST' })).resolves.toBeNull();
   });
 
-  it('keeps the backend error message and maps the status to a UiError kind', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(409, { error: 'Bạn đã nộp hồ sơ CF-026 cho vị trí này.' }));
-
-    await expect(apiClient('/example')).rejects.toMatchObject({
+  it('preserves structured error code, fields, details, and status', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(409, {
+      error: 'Duplicate.',
+      code: 'DUPLICATE_APPLICATION',
+      fieldErrors: { positionId: 'Already used.' },
+      details: { existingApplicationId: 'A01' },
+    }));
+    await expect(apiClient('/applications')).rejects.toMatchObject({
       name: 'UiError',
       kind: 'conflict',
-      message: 'Bạn đã nộp hồ sơ CF-026 cho vị trí này.',
-      details: { status: 409 },
+      code: 'DUPLICATE_APPLICATION',
+      message: 'Duplicate.',
+      fieldErrors: { positionId: 'Already used.' },
+      details: { existingApplicationId: 'A01', status: 409 },
     });
   });
 
-  it('puts backend details directly on error.details next to the status', async () => {
-    fetchMock.mockResolvedValue(
-      jsonResponse(409, { error: 'Chưa thể xác nhận lịch.', details: { conditions: ['CF-026 trùng giờ'], existingApplicationId: 'CF-026' } }),
-    );
-
-    await expect(apiClient('/example')).rejects.toMatchObject({
-      kind: 'conflict',
-      details: { status: 409, conditions: ['CF-026 trùng giờ'], existingApplicationId: 'CF-026' },
-    });
-  });
-
-  it('passes field errors through and falls back to a Vietnamese message', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(422, { fieldErrors: { sop: 'Quá 300 từ.' } }));
-
-    await expect(apiClient('/example')).rejects.toMatchObject({
-      kind: 'validation',
-      message: 'Dữ liệu gửi lên chưa hợp lệ.',
-      fieldErrors: { sop: 'Quá 300 từ.' },
-    });
-  });
-
-  it('reports network failures as a network UiError', async () => {
-    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
-
+  it('normalizes network failures but preserves AbortError', async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch'));
     await expect(apiClient('/health')).rejects.toMatchObject({ kind: 'network' });
+    const aborted = new DOMException('Aborted', 'AbortError');
+    fetchMock.mockRejectedValueOnce(aborted);
+    await expect(apiClient('/health', { signal: new AbortController().signal })).rejects.toBe(aborted);
   });
 });

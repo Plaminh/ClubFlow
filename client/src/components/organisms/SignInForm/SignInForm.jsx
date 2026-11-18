@@ -3,14 +3,13 @@ import Button from '../../atoms/Button/index.js';
 import Alert from '../../molecules/Alert/index.js';
 import Card from '../../molecules/Card/index.js';
 import FormField from '../../molecules/FormField/index.js';
-import { isEmail } from '../../../utils/validation.js';
 import './SignInForm.css';
 
 export default function SignInForm({ onSubmit, pending, serviceError, examples = [] }) {
-  const [values, setValues] = useState({ email: '', password: '' });
+  const [values, setValues] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const emailRef = useRef(null);
+  const usernameRef = useRef(null);
   const passwordRef = useRef(null);
 
   function update(field, value) {
@@ -21,16 +20,10 @@ export default function SignInForm({ onSubmit, pending, serviceError, examples =
   async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = {};
-    if (!values.email.trim()) {
-      nextErrors.email = 'Email là bắt buộc.';
-    } else if (!isEmail(values.email)) {
-      nextErrors.email = 'Email chưa đúng định dạng.';
-    }
-    if (!values.password) {
-      nextErrors.password = 'Mật khẩu là bắt buộc.';
-    }
+    if (!values.username.trim()) nextErrors.username = 'Tên đăng nhập là bắt buộc.';
+    if (!values.password) nextErrors.password = 'Mật khẩu là bắt buộc.';
     setErrors(nextErrors);
-    const first = nextErrors.email ? emailRef : nextErrors.password ? passwordRef : null;
+    const first = nextErrors.username ? usernameRef : nextErrors.password ? passwordRef : null;
     if (first) {
       first.current?.focus();
       return;
@@ -40,25 +33,16 @@ export default function SignInForm({ onSubmit, pending, serviceError, examples =
 
   return (
     <div className="sign-in-grid">
-      <Card title="Thông tin đăng nhập" subtitle="Sử dụng tài khoản demo đã được cấp sẵn.">
-        <form className="stack" noValidate onSubmit={handleSubmit}>
+      <Card title="Thông tin đăng nhập">
+        <form onSubmit={handleSubmit} noValidate>
           {serviceError ? (
-            <Alert tone="error" title="Chưa thể đăng nhập" live>
+            <Alert tone="error" title="Không thể đăng nhập" live>
               <p>{serviceError.message}</p>
             </Alert>
           ) : null}
-          <FormField id="sign-in-email" label="Email" error={errors.email}>
+          <FormField id="sign-in-username" label="Tên đăng nhập" error={errors.username}>
             {(props) => (
-              <input
-                {...props}
-                ref={emailRef}
-                type="email"
-                autoComplete="username"
-                inputMode="email"
-                value={values.email}
-                disabled={pending}
-                onChange={(event) => update('email', event.target.value)}
-              />
+              <input {...props} ref={usernameRef} type="text" autoComplete="username" value={values.username} disabled={pending} onChange={(event) => update('username', event.target.value)} />
             )}
           </FormField>
           <FormField
@@ -66,47 +50,28 @@ export default function SignInForm({ onSubmit, pending, serviceError, examples =
             label="Mật khẩu"
             error={errors.password}
             extra={
-              <Button
-                className="sign-in-form__toggle"
-                variant="quiet"
-                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                onClick={() => setShowPassword((visible) => !visible)}
-              >
+              <Button className="sign-in-form__toggle" variant="quiet" aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} onClick={() => setShowPassword((visible) => !visible)}>
                 {showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               </Button>
             }
           >
             {(props) => (
-              <input
-                {...props}
-                ref={passwordRef}
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                value={values.password}
-                disabled={pending}
-                onChange={(event) => update('password', event.target.value)}
-              />
+              <input {...props} ref={passwordRef} type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={values.password} disabled={pending} onChange={(event) => update('password', event.target.value)} />
             )}
           </FormField>
-          <Button type="submit" block disabled={pending}>
-            {pending ? 'Đang đăng nhập…' : 'Đăng nhập'}
-          </Button>
+          <Button type="submit" block disabled={pending}>{pending ? 'Đang đăng nhập…' : 'Đăng nhập'}</Button>
         </form>
       </Card>
 
       <Card as="aside" title="Tài khoản demo" subtitle="Dữ liệu hư cấu dành riêng cho bản mẫu.">
-        <Alert tone="warning" title="Không phải xác thực thật">
-          <p>Mật khẩu dưới đây được công khai cho môi trường phát triển và không được lưu trong trình duyệt.</p>
+        <Alert tone="warning" title="Không phải tài khoản thật">
+          <p>Mật khẩu dưới đây được công khai cho môi trường phát triển và chỉ được lưu dưới dạng phiên bearer trong tab hiện tại.</p>
         </Alert>
         <dl className="summary-list sign-in-form__examples">
           {examples.map((example) => (
-            <div key={example.email}>
+            <div key={example.username}>
               <dt>{example.displayName}</dt>
-              <dd>
-                <code>{example.email}</code>
-                <br />
-                <code>{example.password}</code>
-              </dd>
+              <dd><code>{example.username}</code><br /><code>{example.password}</code></dd>
             </div>
           ))}
         </dl>

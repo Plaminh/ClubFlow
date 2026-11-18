@@ -14,10 +14,11 @@ export const UI_ERROR_KINDS = Object.freeze([
 ]);
 
 export class UiError extends Error {
-  constructor(kind, message, { fieldErrors, details } = {}) {
+  constructor(kind, message, { code, fieldErrors, details } = {}) {
     super(message);
     this.name = 'UiError';
     this.kind = UI_ERROR_KINDS.includes(kind) ? kind : 'unknown';
+    this.code = code;
     this.fieldErrors = fieldErrors;
     this.details = details;
   }

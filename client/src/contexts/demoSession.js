@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 
 export const DemoSessionContext = createContext(null);
 
-/** Current demo account, role, and demo controls. Not authentication. */
+/** Current HTTP account/session plus isolated development demo controls. */
 export function useDemoSession() {
   const value = useContext(DemoSessionContext);
   if (!value) {

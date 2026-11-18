@@ -25,17 +25,17 @@ describe('AppLayout', () => {
   it('switches to Executive navigation after a DemoBar account switch and lands on the campaign screen', async () => {
     renderApp('/');
 
-    await signInAs('Ban tuyển dụng · CLB Công nghệ & Sáng tạo');
+    await signInAs('Recruitment Executive · Technology and Innovation Club');
 
     await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(navLinks()).toEqual(['Chiến dịch', 'Duyệt hồ sơ', 'Xếp lịch', 'Trang công khai']);
     expect(screen.getByRole('link', { name: 'Chiến dịch' })).toHaveAttribute('aria-current', 'page');
-    expect(who('Ban tuyển dụng · CLB Công nghệ & Sáng tạo')).toBeInTheDocument();
+    expect(who('Recruitment Executive · Ban tuyển dụng')).toBeInTheDocument();
   });
 
   it('marks the active link and focuses the main region when navigating', async () => {
     renderApp('/');
-    await signInAs('Ban tuyển dụng · CLB Công nghệ & Sáng tạo');
+    await signInAs('Recruitment Executive · Technology and Innovation Club');
 
     fireEvent.click(screen.getByRole('link', { name: 'Xếp lịch' }));
 
@@ -47,7 +47,7 @@ describe('AppLayout', () => {
 
   it('sends an Interviewer to the workspace and signs out back to the public portal', async () => {
     renderApp('/');
-    await signInAs('Hà My · User Experience Design');
+    await signInAs('Gia Huy · Content');
 
     await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
     expect(navLinks()).toEqual(['Interviewer Workspace']);
@@ -60,20 +60,20 @@ describe('AppLayout', () => {
 
   it('keeps an Applicant on the portal after signing in there', async () => {
     renderApp('/');
-    await signInAs('Nguyễn Minh Anh');
+    await signInAs('Nguyen Minh Anh');
 
     expect(screen.getByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
-    expect(who('Nguyễn Minh Anh · Ứng viên')).toBeInTheDocument();
+    expect(who('Nguyen Minh Anh · Ứng viên')).toBeInTheDocument();
   });
 
   it('switches between demo accounts and back to guest from the DemoBar', async () => {
     renderApp('/');
-    await signInAs('Hà My · User Experience Design');
+    await signInAs('Gia Huy · Content');
     await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
 
-    await signInAs('Nguyễn Minh Anh');
+    await signInAs('Nguyen Minh Anh');
     await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
-    expect(who('Nguyễn Minh Anh · Ứng viên')).toBeInTheDocument();
+    expect(who('Nguyen Minh Anh · Ứng viên')).toBeInTheDocument();
 
     const demo = screen.getByRole('region', { name: 'Điều khiển bản demo' });
     fireEvent.change(within(demo).getByLabelText(/Đổi tài khoản nhanh/), { target: { value: '' } });

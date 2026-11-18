@@ -39,6 +39,15 @@ export async function signOut() {
   setSessionAccountId(null);
 }
 
+/**
+ * Temporary bridge while the remaining domain services are migrated from the
+ * browser fixture store to HTTP. Authentication remains owned by the HTTP
+ * session context; this only gives legacy domain fixtures the same identity.
+ */
+export function syncLegacyDomainIdentity(accountId) {
+  setSessionAccountId(accountId ?? null);
+}
+
 /* Synchronous helpers for the demo controls (they never call a backend). */
 
 export function listScenarios() {

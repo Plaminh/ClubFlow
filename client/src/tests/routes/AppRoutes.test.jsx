@@ -14,7 +14,7 @@ describe('AppRoutes', () => {
     [ROUTES.EXECUTIVE_REVIEW, 'Application Review', EXECUTIVE],
     [`${ROUTES.EXECUTIVE_REVIEW}?tab=results`, 'Application Review', EXECUTIVE],
     [ROUTES.EXECUTIVE_SCHEDULING, 'Interview Scheduling', EXECUTIVE],
-    [ROUTES.INTERVIEWER, 'Interviewer Workspace', 'iv-hamy'],
+    [ROUTES.INTERVIEWER, 'Interviewer Workspace', 'iv-giahuy'],
     [`${ROUTES.HOME}?tab=apply`, 'Applicant Portal', undefined],
     [ROUTES.LOGIN, 'Đăng nhập', undefined],
     [ROUTES.PROFILE, 'Hồ sơ cá nhân', 'ap-minhanh'],
@@ -37,13 +37,13 @@ describe('AppRoutes', () => {
     renderApp(path);
 
     await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tên đăng nhập')).toBeInTheDocument();
   });
 
   it('returns a guest to the intended protected route after signing in with a role that may open it', async () => {
     renderApp(`${ROUTES.EXECUTIVE_REVIEW}?tab=results`);
 
-    await submitSignIn('executive@clubflow.demo.example');
+    await submitSignIn('exec');
 
     await screen.findByRole('heading', { level: 1, name: 'Application Review' });
     expect(screen.getByRole('tab', { name: /Final Results/, selected: true })).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('AppRoutes', () => {
   it('ignores an intended route the signed-in role may not open and uses the role home instead', async () => {
     renderApp(ROUTES.EXECUTIVE_CAMPAIGN);
 
-    await submitSignIn('ha.my@clubflow.demo.example');
+    await submitSignIn('int-content');
 
     await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
   });
@@ -60,7 +60,7 @@ describe('AppRoutes', () => {
   it.each([
     ['ap-minhanh', 'Applicant Portal'],
     [EXECUTIVE, 'Create Recruitment Campaign'],
-    ['iv-hamy', 'Interviewer Workspace'],
+    ['iv-giahuy', 'Interviewer Workspace'],
   ])('sends signed-in %s away from /login to the role home', async (accountId, title) => {
     renderApp(ROUTES.LOGIN, { accountId });
 
@@ -72,6 +72,15 @@ describe('AppRoutes', () => {
     renderApp(ROUTES.INTERVIEWER);
 
     expect(await screen.findByText('API connected')).toBeInTheDocument();
+  });
+
+  it('clears an invalid stored token before redirecting a protected reload to Sign In', async () => {
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: 'invalid-token' }));
+
+    renderApp(ROUTES.PROFILE);
+
+    await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
+    expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBeNull();
   });
 
   it('shows the API error state when the health check fails', async () => {

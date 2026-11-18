@@ -25,7 +25,7 @@ function ProfileContent() {
     const result = await profile.save(values);
     if (result.ok) {
       setEditing(false);
-      setSuccess('Thông tin hồ sơ đã được cập nhật trong phiên demo.');
+      setSuccess('Thông tin hồ sơ đã được cập nhật.');
     }
     return result;
   }
@@ -34,7 +34,7 @@ function ProfileContent() {
     <MainTemplate
       eyebrow="Tài khoản ClubFlow"
       title="Hồ sơ cá nhân"
-      description="Xem thông tin tài khoản và cập nhật họ tên, email. Đây là mô phỏng trong bản demo: thay đổi chỉ lưu trong bộ nhớ trình duyệt."
+      description="Xem thông tin tài khoản và cập nhật họ tên, email qua dịch vụ ClubFlow."
     >
       <AsyncContent status={profile.status} error={profile.error} onRetry={profile.reload}>
         {profile.data ? (
@@ -67,8 +67,8 @@ function ProfileContent() {
             )}
             <Card title="Bảo mật tài khoản">
               <p>
-                Quản lý mật khẩu chưa có trong bản mẫu frontend này. Tài khoản demo không phát hành token và không lưu mật
-                khẩu trong trình duyệt.
+                Quản lý mật khẩu nằm ngoài phạm vi PA#3. Phiên đăng nhập dùng bearer token chỉ trong tab hiện tại và không
+                lưu mật khẩu trong trình duyệt.
               </p>
             </Card>
           </div>

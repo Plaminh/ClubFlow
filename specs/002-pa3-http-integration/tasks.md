@@ -77,14 +77,14 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 **Purpose**: Establish the only frontend HTTP/session boundary before story-specific domain integration.
 
-- [ ] T031 Add failing client tests for relative paths, JSON/FormData, CSV/PDF responses, structured codes/field errors/details, bearer headers, 204, network failure, and abort behavior in `client/src/tests/services/apiClient.test.js`
-- [ ] T032 Implement relative `/api` request and download behavior with token provider support in `client/src/services/apiClient.js`; remove runtime dependence on `VITE_API_URL` without adding an environment file
-- [ ] T033 Configure matching development and preview `/api` proxies in `client/vite.config.js` and update `.env.example` only if a remaining browser-visible variable is genuinely introduced
-- [ ] T034 Add failing service/context/route tests for HTTP username login, current user restore, logout, token storage/clearing, intended route, reload, and role navigation in `client/src/tests/services/authService.test.js`, `client/src/tests/routes/AppRoutes.test.jsx`, and `client/src/tests/pages/SignInPage.test.jsx`
-- [ ] T035 Replace browser-store authentication/profile calls with contract adapters in `client/src/services/authService.js` and `client/src/services/profileService.js`
-- [ ] T036 Make `client/src/contexts/DemoSessionContext.jsx` the shared HTTP user/token owner, register the token provider, restore through `/auth/me`, clear on logout, and isolate any development-only controls from runtime domain state
-- [ ] T037 Adapt `client/src/hooks/useSignIn.js`, `client/src/hooks/useProfile.js`, `client/src/routes/AuthGate.jsx`, `client/src/routes/RoleGate.jsx`, and account UI only as needed to preserve existing behavior with HTTP auth
-- [ ] T038 Run focused auth/client/route tests, lint, full regression tests, build, and diff checks; append real verification to `AI-LOG.md` and create `feat: integrate PA3 authentication and API client`
+- [x] T031 Add failing client tests for relative paths, JSON/FormData, CSV/PDF responses, structured codes/field errors/details, bearer headers, 204, network failure, and abort behavior in `client/src/tests/services/apiClient.test.js`
+- [x] T032 Implement relative `/api` request and download behavior with token provider support in `client/src/services/apiClient.js`; remove runtime dependence on `VITE_API_URL` without adding an environment file
+- [x] T033 Configure matching development and preview `/api` proxies in `client/vite.config.js` and update `.env.example` only if a remaining browser-visible variable is genuinely introduced
+- [x] T034 Add failing service/context/route tests for HTTP username login, current user restore, logout, token storage/clearing, intended route, reload, and role navigation in `client/src/tests/services/authService.test.js`, `client/src/tests/routes/AppRoutes.test.jsx`, and `client/src/tests/pages/SignInPage.test.jsx`
+- [x] T035 Replace browser-store authentication/profile calls with contract adapters in `client/src/services/authService.js` and `client/src/services/profileService.js`
+- [x] T036 Make `client/src/contexts/DemoSessionContext.jsx` the shared HTTP user/token owner, register the token provider, restore through `/auth/me`, clear on logout, and isolate any development-only controls from runtime domain state
+- [x] T037 Adapt `client/src/hooks/useSignIn.js`, `client/src/hooks/useProfile.js`, `client/src/routes/AuthGate.jsx`, `client/src/routes/RoleGate.jsx`, and account UI only as needed to preserve existing behavior with HTTP auth
+- [x] T038 Run focused auth/client/route tests, lint, full regression tests, build, and diff checks; append real verification to `AI-LOG.md` and create `feat: integrate PA3 authentication and API client`
 
 **Checkpoint**: All roles sign in through HTTP, bearer headers are attached, reload/deep links are safe, and no story service has yet bypassed the committed mock.
 

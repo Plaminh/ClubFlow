@@ -13,9 +13,12 @@ import { ROUTES } from './paths.js';
  * it is not access control. The backend must authorize every request.
  */
 export default function RoleGate({ role, title, children }) {
-  const { role: currentRole } = useDemoSession();
+  const { role: currentRole, status } = useDemoSession();
   const location = useLocation();
 
+  if (status === 'loading') {
+    return null;
+  }
   if (currentRole === role) {
     return children;
   }
