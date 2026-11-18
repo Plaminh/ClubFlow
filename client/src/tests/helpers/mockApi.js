@@ -436,6 +436,21 @@ async function handleFetch(input, init = {}) {
     campaignState.assignments = body.assignments;
     return response(200, campaignView());
   }
+  if (url.pathname === '/api/campaigns' && method === 'POST') {
+    if (user.role !== 'executive') return response(403, { error: 'Executive role required.', code: 'ROLE_FORBIDDEN' });
+    const body = JSON.parse(init.body ?? '{}');
+    const fieldErrors = {};
+    for (const field of ['name', 'description', 'instructions', 'opensOn', 'closesOn', 'interviewDate']) if (!String(body[field] ?? '').trim()) fieldErrors[field] = 'Required.';
+    if (!body.positions?.length) fieldErrors.positions = 'At least one position is required.';
+    if (Object.keys(fieldErrors).length) return response(400, { error: 'Campaign fields are invalid.', code: 'VALIDATION_ERROR', fieldErrors });
+    // The stub holds one campaign: the created draft replaces it.
+    const { positions, roomIds: _roomIds, assignments: _assignments, ...fields } = body;
+    Object.assign(campaignState.campaign, fields, { id: 'cmp-2027-hk1', status: 'draft', publishedAt: null });
+    campaignState.applications = [];
+    updatePositions(positions);
+    campaignState.created = true;
+    return response(201, campaignView());
+  }
   const closeMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/close-applications$/u);
   if (closeMatch && method === 'POST') {
     if (user.role !== 'executive') return response(403, { error: 'Executive role required.', code: 'ROLE_FORBIDDEN' });

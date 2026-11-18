@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import Button from '../components/atoms/Button/index.js';
 import Alert from '../components/molecules/Alert/index.js';
 import AsyncContent from '../components/molecules/AsyncContent/index.js';
@@ -74,11 +75,37 @@ function toForm(view) {
   };
 }
 
-function CampaignWorkspace({ view, actions }) {
+/** An unsaved draft that reuses the club's interviewer and room catalog from an existing campaign. */
+function blankView(catalog) {
+  return {
+    campaign: {
+      id: null,
+      name: '',
+      hostClub: catalog.campaign.hostClub,
+      description: '',
+      instructions: '',
+      opensOn: '',
+      closesOn: '',
+      interviewDate: '',
+      interviewWindow: catalog.campaign.interviewWindow,
+      slotMinutes: catalog.campaign.slotMinutes,
+      status: 'draft',
+    },
+    phase: 'draft',
+    positions: [],
+    interviewSetup: { ...catalog.interviewSetup, assignments: [], roomIds: [], locked: false, lockReason: null },
+    locked: false,
+    lockReason: null,
+  };
+}
+
+function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = false }) {
   const [form, setForm] = useState(() => toForm(view));
   const [current, setCurrent] = useState(view);
   const [errors, setErrors] = useState({});
-  const [banner, setBanner] = useState(null);
+  const [banner, setBanner] = useState(() => (created
+    ? { tone: 'success', title: 'Đã tạo bản nháp chiến dịch', text: 'Tiếp tục cấu hình Interview Setup, xem trước và công bố khi sẵn sàng.' }
+    : null));
   const [listError, setListError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
@@ -158,6 +185,11 @@ function CampaignWorkspace({ view, actions }) {
   async function saveDraft() {
     setBanner(null);
     const result = await action.run(() => actions.saveDraft(form));
+    if (result.ok && !form.id) {
+      // The first save of a new campaign creates it; continue on its own id.
+      onCreated(result.value.campaign.id);
+      return;
+    }
     if (result.ok) {
       applyView(result.value);
       setErrors({});
@@ -241,11 +273,16 @@ function CampaignWorkspace({ view, actions }) {
       <Button variant="secondary" onClick={() => setPreviewOpen(true)}>
         Xem trước
       </Button>
-      {locked || !draft ? null : (
+      {locked || !draft || !form.id ? null : (
         <Button onClick={requestPublish} disabled={disabled}>
           Công bố chiến dịch
         </Button>
       )}
+      {form.id && onCreateNew ? (
+        <Button variant="secondary" onClick={onCreateNew} disabled={disabled}>
+          Tạo chiến dịch mới
+        </Button>
+      ) : null}
       {!locked && current.phase === 'open' ? (
         <Button variant="secondary" onClick={() => setCloseOpen(true)} disabled={disabled}>
           Đóng nhận hồ sơ sớm
@@ -394,15 +431,41 @@ function CampaignWorkspace({ view, actions }) {
 
 export default function CampaignManagementPage() {
   const { dataVersion } = useDemoSession();
-  const { data, status, error, reload, ...actions } = useCampaign();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const creating = searchParams.get('new') === '1';
+  const campaignId = searchParams.get('campaignId') || undefined;
+  // A new draft still loads the primary campaign (the hook default) for the interviewer/room catalog.
+  const { data, status, error, reload, ...actions } = useCampaign(creating ? undefined : campaignId);
 
-  if (status !== 'success') {
+  // While another campaign id loads, the hook still returns the previous one; never edit stale data.
+  const stale = status === 'success' && campaignId && !creating && data.campaign.id !== campaignId;
+  if (status !== 'success' || stale) {
     return (
       <MainTemplate {...HEADING} step={1}>
-        <AsyncContent status={status} error={error} onRetry={reload} />
+        <AsyncContent status={stale ? 'loading' : status} error={error} onRetry={reload} />
       </MainTemplate>
     );
   }
 
-  return <CampaignWorkspace key={dataVersion} view={data} actions={actions} />;
+  if (creating) {
+    return (
+      <CampaignWorkspace
+        key={`new-${dataVersion}`}
+        view={blankView(data)}
+        actions={{ ...actions, saveDraft: (form) => actions.createCampaign(form) }}
+        onCreated={(id) => setSearchParams({ campaignId: id }, { state: { created: true } })}
+      />
+    );
+  }
+
+  return (
+    <CampaignWorkspace
+      key={`${campaignId ?? 'primary'}-${dataVersion}`}
+      view={data}
+      actions={actions}
+      created={Boolean(location.state?.created)}
+      onCreateNew={() => setSearchParams({ new: '1' })}
+    />
+  );
 }

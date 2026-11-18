@@ -177,6 +177,37 @@ describe('Campaign Management', () => {
     expect(getMockApiState().closedEarlyAt).toEqual(expect.any(String));
   });
 
+  it('creates a new draft campaign, then continues on its own id with publish available (C3)', async () => {
+    await openAs('accepting');
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo chiến dịch mới' }));
+    await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' });
+    expect(screen.getByLabelText('Tên chiến dịch')).toHaveValue('');
+    expect(screen.queryByRole('button', { name: 'Công bố chiến dịch' })).not.toBeInTheDocument();
+
+    // Server validation errors are shown on the blank draft and nothing is created.
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu bản nháp' }));
+    expect(await screen.findByText('Campaign fields are invalid.')).toBeInTheDocument();
+    expect(getMockApiState().created).toBeUndefined();
+
+    fireEvent.change(screen.getByLabelText('Tên chiến dịch'), { target: { value: 'ClubFlow 2027 Recruitment' } });
+    fireEvent.change(screen.getByLabelText('Mô tả chiến dịch'), { target: { value: 'Recruit the next cohort.' } });
+    fireEvent.change(screen.getByLabelText('Hướng dẫn ứng tuyển'), { target: { value: 'Submit one PDF CV.' } });
+    fireEvent.change(screen.getByLabelText('Ngày mở đơn'), { target: { value: '2027-01-10' } });
+    fireEvent.change(screen.getByLabelText('Ngày đóng đơn'), { target: { value: '2027-01-25' } });
+    fireEvent.change(screen.getByLabelText('Ngày phỏng vấn'), { target: { value: '2027-02-01' } });
+    fireEvent.click(screen.getByRole('button', { name: '+ Thêm vị trí' }));
+    fireEvent.change(screen.getByLabelText('Ban (Department)'), { target: { value: 'Communications' } });
+    fireEvent.change(screen.getByLabelText('Tên vị trí (Position)'), { target: { value: 'Content' } });
+    fireEvent.change(screen.getByLabelText('Chỉ tiêu'), { target: { value: '2' } });
+    fireEvent.change(screen.getByLabelText('Mô tả công việc'), { target: { value: 'Write content.' } });
+    fireEvent.change(screen.getByLabelText('Yêu cầu'), { target: { value: 'Clear writing.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu bản nháp' }));
+
+    expect(await screen.findByText('Đã tạo bản nháp chiến dịch')).toBeInTheDocument();
+    expect(getMockApiState().campaign).toMatchObject({ id: 'cmp-2027-hk1', status: 'draft', name: 'ClubFlow 2027 Recruitment' });
+    expect(screen.getByRole('button', { name: 'Công bố chiến dịch' })).toBeInTheDocument();
+  });
+
   it('offers early close only while applications are open', async () => {
     await openAs('screening');
     expect(screen.queryByRole('button', { name: 'Đóng nhận hồ sơ sớm' })).not.toBeInTheDocument();
