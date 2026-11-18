@@ -34,6 +34,14 @@ export function sessionUserFor(accountId) {
   return users.find((user) => user.id === accountId) ?? legacyUsers.find((user) => user.id === accountId) ?? null;
 }
 
+/** Creates an application server-side, as if submitted from another tab. */
+export function addMockApiApplication({ id, applicantId, positionId }) {
+  campaignState.applications.push({
+    id, applicantId, positionId, submittedAt: campaignState.now, slotIds: [], sop: '', screeningStatus: 'pendingReview',
+    reviewedAt: null, privateNote: '', cv: { fileName: 'cv.pdf', sizeBytes: 1 }, studentInfo: {},
+  });
+}
+
 export function setMockApiMode(nextMode) {
   mode = nextMode;
 }

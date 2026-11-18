@@ -22,7 +22,7 @@ function emptyValues(account) {
  * Client checks give fast feedback; `onSubmit` returns the service result,
  * whose field errors are shown the same way.
  */
-export default function ApplicationForm({ account, positions, slots, slotMinutes, interviewDate, applications, disabled, onSubmit }) {
+export default function ApplicationForm({ account, positions, slots, slotMinutes, interviewDate, applications, disabled, onSubmit, onViewApplication }) {
   const [values, setValues] = useState(() => emptyValues(account));
   const [errors, setErrors] = useState({});
   const [banner, setBanner] = useState(null);
@@ -88,6 +88,22 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
         title: `Đã gửi hồ sơ ${result.value.id}`,
         text: 'Hồ sơ mới xuất hiện trong tab My Applications với trạng thái Chờ duyệt.',
       });
+    } else if (result.error?.code === 'DUPLICATE_APPLICATION') {
+      // Server-side duplicate (e.g. submitted from another tab): keep every
+      // entered value and point to the existing application.
+      const existingId = result.error.details?.existingApplicationId;
+      setErrors({
+        positionId: existingId
+          ? `Bạn đã nộp hồ sơ ${existingId} cho vị trí này. Mỗi vị trí chỉ có một hồ sơ trong chiến dịch; bạn vẫn có thể ứng tuyển vị trí khác.`
+          : result.error.message,
+      });
+      setBanner({
+        tone: 'error',
+        title: 'Hồ sơ cho vị trí này đã tồn tại',
+        text: 'Dữ liệu bạn đã nhập vẫn được giữ lại; hãy chọn vị trí khác hoặc xem hồ sơ hiện có.',
+        existingId,
+      });
+      setFocusErrors((count) => count + 1);
     } else if (result.error?.fieldErrors) {
       fail(result.error.fieldErrors, result.error.message);
     } else if (result.error) {
@@ -103,6 +119,11 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
       {banner ? (
         <Alert tone={banner.tone} title={banner.title} live>
           <p>{banner.text}</p>
+          {banner.existingId && onViewApplication ? (
+            <Button variant="secondary" onClick={() => onViewApplication(banner.existingId)}>
+              {`Xem hồ sơ ${banner.existingId}`}
+            </Button>
+          ) : null}
         </Alert>
       ) : null}
       <div className="split-layout split-layout--wide-first">

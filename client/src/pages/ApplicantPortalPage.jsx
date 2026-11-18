@@ -88,7 +88,8 @@ export default function ApplicantPortalPage() {
 
   async function submitApplication(formData) {
     const result = await submit.run(() => portal.submitApplication(formData));
-    if (result.ok) {
+    // A 409 duplicate also means our list is stale: refresh it (the form keeps its values).
+    if (result.ok || result.error?.code === 'DUPLICATE_APPLICATION') {
       portal.reload();
     }
     return result;
@@ -130,6 +131,7 @@ export default function ApplicantPortalPage() {
           applications={applications}
           disabled={phase !== 'open'}
           onSubmit={submitApplication}
+          onViewApplication={() => setTab('mine')}
         />
       </div>
     );

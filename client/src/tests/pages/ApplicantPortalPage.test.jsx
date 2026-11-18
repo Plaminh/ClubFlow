@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { renderApp } from '../helpers/renderApp.jsx';
-import { setMockApiMode, setMockApiScenario } from '../helpers/mockApi.js';
+import { addMockApiApplication, setMockApiMode, setMockApiScenario } from '../helpers/mockApi.js';
 
 const MINH_ANH = 'ap-minhanh';
 const HAI_DANG = 'ap-haidang';
@@ -128,6 +128,23 @@ describe('Applicant Portal', () => {
     fireEvent.change(positionSelect, { target: { value: 'pos-ux' } });
 
     expect(screen.getByText(/Bạn đã nộp hồ sơ CF-026 cho vị trí này/)).toBeInTheDocument();
+  });
+
+  it('handles a server-side 409 duplicate: keeps the input and links to the existing application', async () => {
+    await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
+    fillValidForm({ sop: 'Nội dung phải được giữ lại.' });
+    // Another tab already submitted this position; this page does not know yet.
+    addMockApiApplication({ id: 'CF-099', applicantId: HAI_DANG, positionId: 'pos-ux' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
+
+    expect(await screen.findByText('Hồ sơ cho vị trí này đã tồn tại')).toBeInTheDocument();
+    expect(screen.getAllByText(/Bạn đã nộp hồ sơ CF-099 cho vị trí này/).length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue('Nội dung phải được giữ lại.');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Xem hồ sơ CF-099' }));
+    const table = await screen.findByRole('table', { name: 'Hồ sơ của tôi' });
+    expect(within(table).getByText('CF-099')).toBeInTheDocument();
   });
 
   it('tracks each application independently and never shows unconfirmed interviews or results (BR-08)', async () => {
