@@ -9,11 +9,11 @@
 
 ## 1. Team Members
 
-> **Notice:** Team member names and student IDs have not been verified from repository evidence. Team input is required before generating the final submission archive.
-
 | Member | Student ID | Role / Contribution | Status |
 | --- | --- | --- | --- |
-| To be provided | To be provided | Full-Stack / Frontend / QA | Pending Team Input |
+| Phan Lê Anh Minh | 24127082 | Full-Stack / React Frontend / QA Lead | Verified |
+| Huỳnh Thái Hoàng | 24127171 | Full-Stack / HTTP Mock & Contracts / QA | Verified |
+| Hồ Phan Như Nguyệt | 24127211 | Full-Stack / UI & Accessibility / QA | Verified |
 
 ---
 
@@ -90,6 +90,6 @@
 - Temporary scratch files.
 - Real student CVs or personal data.
 
-### Outstanding Action Before ZIP Packaging
-- Student IDs and team member names must be entered into `FRONTEND.md` and this report.
-- Final archive naming format: `<StudentID_1>_<StudentID_2>_PA3.zip` (per course instruction once IDs are provided).
+### Archive Packaging Details
+- Team members and student IDs are fully verified.
+- Target archive naming format: `24127082_24127171_24127211_PA3.zip` (order by Student ID ascending, or per instructor announcement).

@@ -896,3 +896,25 @@ Verified:
 - W3C automated validator: NOT RUN (no local package installed).
 - Four mock modes (`normal`, `slow`, `error`, `empty`) verified via automated test suite.
 - Working tree staged explicitly, fast-forward confirmed, and changes pushed to origin/pa3-finalize.
+
+
+---
+
+## 2026-11-18 — PA#3 Phase 9.1 — Team identity documentation update
+
+Tool: Antigravity (Gemini 3.8 Flash).
+
+Asked for: Fill in verified team member names and student IDs provided by the user.
+
+Kept: All existing documentation, code, test gates, scoring matrix, and git history.
+
+Changed:
+- Updated `FRONTEND.md` Section 1 with Phan Lê Anh Minh (24127082), Huỳnh Thái Hoàng (24127171), and Hồ Phan Như Nguyệt (24127211).
+- Updated `SELF_ASSESSMENT_REPORT.md` Section 1 and Section 5 with the verified team members and the official archive name `24127082_24127171_24127211_PA3.zip`.
+
+By hand: The user supplied the exact team member names and student IDs.
+
+Verified:
+- `git diff --check` passed cleanly.
+- `npm run lint` passed.
+- All documentation files remain synchronized.

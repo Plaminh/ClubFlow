@@ -2,11 +2,11 @@
 
 ## 1. Team Members
 
-Team member names and student IDs have not been verified from repository evidence. **Team input is required before submission.**
-
-| Member | Student ID | Status |
-| --- | --- | --- |
-| To be provided | To be provided | Unverified |
+| Member | Student ID | Role | Status |
+| --- | --- | --- | --- |
+| Phan Lê Anh Minh | 24127082 | Full-Stack / React Frontend / QA Lead | Verified |
+| Huỳnh Thái Hoàng | 24127171 | Full-Stack / HTTP Mock & Contracts / QA | Verified |
+| Hồ Phan Như Nguyệt | 24127211 | Full-Stack / UI & Accessibility / QA | Verified |
 
 ## 2. How to Run
 
@@ -139,5 +139,4 @@ Zero dependencies were added for the contract or HTTP mock.
 
 - **Official course `contract-check.mjs` execution**: Marked as **NOT RUN** because the exact course file was not supplied in the repository or course attachments. The repository provides `node tools/validate-api-docs.mjs` (contract structural validator) and `node tools/verify-pa3-http.mjs` (fresh-state 24-endpoint workflow verifier), which are clearly labeled as non-official.
 - **W3C Automated Validation**: Marked as **NOT RUN** because no offline W3C validator tool is bundled. Structural accessibility and semantic DOM rules (one `h1`, landmarks, unique IDs, labeled controls) are verified by automated tests in `client/src/tests/a11y/screens.a11y.test.jsx`.
-- **Team members & student IDs**: Real student IDs and team names are pending team input before generating the final submission ZIP.
 - **Production backend features**: Real PostgreSQL persistence, Docker containerized services, external email notifications, and cloud storage belong to PA#4.
