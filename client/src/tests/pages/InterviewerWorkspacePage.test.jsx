@@ -1,8 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import * as applicationService from '../../services/applicationService.js';
-import * as demoSessionService from '../../services/demoSessionService.js';
-import * as scheduleService from '../../services/scheduleService.js';
+import { getState } from '../../mocks/store.js';
 import { renderApp } from '../helpers/renderApp.jsx';
 
 const PATH = '/interviewer';
@@ -142,13 +140,9 @@ describe('Interviewer Workspace', () => {
   });
 
   it('keeps the form locked for an interview that has not happened yet', async () => {
-    await demoSessionService.signIn('exec-recruitment');
-    await applicationService.setScreening('CF-028', 'rejected');
-    await scheduleService.updateRow('CF-027', { start: '2026-11-05T09:15:00+07:00', interviewerId: 'iv-giahuy', roomId: 'room-b105' });
-    await scheduleService.updateRow('CF-031', { start: '2026-11-05T09:00:00+07:00', interviewerId: 'iv-giahuy', roomId: 'room-b105' });
-    await scheduleService.confirm();
-
-    await openAs('iv-giahuy', 'screening');
+    renderApp(PATH, { accountId: 'iv-giahuy', scenarioId: 'confirmed' });
+    getState().now = '2026-11-05T02:10:00.000Z';
+    await screen.findByRole('heading', { level: 2, name: /Assigned Interviews/ });
 
     expect(rowIds()).toEqual(['CF-031', 'CF-027']);
     expect(await screen.findByText('Chưa thể đánh giá')).toBeInTheDocument();

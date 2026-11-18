@@ -8,10 +8,10 @@ import { formatDate } from '../../../utils/format.js';
  * kept apart on purpose:
  * - the interview date, window, and common duration belong to the campaign
  *   configuration (Campaign Management) and are only summarized here;
- * - the rooms are a scheduling choice and stay editable until the schedule is
- *   confirmed (`readOnly`), when they are summarized too.
+ * - the rooms are selected in Interview Setup and summarized here. `roomsReadOnly`
+ *   keeps draft generation available while preventing unsupported local edits.
  */
-export default function ScheduleSettingsCard({ settings, rooms, hasDraft, disabled, readOnly, onRoomsChange, onGenerate }) {
+export default function ScheduleSettingsCard({ settings, rooms, hasDraft, disabled, readOnly, roomsReadOnly = false, onRoomsChange, onGenerate }) {
   const selectedRooms = rooms.filter((room) => settings.roomIds.includes(room.id));
 
   return (
@@ -41,7 +41,7 @@ export default function ScheduleSettingsCard({ settings, rooms, hasDraft, disabl
               <dt>Thời lượng mỗi ca</dt>
               <dd>{settings.slotMinutes} phút · dùng chung cho mọi buổi phỏng vấn</dd>
             </div>
-            {readOnly ? (
+            {readOnly || roomsReadOnly ? (
               <div>
                 <dt>Phòng dùng cho lịch</dt>
                 <dd>{selectedRooms.map((room) => room.name).join(', ') || '—'}</dd>
@@ -53,7 +53,7 @@ export default function ScheduleSettingsCard({ settings, rooms, hasDraft, disabl
             vì ứng viên chọn giờ rảnh dựa trên chúng.
           </p>
         </section>
-        {readOnly ? null : (
+        {readOnly || roomsReadOnly ? null : (
           <>
             <ChoiceGroup
               legend="Phòng có sẵn"
@@ -67,6 +67,7 @@ export default function ScheduleSettingsCard({ settings, rooms, hasDraft, disabl
             <p className="hint">Bạn sẽ được hỏi trước khi thay thế lịch nháp hiện tại.</p>
           </>
         )}
+        {roomsReadOnly && !readOnly ? <p className="hint">Phòng đã được chọn trong Interview Setup và khóa sau hồ sơ hợp lệ đầu tiên.</p> : null}
       </div>
     </Card>
   );

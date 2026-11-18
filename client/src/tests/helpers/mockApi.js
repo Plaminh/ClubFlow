@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import { ACCOUNTS } from '../../mocks/fixtures.js';
-import { buildScenarioState } from '../../mocks/scenarios.js';
+import { evaluateSchedule } from '../../mocks/derive.js';
+import { addMinutes, buildScenarioState } from '../../mocks/scenarios.js';
 
 const BASE_USERS = [
   { id: 'exec-recruitment', handle: 'exec', role: 'executive', displayName: 'Recruitment Executive', email: 'executive@clubflow.demo.example', description: 'Technology and Innovation Club' },
@@ -130,6 +131,82 @@ function applicantApplication(application) {
   };
 }
 
+function reviewSummary(application) {
+  const applicant = legacyUsers.find((item) => item.id === application.applicantId);
+  const position = campaignState.positions.find((item) => item.id === application.positionId);
+  return {
+    id: application.id,
+    applicantId: application.applicantId,
+    applicantName: applicant?.displayName ?? application.applicantId,
+    positionId: application.positionId,
+    positionName: position?.name ?? '—',
+    submittedAt: application.submittedAt,
+    screeningStatus: application.screeningStatus,
+  };
+}
+
+function reviewDetail(application) {
+  const summary = reviewSummary(application);
+  const slots = application.slotIds.map((id) => campaignState.slots.find((item) => item.id === id)).filter(Boolean);
+  return {
+    ...summary,
+    student: application.studentInfo,
+    availabilityText: slots.map((slot) => `${slot.start.slice(11, 16)}–${slot.end.slice(11, 16)}`).join(', '),
+    sop: application.sop,
+    cv: { fileName: application.cv.fileName, sizeBytes: application.cv.sizeBytes, downloadPath: `/api/applications/${application.id}/cv` },
+    reviewedAt: application.reviewedAt,
+    privateNote: application.privateNote,
+    siblingIds: campaignState.applications.filter((item) => item.applicantId === application.applicantId && item.id !== application.id).map((item) => item.id),
+    locked: campaignState.schedule.status === 'confirmed',
+  };
+}
+
+function counts(items) {
+  return {
+    applications: items.length,
+    applicants: new Set(items.map((item) => item.applicantId)).size,
+    pendingReview: items.filter((item) => item.screeningStatus === 'pendingReview').length,
+    shortlisted: items.filter((item) => item.screeningStatus === 'shortlisted').length,
+    rejected: items.filter((item) => item.screeningStatus === 'rejected').length,
+  };
+}
+
+function filteredApplications(url) {
+  const search = (url.searchParams.get('search') ?? '').toLowerCase();
+  const positionId = url.searchParams.get('positionId') ?? '';
+  const status = url.searchParams.get('status') ?? '';
+  const sort = url.searchParams.get('sort') ?? 'newest';
+  return campaignState.applications.map(reviewSummary)
+    .filter((item) => !search || `${item.id} ${item.applicantName}`.toLowerCase().includes(search))
+    .filter((item) => !positionId || item.positionId === positionId)
+    .filter((item) => !status || item.screeningStatus === status)
+    .sort((left, right) => sort === 'oldest' ? left.submittedAt.localeCompare(right.submittedAt) : right.submittedAt.localeCompare(left.submittedAt));
+}
+
+function scheduleView() {
+  const evaluated = evaluateSchedule(campaignState);
+  const saved = campaignState.schedule.status !== 'none' && !campaignState.schedule.dirty && Boolean(campaignState.schedule.savedAt);
+  const conditions = [
+    ...evaluated.conditions,
+    { id: 'saved', code: 'DRAFT_SAVED', met: saved, text: saved ? 'Đã lưu các thay đổi của lịch nháp.' : 'Hãy lưu các thay đổi của lịch nháp.' },
+  ];
+  return {
+    settings: { interviewDate: campaignState.campaign.interviewDate, interviewWindow: campaignState.campaign.interviewWindow, slotMinutes: campaignState.campaign.slotMinutes, roomIds: campaignState.schedule.roomIds },
+    assignments: campaignView().interviewSetup.assignments,
+    rooms: campaignState.rooms,
+    rows: mode === 'empty' ? [] : evaluated.rows,
+    summary: mode === 'empty' ? { total: 0, proposed: 0, conflict: 0, unassigned: 0 } : { total: evaluated.summary.shortlisted, proposed: evaluated.summary.proposed, conflict: evaluated.summary.conflict, unassigned: evaluated.summary.unassigned },
+    conditions,
+    status: campaignState.schedule.status,
+    dirty: Boolean(campaignState.schedule.dirty),
+    generatedAt: campaignState.schedule.generatedAt ?? null,
+    savedAt: campaignState.schedule.savedAt,
+    confirmedAt: campaignState.schedule.confirmedAt,
+    canConfirm: evaluated.canConfirm && saved,
+    zeroShortlisted: mode === 'empty' || evaluated.zeroShortlisted,
+  };
+}
+
 async function handleFetch(input, init = {}) {
   if (init.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
   if (delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -211,6 +288,93 @@ async function handleFetch(input, init = {}) {
   if (url.pathname === '/api/me/notifications' && method === 'PATCH') {
     campaignState.notifications.filter((item) => item.accountId === user.id).forEach((item) => { item.readAt = campaignState.now; });
     return response(204);
+  }
+  const reviewListMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/applications$/u);
+  if (reviewListMatch && method === 'GET') {
+    const all = campaignState.applications.map(reviewSummary);
+    const filtered = mode === 'empty' ? [] : filteredApplications(url);
+    const pageSize = Number(url.searchParams.get('pageSize') ?? 5);
+    const page = Number(url.searchParams.get('page') ?? 1);
+    return response(200, {
+      items: filtered.slice((page - 1) * pageSize, page * pageSize), total: filtered.length, page, pageSize,
+      pageCount: filtered.length ? Math.ceil(filtered.length / pageSize) : 0,
+      stats: { campaign: mode === 'empty' ? counts([]) : counts(all), filtered: counts(filtered), isFiltered: ['search', 'positionId', 'status'].some((key) => url.searchParams.has(key) && url.searchParams.get(key)) },
+      positions: campaignState.positions.map(({ id, name }) => ({ id, name })),
+    });
+  }
+  const reviewCsvMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/applications\.csv$/u);
+  if (reviewCsvMatch && method === 'GET') {
+    const rows = filteredApplications(url);
+    const csv = ['Application ID,Applicant,Student ID,Email,Position,Submitted At,Status', ...rows.map((item) => {
+      const source = campaignState.applications.find((application) => application.id === item.id);
+      return [item.id, item.applicantName, source.studentInfo.studentId, source.studentInfo.email, item.positionName, item.submittedAt, item.screeningStatus].join(',');
+    })].join('\r\n');
+    return new Response(csv, { status: 200, headers: { 'content-type': 'text/csv; charset=utf-8' } });
+  }
+  const noteMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/applications\/([^/]+)\/private-note$/u);
+  if (noteMatch && method === 'PATCH') {
+    const application = campaignState.applications.find((item) => item.id === noteMatch[2]);
+    application.privateNote = JSON.parse(init.body).note;
+    return response(200, reviewDetail(application));
+  }
+  const decisionMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/applications\/([^/]+)\/screening-decision$/u);
+  if (decisionMatch && method === 'POST') {
+    if (campaignState.schedule.status === 'confirmed') return response(409, { error: 'Schedule confirmation locks screening.', code: 'SCHEDULE_CONFIRMED' });
+    const application = campaignState.applications.find((item) => item.id === decisionMatch[2]);
+    if (application.screeningStatus !== 'pendingReview') return response(409, { error: 'A screening decision already exists.', code: 'SCREENING_ALREADY_DECIDED' });
+    application.screeningStatus = JSON.parse(init.body).decision;
+    application.reviewedAt = campaignState.now;
+    campaignState.schedule.dirty = campaignState.schedule.status === 'draft';
+    return response(200, reviewSummary(application));
+  }
+  const reviewDetailMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/applications\/([^/]+)$/u);
+  if (reviewDetailMatch && method === 'GET') {
+    const application = campaignState.applications.find((item) => item.id === reviewDetailMatch[2]);
+    return application ? response(200, reviewDetail(application)) : response(404, { error: 'Application not found.', code: 'APPLICATION_NOT_FOUND' });
+  }
+  const cvMatch = url.pathname.match(/^\/api\/applications\/([^/]+)\/cv$/u);
+  if (cvMatch && method === 'GET') return new Response('%PDF-1.4 protected fixture', { status: 200, headers: { 'content-type': 'application/pdf' } });
+
+  const scheduleBase = `/api/campaigns/${campaignState.campaign.id}/schedule`;
+  if (url.pathname === scheduleBase && method === 'GET') return response(200, scheduleView());
+  if (url.pathname === `${scheduleBase}/draft/generate` && method === 'POST') {
+    if (campaignState.schedule.status === 'confirmed') return response(409, { error: 'Schedule is confirmed.', code: 'SCHEDULE_CONFIRMED' });
+    campaignState.schedule.status = 'draft';
+    campaignState.schedule.dirty = true;
+    campaignState.schedule.generatedAt = campaignState.now;
+    return response(200, scheduleView());
+  }
+  const rowMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)\/schedule\/draft\/rows\/([^/]+)$/u);
+  if (rowMatch && method === 'PATCH') {
+    const body = JSON.parse(init.body);
+    const applicationId = rowMatch[2];
+    let interview = campaignState.interviews.find((item) => item.applicationId === applicationId);
+    if (!interview) {
+      interview = { id: `iv-${applicationId.toLowerCase()}`, applicationId };
+      campaignState.interviews.push(interview);
+    }
+    Object.assign(interview, body, { end: addMinutes(body.start, campaignState.campaign.slotMinutes), note: '' });
+    campaignState.schedule.status = 'draft';
+    campaignState.schedule.dirty = true;
+    return response(200, scheduleView());
+  }
+  if (url.pathname === `${scheduleBase}/draft/save` && method === 'POST') {
+    campaignState.schedule.dirty = false;
+    campaignState.schedule.savedAt = campaignState.now;
+    return response(200, scheduleView());
+  }
+  if (url.pathname === `${scheduleBase}/confirm` && method === 'POST') {
+    const view = scheduleView();
+    if (!view.canConfirm) return response(409, { error: 'Schedule cannot be confirmed.', code: 'SCHEDULE_NOT_READY', details: { conditions: view.conditions.filter((item) => !item.met) } });
+    campaignState.schedule.status = 'confirmed';
+    campaignState.schedule.confirmedAt = campaignState.now;
+    campaignState.schedule.dirty = false;
+    return response(200, scheduleView());
+  }
+  if (url.pathname === `${scheduleBase}.csv` && method === 'GET') {
+    const rows = scheduleView().rows;
+    const csv = ['Application ID,Applicant,Position,Start,End,Interviewer,Room,Status', ...rows.map((row) => [row.applicationId, row.applicantName, row.positionName, row.start ?? '', row.end ?? '', row.interviewerName ?? '', row.roomName ?? '', row.status].join(','))].join('\r\n');
+    return new Response(csv, { status: 200, headers: { 'content-type': 'text/csv; charset=utf-8' } });
   }
   const campaignMatch = url.pathname.match(/^\/api\/campaigns\/([^/]+)$/u);
   if (campaignMatch && method === 'GET') {

@@ -62,7 +62,7 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
   function generate() {
     setRegenerateOpen(false);
     run(() => actions.generateDraft(), {
-      title: 'Đã tạo lịch nháp (mô phỏng)',
+      title: 'Đã tạo lịch nháp',
       text: 'Lịch nháp mẫu đã được tạo cho các hồ sơ qua vòng CV. Kiểm tra các bản ghi Conflict và Unassigned.',
     });
   }
@@ -88,14 +88,14 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
     const result = await action.run(() => actions.exportTimetable());
     if (result.ok) {
       downloadText(result.value.fileName, result.value.content);
-      setMessage({ tone: 'success', title: `Đã xuất lịch ${result.value.rowCount} buổi phỏng vấn (mô phỏng)` });
+      setMessage({ tone: 'success', title: `Đã xuất lịch ${result.value.rowCount} buổi phỏng vấn` });
     }
   }
 
   async function confirmSchedule() {
     setConfirmOpen(false);
     await run(() => actions.confirm(), {
-      title: 'Đã xác nhận lịch phỏng vấn (mô phỏng)',
+      title: 'Đã xác nhận lịch phỏng vấn',
       text: 'Ứng viên và người phỏng vấn được phân công giờ đã thấy lịch của mình. Kết quả tuyển dụng chưa được công bố.',
     });
   }
@@ -140,7 +140,7 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
           hasDraft={schedule.status !== 'none'}
           disabled={action.pending}
           readOnly={confirmed}
-          onRoomsChange={(roomIds) => run(() => actions.updateSettings({ roomIds }))}
+          roomsReadOnly
           onGenerate={() => (hasDraft ? setRegenerateOpen(true) : generate())}
         />
 
@@ -172,7 +172,7 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
                 <Button
                   variant="secondary"
                   disabled={action.pending || !schedule.hasUnsavedChanges}
-                  onClick={() => run(() => actions.saveDraft(), { title: 'Đã lưu lịch nháp (mô phỏng)' })}
+                  onClick={() => run(() => actions.saveDraft(), { title: 'Đã lưu lịch nháp' })}
                 >
                   Lưu thay đổi
                 </Button>

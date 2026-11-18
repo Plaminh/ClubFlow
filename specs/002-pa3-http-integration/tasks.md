@@ -139,18 +139,18 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 ### Tests for User Story 1B
 
-- [ ] T052 [P] [US1] Add failing HTTP adapter tests for review, statistics, files, and CSV in `client/src/tests/services/applicationHttpService.test.js`
-- [ ] T053 [P] [US1] Add failing HTTP adapter tests for schedule read/generate/edit/save/export/confirm in `client/src/tests/services/scheduleHttpService.test.js`
-- [ ] T054 [P] [US1] Extend `client/src/tests/pages/ApplicationReviewPage.test.jsx` and `client/src/tests/pages/InterviewSchedulingPage.test.jsx` for HTTP loading/retry/empty, independent mutations, filters, conflict reasons, meaningful Save, refusal, and locks
+- [x] T052 [P] [US1] Add failing HTTP adapter tests for review, statistics, files, and CSV in `client/src/tests/services/applicationHttpService.test.js`
+- [x] T053 [P] [US1] Add failing HTTP adapter tests for schedule read/generate/edit/save/export/confirm in `client/src/tests/services/scheduleHttpService.test.js`
+- [x] T054 [P] [US1] Extend `client/src/tests/pages/ApplicationReviewPage.test.jsx` and `client/src/tests/pages/InterviewSchedulingPage.test.jsx` for HTTP loading/retry/empty, independent mutations, filters, conflict reasons, meaningful Save, refusal, and locks
 
 ### Implementation for User Story 1B
 
-- [ ] T055 [US1] Replace review, detail, note, screening, CSV, and protected CV browser-store calls with HTTP adapters in `client/src/services/applicationService.js`
-- [ ] T056 [US1] Replace schedule read/generate/edit/save/confirm/export browser-store calls with HTTP adapters in `client/src/services/scheduleService.js`
-- [ ] T057 [US1] Add cancellation/refetch-safe behavior to `client/src/hooks/useApplications.js` and `client/src/hooks/useSchedule.js`
-- [ ] T058 [US1] Adapt `client/src/pages/ApplicationReviewPage.jsx`, screening organisms, and file/CSV actions for contract-driven reads and mutations without reloads
-- [ ] T059 [US1] Adapt `client/src/pages/InterviewSchedulingPage.jsx`, `ScheduleSettingsCard/`, `ScheduleTable/`, `ScheduleRowDialog/`, and `ConfirmationChecklist/` for HTTP states, staged edits, save, and confirmation locks
-- [ ] T060 [US1] Run focused review/schedule tests and fresh-state flow, then full lint/test/build/diff checks; append `AI-LOG.md` evidence and create `feat: integrate application review and scheduling APIs`
+- [x] T055 [US1] Replace review, detail, note, screening, CSV, and protected CV browser-store calls with HTTP adapters in `client/src/services/applicationService.js`
+- [x] T056 [US1] Replace schedule read/generate/edit/save/confirm/export browser-store calls with HTTP adapters in `client/src/services/scheduleService.js`
+- [x] T057 [US1] Add cancellation/refetch-safe behavior to `client/src/hooks/useApplications.js` and `client/src/hooks/useSchedule.js`
+- [x] T058 [US1] Adapt `client/src/pages/ApplicationReviewPage.jsx`, screening organisms, and file/CSV actions for contract-driven reads and mutations without reloads
+- [x] T059 [US1] Adapt `client/src/pages/InterviewSchedulingPage.jsx`, `ScheduleSettingsCard/`, `ScheduleTable/`, `ScheduleRowDialog/`, and `ConfirmationChecklist/` for HTTP states, staged edits, save, and confirmation locks
+- [x] T060 [US1] Run focused review/schedule tests and fresh-state flow, then full lint/test/build/diff checks; append `AI-LOG.md` evidence and create `feat: integrate application review and scheduling APIs`
 
 ---
 

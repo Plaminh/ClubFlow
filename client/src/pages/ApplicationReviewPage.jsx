@@ -76,9 +76,20 @@ function ScreeningPanel({ campaign }) {
     const result = await action.run(() => applicationActions.saveNote(id, note));
     setMessage(
       result.ok
-        ? { applicationId: id, tone: 'success', title: 'Đã lưu ghi chú nội bộ (mô phỏng)' }
+        ? { applicationId: id, tone: 'success', title: 'Đã lưu ghi chú nội bộ' }
         : { applicationId: id, tone: 'error', title: 'Chưa lưu được ghi chú', text: result.error?.message },
     );
+  }
+
+  async function openCv(detailValue) {
+    const result = await action.run(() => applicationActions.downloadCv(detailValue.id));
+    if (!result.ok) {
+      setMessage({ applicationId: detailValue.id, tone: 'error', title: 'Chưa mở được CV', text: result.error?.message });
+      return;
+    }
+    const url = URL.createObjectURL(result.value);
+    window.open(url, '_blank', 'noopener,noreferrer');
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   async function decide(target) {
@@ -105,7 +116,7 @@ function ScreeningPanel({ campaign }) {
       downloadText(result.value.fileName, result.value.content);
       setExportMessage({
         tone: 'success',
-        title: `Đã xuất ${result.value.rowCount} hồ sơ ${filtered ? 'theo bộ lọc hiện tại' : 'của chiến dịch'} (mô phỏng)`,
+        title: `Đã xuất ${result.value.rowCount} hồ sơ ${filtered ? 'theo bộ lọc hiện tại' : 'của chiến dịch'}`,
         text: 'Tệp CSV không gồm ghi chú nội bộ và tệp CV.',
       });
     } else {
@@ -189,6 +200,7 @@ function ScreeningPanel({ campaign }) {
               pending={action.pending}
               message={message?.applicationId === current.id ? message : null}
               focusOnMount={focusDetail}
+              onOpenCv={openCv}
               onSaveNote={saveNote}
               onShortlist={() => setConfirming({ id: current.id, status: 'shortlisted' })}
               onReject={() => setConfirming({ id: current.id, status: 'rejected' })}

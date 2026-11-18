@@ -798,3 +798,30 @@ Verified:
 - `git diff --check` passed. The official course checker remains NOT RUN because its exact file is unavailable.
 
 Limitations: Executive review and scheduling services still use the temporary browser bridge until Phase 6.
+
+---
+
+## 2026-11-18 — PA#3 Phase 6 — Application review and scheduling HTTP integration
+
+Tool: Codex.
+
+Changed:
+
+- Replaced Executive Application list/statistics, detail, private-note, independent screening decision, filtered CSV, and protected CV browser-store calls with relative `/api` adapters.
+- Replaced Schedule read, draft generation, row edit, meaningful save, CSV export, and confirmation browser-store calls with contract adapters. Canonical `dirty`, summary, and confirmation-condition fields are mapped to the existing UI without changing the API contract.
+- Preserved Vietnam-local `+07:00` timestamps when deriving selectable interview starts so row edits satisfy the campaign-date/window contract.
+- Added abort-aware review/detail/schedule reads and stable mutation callbacks. Mutations refetch canonical server state, preserving filters and avoiding full-page reloads.
+- Adapted protected CV handling, removed browser-simulation copy, made Interview Setup rooms truthfully read-only in Scheduling, and retained draft regeneration, staged row edits, explicit Save, refusal reasons, export, and confirmation locks.
+- Added dedicated HTTP adapter tests plus page coverage for loading, retry, empty data, independent decisions, immutable decisions, filtering, protected files, CSV, conflicts, meaningful Save, invalid confirmation, successful confirmation, and post-confirmation locks. Removed superseded browser-store review/scheduling service tests while retaining unrelated Interviewer/result coverage for Phase 7.
+
+Verified:
+
+- Focused review/scheduling HTTP and page suite passed: 30/30 tests in 4 files.
+- `npm run lint` passed.
+- `npm test` passed: frontend 259/259 in 28 files, backend 18/18 in 5 files, and mock 10/10 in 6 files.
+- `npm run build` passed with the existing non-blocking Vite chunk-size warning.
+- `npm run verify:mock-http` passed the clearly non-official fresh-state 24-endpoint workflow with three Applications, three confirmed Interviews, and two published Results.
+- `node tools/validate-api-docs.mjs` passed 9 files, 37 endpoints, and 52 request examples; `git diff --check` passed.
+- Official `contract-check.mjs`: **NOT RUN** — the exact course checker remains unavailable.
+
+Limitations: Interviewer assessment and Executive result services remain on the temporary browser bridge until Phase 7. Route/mode/responsive evidence remains assigned to later Spec Kit phases.

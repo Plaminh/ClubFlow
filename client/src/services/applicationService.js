@@ -1,185 +1,37 @@
-/*
- * Application review service (Executive). Demo implementation over the mock
- * store; replace bodies with apiClient calls during backend integration.
- */
-import { accountName, isScheduleConfirmed, positionById, slotText } from '../mocks/derive.js';
-import { SAMPLE_CV_URL } from '../mocks/fixtures.js';
-import { assertNotLockedBySchedule, requireRole } from '../mocks/guards.js';
-import { clone, getState, mockRequest } from '../mocks/store.js';
-import { formatDateTime } from '../utils/format.js';
-import { getLabel, SCREENING_STATUS_LABELS } from '../constants/labels.js';
-import { toCsv } from '../utils/csv.js';
-import { createUiError } from './uiError.js';
+import { apiClient, apiDownload } from './apiClient.js';
+import { PRIMARY_CAMPAIGN_ID } from './campaignService.js';
 
 export const DEFAULT_PAGE_SIZE = 5;
 
-const normalize = (text) =>
-  String(text ?? '')
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .toLowerCase();
+const base = (campaignId = PRIMARY_CAMPAIGN_ID) => `/campaigns/${campaignId}/applications`;
 
-function summaryOf(state, application) {
-  return {
-    id: application.id,
-    applicantId: application.applicantId,
-    applicantName: accountName(application.applicantId),
-    positionId: application.positionId,
-    positionName: positionById(state, application.positionId)?.name ?? '—',
-    submittedAt: application.submittedAt,
-    screeningStatus: application.screeningStatus,
-  };
+export function list(query = {}, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return apiClient(base(campaignId), { ...options, query: { ...query, pageSize: query.pageSize ?? DEFAULT_PAGE_SIZE } });
 }
 
-function filtered(state, { search = '', positionId = '', status = '', sort = 'newest' } = {}) {
-  const needle = normalize(search.trim());
-  return state.applications
-    .map((application) => summaryOf(state, application))
-    .filter((item) => !needle || normalize(`${item.id} ${item.applicantName}`).includes(needle))
-    .filter((item) => !positionId || item.positionId === positionId)
-    .filter((item) => !status || item.screeningStatus === status)
-    .sort((a, b) =>
-      sort === 'oldest' ? a.submittedAt.localeCompare(b.submittedAt) : b.submittedAt.localeCompare(a.submittedAt),
-    );
+export async function getStats(query = {}, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return (await list(query, options, campaignId)).stats;
 }
 
-function countsOf(items) {
-  return {
-    applications: items.length,
-    applicants: new Set(items.map((item) => item.applicantId)).size,
-    pendingReview: items.filter((item) => item.screeningStatus === 'pendingReview').length,
-    shortlisted: items.filter((item) => item.screeningStatus === 'shortlisted').length,
-    rejected: items.filter((item) => item.screeningStatus === 'rejected').length,
-  };
+export async function get(id, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  const detail = await apiClient(`${base(campaignId)}/${id}`, options);
+  return { ...detail, cv: { ...detail.cv, url: detail.cv.downloadPath } };
 }
 
-function findApplication(state, id) {
-  const application = state.applications.find((item) => item.id === id);
-  if (!application) {
-    throw createUiError('notFound', `Không tìm thấy hồ sơ ${id}.`);
-  }
-  return application;
+export function saveNote(id, note, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return apiClient(`${base(campaignId)}/${id}/private-note`, { ...options, method: 'PATCH', body: { note } });
 }
 
-function detailOf(state, application) {
-  return {
-    ...summaryOf(state, application),
-    // The snapshot submitted with this application, not the current account profile.
-    student: { ...application.studentInfo },
-    availabilityText: slotText(state, application.slotIds),
-    sop: application.sop,
-    cv: { ...application.cv, url: SAMPLE_CV_URL },
-    reviewedAt: application.reviewedAt,
-    privateNote: application.privateNote,
-    // Other applications by the same student (decided independently, BR-07).
-    siblingIds: state.applications
-      .filter((item) => item.applicantId === application.applicantId && item.id !== application.id)
-      .map((item) => item.id),
-    locked: isScheduleConfirmed(state),
-  };
+export function setScreening(id, decision, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return apiClient(`${base(campaignId)}/${id}/screening-decision`, { ...options, method: 'POST', body: { decision } });
 }
 
-/** Page of application summaries. query: { search, positionId, status, sort, page, pageSize } */
-export async function list(query = {}) {
-  await mockRequest();
-  requireRole('executive');
-  const items = filtered(getState(), query);
-  const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const page = Math.min(Math.max(1, query.page ?? 1), pageCount);
-  return clone({
-    items: items.slice((page - 1) * pageSize, page * pageSize),
-    total: items.length,
-    page,
-    pageSize,
-    pageCount,
-  });
+export async function exportCsv(query = {}, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  const content = await apiClient(`${base(campaignId)}.csv`, { ...options, query, responseType: 'text' });
+  const rowCount = Math.max(0, content.trim().split(/\r?\n/u).length - 1);
+  return { fileName: 'clubflow-applications.csv', content, rowCount };
 }
 
-/** Campaign-wide and filtered counts; applications and distinct applicants differ (BR-06). */
-export async function getStats(query = {}) {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  const all = filtered(state, {});
-  const subset = filtered(state, query);
-  const isFiltered = Boolean(query.search?.trim() || query.positionId || query.status);
-  return clone({ campaign: countsOf(all), filtered: countsOf(subset), isFiltered });
-}
-
-export async function get(id) {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  return clone(detailOf(state, findApplication(state, id)));
-}
-
-export async function saveNote(id, note) {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  const application = findApplication(state, id);
-  application.privateNote = note;
-  return clone(detailOf(state, application));
-}
-
-/**
- * Records the CV-screening decision for ONE application (BR-07).
- * Only Pending Review applications can be decided: a saved Shortlist/Reject
- * decision is final (team-selected Q-06; the sources leave reversal open,
- * WORKFLOWS §3). There is no undo and no override.
- */
-export async function setScreening(id, status) {
-  await mockRequest();
-  requireRole('executive');
-  assertNotLockedBySchedule('quyết định vòng CV');
-  if (!['shortlisted', 'rejected'].includes(status)) {
-    throw createUiError('validation', 'Quyết định không hợp lệ.');
-  }
-  const state = getState();
-  const application = findApplication(state, id);
-  if (application.screeningStatus !== 'pendingReview') {
-    throw createUiError(
-      'conflict',
-      `Hồ sơ ${id} đã có quyết định "${getLabel(SCREENING_STATUS_LABELS, application.screeningStatus)}"; quyết định đã lưu không thể thay đổi.`,
-    );
-  }
-  application.screeningStatus = status;
-  application.reviewedAt = state.now;
-  if (status === 'rejected') {
-    state.interviews = state.interviews.filter((interview) => interview.applicationId !== id);
-  }
-  if (state.schedule.status === 'draft') {
-    state.schedule.dirty = true;
-  }
-  return clone(detailOf(state, application));
-}
-
-
-/** CSV of the current filter with permitted fields only (no private notes, no CV files) — BR-09. */
-export async function exportCsv(query = {}) {
-  await mockRequest();
-  requireRole('executive');
-  const state = getState();
-  const items = filtered(state, query);
-  const header = ['Mã hồ sơ', 'Ứng viên', 'Mã số sinh viên', 'Email', 'Vị trí', 'Thời gian nộp', 'Trạng thái'];
-  const lines = items.map((item) => {
-    const { studentInfo } = findApplication(state, item.id);
-    return [
-      item.id,
-      item.applicantName,
-      studentInfo.studentId,
-      studentInfo.email,
-      item.positionName,
-      formatDateTime(item.submittedAt),
-      getLabel(SCREENING_STATUS_LABELS, item.screeningStatus),
-    ];
-  });
-  return {
-    fileName: 'clubflow-ho-so.csv',
-    content: toCsv(header, lines),
-    rowCount: items.length,
-  };
+export function downloadCv(applicationId, options = {}) {
+  return apiDownload(`/applications/${applicationId}/cv`, options);
 }

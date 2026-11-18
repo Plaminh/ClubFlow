@@ -21,7 +21,7 @@ function decisionHint(detail) {
 }
 
 /** Selected application beside the list (reference detail card). */
-export default function ApplicationDetail({ detail, pending, message, focusOnMount, onSaveNote, onShortlist, onReject, onClose }) {
+export default function ApplicationDetail({ detail, pending, message, focusOnMount, onOpenCv, onSaveNote, onShortlist, onReject, onClose }) {
   const [note, setNote] = useState(detail.privateNote ?? '');
   const panelRef = useRef(null);
   const canDecide = !detail.locked && detail.screeningStatus === 'pendingReview';
@@ -85,12 +85,11 @@ export default function ApplicationDetail({ detail, pending, message, focusOnMou
             </div>
           </dl>
           <div>
-            <Button variant="secondary" href={detail.cv.url} target="_blank" rel="noreferrer">
-              Mở CV mẫu hư cấu (PDF)
+            <Button variant="secondary" onClick={() => onOpenCv(detail)} disabled={pending}>
+              Mở CV được bảo vệ (PDF)
             </Button>
             <p className="hint">
-              {detail.cv.fileName} · {Math.round(detail.cv.sizeBytes / 1024)} KB · Dữ liệu tổng hợp, không thuộc người
-              thật.
+              {detail.cv.fileName} · {Math.round(detail.cv.sizeBytes / 1024)} KB · chỉ tải qua endpoint có bearer token.
             </p>
           </div>
           <section aria-labelledby={`sop-${detail.id}`}>

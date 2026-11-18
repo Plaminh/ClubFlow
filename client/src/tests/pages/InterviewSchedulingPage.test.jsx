@@ -1,8 +1,8 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import * as applicationService from '../../services/applicationService.js';
-import * as demoSessionService from '../../services/demoSessionService.js';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
+import { setMockApiDelay, setMockApiMode } from '../helpers/mockApi.js';
 
 const PATH = '/executive/scheduling';
 
@@ -36,6 +36,26 @@ async function editRow(buttonName, { start, room }) {
 }
 
 describe('Interview Scheduling', () => {
+  it('shows loading, then supports retry after an HTTP failure', async () => {
+    setMockApiDelay(50);
+    renderApp(PATH, { accountId: EXECUTIVE, scenarioId: 'screening' });
+    expect(await screen.findByText('Đang tải dữ liệu…')).toBeInTheDocument();
+    await screen.findByRole('heading', { level: 2, name: /^Lịch (nháp|Confirmed)$/ });
+
+    setMockApiDelay(0);
+    setMockApiMode('error');
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo lại lịch nháp' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Tạo lại lịch nháp?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Thay thế lịch nháp' }));
+    expect(await screen.findByText('Chưa thực hiện được')).toBeInTheDocument();
+
+    setMockApiMode('normal');
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo lại lịch nháp' }));
+    const retryDialog = await screen.findByRole('dialog', { name: 'Tạo lại lịch nháp?' });
+    fireEvent.click(within(retryDialog).getByRole('button', { name: 'Thay thế lịch nháp' }));
+    expect(await screen.findByText('Đã tạo lịch nháp')).toBeInTheDocument();
+  });
+
   it('shows the reference draft with summary counts that match the rows', async () => {
     await openScheduling();
 
@@ -81,9 +101,8 @@ describe('Interview Scheduling', () => {
   });
 
   it('resolves the draft, saves, confirms, and becomes read-only (BR-13, BR-14)', async () => {
-    demoSessionService.restoreDemoState({ accountId: EXECUTIVE });
-    await applicationService.setScreening('CF-028', 'rejected');
     await openScheduling();
+    await applicationService.setScreening('CF-028', 'rejected');
 
     await editRow('Sửa CF-027', { start: '09:15–09:30' });
     await editRow('Gán khung giờ CF-031', { start: '09:00–09:15', room: 'B-105' });
@@ -91,7 +110,7 @@ describe('Interview Scheduling', () => {
     expect(stat('Proposed')).toBe('4');
     expect(screen.getByText('Có thay đổi chưa lưu')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Lưu thay đổi' }));
-    expect(await screen.findByText('Đã lưu lịch nháp (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã lưu lịch nháp')).toBeInTheDocument();
 
     const confirmButton = screen.getByRole('button', { name: 'Duyệt & xác nhận lịch' });
     expect(confirmButton).toBeEnabled();
@@ -99,14 +118,14 @@ describe('Interview Scheduling', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Xác nhận lịch phỏng vấn?' });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Duyệt & xác nhận lịch' }));
 
-    expect(await screen.findByText('Đã xác nhận lịch phỏng vấn (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã xác nhận lịch phỏng vấn')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Lịch Confirmed' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Sửa / })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Xuất lịch' })).toBeEnabled();
   });
 
-  it('summarizes the campaign interview configuration as text and keeps only the rooms editable (Q-03)', async () => {
+  it('summarizes the locked Campaign Interview Setup and still permits draft generation (Q-03)', async () => {
     await openScheduling();
 
     const configuration = screen.getByRole('region', { name: 'Cấu hình phỏng vấn của chiến dịch' });
@@ -119,13 +138,9 @@ describe('Interview Scheduling', () => {
     expect(page.queryAllByRole('combobox')).toEqual([]);
     expect(page.queryAllByRole('textbox')).toEqual([]);
 
-    const roomB = screen.getByRole('checkbox', { name: 'B-105' });
-    expect(roomB).toBeEnabled();
-    expect(roomB).toBeChecked();
-    fireEvent.click(roomB);
-
-    expect((await screen.findAllByText(/Phòng không nằm trong danh sách phòng đã chọn\./)).length).toBeGreaterThan(0);
-    expect(screen.getByText('Có thay đổi chưa lưu')).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.getByText('A-201, B-105')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeEnabled();
   });
 
   it('asks before replacing an existing draft', async () => {

@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
+import { setMockApiDelay, setMockApiMode } from '../helpers/mockApi.js';
 
 const PATH = '/executive/review';
 
@@ -16,6 +17,14 @@ function statValue(label) {
 }
 
 describe('Application Review — CV Screening', () => {
+  it('shows a loading state while HTTP data is pending', async () => {
+    setMockApiDelay(50);
+    renderApp(PATH, { accountId: EXECUTIVE });
+
+    expect(await screen.findByText('Đang tải dữ liệu…')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 2, name: 'Tìm và lọc hồ sơ' })).toBeInTheDocument();
+  });
+
   it('shows the reference header, campaign context, and distinct application/applicant counts (BR-06)', async () => {
     await openScreening();
 
@@ -54,10 +63,7 @@ describe('Application Review — CV Screening', () => {
 
     const detail = (await screen.findByRole('heading', { level: 2, name: 'CF-026 · Nguyễn Minh Anh' })).closest('article');
     expect(within(detail).getByText('Bài trình bày nguyện vọng · bản đầy đủ')).toBeInTheDocument();
-    expect(within(detail).getByRole('link', { name: 'Mở CV mẫu hư cấu (PDF)' })).toHaveAttribute(
-      'href',
-      '/demo/fictional-sample-cv.pdf',
-    );
+    expect(within(detail).getByRole('button', { name: 'Mở CV được bảo vệ (PDF)' })).toBeEnabled();
     expect(within(detail).getByLabelText('Ghi chú nội bộ · chỉ Ban tuyển dụng nhìn thấy')).toHaveValue(
       'Có kinh nghiệm nghiên cứu người dùng; cần hỏi thêm cách ưu tiên phản hồi khi các nhóm người dùng có nhu cầu khác nhau.',
     );
@@ -162,7 +168,7 @@ describe('Application Review — CV Screening', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Xuất CSV' }));
 
-    expect(await screen.findByText('Đã xuất 4 hồ sơ theo bộ lọc hiện tại (mô phỏng)')).toBeInTheDocument();
+    expect(await screen.findByText('Đã xuất 4 hồ sơ theo bộ lọc hiện tại')).toBeInTheDocument();
     expect(createObjectURL).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
@@ -183,12 +189,11 @@ describe('Application Review — CV Screening', () => {
   });
 
   it('shows an error with retry when the network fails', async () => {
-    const { setSimulation } = await import('../../mocks/store.js');
-    setSimulation('error');
+    setMockApiMode('error');
     renderApp(PATH, { accountId: EXECUTIVE });
 
     expect(await screen.findByText('Không tải được dữ liệu')).toBeInTheDocument();
-    setSimulation('normal');
+    setMockApiMode('normal');
     fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }));
     expect(await screen.findByRole('heading', { level: 2, name: 'Tìm và lọc hồ sơ' })).toBeInTheDocument();
   });
