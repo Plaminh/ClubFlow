@@ -2630,3 +2630,409 @@ NEVER PUSH.
 
 Do not stop after one phase unless a genuine blocker prevents safe continuation.
 `````
+
+
+## 2026-11-18 — Request 6 — Autonomous PA#3 Remediation and Final Verification
+
+**Record type:** Exact prompt available from current conversation.
+
+**Summary (non-verbatim):** Requested autonomous continuation of PA#3 remediation, resolving all verified defects, completing C10/C11 and remaining audit findings, running quality gates, updating documentation and producing the final audit report in Vietnamese.
+
+**Exact prompt (verbatim):**
+
+````text
+# CLUBFLOW PA#3 — CLAUDE CODE AUTONOMOUS REMEDIATION
+
+You are the Lead Full-Stack Engineer, React Architect, QA Engineer, and Technical Auditor for ClubFlow.
+
+PROJECT:
+ClubFlow — CSC13008, 24KTPM1
+Milestone: PA#3 React Frontend
+Deadline: November 30, 2026, 22:00
+
+MISSION:
+Continue from the CURRENT repository state, resolve all verified defects, complete unfinished Phase 4–6 work, independently verify the implementation, and automatically commit and push each successfully verified milestone.
+
+EXECUTION LOOP:
+AUDIT → PLAN → IMPLEMENT → TEST → FIX → REVERIFY → COMMIT → PUSH → NEXT TASK.
+
+Work autonomously. Do not stop after C10 or C11. Continue until all feasible PA#3 tasks are complete, unless there is a genuine blocker.
+
+You are authorized to:
+- Modify source and documentation within PA#3 scope.
+- Run local development servers and tests.
+- Write meaningful regression tests.
+- Create local commits after verification.
+- Push verified commits to origin/pa3-finalize.
+
+You must NOT:
+- Force push or rewrite Git history.
+- Merge or rebase automatically.
+- Push to main, dev, or another branch.
+- Delete unrelated work.
+- Weaken tests or validation to obtain PASS.
+- Fabricate screenshots, logs or official verification results.
+- Implement unrelated PA#4 functionality.
+- Commit secrets, node_modules, or real student CVs.
+
+==================================================
+1. VERIFY CURRENT STATE
+==================================================
+
+First inspect:
+
+git branch --show-current
+git status --short
+git log -15 --oneline
+git remote -v
+
+Expected previous audit:
+- Branch: pa3-finalize.
+- Last audited HEAD: 4269f19.
+- Contract committed before mock.
+- Mock committed before React consumers.
+- C1–C9 mostly HTTP-integrated.
+- C10/C11 still use browser fixtures.
+- Incomplete Spec Kit tasks T061–T083.
+
+Treat the audit as a hypothesis, not proof.
+Reinspect current source before editing.
+
+Read:
+- AGENTS.md and client/AGENTS.md.
+- Official PA#3 rubric and ClubFlow brief.
+- Product Owner decisions Q01–Q07.
+- docs/api/.
+- FRONTEND.md.
+- AI-LOG.md.
+- specs/002-pa3-http-integration/.
+- client/src/services/, hooks/, pages/, contexts/.
+- mock/server.mjs and mock/data/.
+- Existing tests.
+
+Preserve any unrelated uncommitted files.
+
+Do not recreate completed specifications or restart Phase 2.
+
+==================================================
+2. FIX C10 — INTERVIEWER HTTP INTEGRATION
+==================================================
+
+Inspect and update:
+- client/src/services/interviewerService.js
+- client/src/hooks/useInterviewerWorkspace.js
+- client/src/pages/InterviewerWorkspacePage.jsx
+- Related tests.
+
+Replace all runtime browser mock/store calls with the documented HTTP endpoints.
+
+Implement:
+- Assigned interview list.
+- Interview detail.
+- Authorized CV access.
+- One assessment per completed, assigned interview.
+
+Required UI states:
+- Loading.
+- Error with Retry.
+- Empty.
+- Success.
+
+Verify:
+- API empty means UI empty.
+- API 500 means UI error, not fixture fallback.
+- Only assigned interviews are visible.
+- No CF-* records appear from old browser state.
+- Assessment submission actually mutates HTTP mock state.
+- 400/401/403/404/409 errors behave correctly.
+
+Add focused tests proving the HTTP behavior.
+
+After verification:
+Commit:
+feat: integrate interviewer assessment APIs
+
+Push only after verifying fast-forward remote status.
+
+==================================================
+3. FIX C11 — FINAL RESULTS HTTP INTEGRATION
+==================================================
+
+Inspect and update:
+- client/src/services/resultService.js
+- client/src/hooks/useFinalResults.js
+- client/src/pages/ApplicationReviewPage.jsx
+- Applicant portal result/notification displays.
+- Related tests.
+
+Use only the committed API contract.
+
+Required:
+- Load actual HTTP result candidates.
+- Load assessment details.
+- Record Pass/Fail per application.
+- Publish recorded results.
+- Show published results to the correct applicant.
+- Generate in-app notifications.
+
+Verify:
+- A01 and A02 are independent.
+- Results are private before publication.
+- No stale CF-* fixtures or November 5 timeline.
+- No false "(mô phỏng)" labels.
+- HTTP error/empty modes affect the UI correctly.
+- Duplicate publication does not duplicate notifications.
+- Published results are read-only.
+
+Add focused tests and HTTP workflow verification.
+
+After verification:
+Commit:
+feat: integrate final results APIs
+
+Push only after verifying fast-forward remote status.
+
+==================================================
+4. FIX REMAINING AUDIT FINDINGS
+==================================================
+
+A. Mock modes:
+- Normal: approximately 150ms delay.
+- Slow: approximately 2000ms delay.
+- Error: HTTP 500 for all endpoints except login.
+- Empty: empty all arrays including nested arrays and show zero counts.
+
+Do not silently exempt health or auth/me from error mode unless the official rubric requires it.
+
+B. Application Review:
+- Add search debounce around 300ms.
+- Preserve request cancellation.
+- Prevent stale responses from overwriting newer results.
+
+C. Duplicate application:
+- Handle HTTP 409.
+- Preserve input.
+- Link or navigate to the existing application using existingApplicationId.
+
+D. Demo controls:
+- Remove inaccurate browser-only data/reset descriptions.
+- Ensure demo scenario selection does not override HTTP campaign state.
+
+E. Responsive:
+- Fix brand-link mobile tap target to at least 44px.
+- Review major routes at 360, 768 and 1280px.
+- No horizontal page overflow.
+
+F. Regression tests:
+- Earlier baseline: 295 frontend tests.
+- Most recent audit: 259 frontend tests.
+- Investigate the difference using Git history.
+- Restore missing meaningful coverage if needed.
+- Never add meaningless tests merely to increase totals.
+
+Group coherent fixes into separate verified commits and push after each.
+
+==================================================
+5. COMPLETE FULL C1–C11 HTTP WORKFLOW
+==================================================
+
+Use the same deterministic HTTP mock state and consistent campaign timeline.
+
+Test:
+
+1. Executive creates and publishes a campaign.
+2. Visitor sees the campaign.
+3. Student A signs in.
+4. Student A submits A01 Content.
+5. Student A submits A02 Communications.
+6. Duplicate A01 returns 409.
+7. A01 and A02 maintain independent state.
+8. Executive reviews and shortlists applications.
+9. Applications close according to Q03.
+10. Executive generates a draft schedule.
+11. Conflict and Unassigned states have reasons.
+12. Executive fixes assignments.
+13. Valid schedule confirmation succeeds.
+14. Confirmed schedule becomes read-only.
+15. Applicant sees assigned interview information.
+16. Interviewer sees only assigned interviews.
+17. Interviewer submits assessment after the interview.
+18. Executive records Pass/Fail.
+19. Executive publishes results.
+20. Student A sees published results and notifications.
+
+Test negative authorization and ownership cases.
+
+Do not fake success by bypassing HTTP services.
+
+==================================================
+6. AUTOMATED AND BROWSER VERIFICATION
+==================================================
+
+Run and record:
+
+npm run lint
+npm test
+npm run build
+npm run verify:mock-http
+node tools/validate-api-docs.mjs
+
+Run the original official contract-check.mjs if it is available.
+
+If not available:
+- Report OFFICIAL CHECKER: NOT RUN.
+- Do not substitute a custom checker while claiming it is official.
+
+Restart the HTTP mock before stateful checks.
+
+Verify four modes on API and browser.
+
+Browser verification:
+- C1–C11.
+- Deep links.
+- Login/logout.
+- Role guards.
+- Loading/Error/Retry/Empty.
+- Form validation.
+- 360/768/1280 responsive.
+- Actual rendered DOM.
+- No horizontal overflow.
+- Accessible labels and one h1 per screen.
+
+Run W3C validation if actual tooling is available.
+Otherwise report NOT RUN.
+
+Do not invent evidence.
+
+==================================================
+7. DOCUMENTATION AND SUBMISSION
+==================================================
+
+Update:
+- FRONTEND.md.
+- AI-LOG.md.
+- brief.md.
+- SELF_ASSESSMENT_REPORT.md.
+- Spec Kit tasks and evidence.
+
+FRONTEND.md must accurately document:
+- Team members.
+- Run commands.
+- Demo accounts.
+- Routes and HTTP integration.
+- Product Owner decisions.
+- Libraries.
+- Remaining Not Done.
+
+Self-assessment must use all nine PA#3 rubric criteria and evidence-based scores.
+
+Preserve real historical prompts in brief.md.
+Preserve old AI-LOG entries.
+
+Do not invent student IDs or Product Owner URLs.
+
+Rebuild client/dist from final source.
+
+Verify submission:
+- Repository including .git.
+- client/dist.
+- mock/server.mjs and mock/data.
+- docs/api.
+- FRONTEND.md.
+- brief.md.
+- AI-LOG.md.
+- SELF_ASSESSMENT_REPORT.md.
+- AGENTS.md.
+
+Exclude:
+- node_modules.
+- .env secrets.
+- Temporary files.
+- Real CV data.
+
+Only generate submission ZIP when actual student IDs and required naming details are available.
+
+==================================================
+8. GIT COMMIT AND PUSH POLICY
+==================================================
+
+For each completed milestone:
+
+1. Review source diff.
+2. Run targeted tests.
+3. Run relevant full regression gates.
+4. Fix failures.
+5. Reverify.
+6. Stage only the milestone's files.
+7. Commit with a meaningful message.
+8. Fetch origin.
+9. Confirm local history is a fast-forward of origin/pa3-finalize.
+10. Push to origin/pa3-finalize.
+11. Verify remote synchronization.
+12. Continue automatically.
+
+Do not force push.
+Do not auto-merge or rebase divergent history.
+Do not push failed work.
+
+==================================================
+9. FINAL INDEPENDENT AUDIT
+==================================================
+
+Once implementation appears complete:
+
+Run a fresh audit as if you were the lecturer.
+
+Evaluate:
+
+1. Whole Main Flow /25.
+2. Routing/Auth/State /10.
+3. API Data States /10.
+4. Forms /10.
+5. Contract/Mock /15.
+6. Responsive/Semantic/W3C /5.
+7. Brief/Rules /10.
+8. AI-LOG /10.
+9. Commit History /5.
+
+Do not give full marks without verified evidence.
+
+Produce:
+- Final score estimate.
+- C1–C11 evidence matrix.
+- Remaining P0/P1/P2/P3 defects.
+- Test results.
+- Official checker status.
+- Browser/W3C status.
+- Git commit hashes.
+- Push verification.
+- Submission readiness.
+
+If any P0/P1 issue is found:
+Fix it, rerun relevant tests, commit and push again.
+
+==================================================
+10. STOP CONDITIONS
+==================================================
+
+Only stop when:
+- All feasible Phase 4–6 tasks are completed.
+- Required verification gates pass.
+- No P0/P1 blockers remain.
+- Final report is produced.
+
+Or when:
+- A genuine specification blocker cannot be resolved.
+- Unrelated user work would be overwritten.
+- Required tools are unavailable and completion cannot safely be asserted.
+- Remote branch has diverged.
+- Git push is rejected.
+- An unsafe destructive action would be necessary.
+
+Do not stop to request approval for ordinary technical decisions.
+
+FINAL OUTPUT:
+Write the final report in Vietnamese.
+
+Begin by auditing the current repository and resuming the next incomplete task.
+````

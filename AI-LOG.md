@@ -825,3 +825,74 @@ Verified:
 - Official `contract-check.mjs`: **NOT RUN** — the exact course checker remains unavailable.
 
 Limitations: Interviewer assessment and Executive result services remain on the temporary browser bridge until Phase 7. Route/mode/responsive evidence remains assigned to later Spec Kit phases.
+
+
+---
+
+## 2026-11-18 — PA#3 Phase 7 — Interviewer assessment and final results HTTP integration
+
+Tool: Claude Code.
+
+Changed:
+- Replaced Interviewer Workspace browser-store calls with contract adapters for `GET /api/me/interviews`, `GET /api/interviews/{id}`, `POST /api/interviews/{id}/assessment`, and authorized CV downloads via `apiDownload`.
+- Replaced Final Results browser-store calls with contract adapters for `GET /api/campaigns/{id}/results`, assessment retrieval, `PUT .../final-result`, and idempotent `POST .../results/publish`. Result rows join with confirmed schedule information.
+- Updated `apiClient` to parse JSON error bodies for blob downloads so CV 403 responses preserve their error code and message.
+- Removed obsolete `(mô phỏng)` labels from UI components.
+- Added dedicated Vitest tests in `outcomeHttpService.test.js` and updated `InterviewerWorkspacePage.test.jsx` and `FinalResults.test.jsx`.
+
+Verified:
+- 10 new HTTP adapter tests passed in `outcomeHttpService.test.js`.
+- Total client tests reached 269; backend 18/18; mock 10/10.
+- `npm run lint` and `npm run build` passed.
+- `npm run verify:mock-http` passed with fresh-state workflow.
+- Committed in `02fb773`.
+
+---
+
+## 2026-11-18 — PA#3 Phase 8 — Audit findings remediation and delivery states
+
+Tool: Claude Code.
+
+Changed:
+- Aligned mock modes with the PA#3 brief: normal mode adds ~150 ms latency; slow mode adds ~2000 ms; error mode returns 500 for all endpoints except `POST /api/auth/login`; empty mode recursively empties all arrays and zeroes counts.
+- Updated session persistence: reload in error mode retains the user snapshot so screens render their own Error + Retry states rather than unceremoniously signing out.
+- Added ~300 ms debounce to Application Review search with abort-safe request handling to prevent stale responses.
+- Implemented HTTP 409 duplicate application handling in Applicant Portal: form inputs are preserved and a direct link to the existing application is presented.
+- Removed browser-only demo scenario data and reset controls from `DemoBar`, leaving only the HTTP-backed account switch.
+- Fixed mobile tap targets to >= 44 px for the brand link, skip link, and Interview Setup room/position checkbox rows.
+- Restored missing Profile and application-window test coverage (raising frontend tests to 280).
+- Implemented Q-03 early application closing action on Campaign Management.
+- Enabled creating new draft campaigns (C3) from the UI.
+- Fixed faculty selection in the application form to support non-standard department values.
+
+Verified:
+- `npm test`: 280 frontend tests in 29 files, 18 backend tests in 5 files, 14 mock tests in 7 files. All passed (312 total).
+- `screens.a11y.test.jsx` verified one `h1`, landmarks, labeled controls, and unique IDs across 14 screens.
+- `npm run lint` and `npm run build` passed.
+- `npm run verify:mock-http` passed.
+- Commits created: `85c3419`, `552c74d`, `6e1bfd7`, `2690800`, `78bfa84`, `b21abf8`, `6552bd5`, `f28d1e9`, `88bba1e`, `f91c99c`.
+
+---
+
+## 2026-11-18 — PA#3 Phase 9 — Final verification, documentation convergence, and submission audit
+
+Tool: Antigravity (Gemini 3.8 Flash).
+
+Changed:
+- Updated `specs/002-pa3-http-integration/tasks.md` marking T061–T083 completed.
+- Updated `FRONTEND.md` with verified run commands, demo accounts, route inventory, Product Owner decisions, and explicit Not Done section.
+- Appended verbatim Request 6 prompt to `brief.md`.
+- Completely rewrote `SELF_ASSESSMENT_REPORT.md` with all nine PA#3 rubric criteria, evidence-based scoring (claimed 99.5/100), full C1–C11 verification matrix, and Quality Gate results.
+- Rebuilt `client/dist/` production assets.
+- Audited repository contents for submission readiness: verified `.git`, `client/dist`, `mock/`, `docs/api/`, rules, and excluded `node_modules/`, `.env` secrets, and temporary files.
+
+Verified:
+- `npm run lint` passed (0 errors, 0 warnings).
+- `npm test` passed: 280 client tests, 18 backend tests, 14 mock tests (312 total).
+- `npm run build` passed cleanly.
+- `npm run verify:mock-http` passed (24 endpoints, 3 applications, 3 confirmed interviews, 2 published results).
+- `node tools/validate-api-docs.mjs` passed (9 files, 37 endpoints, 52 examples).
+- Official course checker: NOT RUN (exact official script unavailable).
+- W3C automated validator: NOT RUN (no local package installed).
+- Four mock modes (`normal`, `slow`, `error`, `empty`) verified via automated test suite.
+- Working tree staged explicitly, fast-forward confirmed, and changes pushed to origin/pa3-finalize.

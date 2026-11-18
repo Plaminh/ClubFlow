@@ -162,18 +162,18 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 ### Tests for User Story 3 and Outcomes
 
-- [ ] T061 [P] [US3] Add failing assigned-interview/detail/CV/assessment HTTP adapter tests in `client/src/tests/services/interviewerHttpService.test.js`
-- [ ] T062 [P] [US1] Add failing assessment/result/publication HTTP adapter tests in `client/src/tests/services/resultHttpService.test.js`
-- [ ] T063 [P] [US3] Extend `client/src/tests/pages/InterviewerWorkspacePage.test.jsx` for loading/retry/empty, assignment privacy, private-note absence, future/unassigned refusal, validation, and duplicate submission
-- [ ] T064 [P] [US1] Extend `client/src/tests/pages/FinalResults.test.jsx` for assessment prerequisites, decisions, publication, retry/empty states, and notification uniqueness
+- [x] T061 [P] [US3] Add failing assigned-interview/detail/CV/assessment HTTP adapter tests in `client/src/tests/services/interviewerHttpService.test.js`
+- [x] T062 [P] [US1] Add failing assessment/result/publication HTTP adapter tests in `client/src/tests/services/resultHttpService.test.js`
+- [x] T063 [P] [US3] Extend `client/src/tests/pages/InterviewerWorkspacePage.test.jsx` for loading/retry/empty, assignment privacy, private-note absence, future/unassigned refusal, validation, and duplicate submission
+- [x] T064 [P] [US1] Extend `client/src/tests/pages/FinalResults.test.jsx` for assessment prerequisites, decisions, publication, retry/empty states, and notification uniqueness
 
 ### Implementation for User Story 3 and Outcomes
 
-- [ ] T065 [US3] Replace assigned-interview/detail/assessment browser-store calls with HTTP adapters in `client/src/services/interviewerService.js`
-- [ ] T066 [US1] Replace result list/assessment/record/publish browser-store calls with HTTP adapters in `client/src/services/resultService.js`
-- [ ] T067 [US3] Add cancellation/refetch and mutation handling in `client/src/hooks/useInterviewerWorkspace.js` and `client/src/hooks/useFinalResults.js`
-- [ ] T068 [US3] Adapt `client/src/pages/InterviewerWorkspacePage.jsx`, assigned-interview organisms, and `client/src/pages/ApplicationReviewPage.jsx` result organisms for HTTP states and immutable workflow records
-- [ ] T069 [US3] Run focused Interviewer/outcome flow, full lint/test/build/diff checks, append `AI-LOG.md` evidence, and create `feat: integrate interviewer and results APIs`
+- [x] T065 [US3] Replace assigned-interview/detail/assessment browser-store calls with HTTP adapters in `client/src/services/interviewerService.js`
+- [x] T066 [US1] Replace result list/assessment/record/publish browser-store calls with HTTP adapters in `client/src/services/resultService.js`
+- [x] T067 [US3] Add cancellation/refetch and mutation handling in `client/src/hooks/useInterviewerWorkspace.js` and `client/src/hooks/useFinalResults.js`
+- [x] T068 [US3] Adapt `client/src/pages/InterviewerWorkspacePage.jsx`, assigned-interview organisms, and `client/src/pages/ApplicationReviewPage.jsx` result organisms for HTTP states and immutable workflow records
+- [x] T069 [US3] Run focused Interviewer/outcome flow, full lint/test/build/diff checks, append `AI-LOG.md` evidence, and create `feat: integrate interviewer and results APIs`
 
 ---
 
@@ -183,12 +183,12 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 **Independent Test**: Restart each mode and directly open/reload every important route at 360/768/1280, exercising retry and cross-role states without stale fixture data.
 
-- [ ] T070 [P] [US4] Extend `client/src/tests/pages/CampaignManagementPage.test.jsx`, `ApplicationReviewPage.test.jsx`, `InterviewSchedulingPage.test.jsx`, `ApplicantPortalPage.test.jsx`, and `InterviewerWorkspacePage.test.jsx` so every main data screen proves loading, retryable error, empty, and success behavior
-- [ ] T071 [P] [US4] Extend route tests for direct access, reload-equivalent initialization, Browser Back behavior, unknown routes, signed-out redirects, and cross-role access in `client/src/tests/routes/AppRoutes.test.jsx`
-- [ ] T072 [US4] Remove remaining runtime domain imports from `client/src/mocks/store.js` across `client/src/services/`, pages, hooks, contexts, and components; retain only justified development/test fixtures
-- [ ] T073 [US4] Audit and fix one-`h1`, landmarks, labels, link/button semantics, focus, 44-pixel targets, table/drawer/dialog containment, and page overflow in affected `client/src/` JSX/CSS
-- [ ] T074 [US4] Execute available browser automation at 360/768/1280 for important routes/modes and record exact automated, manual, zoom, screen-reader, and W3C PASS/FAIL/NOT RUN evidence in `specs/002-pa3-http-integration/quickstart.md`
-- [ ] T075 [US4] Run full normal/slow/error/empty and route regression gates, fix/re-run failures, append `AI-LOG.md`, and create focused test/fix commits only after reviewed green diffs
+- [x] T070 [P] [US4] Extend `client/src/tests/pages/CampaignManagementPage.test.jsx`, `ApplicationReviewPage.test.jsx`, `InterviewSchedulingPage.test.jsx`, `ApplicantPortalPage.test.jsx`, and `InterviewerWorkspacePage.test.jsx` so every main data screen proves loading, retryable error, empty, and success behavior
+- [x] T071 [P] [US4] Extend route tests for direct access, reload-equivalent initialization, Browser Back behavior, unknown routes, signed-out redirects, and cross-role access in `client/src/tests/routes/AppRoutes.test.jsx`
+- [x] T072 [US4] Remove remaining runtime domain imports from `client/src/mocks/store.js` across `client/src/services/`, pages, hooks, contexts, and components; retain only justified development/test fixtures
+- [x] T073 [US4] Audit and fix one-`h1`, landmarks, labels, link/button semantics, focus, 44-pixel targets, table/drawer/dialog containment, and page overflow in affected `client/src/` JSX/CSS
+- [x] T074 [US4] Execute available browser automation at 360/768/1280 for important routes/modes and record exact automated, manual, zoom, screen-reader, and W3C PASS/FAIL/NOT RUN evidence in `specs/002-pa3-http-integration/quickstart.md`
+- [x] T075 [US4] Run full normal/slow/error/empty and route regression gates, fix/re-run failures, append `AI-LOG.md`, and create focused test/fix commits only after reviewed green diffs
 
 ---
 
@@ -196,14 +196,14 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 **Purpose**: Converge all tasks, rebuild current artifacts, assess the rubric honestly, and leave a reviewable local history.
 
-- [ ] T076 Run the complete fresh-state C1-C11 flow and independent failure cases against `mock/server.mjs`; record trace evidence in `SELF_ASSESSMENT_REPORT.md`
-- [ ] T077 Run final `npm run lint`, all frontend/backend/mock tests, `npm run build`, documentation validation, equivalent HTTP verification, four modes, diff checks, and official checker only if the exact file is available
-- [ ] T078 Audit all runtime frontend requests against `docs/api/`, all documented examples against mock routes, and all C1-C11 operations against tests; correct contract only with an explicit documented corrective commit
-- [ ] T079 Complete English documentation in `FRONTEND.md`, `brief.md`, `AI-LOG.md`, `SELF_ASSESSMENT_REPORT.md`, `docs/api/`, and this task file without inventing team identity, public links, incidents, or unexecuted evidence
-- [ ] T080 Rebuild and inspect `client/dist/`, verify production preview through the HTTP mock, and record any preview limitation truthfully
-- [ ] T081 Audit required submission contents including hidden `.git`, exclusions, secrets, real uploads, temporary artifacts, and missing team/student/score fields; do not create the final ZIP while required human inputs remain
-- [ ] T082 Review final Git history, branch, HEAD, commit order, expected committed files, and working tree; stage explicitly, create only justified final documentation/test commits, and never push
-- [ ] T083 Re-run Spec Kit checklist status and cross-artifact convergence; mark every genuinely completed task `[x]` in `specs/002-pa3-http-integration/tasks.md` and leave any blocked item unchecked with evidence
+- [x] T076 Run the complete fresh-state C1-C11 flow and independent failure cases against `mock/server.mjs`; record trace evidence in `SELF_ASSESSMENT_REPORT.md`
+- [x] T077 Run final `npm run lint`, all frontend/backend/mock tests, `npm run build`, documentation validation, equivalent HTTP verification, four modes, diff checks, and official checker only if the exact file is available
+- [x] T078 Audit all runtime frontend requests against `docs/api/`, all documented examples against mock routes, and all C1-C11 operations against tests; correct contract only with an explicit documented corrective commit
+- [x] T079 Complete English documentation in `FRONTEND.md`, `brief.md`, `AI-LOG.md`, `SELF_ASSESSMENT_REPORT.md`, `docs/api/`, and this task file without inventing team identity, public links, incidents, or unexecuted evidence
+- [x] T080 Rebuild and inspect `client/dist/`, verify production preview through the HTTP mock, and record any preview limitation truthfully
+- [x] T081 Audit required submission contents including hidden `.git`, exclusions, secrets, real uploads, temporary artifacts, and missing team/student/score fields; do not create the final ZIP while required human inputs remain
+- [x] T082 Review final Git history, branch, HEAD, commit order, expected committed files, and working tree; stage explicitly, create only justified final documentation/test commits, and never push
+- [x] T083 Re-run Spec Kit checklist status and cross-artifact convergence; mark every genuinely completed task `[x]` in `specs/002-pa3-http-integration/tasks.md` and leave any blocked item unchecked with evidence
 
 ---
 
