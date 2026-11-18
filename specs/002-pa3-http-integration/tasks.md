@@ -51,23 +51,23 @@ description: "Dependency-ordered tasks for PA#3 HTTP integration and completion"
 
 **CRITICAL**: Phase 1 commit must exist before this phase begins. No frontend domain integration starts until the Phase 2 commit exists.
 
-- [ ] T014 Add mock test configuration and root scripts without new dependencies in `mock/vitest.config.mjs` and `package.json`
-- [ ] T015 [P] Create deterministic fictional users, campaign, positions, slots, rooms, assignments, applications, schedule, assessments, results, notifications, and sample PDF fixtures under `mock/data/`
-- [ ] T016 [P] Add failing tests for login/role/profile handling and stable restart tokens in `mock/tests/auth-profile.test.mjs`
-- [ ] T017 [P] Add failing tests for public campaign, multipart limits, duplicate applications, A01/A02 independence, and own-data visibility in `mock/tests/applicant.test.mjs`
-- [ ] T018 [P] Add failing tests for campaign publication/Q-03 edits, review mutations, CSV, CV permissions, and interview setup in `mock/tests/executive.test.mjs`
-- [ ] T019 [P] Add failing tests for conflict/unassigned recalculation, meaningful save, invalid confirmation, confirmation lock, and CSV export in `mock/tests/scheduling.test.mjs`
-- [ ] T020 [P] Add failing tests for assigned Interviewer ownership, assessment uniqueness, result publication, notification uniqueness, and privacy in `mock/tests/outcomes.test.mjs`
-- [ ] T021 [P] Add failing tests for normal/slow/error/empty modes, nested arrays, request logging, and restart/reset behavior in `mock/tests/modes.test.mjs`
-- [ ] T022 Implement request parsing, JSON/error/file responses, path matching, delay/mode handling, recursive empty projection, and structured request logging in `mock/lib/http.mjs`
-- [ ] T023 Implement deterministic fixture loading, deep-cloned in-memory state, ID generation, lifecycle clock/phase helpers, visibility projections, and reset behavior in `mock/lib/state.mjs`
-- [ ] T024 Implement token authentication, role/ownership/assignment guards, validation helpers, interval/conflict evaluation, and file rules in `mock/lib/domain.mjs`
-- [ ] T025 Implement all committed auth/profile, campaign/setup, public/applicant, review/files, schedule, interviewer, result, and notification routes in `mock/lib/routes.mjs`
-- [ ] T026 Implement the built-in Node entry point, startup validation, port/mode defaults, clean shutdown, and request status logs in `mock/server.mjs`
-- [ ] T027 Implement a clearly non-official fresh-state HTTP workflow verifier in `tools/verify-pa3-http.mjs` without naming or presenting it as the official checker
-- [ ] T028 Run focused mock tests, fresh normal-mode HTTP verification, strict value review where compatible, all four mode checks, lint, full tests, build, and `git diff --check`; fix and re-run every failure
-- [ ] T029 Append truthful Phase 3 details, checker limitation, verification, and incidents to `AI-LOG.md`; update mock run instructions in `FRONTEND.md`
-- [ ] T030 Review/stage only `mock/`, approved scripts/tooling, and Phase 3 docs; create the scoped local commit `feat: implement contract-driven PA3 HTTP mock`
+- [x] T014 Add mock test configuration and root scripts without new dependencies in `mock/vitest.config.mjs` and `package.json`
+- [x] T015 [P] Create deterministic fictional users, campaign, positions, slots, rooms, assignments, applications, schedule, assessments, results, notifications, and sample PDF fixtures under `mock/data/`
+- [x] T016 [P] Add failing tests for login/role/profile handling and stable restart tokens in `mock/tests/auth-profile.test.mjs`
+- [x] T017 [P] Add failing tests for public campaign, multipart limits, duplicate applications, A01/A02 independence, and own-data visibility in `mock/tests/applicant.test.mjs`
+- [x] T018 [P] Add failing tests for campaign publication/Q-03 edits, review mutations, CSV, CV permissions, and interview setup in `mock/tests/executive.test.mjs`
+- [x] T019 [P] Add failing tests for conflict/unassigned recalculation, meaningful save, invalid confirmation, confirmation lock, and CSV export in `mock/tests/scheduling.test.mjs`
+- [x] T020 [P] Add failing tests for assigned Interviewer ownership, assessment uniqueness, result publication, notification uniqueness, and privacy in `mock/tests/outcomes.test.mjs`
+- [x] T021 [P] Add failing tests for normal/slow/error/empty modes, nested arrays, request logging, and restart/reset behavior in `mock/tests/modes.test.mjs`
+- [x] T022 Implement request parsing, JSON/error/file responses, path matching, delay/mode handling, recursive empty projection, and structured request logging in `mock/lib/http.mjs`
+- [x] T023 Implement deterministic fixture loading, deep-cloned in-memory state, ID generation, lifecycle clock/phase helpers, visibility projections, and reset behavior in `mock/lib/state.mjs`
+- [x] T024 Implement token authentication, role/ownership/assignment guards, validation helpers, interval/conflict evaluation, and file rules in `mock/lib/domain.mjs`
+- [x] T025 Implement all committed auth/profile, campaign/setup, public/applicant, review/files, schedule, interviewer, result, and notification routes in `mock/lib/routes.mjs`
+- [x] T026 Implement the built-in Node entry point, startup validation, port/mode defaults, clean shutdown, and request status logs in `mock/server.mjs`
+- [x] T027 Implement a clearly non-official fresh-state HTTP workflow verifier in `tools/verify-pa3-http.mjs` without naming or presenting it as the official checker
+- [x] T028 Run focused mock tests, fresh normal-mode HTTP verification, strict value review where compatible, all four mode checks, lint, full tests, build, and `git diff --check`; fix and re-run every failure
+- [x] T029 Append truthful Phase 3 details, checker limitation, verification, and incidents to `AI-LOG.md`; update mock run instructions in `FRONTEND.md`
+- [x] T030 Review/stage only `mock/`, approved scripts/tooling, and Phase 3 docs; create the scoped local commit `feat: implement contract-driven PA3 HTTP mock`
 
 **Checkpoint**: Full committed provider passes its tests and manual/equivalent HTTP checks from fresh state. Official checker remains NOT RUN unless its exact course file is later supplied.
 

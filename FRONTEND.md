@@ -22,21 +22,35 @@ The Vite development server uses `http://localhost:3000`.
 
 ### PA#3 HTTP Mock
 
-The reviewed contract requires this command:
+Start the built-in Node HTTP mock with:
 
 ```sh
-node mock/server.mjs
+npm run mock
 ```
 
-`mock/server.mjs` and `mock/data/` are not implemented yet, so the command is not currently runnable. The current React UI still uses browser fixtures for domain data; only the footer health check uses the shared HTTP client. Contract documentation alone does not satisfy HTTP integration.
+The default address is `http://localhost:3001`. The process starts from fresh deterministic in-memory fixtures on every restart and logs one structured JSON status record per request. The current React UI still uses browser fixtures for domain data until the consumer-integration phases are complete.
 
-The planned default mock address is `http://localhost:3001`. Modes will be selected with the process variable `MOCK_MODE=normal|slow|error|empty`; no additional environment file will be created.
+Select a mode with the process variable `MOCK_MODE=normal|slow|error|empty`; no additional environment file is used. For example in PowerShell:
+
+```powershell
+$env:MOCK_MODE = 'slow'
+npm run mock
+```
+
+Verification commands:
+
+```sh
+npm run test:mock
+npm run verify:mock-http
+```
+
+The second command is the repository's clearly non-official fresh-state workflow verifier. It is not the unavailable course checker.
 
 ## 3. Demo Accounts
 
 ### Required PA#3 Accounts
 
-The reviewed API contract defines these deterministic fictional credentials. They are not runtime-verified until the HTTP mock is implemented and checked.
+The HTTP mock and its fresh-state verifier runtime-check these deterministic fictional credentials.
 
 | Name in examples | Role | User name | Password |
 | --- | --- | --- | --- |
@@ -48,7 +62,7 @@ The reviewed API contract defines these deterministic fictional credentials. The
 
 ### Existing Browser-Demo Accounts
 
-These credentials are verified only for the current browser prototype in `client/src/mocks/`. They issue no HTTP token yet.
+These credentials remain the existing browser-prototype identities in `client/src/mocks/`. The canonical usernames above issue deterministic HTTP bearer tokens; frontend session migration is a later phase.
 
 | Browser-demo account ID | Role | Browser-demo email | Browser-demo password | Contract relationship |
 | --- | --- | --- | --- | --- |
@@ -99,21 +113,18 @@ The supplied PA#3 prompt contains the following directions. No public Product Ow
 | Vite | Development server and production bundler |
 | React Router DOM | Direct routes, navigation, redirects, and role/auth gates |
 | Plain CSS | Existing styling approach; no CSS framework dependency |
-| Vitest | Sole automated test framework for frontend, backend, and planned mock checks |
+| Vitest | Sole automated test framework for frontend, backend, and mock checks |
 | React Testing Library / jest-dom | Observable component, route, form, and accessibility assertions |
 | ESLint with React plugins | Repository lint and React/Hook rules |
-| Node.js built-in modules | Required future HTTP mock runtime without a third-party server/router |
+| Node.js built-in modules | HTTP mock runtime without a third-party server/router |
 
-No dependency was added during contract work.
+No dependency was added for the contract or HTTP mock.
 
 ## 7. Not Done
 
-- Runtime implementation and verification of the reviewed API contract. Structural documentation validation passes, but this does not prove a provider exists.
-- Node built-in HTTP mock at `mock/server.mjs`, deterministic data under `mock/data/`, and `normal`, `slow`, `error`, `empty` modes.
-- Runtime canonical accounts and bearer authentication (credentials are contract-defined only).
 - Relative `/api` Vite development/preview proxies and removal of runtime absolute API configuration.
 - Conversion of domain services from browser fixture/store access to HTTP.
 - Full C4 editing behavior and remaining Q-03 UI correction.
 - Exact official course `contract-check.mjs` execution. The file is unavailable, so official checker status is **NOT RUN**; a separate structural validator is not a substitute.
-- Current runtime evidence for C1-C11, four modes, direct routes, 360/768/1280 widths, production preview, and rendered HTML validation.
+- Frontend runtime evidence for C1-C11, direct routes, 360/768/1280 widths, production preview, and rendered HTML validation. Provider-level C1-C11 and four-mode behavior are automated; they do not substitute for browser evidence.
 - Team names, student IDs, public Product Owner decision links, and final submission ZIP naming fields.

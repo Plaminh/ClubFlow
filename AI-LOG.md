@@ -690,4 +690,37 @@ Verified:
 
 Limitations: This phase defines and statically validates the contract only. No HTTP mock route or frontend domain HTTP consumer exists yet, multipart/file behavior is not runtime-proven, and current browser services still read in-memory fixtures. Team names, student IDs, and public Product Owner links still require human input.
 
-Commit: planned scoped local commit `docs: define PA3 API contract`; hash is recorded after successful final phase verification and commit creation.
+Commit: `5ba9f3e` (`docs: define PA3 API contract`), pushed to `origin/pa3-finalize` after the remote fast-forward safety check; local and remote hashes matched after push.
+
+---
+
+## 2026-11-18 — PA#3 Phase 3 — Contract-driven HTTP mock
+
+Tool: Codex.
+
+Asked for: Continue from the next incomplete Spec Kit task through PA#3 Phase 6, verifying and committing every completed phase. During this phase the Git policy was explicitly updated to permit a fetch/fast-forward safety check and push of each green phase to `origin/pa3-finalize`, without force-push, merge, rebase, or pushes to other branches.
+
+Rejected:
+
+- Did not add Express or another mock-server dependency. The provider uses Node's built-in HTTP, Fetch, FormData, URL, and stream-compatible APIs with the existing Vitest installation.
+- Did not create or label a replacement `contract-check.mjs`. The official course checker remains **NOT RUN** because its exact file is unavailable.
+
+Changed:
+
+- Added deterministic fictional users, one fresh published primary Campaign, Positions, availability slots, Interviewer assignments, rooms, and a safe fictional PDF under `mock/data/`.
+- Added shared request parsing, structured JSON errors, CSV/PDF responses, route matching, role/ownership/assignment guards, fixture cloning/reset, stable IDs/timestamps/tokens, interval conflict evaluation, recursive empty-mode projection, and structured request logs.
+- Implemented every endpoint in the 37-row inventory across authentication/profile, campaign/setup, public/applicant, Executive review/files, scheduling, Interviewer assessments, final results, and Applicant notifications.
+- Implemented `normal`, `slow`, `error`, and `empty` modes, clean startup/shutdown, and root scripts for the mock, its Vitest suite, and a clearly non-official fresh-state HTTP workflow verifier.
+- Added six HTTP integration test files covering stable restart tokens, multipart/file rules, duplicate/ownership isolation, constrained campaign edits, review/CSV/CV permissions, Conflict/Unassigned recalculation, meaningful Save Changes, confirmation locks, assignment privacy, assessment immutability, result publication idempotency, notification uniqueness, modes, logging, and reset.
+- Updated `FRONTEND.md` with runnable mock/mode/verification commands and accurate provider-versus-frontend integration status.
+
+Verified:
+
+- `npm run test:mock`: 6 files and 10 tests passed against real ephemeral HTTP listeners.
+- `npm run verify:mock-http`: passed a fresh normal-mode C1-C11-equivalent workflow with 24 endpoint interactions, three applications, three confirmed interviews, and two published results.
+- Final phase gates passed: `npm run lint`; `npm test` with frontend 296/296 in 24 files, backend 18/18 in 5 files, and mock 10/10 in 6 files; `npm run build`; the non-official HTTP verifier; structural contract validation with 9 files/37 endpoints/52 request examples; and `git diff --check`. The existing non-blocking Vite chunk-size warning remains.
+- Contract phase commit `5ba9f3e` was fetched, verified as a fast-forward update of `origin/pa3-finalize`, pushed, and then verified byte-for-byte equal locally and remotely.
+
+Incidents: The first combined documentation/tool patch used an outdated `package.json` context because the required mock scripts had already been applied in an earlier scoped edit. The patch failed atomically; the tool file was then added against the actual state. No source content was lost or partially staged.
+
+Limitations: The provider is intentionally an in-memory deterministic PA#3 mock, not the Express/PostgreSQL production backend. The React domain services still use browser fixtures until the subsequent consumer phases. Browser route/responsive/accessibility evidence is therefore still pending. The official course checker remains NOT RUN.

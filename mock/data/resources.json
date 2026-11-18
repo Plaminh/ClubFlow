@@ -1,0 +1,7 @@
+{
+  "rooms": [
+    { "id": "room-a201", "name": "A-201" },
+    { "id": "room-b105", "name": "B-105" }
+  ],
+  "password": "ClubFlowDemo!"
+}
