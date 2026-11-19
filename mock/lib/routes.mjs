@@ -301,6 +301,12 @@ function recalculateRows(rows) {
   }
 }
 
+/** "A01", "A01 and A02", "A01, A02 and A03" for the rows' application ids. */
+function namesOf(rows) {
+  const ids = rows.map((row) => row.applicationId);
+  return ids.length > 1 ? `${ids.slice(0, -1).join(', ')} and ${ids[ids.length - 1]}` : ids[0] ?? '';
+}
+
 function scheduleConditions(state, campaign, schedule) {
   const applications = state.applications.filter((application) => application.campaignId === campaign.id);
   const shortlisted = applications.filter((application) => application.screeningStatus === 'shortlisted');
@@ -309,12 +315,14 @@ function scheduleConditions(state, campaign, schedule) {
   const saved = schedule.status !== 'none' && !schedule.dirty && Boolean(schedule.savedAt);
   const assigned = shortlisted.length > 0 && schedule.rows.length === shortlisted.length && schedule.rows.every((row) => row.status !== 'unassigned');
   const conflictFree = schedule.rows.length > 0 && schedule.rows.every((row) => row.status !== 'conflict');
+  const unassignedRows = schedule.rows.filter((row) => row.status === 'unassigned');
+  const conflictRows = schedule.rows.filter((row) => row.status === 'conflict');
   return [
     { code: 'APPLICATIONS_CLOSED', label: 'Applications are closed', met: closed, detail: closed ? 'Closed.' : 'Applications remain open.' },
     { code: 'ALL_REVIEWED', label: 'All applications are reviewed', met: reviewed, detail: `${applications.filter((item) => item.screeningStatus !== 'pendingReview').length} of ${applications.length} applications reviewed.` },
-    { code: 'DRAFT_SAVED', label: 'Draft changes are saved', met: saved, detail: saved ? 'Saved.' : 'Generate and save a draft.' },
-    { code: 'ALL_ASSIGNED', label: 'Every shortlisted application is assigned', met: assigned, detail: `${schedule.rows.filter((row) => row.status !== 'unassigned').length} of ${shortlisted.length} assigned.` },
-    { code: 'NO_CONFLICTS', label: 'No conflicts remain', met: conflictFree, detail: conflictFree ? 'No conflicts.' : 'Resolve draft conflicts.' },
+    { code: 'DRAFT_SAVED', label: 'Draft changes are saved', met: saved, detail: saved ? 'Saved.' : schedule.status === 'none' ? 'Generate and save a draft.' : 'Unsaved generated draft.' },
+    { code: 'ALL_ASSIGNED', label: 'Every shortlisted application is assigned', met: assigned, detail: assigned ? `${shortlisted.length} of ${shortlisted.length} assigned.` : unassignedRows.length ? `${namesOf(unassignedRows)} ${unassignedRows.length > 1 ? 'are' : 'is'} unassigned.` : `${shortlisted.length} shortlisted applications need assignments.` },
+    { code: 'NO_CONFLICTS', label: 'No conflicts remain', met: conflictFree, detail: conflictFree ? 'No conflicts.' : conflictRows.length ? `${namesOf(conflictRows)} ${conflictRows.length > 1 ? 'conflict' : 'conflicts'}.` : 'Generate and review a draft.' },
   ];
 }
 
@@ -361,6 +369,7 @@ function fullInterviewRow(state, campaign, application, values = {}) {
     applicantName: application.studentInfo.name,
     positionId: application.positionId,
     positionName: position.name,
+    availabilityText: availabilityText(campaign, application.slotIds),
     start: values.start ?? null,
     end: values.start ? addMinutes(values.start, campaign.slotMinutes) : null,
     interviewerId: values.interviewerId ?? null,

@@ -15,7 +15,7 @@ The canonical `GET` schedule view contains:
 - `status`: `none`, `draft`, or `confirmed`.
 - `dirty`, `generatedAt`, `savedAt`, `confirmedAt`, `canConfirm`, and `zeroShortlisted`.
 
-Mutation responses return the action projection shown by their example. The frontend may use that result immediately and refetch this canonical `GET` view. Empty mode sets every array in either projection to `[]` and all summary counts to zero while retaining valid settings/status scalars.
+Mutation responses return the canonical view: each example shows the main fields and ends with `…` for the remaining fields of that view. The frontend may use that result immediately and refetch this canonical `GET` view. Empty mode sets every array in either projection to `[]` and all summary counts to zero while retaining valid settings/status scalars.
 
 ## GET /api/campaigns/{campaignId}/schedule
 
@@ -71,7 +71,7 @@ Content-Type: application/json
   "rows": [],
   "summary": { "total": 0, "proposed": 0, "conflict": 0, "unassigned": 0 },
   "conditions": [
-    { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed early at 2026-11-17T10:00:00+07:00." },
+    { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed." },
     { "code": "ALL_REVIEWED", "label": "All applications are reviewed", "met": true, "detail": "3 of 3 applications reviewed." },
     { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": false, "detail": "Generate and save a draft." },
     { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": false, "detail": "3 shortlisted applications need assignments." },
@@ -118,6 +118,7 @@ Content-Type: application/json
       "applicantName": "Nguyen Minh Anh",
       "positionId": "pos-content",
       "positionName": "Content",
+      "availabilityText": "09:00-10:00, 10:00-11:00",
       "start": "2026-12-02T09:00:00+07:00",
       "end": "2026-12-02T09:30:00+07:00",
       "interviewerId": "iv-giahuy",
@@ -135,6 +136,7 @@ Content-Type: application/json
       "applicantName": "Nguyen Minh Anh",
       "positionId": "pos-comms",
       "positionName": "Communications",
+      "availabilityText": "09:00-10:00, 10:00-11:00",
       "start": "2026-12-02T09:00:00+07:00",
       "end": "2026-12-02T09:30:00+07:00",
       "interviewerId": "iv-comms",
@@ -152,6 +154,7 @@ Content-Type: application/json
       "applicantName": "Pham Quoc Bao",
       "positionId": "pos-comms",
       "positionName": "Communications",
+      "availabilityText": "09:00-10:00, 10:00-11:00",
       "start": null,
       "end": null,
       "interviewerId": null,
@@ -177,7 +180,8 @@ Content-Type: application/json
     { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": false, "detail": "Unsaved generated draft." },
     { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": false, "detail": "A03 is unassigned." },
     { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": false, "detail": "A01 and A02 conflict." }
-  ]
+  ],
+  …
 }
 ```
 
@@ -214,14 +218,15 @@ Content-Type: application/json
 
 {
   "rows": [
-    { "applicationId": "A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "interviewerId": "iv-giahuy", "roomId": "room-a201", "status": "proposed", "reasons": [], "conflictWith": [] },
-    { "applicationId": "A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [] },
-    { "applicationId": "A03", "start": null, "end": null, "interviewerId": null, "roomId": null, "status": "unassigned", "reasons": ["The deterministic draft left this application for manual assignment."], "conflictWith": [] }
+    { "applicationId": "A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "interviewerId": "iv-giahuy", "roomId": "room-a201", "status": "proposed", "reasons": [], "conflictWith": [], … },
+    { "applicationId": "A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [], … },
+    { "applicationId": "A03", "start": null, "end": null, "interviewerId": null, "roomId": null, "status": "unassigned", "reasons": ["The deterministic draft left this application for manual assignment."], "conflictWith": [], … }
   ],
   "summary": { "total": 3, "proposed": 2, "conflict": 0, "unassigned": 1 },
   "status": "draft",
   "dirty": true,
-  "canConfirm": false
+  "canConfirm": false,
+  …
 }
 ```
 
@@ -244,14 +249,15 @@ Content-Type: application/json
 
 {
   "rows": [
-    { "applicationId": "A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "interviewerId": "iv-giahuy", "roomId": "room-a201", "status": "proposed", "reasons": [], "conflictWith": [] },
-    { "applicationId": "A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [] },
-    { "applicationId": "A03", "start": "2026-12-02T10:00:00+07:00", "end": "2026-12-02T10:30:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [] }
+    { "applicationId": "A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "interviewerId": "iv-giahuy", "roomId": "room-a201", "status": "proposed", "reasons": [], "conflictWith": [], … },
+    { "applicationId": "A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [], … },
+    { "applicationId": "A03", "start": "2026-12-02T10:00:00+07:00", "end": "2026-12-02T10:30:00+07:00", "interviewerId": "iv-comms", "roomId": "room-b105", "status": "proposed", "reasons": [], "conflictWith": [], … }
   ],
   "summary": { "total": 3, "proposed": 3, "conflict": 0, "unassigned": 0 },
   "status": "draft",
   "dirty": true,
-  "canConfirm": false
+  "canConfirm": false,
+  …
 }
 ```
 
@@ -289,10 +295,11 @@ Content-Type: application/json
     { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": true, "detail": "No conflicts." }
   ],
   "rows": [
-    { "applicationId": "A01", "status": "proposed", "reasons": [], "conflictWith": [] },
-    { "applicationId": "A02", "status": "proposed", "reasons": [], "conflictWith": [] },
-    { "applicationId": "A03", "status": "proposed", "reasons": [], "conflictWith": [] }
-  ]
+    { "applicationId": "A01", "status": "proposed", "reasons": [], "conflictWith": [], … },
+    { "applicationId": "A02", "status": "proposed", "reasons": [], "conflictWith": [], … },
+    { "applicationId": "A03", "status": "proposed", "reasons": [], "conflictWith": [], … }
+  ],
+  …
 }
 ```
 
@@ -314,7 +321,11 @@ Accept: text/csv
 HTTP/1.1 200 OK
 Content-Type: text/csv; charset=utf-8
 Content-Disposition: attachment; filename="clubflow-schedule.csv"
+```
 
+Body of that answer (CSV, so the answer block above has no body for the checker):
+
+```text
 Application ID,Applicant,Position,Start,End,Interviewer,Room,Status
 A01,Nguyen Minh Anh,Content,2026-12-02T09:00:00+07:00,2026-12-02T09:30:00+07:00,Gia Huy,A-201,proposed
 A02,Nguyen Minh Anh,Communications,2026-12-02T09:30:00+07:00,2026-12-02T10:00:00+07:00,Linh Tran,B-105,proposed
@@ -355,13 +366,18 @@ Content-Type: application/json
     { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": true, "detail": "No conflicts." }
   ],
   "rows": [
-    { "interviewId": "int-A01", "applicationId": "A01", "status": "confirmed", "reasons": [], "conflictWith": [] },
-    { "interviewId": "int-A02", "applicationId": "A02", "status": "confirmed", "reasons": [], "conflictWith": [] },
-    { "interviewId": "int-A03", "applicationId": "A03", "status": "confirmed", "reasons": [], "conflictWith": [] }
-  ]
+    { "interviewId": "int-A01", "applicationId": "A01", "status": "confirmed", "reasons": [], "conflictWith": [], … },
+    { "interviewId": "int-A02", "applicationId": "A02", "status": "confirmed", "reasons": [], "conflictWith": [], … },
+    { "interviewId": "int-A03", "applicationId": "A03", "status": "confirmed", "reasons": [], "conflictWith": [], … }
+  ],
+  …
 }
 ```
 
 ## Changes
 
+- 2026-11-19: Schedule rows now carry `availabilityText` (the Applicant's chosen slots, for example `09:00-10:00, 10:00-11:00`). The Scheduling screen has a column for it that was always empty because the contract and the mock did not send it; the Executive needs it to place an interview inside the Applicant's availability.
+- 2026-11-19: The mock now names the applications in the confirmation conditions (`ALL_ASSIGNED`: "A03 is unassigned.", `NO_CONFLICTS`: "A01 and A02 conflict.") and uses the example texts for the unsaved and no-draft cases, as the examples already showed; it said "Resolve draft conflicts." and "0 of 3 assigned." before, so a refused confirmation did not name the applications. The `APPLICATIONS_CLOSED` example detail is now `Closed.`, which is what the mock answers.
+- 2026-11-19: The schedule CSV example no longer carries its body inside the `http` answer block (see the same change in `03-review-files.md`).
+- 2026-11-19: Mutation examples (generate, row edit, save, confirm) now end with `…`, and the prose says mutation responses return the canonical schedule view. The mock already returned the full view, so the earlier "action projection" wording and the shorter examples did not match it; found by sending every example to a freshly started mock.
 - 2026-11-18: Defined complete schedule DTOs, deterministic Conflict/Unassigned generation, recalculated row edits, meaningful dirty/save semantics, CSV, readiness conditions, refusal behavior, confirmation, and locks.

@@ -154,12 +154,13 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "status": "ok",
-  "mode": "normal"
+  "status": "ok"
 }
 ```
 
 ## Changes
 
+- 2026-11-19 (late entry for commit `85c3419` of 2026-11-18, which changed `mock/server.mjs` without a line here): the mock modes follow the PA#3 brief: `normal` answers after about 150 ms, `slow` after 2 s, `error` answers 500 with the error shape for every request except `POST /api/auth/login`, and `empty` makes every list in an answer `[]`, nested lists included. No endpoint, field or status of this contract changed.
+- 2026-11-19: Removed `mode` from the `GET /api/health` example; the mock answers `{ "status": "ok" }` only. The mock now reads its port from `PORT` (default 3001) instead of `MOCK_PORT`, as the PA#3 brief requires.
 - 2026-11-18: Finalized direct response/error conventions, one coherent primary-campaign journey, early-close business action, complete inventory, C1-C11 trace, mock restart semantics, and official-checker-independent wording.
 - 2026-11-17: Replaced the health-only scaffold with the initial PA#3 contract outline.

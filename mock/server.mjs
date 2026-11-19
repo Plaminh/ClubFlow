@@ -90,8 +90,8 @@ export function createMockServer(options = {}) {
 }
 
 async function main() {
-  const port = Number(process.env.MOCK_PORT ?? 3001);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('MOCK_PORT must be an integer from 1 to 65535.');
+  const port = Number(process.env.PORT ?? 3001);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be an integer from 1 to 65535.');
   const mock = createMockServer();
   const baseUrl = await mock.listen(port, '0.0.0.0');
   console.info(`ClubFlow PA#3 mock listening at ${baseUrl} in ${mock.mode} mode.`);

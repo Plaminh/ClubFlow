@@ -251,7 +251,11 @@ Accept: text/csv
 HTTP/1.1 200 OK
 Content-Type: text/csv; charset=utf-8
 Content-Disposition: attachment; filename="clubflow-applications.csv"
+```
 
+Body of that answer (CSV, so the answer block above has no body for the checker):
+
+```text
 Application ID,Applicant,Student ID,Email,Position,Submitted At,Status
 A01,Nguyen Minh Anh,26DEMO0142,minh.anh@demo.example,Content,2026-11-17T09:10:00+07:00,shortlisted
 A02,Nguyen Minh Anh,26DEMO0142,minh.anh@demo.example,Communications,2026-11-17T09:12:00+07:00,shortlisted
@@ -277,10 +281,11 @@ HTTP/1.1 200 OK
 Content-Type: application/pdf
 Content-Disposition: inline; filename="cv.pdf"
 Content-Length: 204800
-
-[binary PDF body]
 ```
+
+The body of that answer is the PDF itself, so the answer block above has no body for the checker.
 
 ## Changes
 
+- 2026-11-19: The CSV and PDF examples no longer carry their body inside the `http` answer block, because the course contract-check reads that block as JSON; the CSV text is shown in a `text` block after the answer. The answers themselves did not change.
 - 2026-11-18: Added composite list/statistics semantics, exact query limits, independent A01/A02/A03 decisions, note limits, permitted CSV fields, protected CV authorization, and deterministic examples.

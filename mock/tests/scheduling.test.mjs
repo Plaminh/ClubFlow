@@ -21,6 +21,7 @@ describe('scheduling HTTP contract', () => {
     const generated = await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', { method: 'POST', headers: bearer(exec) });
     expect(generated.body.summary).toEqual({ total: 3, proposed: 0, conflict: 2, unassigned: 1 });
     expect(generated.body.rows.find((row) => row.applicationId === 'A01').conflictWith).toEqual(['A02']);
+    for (const row of generated.body.rows) expect(row.availabilityText).toEqual(expect.stringMatching(/^\d{2}:\d{2}-\d{2}:\d{2}/));
 
     const edit = async (id, start) => request(mock.baseUrl, `/api/campaigns/cmp-2026-hk1/schedule/draft/rows/${id}`, {
       method: 'PATCH',

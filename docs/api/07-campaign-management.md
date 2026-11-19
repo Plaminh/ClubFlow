@@ -58,8 +58,8 @@ Content-Type: application/json
       "departmentName": "Communications",
       "name": "Content",
       "quota": 2,
-      "description": "Create useful club content.",
-      "requirements": "Clear writing.",
+      "description": "Create campaign content.",
+      "requirements": "Clear writing and collaboration.",
       "applicationCount": 1
     },
     {
@@ -159,12 +159,12 @@ Content-Type: application/json
   },
   "phase": "draft",
   "positions": [
-    { "id": "pos-2027-content", "departmentId": "dep-comms", "departmentName": "Communications", "name": "Content", "quota": 2, "description": "Create useful club content.", "requirements": "Clear writing.", "applicationCount": 0 }
+    { "id": "pos-2027-content", "departmentId": "dep-communications", "departmentName": "Communications", "name": "Content", "quota": 2, "description": "Create useful club content.", "requirements": "Clear writing.", "applicationCount": 0 }
   ],
   "slots": [
-    { "id": "slot-2027-0900", "start": "2027-02-01T09:00:00+07:00", "end": "2027-02-01T10:00:00+07:00" },
-    { "id": "slot-2027-1000", "start": "2027-02-01T10:00:00+07:00", "end": "2027-02-01T11:00:00+07:00" },
-    { "id": "slot-2027-1100", "start": "2027-02-01T11:00:00+07:00", "end": "2027-02-01T12:00:00+07:00" }
+    { "id": "slot-0900", "start": "2027-02-01T09:00:00+07:00", "end": "2027-02-01T10:00:00+07:00" },
+    { "id": "slot-1000", "start": "2027-02-01T10:00:00+07:00", "end": "2027-02-01T11:00:00+07:00" },
+    { "id": "slot-1100", "start": "2027-02-01T11:00:00+07:00", "end": "2027-02-01T12:00:00+07:00" }
   ],
   "interviewSetup": {
     "interviewers": [
@@ -230,13 +230,14 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "campaign": { "id": "cmp-2027-hk1", "description": "Recruit the next club cohort with practical project work.", "status": "draft" },
+  "campaign": { "id": "cmp-2027-hk1", "description": "Recruit the next club cohort with practical project work.", "status": "draft", … },
   "positions": [
-    { "id": "pos-2027-content", "name": "Content", "quota": 2, "applicationCount": 0 },
-    { "id": "pos-2027-operations", "name": "Event Operations", "quota": 1, "applicationCount": 0 }
+    { "id": "pos-2027-content", "name": "Content", "quota": 2, "applicationCount": 0, … },
+    { "id": "pos-2027-event-operations", "name": "Event Operations", "quota": 1, "applicationCount": 0, … }
   ],
   "locked": false,
-  "lockReason": null
+  "lockReason": null,
+  …
 }
 ```
 
@@ -249,7 +250,7 @@ Content-Type: application/json
 **Success**: `200` composite Campaign view. Errors: `401`; `403`; `404 POSITION_NOT_FOUND`; `409 POSITION_HAS_APPLICATIONS`; `409 CAMPAIGN_CONFIRMED`.
 
 ```http
-DELETE /api/campaigns/cmp-2027-hk1/positions/pos-2027-operations HTTP/1.1
+DELETE /api/campaigns/cmp-2027-hk1/positions/pos-2027-event-operations HTTP/1.1
 Authorization: Bearer {{token:exec}}
 Accept: application/json
 ```
@@ -259,12 +260,13 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "campaign": { "id": "cmp-2027-hk1", "status": "draft" },
+  "campaign": { "id": "cmp-2027-hk1", "status": "draft", … },
   "positions": [
-    { "id": "pos-2027-content", "name": "Content", "quota": 2, "applicationCount": 0 }
+    { "id": "pos-2027-content", "name": "Content", "quota": 2, "applicationCount": 0, … }
   ],
   "locked": false,
-  "lockReason": null
+  "lockReason": null,
+  …
 }
 ```
 
@@ -312,7 +314,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "campaign": { "id": "cmp-2027-hk1", "interviewDate": "2027-02-01", "interviewWindow": { "start": "09:00", "end": "12:00" }, "slotMinutes": 30, "status": "draft" },
+  "campaign": { "id": "cmp-2027-hk1", "interviewDate": "2027-02-01", "interviewWindow": { "start": "09:00", "end": "12:00" }, "slotMinutes": 30, "status": "draft", … },
   "interviewSetup": {
     "interviewers": [
       { "id": "iv-giahuy", "name": "Gia Huy" },
@@ -330,7 +332,8 @@ Content-Type: application/json
     "lockReason": null
   },
   "locked": false,
-  "lockReason": null
+  "lockReason": null,
+  …
 }
 ```
 
@@ -363,14 +366,16 @@ Content-Type: application/json
     "status": "published",
     "publishedAt": "2026-12-02T13:30:00+07:00",
     "opensOn": "2027-01-10",
-    "closesOn": "2027-01-25"
+    "closesOn": "2027-01-25",
+    …
   },
   "phase": "before-open",
   "positions": [
-    { "id": "pos-2027-content", "name": "Content", "quota": 2, "applicationCount": 0 }
+    { "id": "pos-2027-content", "name": "Content", "quota": 2, "applicationCount": 0, … }
   ],
   "locked": false,
-  "lockReason": null
+  "lockReason": null,
+  …
 }
 ```
 
@@ -402,16 +407,19 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "campaign": { "id": "cmp-2027-hk1", "status": "published", "closesOn": "2027-01-26" },
+  "campaign": { "id": "cmp-2027-hk1", "status": "published", "closesOn": "2027-01-26", … },
   "phase": "before-open",
   "positions": [
-    { "id": "pos-2027-content", "name": "Content", "quota": 3, "applicationCount": 0 }
+    { "id": "pos-2027-content", "name": "Content", "quota": 3, "applicationCount": 0, … }
   ],
   "locked": false,
-  "lockReason": null
+  "lockReason": null,
+  …
 }
 ```
 
 ## Changes
 
+- 2026-11-19: Example values aligned with the mock's data: position description and requirements in the `GET` example, `departmentId` `dep-communications` and slot ids `slot-0900`, `slot-1000`, `slot-1100` in the `POST /api/campaigns` example. Values only; no field or status changed.
+- 2026-11-19: Campaign write and publish examples now end with `…` in the campaign, position and top-level objects, because the mock returns the full composite view. The Event Operations position id in the `PATCH`/`DELETE` examples is now `pos-2027-event-operations`, the id the mock assigns from the position name; the old `pos-2027-operations` made the following `DELETE` answer 404 and the `publish` example answer 400.
 - 2026-11-18: Defined minimized composite Campaign/setup reads, draft creation/save/publish, Position upsert/removal, exact C4 validation, constrained Q-03 published edits, first-Application setup lock, and confirmed lock.

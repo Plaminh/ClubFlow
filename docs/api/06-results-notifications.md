@@ -238,7 +238,8 @@ Content-Type: application/json
       "positionName": "Content",
       "screeningStatus": "shortlisted",
       "confirmedInterview": { "interviewId": "int-A01", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T09:30:00+07:00", "roomName": "A-201" },
-      "result": { "decision": "pass", "publishedAt": "2026-12-02T13:20:00+07:00" }
+      "result": { "decision": "pass", "publishedAt": "2026-12-02T13:20:00+07:00" },
+      …
     },
     {
       "id": "A02",
@@ -246,7 +247,8 @@ Content-Type: application/json
       "positionName": "Communications",
       "screeningStatus": "shortlisted",
       "confirmedInterview": { "interviewId": "int-A02", "start": "2026-12-02T09:30:00+07:00", "end": "2026-12-02T10:00:00+07:00", "roomName": "B-105" },
-      "result": { "decision": "fail", "publishedAt": "2026-12-02T13:20:00+07:00" }
+      "result": { "decision": "fail", "publishedAt": "2026-12-02T13:20:00+07:00" },
+      …
     }
   ]
 }
@@ -274,4 +276,5 @@ HTTP/1.1 204 No Content
 
 ## Changes
 
+- 2026-11-19: The `GET /api/me/applications` example now ends each item with `…`; the mock also returns `campaignId`, `campaignName` and `submittedAt`, which the example did not show.
 - 2026-11-18: Defined Executive result workspace, nullable assessment read, assessed-only decisions, idempotent atomic publication, published-only Applicant visibility, notification ownership, and mark-all-read semantics.
