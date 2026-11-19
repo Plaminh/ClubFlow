@@ -51,6 +51,10 @@ Rules:
 - Runtime domain requests MUST use relative `/api` paths. Do not hardcode hosts, ports, or absolute API URLs in application source.
 - Main-flow business data MUST NOT be hardcoded in components. API-backed screens MUST provide loading, error with Retry, empty, and successful states.
 - Do not add or change API contract endpoints, mock behavior/data, or dependencies without explicit approval and coordinated review.
+- Call only endpoints that exist in `docs/api/`. If a screen needs one that is missing, stop and say so; do not call it, and do not edit `docs/api/` or `mock/` to make it exist.
+- When a change to `docs/api/` or `mock/` is approved, add a dated line to that file's `## Changes` section, and read `git diff -- docs/api mock` after every assistant request; reject any change nobody asked for.
+- Stack for PA#3: React Router (`BrowserRouter`), plain CSS bundled by Vite, no form library, no other framework. Adding any dependency needs explicit approval.
+- Before a hand-in: build with `NODE_ENV=production` (a development bundle sends every request twice), start `node mock/server.mjs` fresh, run `node tools/contract-check.mjs`, then open every route as each demo account at 360, 768 and 1280 px in the `normal`, `slow`, `error` and `empty` modes.
 - C1-C11 flows, the `normal`/`slow`/`error`/`empty` HTTP mock modes, direct-route access, and responsive checks at 360 px, 768 px, and 1280 px are PA#3 acceptance gates.
 - Preserve semantic HTML, one `h1` per screen, labeled form controls, link/button semantics, 44 px mobile targets, and no horizontal page scroll.
 

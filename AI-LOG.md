@@ -601,6 +601,10 @@ Scope: Documentation only. No file under `frontend/src/`, `backend/`, database, 
 
 ---
 
+## PA#3
+
+Entries below this heading belong to PA#3. The PA#2 entries above are unchanged.
+
 ## 2026-11-17 — PA#3 Phase 1 — Requirements and repository alignment
 
 Tool: Codex.
@@ -918,3 +922,250 @@ Verified:
 - `git diff --check` passed cleanly.
 - `npm run lint` passed.
 - All documentation files remain synchronized.
+
+---
+
+## 2026-11-19 - PA#3 Phase 10 - Contract check against the lecturer's documents
+
+Tool: Claude Code.
+
+Asked for: Read every lecturer document (rubric, brief, contract-check README, AI-LOG and self-assessment templates, product-owner answers), check the repository against only what those documents say, then fix the contract/mock mismatches, the AI-LOG structure, and rebuild.
+
+Kept: The React source, the mock routes and data, the contract's endpoint list, and all PA#2 and earlier PA#3 log entries as written.
+
+Changed:
+- `docs/api/04-scheduling.md`, `06-results-notifications.md`, `07-campaign-management.md`: mutation and campaign examples now end their objects with `…`, because the mock returns the full view and the examples showed a shorter projection. The Event Operations position id in the examples is now `pos-2027-event-operations`, the id the mock really assigns.
+- `docs/api/README.md`: removed `mode` from the `GET /api/health` example; the mock never returned it.
+- `mock/server.mjs`: the port now comes from `PORT` (default 3001), as the PA#3 brief says, instead of `MOCK_PORT`.
+- Every changed contract file has a dated line in its `## Changes` section.
+- `AI-LOG.md`: added the `## PA#3` heading above the first PA#3 entry, and this entry.
+
+Rejected:
+- Rewriting the mock to trim its answers down to the shorter examples: the front end already reads the full views, so the contract was the side that was incomplete.
+- Treating `npm run verify:mock-http` and `tools/validate-api-docs.mjs` as proof that every example matches the mock: both are non-official and neither sends the examples to the mock.
+- Reconstructing `contract-check.mjs` from the lecturer's `contract-check.pdf`: the PDF text lost its line breaks, so the script cannot be rebuilt faithfully.
+
+By hand: None in this task. The diff is waiting for team review.
+
+Verified:
+- A throwaway checker written from `contract-check-README.md` (not the official script) sent all 52 examples to a freshly started mock. Before the edits 12 examples failed; after them 52 pass, and all 37 endpoints of the README table have an example.
+- After `npm ci` and a local `.env` copied from `.env.example`: `npm run lint` clean; `npm test` 280 + 18 + 14 = 312 passed; `npm run build` passed; `npm run verify:mock-http` and `node tools/validate-api-docs.mjs` passed.
+- Not run: the official `contract-check.mjs`, the W3C checker, and a browser check at 360/768/1280 px.
+
+Incidents:
+- The earlier phases recorded the contract and the mock as matching, but 12 of 52 examples did not. The structural validator and the workflow script never sent the examples to the mock. Sending every example, in README order, to a restarted mock caught it. Two of the 12 (a `DELETE` answering 404 and a `publish` answering 400) came from one wrong position id in the examples; the other ten were answers carrying fields the examples did not show.
+- During this task the throwaway checker was first run twice against the same mock. The second run reported many extra failures because the first run had already changed the state. Restarting the mock before each run removed them, which is what the contract-check README says to do.
+
+Limitations: No commit was made in this task. The checker used is an approximation, so the official tool may still report differences.
+
+---
+
+## 2026-11-19 - PA#3 Phase 11 - W3C and width check in a real browser
+
+Tool: Claude Code.
+
+Asked for: Check the three widths and the W3C requirement of the PA#3 rubric, which no earlier phase had run in a browser.
+
+Kept: The React source and the contract; the screens needed no layout change.
+
+Changed:
+- `client/index.html`: added `<link rel="icon" href="data:," />`, then rebuilt `client/dist/`.
+- `FRONTEND.md` and `SELF_ASSESSMENT_REPORT.md`: replaced the two NOT RUN lines with the results below and changed the claimed total from 77 to 78.
+
+Rejected:
+- Installing Java and a local copy of the Nu validator: the rubric names the W3C checker, so the rendered HTML (fictional demo data) was sent to validator.w3.org/nu instead.
+- Keeping the browser scripts in the repository: they were throwaway files and stay outside it.
+
+By hand: None in this task. The diff is waiting for team review.
+
+Verified:
+- Headless Chrome on `vite preview` of `client/dist/`, signed in through the sign-in screen as `studentA`, `exec`, `int-content` and `int-comms`, every route opened directly at 360, 768 and 1280 px: no horizontal scroll, one `h1`, one `main`, no skipped heading level, no unlabeled visible input, no blank screen. A wrong-role route shows a role message, and a signed-out protected route goes to `/login`.
+- At 360 px every button and link is at least 44 px high; the six setup checkboxes on `/executive/campaign` are 20 px high inside 44 px labels.
+- W3C Nu checker on the rendered `<html>`: 17 screens and 4 applicant-portal tabs gave 0 errors and 0 warnings. A deliberately broken page gave 4 errors, so the checker was really running.
+- After the fix, `/`, `/login` and a not-found path produce no console message and no 4xx response.
+
+Incidents:
+- Every page logged "Failed to load resource: 404" because `/favicon.ico` did not exist. The jsdom tests of earlier phases cannot see this; the Chrome console showed it. Adding an empty icon link removed it.
+
+Limitations: Dialogs, the review drawer, the slow, error and empty mode screens and a click-through of C1-C11 were not checked. No commit was made in this task.
+
+---
+
+## 2026-11-19 - PA#3 Phase 12 - Course contract-check and delivery-mode run
+
+Tool: Claude Code.
+
+Asked for: Run the lecturer's `tools/contract-check.mjs` (added by the team to `tools/`, not edited) on a freshly started mock, fix what it reports, and run the slow, error and empty modes in a browser.
+
+Kept: The mock routes and data, the contract's endpoints and field lists, and `tools/contract-check.mjs` exactly as supplied.
+
+Changed:
+- `FRONTEND.md`: removed the `### Required PA#3 Accounts` sub-heading so the Demo accounts table sits directly under `## 3. Demo Accounts`, which is where the checker looks for it. Added the Product Owner post link, the checker command, and the repeated-request finding to Not done.
+- `docs/api/03-review-files.md` and `04-scheduling.md`: the CSV and PDF answer blocks no longer carry a body (the checker reads the block as JSON); the CSV text moved into a `text` block. Dated lines added to `## Changes`.
+- `SELF_ASSESSMENT_REPORT.md`: criterion 3 claim 8 to 7, criterion 5 claim 12 to 14, total 79.
+
+Rejected:
+- Aligning the 15 value notes (for example `dep-comms` against `dep-communications`): the checker does not count them and the examples stay readable; listed under What we did not manage.
+- Fixing the repeated requests in this task: they touch the client data hooks and need a decision and tests of their own.
+
+By hand: The team added `tools/contract-check.mjs` and gave the Product Owner post link. The edits above were made by the assistant and wait for team review.
+
+Verified:
+- `node tools/contract-check.mjs --base http://localhost:3001` on a freshly started mock: 52 of 52 examples answered as written, exit 0, 37 of 37 endpoints have an example, 15 value notes.
+- `npm run lint` clean; `npm test` 280 + 18 + 14 passed after the edits.
+- Headless Chrome: in error mode all six data screens tested showed a Thử lại button, and Retry on `/executive/review` loaded the data after the mock was restarted in normal mode, without a page reload; slow mode showed the session-restore loading text.
+- Mock request log of a direct load in normal mode: `GET /api/health` twice on every screen, `GET /api/campaigns/current` twice on the applicant portal, `GET /api/campaigns/{id}` and `.../schedule` twice on Interview Scheduling.
+
+Incidents:
+- The first official run answered 8 of 52 examples and failed 44. Our `FRONTEND.md` kept the Demo accounts table under a sub-heading, so the checker found no accounts and could not sign in for any protected example. Earlier phases had only run our own validator, which does not read that table. Running the real tool caught it; moving the table fixed it.
+- The second run reported 3 more failures on the CSV and PDF examples because their answer blocks held non-JSON bodies. A third run, done by mistake against a mock that was still running from an earlier command, reported 21 failures caused by leftover state; killing every mock process and starting a fresh one gave 52 of 52, as the checker's README says to do.
+
+Limitations: The empty-mode screens were not read one by one and C1-C11 was not clicked through. No commit was made in this task.
+
+---
+
+## 2026-11-19 - PA#3 Phase 13 - Duplicate requests: wrong first diagnosis, one real cause
+
+Tool: Claude Code.
+
+Asked for: Fix the repeated requests reported in Phase 12.
+
+Kept: The data hooks, the mock and the contract.
+
+Changed:
+- `client/src/hooks/useApplicantPortal.js` and `client/src/pages/ApplicantPortalPage.jsx`: the portal waits for the session restore before it loads data, and shows the loading state meanwhile. Before, the public page asked for `GET /api/campaigns/current` while the saved session was still being restored, then asked again with the applicant requests once `/api/auth/me` answered.
+- `client/src/tests/pages/ApplicantPortalPage.test.jsx`: one new test (no StrictMode) that fails with 2 requests before the fix and passes with 1 after it.
+- `FRONTEND.md`: a build note about `NODE_ENV` (see Incidents); the Phase 12 "repeated requests" item is removed from Not done.
+- `SELF_ASSESSMENT_REPORT.md`: criterion 3 claim back to 8, total 80.
+
+Rejected:
+- Fixing `GET /api/health` and the scheduling requests: they were not defects (see Incidents).
+- Changing `.env.example`: it is shared with the backend; only the build note was added.
+
+By hand: None in this task. The diff is waiting for team review.
+
+Verified:
+- Mock request log in normal mode, each screen opened directly in headless Chrome on the production `client/dist/`: applicant portal, campaign, review, scheduling and interviewer screens each send every request once.
+- `npm run lint` clean; `npm test` 281 + 18 + 14 = 313 passed; production build 402 kB.
+- On the production build, 17 rendered screens again gave 0 W3C errors, no horizontal scroll at 360, 768 and 1280 px, no console message.
+
+Incidents:
+- Phase 12 reported `GET /api/health` twice on every screen and doubled campaign and schedule requests as a client defect. That was wrong. The pairs left the browser less than 1 ms apart and the first of each pair was aborted, which is what React StrictMode does in development. The `client/dist/` I had rebuilt that day was a development bundle (676 kB, React development markers), because the local `.env` copied from `.env.example` contains `NODE_ENV=development` and Vite honours it; the earlier production build is 402 kB. Rebuilding with `NODE_ENV=production` removed those duplicates. The ZIP named `_79` held that development bundle and was replaced.
+- One duplicate was real, on production too: the applicant portal request described under Changed. It was found by watching the request order with timestamps, and the new test reproduces it.
+
+Limitations: Empty-mode screens were not read one by one and C1-C11 was not clicked through. No commit was made in this task.
+
+---
+
+## 2026-11-19 - PA#3 Phase 14 - Browser walk of C1-C11 and fixes for criteria 1 to 7
+
+Tool: Claude Code.
+
+Asked for: Check criteria 1 to 7 of the PA#3 rubric by running the app as the course script would, and fix what fails (criteria 8 and 9 excluded).
+
+Kept: The screens, routes, hooks and the contract's endpoints.
+
+Changed:
+- Button labels now use the brief's names: `Save as Draft`, `Preview Campaign`, `Publish Campaign`, `Reject`, `Continue to Interview Scheduling`, `Save Changes`, `Approve & Confirm Schedule`, `+ Assign Slot`, `Resolve`, `Edit` (`CampaignManagementPage.jsx`, `ApplicationDetail.jsx`, `ApplicationReviewPage.jsx`, `InterviewSchedulingPage.jsx`, `ConfirmationChecklist.jsx`, `ScheduleTable.jsx`) and the page tests.
+- `mock/lib/routes.mjs`: the confirmation conditions name the applications ("A01 and A02 conflict."), as the contract examples already showed.
+- `docs/api/`: example values aligned with the mock; `## Changes` lines, including a late entry for `85c3419`.
+- `DataTable.jsx`: removed the redundant `role` attributes of the table parts.
+- `InterviewSetupCard.css`, `ChoiceGroup.css`: checkboxes and radios are 44 px on phones.
+- `AGENTS.md`: call only contract endpoints and stop when one is missing, no edits to `docs/api/` or `mock/` without approval and a `## Changes` line, stack and no new dependency, the hand-in procedure. `brief.md`: the prompts of this conversation, verbatim.
+- `SELF_ASSESSMENT_REPORT.md`, `FRONTEND.md`: results and claims, total 89.
+
+Rejected:
+- Letting the scheduling screen edit the interview date, window and duration: they are fixed in Campaign Management after publication (Q-03), so the screen only shows them; listed under What we did not manage.
+- Changing the mock to answer the CSV and PDF examples with a body: the checker reads those blocks as JSON, so the examples have no body there.
+
+By hand: None in this task. The diff is waiting for team review.
+
+Verified:
+- Headless Chrome on the production `client/dist/` and a freshly started mock: C1 to C11 walked through the screens' own buttons; A01 and A02 stayed independent (A01 shortlisted while A02 pending; Pass on A01 and Fail on A02 published and shown separately).
+- Every route reloaded, Back, intended route after sign-in, not-found, role refusal; empty mode read on seven data screens; error mode with Retry; slow mode; no repeated requests; no console message.
+- `tools/contract-check.mjs` on a fresh mock: 52 of 52, exit 0. Every request in the mock's log of the walk is in the contract table.
+- W3C Nu checker: 17 screens and 13 data-rich states, 0 errors, 0 warnings; at 360 px every control is at least 44 px high and nothing scrolls sideways.
+- `npm run lint` clean; `npm test` 281 + 18 + 14 = 313 passed; production build 402 kB.
+
+Incidents:
+- The first W3C pass (17 screens) found nothing because those screens were empty. Once the walk had put data in the lists, every table gave 27 errors: `DataTable.jsx` put `role="row"`, `role="cell"` and similar on the parts of a table that already has those roles. Validating states with data caught it; removing the attributes fixed it, and all 313 tests still passed.
+- My first checks of C7 and C10 passed or failed for the wrong reason: a text match on "Chờ duyệt" also matched a filter option, and the assessment submit asks for a confirmation click my script did not make. Reading the API state (A02 still `pendingReview`) and a screenshot of the dialog showed it; the script was corrected, not the app.
+- The confirmation refusal said "Resolve draft conflicts." and "0 of 3 assigned." although the contract example names the applications; the checker only reported it as a value note, a browser walk showed that the refusal did not name them.
+
+Limitations: Pressing a submit button twice and the slow-mode text of every screen after the session restore were not exercised. No commit was made in this task.
+
+---
+
+## 2026-11-19 - PA#3 Phase 15 - Slow-mode loading text and double submit
+
+Tool: Claude Code.
+
+Asked for: Close the two gaps left in criteria 3 and 4: the loading text of every screen in slow mode, and pressing a submit button twice.
+
+Kept: All application code; nothing needed a fix.
+
+Changed:
+- `SELF_ASSESSMENT_REPORT.md`: criteria 3 and 4 claimed at 10, total 91, archive name `_91`; the two matching lines removed from What we did not manage.
+
+Rejected: Adding a code guard against double submit: every action already sent one request, so a guard would have been code for a problem that did not exist.
+
+By hand: None in this task. The diff is waiting for team review.
+
+Verified:
+- Mock in slow mode, seven data screens opened as their role: a loading status was on screen the whole time, first "Đang khôi phục phiên đăng nhập…" and then "Đang tải dữ liệu…".
+- Mock in slow mode, each action clicked twice in the same instant in headless Chrome and counted in the page's request events: sign-in, application submit, close applications, note, shortlist, generate draft, slot edit, Save Changes, Approve & Confirm, assessment, record Pass, Save as Draft, publish: one request each.
+
+Incidents: None in this task. The checks that ran were the two above.
+
+Limitations: The double-click test clicks twice within one script tick, not two real mouse clicks 100 ms apart. No commit was made in this task.
+
+
+---
+
+## 2026-11-19 - PA#3 Phase 16 - Self-assessment marks for criteria 1, 8 and 9
+
+Tool: Claude Code.
+
+Asked for: Explain why criterion 1 was claimed at 23 and the deductions on criteria 8 and 9, then raise the claims where the evidence allows.
+
+Kept: Criterion 1 at 25 (the team's reading: the rubric's "choose the date, time window and duration" is ambiguous against Q-03, so showing the fixed values and generating the draft is a defensible reading; this is a decision, not a lecturer answer). Criteria 8 and 9 are claimed at 8 and 3, on the team's decision, on the understanding that the new changes are committed in small, separate commits.
+
+Changed:
+- `SELF_ASSESSMENT_REPORT.md`: criterion 1 claimed at 25, criterion 8 at 8, criterion 9 at 3, total 95, archive name `_95`.
+
+Rejected: Wording proposed by the team for criteria 8 and 9 (10 and 5: "every task recorded", "scoped commits", "zero rewritten history"). It was not used because the log has entries without an Asked for or Rejected line, all 73 commits carry one author, and the 2026-11-19 changes are not committed, so the text would have been contradicted by the files and the history.
+
+By hand: The team decided to raise criterion 1 and to read the rubric's ambiguity in its favour.
+
+Verified:
+- `git status -sb` shows `pa3-finalize` level with `origin/pa3-finalize` (`c4b6682`).
+- `git log --all` shows 25 extra commits by "T3 Code" under `refs/t3/`; none is on a branch, and `git log` on the branch lists 73 commits by one author.
+
+Limitations: Pushes to the remote were not inspected, so no claim about force-pushes is made. Criteria 8 and 9 can rise only after the log entries are completed by the people who did the work and the new changes are committed in small, separate commits.
+
+---
+
+## 2026-11-19 - PA#3 Phase 17 - Applicant availability missing on the Scheduling screen
+
+Tool: Claude Code.
+
+Asked for: Check a demo bug (column "Giờ rảnh ứng viên" always "—" on the Executive's scheduling table), whether Applicants choose interview times, whether the Executive books for them, and whether this goes against the brief.
+
+Kept: The client column, which already read `row.availabilityText`; the brief's flow (Applicants give availability, the Executive places the final slot).
+
+Changed:
+- `docs/api/04-scheduling.md`: schedule rows carry `availabilityText` in the examples; dated `## Changes` line (approved by the team before the edit).
+- `mock/lib/routes.mjs`: `fullInterviewRow` adds `availabilityText` from the Applicant's `slotIds`.
+- `mock/tests/scheduling.test.mjs` (written first, failed before the fix) and `client/src/tests/components/ScheduleTable.test.jsx`.
+
+Rejected: Editing the client; it was correct, the contract and mock did not send the field.
+
+By hand: The team approved the contract and mock change.
+
+Verified:
+- `node tools/contract-check.mjs` on a fresh mock: 52 of 52, 0 FAIL.
+- `npm run lint`, `npm test` (client 282, backend 18, mock 14), `NODE_ENV=production npm run build`: all passed.
+
+Incident: My earlier walk of C1-C11 checked button names and flow but did not compare this column with the data, so I missed the bug until the demo.
+
+Limitations: Not re-walked in a browser after the fix; the mock test and the component test cover the field and its display.

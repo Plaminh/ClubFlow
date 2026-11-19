@@ -3036,3 +3036,53 @@ Write the final report in Vietnamese.
 
 Begin by auditing the current repository and resuming the next incomplete task.
 ````
+
+## 2026-11-19 - Request 7 - Check the repository against the lecturer's documents
+
+**Record type:** Exact prompt (the user's own words, in the conversation).
+
+**Summary (non-verbatim):** Read every lecturer document and check the repository against those documents only.
+
+**Exact prompt (verbatim):**
+
+`````text
+Đọc toàn bộ files trong thư mục tài liệu của giảng viên và check repo đã hoàn thiện theo yêu cầu này chưa? Không tự sinh các yêu cầu, bám theo trong tài liệu.
+`````
+
+## 2026-11-19 - Request 8 - Fix the contract, the logs and the report
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Carry out the four steps proposed after the check: contract and mock fixes, AI-LOG and self-assessment, FRONTEND.md, build and ZIP.
+
+**Exact prompt (verbatim):**
+
+`````text
+Bạn hãy làm (1), (2), (3), (4).
+`````
+
+## 2026-11-19 - Request 9 - Fix the repeated requests
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Fix the repeated requests reported after the delivery-mode run.
+
+**Exact prompt (verbatim):**
+
+`````text
+Sửa lỗi request lặp.
+`````
+
+## 2026-11-19 - Request 10 - Check and fix criteria 1 to 7
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** After a plan to reach the maximum on the self-assessed criteria, check and fix criteria 1 to 7 now; criteria 8 and 9 are out of scope.
+
+**Exact prompt (verbatim):**
+
+`````text
+mục 8, 9. bỏ qua.
+Bạn kiểm tra và làm làm 1->7 ngay bây giờ.
+`````
+

@@ -12,12 +12,28 @@
 
 Prerequisite: Node.js 22.12.0 or newer and existing repository dependencies installed from the root workspace (`npm install`).
 
-### PA#3 HTTP Mock
-
-Start the built-in Node HTTP mock:
+### Quick start
 
 ```sh
-npm run mock
+npm ci                      # from the repository root; installs client/ too (npm workspace)
+node mock/server.mjs        # terminal 1: the mock on http://localhost:3001 (PORT overrides the port)
+cd client && npm run dev    # terminal 2: Vite on http://localhost:3000, /api proxied to the mock
+```
+
+Preview the production build:
+
+```sh
+cd client
+npm run build
+npx vite preview            # http://localhost:4173, /api proxied to the mock
+```
+
+### PA#3 HTTP Mock
+
+Start the built-in Node HTTP mock (`npm run mock` at the root does the same):
+
+```sh
+node mock/server.mjs
 ```
 
 The default address is `http://localhost:3001`. The process starts from fresh deterministic in-memory fixtures on every restart and logs one structured JSON status record per request.
@@ -51,6 +67,8 @@ npm run preview --workspace client
 
 Vite preview serves `client/dist/` at `http://localhost:4173`, also proxying `/api` to `http://localhost:3001`.
 
+Build pitfall: if the root `.env` sets `NODE_ENV=development` (the value in `.env.example`), Vite builds a development bundle (about 676 kB, with React StrictMode sending every request twice). Delete that line from your local `.env` or run `NODE_ENV=production npm run build`, and check that `client/dist/assets/index-*.js` is about 400 kB before you zip.
+
 ### Verification Commands
 
 ```sh
@@ -59,13 +77,12 @@ npm test                 # Run all frontend, backend, and mock Vitest suites
 npm run test:mock        # Run mock-specific tests
 npm run verify:mock-http # Run non-official fresh-state 24-endpoint workflow verifier
 node tools/validate-api-docs.mjs # Run structural API documentation validator
+node tools/contract-check.mjs --base http://localhost:3001 # Course checker; restart the mock first
 ```
 
 The mock verifier is the repository's clearly non-official fresh-state workflow verifier. It is not the unavailable course checker.
 
 ## 3. Demo Accounts
-
-### Required PA#3 Accounts
 
 The HTTP mock and its fresh-state verifier runtime-check these deterministic fictional credentials:
 
@@ -108,6 +125,8 @@ The app shell footer calls `GET /api/health` to indicate API connection status.
 
 ## 5. Product Owner Decisions
 
+Source of Q-01 to Q-07: the product owners' reply to our questions, posted under "ClubFlow - questions for the product owners" in the course Facebook group. Post: https://www.facebook.com/share/p/1CVJXYupXP/
+
 The implementation adheres to all Product Owner decisions:
 
 | Decision | PA#3 Direction & Implementation |
@@ -137,6 +156,9 @@ Zero dependencies were added for the contract or HTTP mock.
 
 ## 7. Remaining Not Done
 
-- **Official course `contract-check.mjs` execution**: Marked as **NOT RUN** because the exact course file was not supplied in the repository or course attachments. The repository provides `node tools/validate-api-docs.mjs` (contract structural validator) and `node tools/verify-pa3-http.mjs` (fresh-state 24-endpoint workflow verifier), which are clearly labeled as non-official.
-- **W3C Automated Validation**: Marked as **NOT RUN** because no offline W3C validator tool is bundled. Structural accessibility and semantic DOM rules (one `h1`, landmarks, unique IDs, labeled controls) are verified by automated tests in `client/src/tests/a11y/screens.a11y.test.jsx`.
+- **Official course `contract-check.mjs`**: `node tools/contract-check.mjs --base http://localhost:3001` on a freshly started mock answered 52 of 52 examples as written (exit 0) and found an example for each of the 37 endpoints in the README table, on 2026-11-19. It also lists 3 notes (the CSV and PDF answers have no body in the example block by design), which do not count as failures. Before the fixes of that day the first run found 44 failures: the Demo accounts table sat under a sub-heading so the tool could not sign in, and the CSV and PDF answer blocks carried a body. `node tools/validate-api-docs.mjs` and `node tools/verify-pa3-http.mjs` are our own non-official checks.
+- **Schedule generation**: the mock returns a fixed draft schedule; the first-fit rule of Q-01 is not computed (planned for PA#4).
+- **W3C Automated Validation**: On 2026-11-19 the rendered HTML of 17 screens, 4 applicant-portal tabs and 13 states with data (lists, review drawer, final results, assessment, confirmed schedule, interviewer, preview) gave 0 errors and 0 warnings in the W3C Nu checker. Structural rules are also tested in `client/src/tests/a11y/screens.a11y.test.jsx`.
+- **Interview date, window and duration on the scheduling screen**: shown, not chosen; they are set in Campaign Management and locked after publication (Q-03).
+- **Draft campaign after a reload**: the campaign page edits the current campaign, so a draft created earlier is not reopened after a reload.
 - **Production backend features**: Real PostgreSQL persistence, Docker containerized services, external email notifications, and cloud storage belong to PA#4.
