@@ -174,7 +174,7 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
                   disabled={action.pending || !schedule.hasUnsavedChanges}
                   onClick={() => run(() => actions.saveDraft(), { title: 'Đã lưu lịch nháp' })}
                 >
-                  Lưu thay đổi
+                  Save Changes
                 </Button>
               ) : null}
               <Button variant="secondary" onClick={exportTimetable} disabled={action.pending}>

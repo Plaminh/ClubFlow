@@ -49,9 +49,9 @@ export default function ScheduleTable({ rows, readOnly, onEdit, caption }) {
         <Button
           variant="secondary"
           onClick={() => onEdit(row)}
-          aria-label={`${row.status === 'unassigned' ? 'Gán khung giờ' : 'Sửa'} ${row.applicationId}`}
+          aria-label={`${row.status === 'unassigned' ? 'Assign Slot' : row.status === 'conflict' ? 'Resolve' : 'Edit'} ${row.applicationId}`}
         >
-          {row.status === 'unassigned' ? '+ Gán khung giờ' : row.status === 'conflict' ? 'Giải quyết' : 'Sửa'}
+          {row.status === 'unassigned' ? '+ Assign Slot' : row.status === 'conflict' ? 'Resolve' : 'Edit'}
         </Button>
       ),
     });

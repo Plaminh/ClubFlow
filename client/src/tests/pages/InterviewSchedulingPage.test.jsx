@@ -82,7 +82,7 @@ describe('Interview Scheduling', () => {
   it('blocks confirmation and lists each unmet condition (BR-13)', async () => {
     await openScheduling();
 
-    expect(screen.getByRole('button', { name: 'Duyệt & xác nhận lịch' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Approve & Confirm Schedule' })).toBeDisabled();
     expect(screen.getByText('Chưa thể xác nhận')).toBeInTheDocument();
     expect(screen.getByText('CF-028 · Trần Bảo Ngọc vẫn đang chờ duyệt.')).toBeInTheDocument();
     expect(screen.getByText('Còn 2 bản ghi Conflict.')).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe('Interview Scheduling', () => {
   it('flags a manual edit that double-books a room', async () => {
     await openScheduling();
 
-    await editRow('Gán khung giờ CF-031', { start: '09:15–09:30', room: 'A-201' });
+    await editRow('Assign Slot CF-031', { start: '09:15–09:30', room: 'A-201' });
 
     expect(await screen.findByText('Đã cập nhật CF-031: vẫn còn vấn đề')).toBeInTheDocument();
     expect(screen.getAllByText(/Chồng giờ với CF-030 \(cùng phòng A-201\)/).length).toBeGreaterThan(0);
@@ -104,15 +104,15 @@ describe('Interview Scheduling', () => {
     await openScheduling();
     await applicationService.setScreening('CF-028', 'rejected');
 
-    await editRow('Sửa CF-027', { start: '09:15–09:30' });
-    await editRow('Gán khung giờ CF-031', { start: '09:00–09:15', room: 'B-105' });
+    await editRow('Resolve CF-027', { start: '09:15–09:30' });
+    await editRow('Assign Slot CF-031', { start: '09:00–09:15', room: 'B-105' });
 
     expect(stat('Proposed')).toBe('4');
     expect(screen.getByText('Có thay đổi chưa lưu')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu thay đổi' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
     expect(await screen.findByText('Đã lưu lịch nháp')).toBeInTheDocument();
 
-    const confirmButton = screen.getByRole('button', { name: 'Duyệt & xác nhận lịch' });
+    const confirmButton = screen.getByRole('button', { name: 'Approve & Confirm Schedule' });
     expect(confirmButton).toBeEnabled();
     fireEvent.click(confirmButton);
     const dialog = await screen.findByRole('dialog', { name: 'Xác nhận lịch phỏng vấn?' });
@@ -120,7 +120,7 @@ describe('Interview Scheduling', () => {
 
     expect(await screen.findByText('Đã xác nhận lịch phỏng vấn')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Lịch Confirmed' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^Sửa / })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Edit / })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Xuất lịch' })).toBeEnabled();
   });
@@ -159,11 +159,11 @@ describe('Interview Scheduling', () => {
 
     expect(screen.getByText('Confirmed · chỉ đọc')).toBeInTheDocument();
     expect(tableRows()).toHaveLength(4);
-    expect(screen.queryByRole('button', { name: 'Duyệt & xác nhận lịch' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Approve & Confirm Schedule' })).not.toBeInTheDocument();
     // Rooms are part of the locked schedule now: shown as text, not as disabled checkboxes.
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.getByText('A-201, B-105')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^(Sửa|Giải quyết|Gán khung giờ) / })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^(Edit|Resolve|Assign Slot) / })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeDisabled();
   });
 

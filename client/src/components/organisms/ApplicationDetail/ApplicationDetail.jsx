@@ -115,7 +115,7 @@ export default function ApplicationDetail({ detail, pending, message, focusOnMou
           ) : null}
           <div className="button-row" role="group" aria-label="Quyết định hồ sơ">
             <Button variant="danger" onClick={onReject} disabled={!canDecide || pending}>
-              Loại hồ sơ
+              Reject
             </Button>
             <Button onClick={onShortlist} disabled={!canDecide || pending}>
               Shortlist Candidate

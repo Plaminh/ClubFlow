@@ -230,7 +230,7 @@ function ScreeningPanel({ campaign }) {
             “Qua vòng CV” chỉ nghĩa là đủ điều kiện được đưa vào lịch nháp, chưa phải kết quả tuyển cuối.
           </p>
           {totals.shortlisted > 0 ? (
-            <Button to={ROUTES.EXECUTIVE_SCHEDULING}>Tiếp tục tới Interview Scheduling →</Button>
+            <Button to={ROUTES.EXECUTIVE_SCHEDULING}>Continue to Interview Scheduling →</Button>
           ) : null}
         </Alert>
       ) : null}

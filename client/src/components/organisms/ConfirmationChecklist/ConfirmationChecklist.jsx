@@ -32,7 +32,7 @@ export default function ConfirmationChecklist({ conditions, canConfirm, pending,
         </ul>
         <div className="button-row">
           <Button onClick={onConfirm} disabled={!canConfirm || pending}>
-            Duyệt &amp; xác nhận lịch
+            Approve &amp; Confirm Schedule
           </Button>
         </div>
         <p className="hint">

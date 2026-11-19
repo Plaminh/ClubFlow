@@ -40,10 +40,10 @@ function SignInGate({ role, title, text, onSignIn }) {
 
 export default function ApplicantPortalPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { role, account, dataVersion } = useDemoSession();
+  const { role, account, dataVersion, status: sessionStatus } = useDemoSession();
   const { openSignIn } = useOutletContext() ?? {};
   const isApplicant = role === 'applicant';
-  const portal = useApplicantPortal(isApplicant);
+  const portal = useApplicantPortal(isApplicant, sessionStatus !== 'loading');
   const submit = useAction();
   const markRead = useAction();
   const requested = searchParams.get(TAB_QUERY_PARAM);

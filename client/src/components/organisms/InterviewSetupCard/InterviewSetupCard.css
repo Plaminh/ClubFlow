@@ -13,3 +13,11 @@
   height: 1.25rem;
   margin: 0;
 }
+
+/* On phones the box itself is also a 44 px target, not only its label. */
+@media (max-width: 30rem) {
+  .checkbox-row input {
+    width: var(--control-min-height);
+    height: var(--control-min-height);
+  }
+}

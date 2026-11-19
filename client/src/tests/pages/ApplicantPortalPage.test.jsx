@@ -1,7 +1,10 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { DemoSessionProvider } from '../../contexts/DemoSessionContext.jsx';
+import AppRoutes from '../../routes/AppRoutes.jsx';
 import { renderApp } from '../helpers/renderApp.jsx';
-import { addMockApiApplication, setMockApiMode, setMockApiScenario } from '../helpers/mockApi.js';
+import { addMockApiApplication, sessionUserFor, setMockApiMode, setMockApiScenario } from '../helpers/mockApi.js';
 
 const MINH_ANH = 'ap-minhanh';
 const HAI_DANG = 'ap-haidang';
@@ -26,6 +29,22 @@ function fillValidForm({ position = 'User Experience Design', sop = 'Em muốn t
 }
 
 describe('Applicant Portal', () => {
+  it('requests the public campaign once when a saved applicant session is restored', async () => {
+    // No StrictMode here: its double effects would hide a real second request.
+    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: 'mock-token-studentA', user: sessionUserFor(MINH_ANH) }));
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DemoSessionProvider>
+          <AppRoutes />
+        </DemoSessionProvider>
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('tab', { selected: true });
+    const campaignRequests = fetch.mock.calls.filter(([url]) => String(url).includes('/campaigns/current'));
+    expect(campaignRequests).toHaveLength(1);
+  });
+
   it('shows the public campaign to visitors and asks them to sign in to apply (BR-02)', async () => {
     renderApp('/', { scenarioId: 'accepting' });
 

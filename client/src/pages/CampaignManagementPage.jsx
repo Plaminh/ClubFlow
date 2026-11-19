@@ -267,15 +267,15 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
     <>
       {locked ? null : (
         <Button variant="secondary" onClick={saveDraft} disabled={disabled}>
-          {draft ? 'Lưu bản nháp' : 'Lưu thay đổi'}
+          {draft ? 'Save as Draft' : 'Lưu thay đổi'}
         </Button>
       )}
       <Button variant="secondary" onClick={() => setPreviewOpen(true)}>
-        Xem trước
+        Preview Campaign
       </Button>
       {locked || !draft || !form.id ? null : (
         <Button onClick={requestPublish} disabled={disabled}>
-          Công bố chiến dịch
+          Publish Campaign
         </Button>
       )}
       {form.id && onCreateNew ? (

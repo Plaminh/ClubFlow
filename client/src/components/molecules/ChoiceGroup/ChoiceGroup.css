@@ -48,3 +48,11 @@
   color: var(--color-muted);
   cursor: not-allowed;
 }
+
+/* On phones the box or radio itself is also a 44 px target, not only its chip. */
+@media (max-width: 30rem) {
+  .choice-group__option input {
+    width: var(--control-min-height);
+    height: var(--control-min-height);
+  }
+}

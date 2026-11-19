@@ -17,7 +17,7 @@ function expectNoEditingControls() {
   expect(page.queryAllByRole('textbox')).toEqual([]);
   expect(page.queryAllByRole('combobox')).toEqual([]);
   expect(page.queryByLabelText('Ngày mở đơn')).not.toBeInTheDocument();
-  for (const name of ['Lưu bản nháp', 'Công bố chiến dịch', 'Lưu thay đổi', '+ Thêm vị trí', 'Xóa vị trí']) {
+  for (const name of ['Save as Draft', 'Publish Campaign', 'Lưu thay đổi', '+ Thêm vị trí', 'Xóa vị trí']) {
     expect(page.queryAllByRole('button', { name })).toEqual([]);
   }
 }
@@ -58,8 +58,8 @@ describe('Campaign Management', () => {
 
     expect(screen.getByLabelText('Tên chiến dịch')).toBeEnabled();
     expect(screen.getByLabelText('Thời lượng mỗi ca')).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Công bố chiến dịch' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Save as Draft' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Publish Campaign' })).toBeEnabled();
     expect(screen.getByRole('heading', { level: 2, name: 'Xem trước chiến dịch' })).toBeInTheDocument();
     expect(screen.queryByText(/chỉ đọc/i)).not.toBeInTheDocument();
   });
@@ -70,7 +70,7 @@ describe('Campaign Management', () => {
     fireEvent.change(screen.getByLabelText('Ngày đóng đơn'), { target: { value: '2026-10-01' } });
     fireEvent.change(screen.getAllByLabelText('Chỉ tiêu')[0], { target: { value: '0' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publish Campaign' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Chưa thể công bố chiến dịch');
     expect(screen.getByText('Mô tả chiến dịch là bắt buộc. Hãy thêm mô tả trước khi công bố.')).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe('Campaign Management', () => {
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     }
 
-    fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publish Campaign' }));
 
     expect(await screen.findByText('Chiến dịch cần ít nhất một vị trí tuyển.')).toBeInTheDocument();
   });
@@ -106,15 +106,15 @@ describe('Campaign Management', () => {
     fireEvent.change(last('Mô tả công việc'), { target: { value: 'Điều phối sự kiện.' } });
     fireEvent.change(last('Yêu cầu'), { target: { value: 'Chủ động.' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu bản nháp' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }));
     expect(await screen.findByText('Đã lưu thay đổi')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Xem trước' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview Campaign' }));
     const preview = await screen.findByRole('dialog', { name: 'Xem trước chiến dịch' });
     expect(within(preview).getByText('Event Coordinator')).toBeInTheDocument();
     fireEvent.keyDown(preview, { key: 'Escape' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publish Campaign' }));
     const confirm = await screen.findByRole('dialog', { name: 'Công bố chiến dịch?' });
     expect(within(confirm).getByText(/chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03/)).toBeInTheDocument();
     fireEvent.click(within(confirm).getByRole('button', { name: 'Công bố chiến dịch' }));
@@ -129,7 +129,7 @@ describe('Campaign Management', () => {
   it('cancelling the publish confirmation keeps the draft editable', async () => {
     await openAs('draft');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Công bố chiến dịch' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publish Campaign' }));
     const confirm = await screen.findByRole('dialog', { name: 'Công bố chiến dịch?' });
     fireEvent.click(within(confirm).getByRole('button', { name: 'Hủy' }));
 
@@ -152,7 +152,7 @@ describe('Campaign Management', () => {
     expect(screen.getByText('15 phút/ca')).toBeInTheDocument();
     expect(screen.getAllByText('3 hồ sơ đang liên kết với vị trí này.')).toHaveLength(2);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Xem trước' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview Campaign' }));
     const preview = await screen.findByRole('dialog', { name: 'Xem trước chiến dịch' });
     expect(within(preview).getByText('Nội dung ứng viên sẽ thấy')).toBeInTheDocument();
   });
@@ -163,7 +163,7 @@ describe('Campaign Management', () => {
     expect(screen.getByText('Cấu hình chiến dịch đang ở chế độ chỉ đọc')).toBeInTheDocument();
     expect(screen.getByText(/lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa \(BR-14\)/)).toBeInTheDocument();
     expectNoEditingControls();
-    expect(screen.getByRole('button', { name: 'Xem trước' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Preview Campaign' })).toBeEnabled();
   });
 
   it('closes applications early after confirmation (Q-03) and hides the action afterwards', async () => {
@@ -182,10 +182,10 @@ describe('Campaign Management', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tạo chiến dịch mới' }));
     await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' });
     expect(screen.getByLabelText('Tên chiến dịch')).toHaveValue('');
-    expect(screen.queryByRole('button', { name: 'Công bố chiến dịch' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Publish Campaign' })).not.toBeInTheDocument();
 
     // Server validation errors are shown on the blank draft and nothing is created.
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu bản nháp' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }));
     expect(await screen.findByText('Campaign fields are invalid.')).toBeInTheDocument();
     expect(getMockApiState().created).toBeUndefined();
 
@@ -201,11 +201,11 @@ describe('Campaign Management', () => {
     fireEvent.change(screen.getByLabelText('Chỉ tiêu'), { target: { value: '2' } });
     fireEvent.change(screen.getByLabelText('Mô tả công việc'), { target: { value: 'Write content.' } });
     fireEvent.change(screen.getByLabelText('Yêu cầu'), { target: { value: 'Clear writing.' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu bản nháp' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }));
 
     expect(await screen.findByText('Đã tạo bản nháp chiến dịch')).toBeInTheDocument();
     expect(getMockApiState().campaign).toMatchObject({ id: 'cmp-2027-hk1', status: 'draft', name: 'ClubFlow 2027 Recruitment' });
-    expect(screen.getByRole('button', { name: 'Công bố chiến dịch' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Publish Campaign' })).toBeInTheDocument();
   });
 
   it('offers early close only while applications are open', async () => {

@@ -17,24 +17,24 @@ export default function DataTable({ caption, columns, rows, getRowKey, selectedK
 
   return (
     <div className="table-scroll" role="region" aria-label={caption} tabIndex={0}>
-      <table className="data-table" role="table">
+      <table className="data-table">
         <caption className="visually-hidden">{caption}</caption>
-        <thead role="rowgroup">
-          <tr role="row">
+        <thead>
+          <tr>
             {columns.map((column) => (
-              <th key={column.key} scope="col" role="columnheader">
+              <th key={column.key} scope="col">
                 {column.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody role="rowgroup">
+        <tbody>
           {rows.map((row) => {
             const key = getRowKey(row);
             return (
-              <tr key={key} role="row" data-selected={key === selectedKey ? 'true' : undefined}>
+              <tr key={key} data-selected={key === selectedKey ? 'true' : undefined}>
                 {columns.map((column) => (
-                  <td key={column.key} role="cell" data-label={column.header}>
+                  <td key={column.key} data-label={column.header}>
                     <div className="data-table__value">{column.render(row)}</div>
                   </td>
                 ))}
