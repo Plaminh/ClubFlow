@@ -220,7 +220,7 @@ function scheduleView() {
     { id: 'saved', code: 'DRAFT_SAVED', met: saved, text: saved ? 'Đã lưu các thay đổi của lịch nháp.' : 'Hãy lưu các thay đổi của lịch nháp.' },
   ];
   return {
-    settings: { interviewDate: campaignState.campaign.interviewDate, interviewWindow: campaignState.campaign.interviewWindow, slotMinutes: campaignState.campaign.slotMinutes, roomIds: campaignState.schedule.roomIds },
+    settings: { ...(campaignState.schedule.settings ?? { interviewDate: campaignState.campaign.interviewDate, interviewWindow: campaignState.campaign.interviewWindow, slotMinutes: campaignState.campaign.slotMinutes }), roomIds: campaignState.schedule.roomIds },
     assignments: campaignView().interviewSetup.assignments,
     rooms: campaignState.rooms,
     rows: mode === 'empty' ? [] : evaluated.rows,
@@ -370,6 +370,15 @@ async function handleFetch(input, init = {}) {
   if (url.pathname === scheduleBase && method === 'GET') return response(200, scheduleView());
   if (url.pathname === `${scheduleBase}/draft/generate` && method === 'POST') {
     if (campaignState.schedule.status === 'confirmed') return response(409, { error: 'Schedule is confirmed.', code: 'SCHEDULE_CONFIRMED' });
+    // Same required body as docs/api/04-scheduling.md; the fixture draft rows themselves stay fixed.
+    const body = init.body ? JSON.parse(init.body) : {};
+    const fieldErrors = {};
+    if (!body.interviewDate) fieldErrors.interviewDate = 'Interview date is required.';
+    if (!body.interviewWindow?.start || !body.interviewWindow?.end) fieldErrors.interviewWindow = 'A start and an end time are required.';
+    else if (!(body.interviewWindow.start < body.interviewWindow.end)) fieldErrors.interviewWindow = 'Start must be before end.';
+    if (![15, 20, 30].includes(body.slotMinutes)) fieldErrors.slotMinutes = 'Must be 15, 20, or 30.';
+    if (Object.keys(fieldErrors).length) return response(400, { error: 'Schedule settings are invalid.', code: 'VALIDATION_ERROR', fieldErrors });
+    campaignState.schedule.settings = { interviewDate: body.interviewDate, interviewWindow: { ...body.interviewWindow }, slotMinutes: body.slotMinutes };
     campaignState.schedule.status = 'draft';
     campaignState.schedule.dirty = true;
     campaignState.schedule.generatedAt = campaignState.now;

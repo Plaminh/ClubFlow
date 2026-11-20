@@ -2,6 +2,13 @@ import { createMockServer } from '../server.mjs';
 
 export const silentLogger = { info() {} };
 
+/** The C8 settings the contract examples use: the Campaign's own date, window and duration. */
+export const GENERATE_SETTINGS = Object.freeze({ interviewDate: '2026-12-02', interviewWindow: { start: '09:00', end: '12:00' }, slotMinutes: 30 });
+
+export function generateRequest(token, settings = GENERATE_SETTINGS) {
+  return { method: 'POST', headers: bearer(token, { 'content-type': 'application/json' }), body: JSON.stringify(settings) };
+}
+
 export async function startMock(mode = 'normal', options = {}) {
   // Tests skip the ~150 ms normal latency unless they measure it explicitly.
   const mock = createMockServer({ mode, logger: silentLogger, normalDelayMs: 0, ...options });
@@ -78,7 +85,7 @@ export async function prepareConfirmedSchedule(baseUrl) {
       body: JSON.stringify({ decision: 'shortlisted' }),
     });
   }
-  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', { method: 'POST', headers: bearer(exec) });
+  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', generateRequest(exec));
   for (const [applicationId, start, interviewerId, roomId] of [
     ['A02', '2026-12-02T09:30:00+07:00', 'iv-comms', 'room-b105'],
     ['A03', '2026-12-02T10:00:00+07:00', 'iv-comms', 'room-b105'],

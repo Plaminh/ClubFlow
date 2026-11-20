@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { bearer, login, request, seedApplications, startMock } from './helpers.mjs';
+import { bearer, generateRequest, login, request, seedApplications, startMock } from './helpers.mjs';
 
 describe('scheduling HTTP contract', () => {
   let mock;
@@ -18,7 +18,7 @@ describe('scheduling HTTP contract', () => {
         method: 'POST', headers: bearer(exec, { 'content-type': 'application/json' }), body: JSON.stringify({ decision: 'shortlisted' }),
       });
     }
-    const generated = await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', { method: 'POST', headers: bearer(exec) });
+    const generated = await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', generateRequest(exec));
     expect(generated.body.summary).toEqual({ total: 3, proposed: 0, conflict: 2, unassigned: 1 });
     expect(generated.body.rows.find((row) => row.applicationId === 'A01').conflictWith).toEqual(['A02']);
     for (const row of generated.body.rows) expect(row.availabilityText).toEqual(expect.stringMatching(/^\d{2}:\d{2}-\d{2}:\d{2}/));
@@ -40,6 +40,6 @@ describe('scheduling HTTP contract', () => {
     const confirmed = await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/confirm', { method: 'POST', headers: bearer(exec) });
     expect(confirmed.body.status).toBe('confirmed');
     expect(confirmed.body.rows.every((row) => row.status === 'confirmed')).toBe(true);
-    expect((await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', { method: 'POST', headers: bearer(exec) })).body.code).toBe('SCHEDULE_CONFIRMED');
+    expect((await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', generateRequest(exec))).body.code).toBe('SCHEDULE_CONFIRMED');
   });
 });

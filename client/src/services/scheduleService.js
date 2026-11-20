@@ -53,8 +53,9 @@ async function mutate(path, method = 'POST', body, options = {}, campaignId = PR
   return getSchedule(options, campaignId);
 }
 
-export function generateDraft(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
-  return mutate('/draft/generate', 'POST', undefined, options, campaignId);
+/** `settings`: `{ interviewDate, interviewWindow: { start, end }, slotMinutes }` chosen for the draft (C8). */
+export function generateDraft(settings, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
+  return mutate('/draft/generate', 'POST', settings, options, campaignId);
 }
 
 export function updateRow(applicationId, change, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {

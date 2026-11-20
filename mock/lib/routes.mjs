@@ -274,12 +274,12 @@ function scheduleSummary(rows, confirmed = false) {
   };
 }
 
-function recalculateRows(rows) {
+function recalculateRows(rows, unassignedReasons = {}) {
   for (const row of rows) {
     row.reasons = [];
     row.conflictWith = [];
     row.status = row.start && row.interviewerId && row.roomId ? 'proposed' : 'unassigned';
-    if (row.status === 'unassigned') row.reasons.push('The deterministic draft left this application for manual assignment.');
+    if (row.status === 'unassigned') row.reasons.push(unassignedReasons[row.applicationId] ?? 'The deterministic draft left this application for manual assignment.');
   }
   for (let leftIndex = 0; leftIndex < rows.length; leftIndex += 1) {
     for (let rightIndex = leftIndex + 1; rightIndex < rows.length; rightIndex += 1) {
@@ -330,13 +330,40 @@ function canConfirm(state, campaign, schedule) {
   return schedule.status === 'draft' && scheduleConditions(state, campaign, schedule).every((condition) => condition.met);
 }
 
+/** Date, window and duration of the draft: chosen at Generate, else the campaign's. */
+function scheduleSettings(campaign, schedule) {
+  return schedule?.settings ?? { interviewDate: campaign.interviewDate, interviewWindow: clone(campaign.interviewWindow), slotMinutes: campaign.slotMinutes };
+}
+
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/u;
+const minutesOf = (time) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
+
+function validateGenerateSettings(campaign, body) {
+  const fieldErrors = {};
+  const date = body?.interviewDate;
+  const window = body?.interviewWindow;
+  const slotMinutes = body?.slotMinutes;
+  if (date === undefined || date === null || date === '') fieldErrors.interviewDate = 'Interview date is required.';
+  else if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/u.test(date) || Number.isNaN(Date.parse(`${date}T00:00:00+07:00`))) fieldErrors.interviewDate = 'Use a YYYY-MM-DD date.';
+  else if (date <= campaign.closesOn) fieldErrors.interviewDate = 'Interview date must be after the campaign closes.';
+  if (window === undefined || window === null) fieldErrors.interviewWindow = 'A start and an end time are required.';
+  else if (typeof window !== 'object' || !TIME.test(window.start ?? '') || !TIME.test(window.end ?? '')) fieldErrors.interviewWindow = 'Use HH:MM start and end times.';
+  else if (!(window.start < window.end)) fieldErrors.interviewWindow = 'Start must be before end.';
+  if (slotMinutes === undefined || slotMinutes === null) fieldErrors.slotMinutes = 'Duration is required.';
+  else if (![15, 20, 30].includes(slotMinutes)) fieldErrors.slotMinutes = 'Must be 15, 20, or 30.';
+  if (!fieldErrors.interviewWindow && !fieldErrors.slotMinutes && minutesOf(window.end) - minutesOf(window.start) < slotMinutes) fieldErrors.interviewWindow = 'The window must fit at least one interview.';
+  if (Object.keys(fieldErrors).length) fail(400, 'VALIDATION_ERROR', 'Schedule settings are invalid.', { fieldErrors });
+  return { interviewDate: date, interviewWindow: { start: window.start, end: window.end }, slotMinutes };
+}
+
 function scheduleProjection(state, campaign, schedule) {
   const confirmed = schedule.status === 'confirmed';
+  const settings = scheduleSettings(campaign, schedule);
   return {
     settings: {
-      interviewDate: campaign.interviewDate,
-      interviewWindow: clone(campaign.interviewWindow),
-      slotMinutes: campaign.slotMinutes,
+      interviewDate: settings.interviewDate,
+      interviewWindow: clone(settings.interviewWindow),
+      slotMinutes: settings.slotMinutes,
       roomIds: clone(campaign.roomIds),
     },
     assignments: campaign.assignments.map((assignment) => expandedAssignment(state, campaign, assignment)),
@@ -358,7 +385,7 @@ function emptySchedule() {
   return { status: 'none', dirty: false, generatedAt: null, savedAt: null, confirmedAt: null, rows: [] };
 }
 
-function fullInterviewRow(state, campaign, application, values = {}) {
+function fullInterviewRow(state, campaign, application, values = {}, slotMinutes = campaign.slotMinutes) {
   const position = positionFor(campaign, application.positionId);
   const user = values.interviewerId ? findUser(state, values.interviewerId) : null;
   const room = values.roomId ? findRoom(state, values.roomId) : null;
@@ -371,7 +398,7 @@ function fullInterviewRow(state, campaign, application, values = {}) {
     positionName: position.name,
     availabilityText: availabilityText(campaign, application.slotIds),
     start: values.start ?? null,
-    end: values.start ? addMinutes(values.start, campaign.slotMinutes) : null,
+    end: values.start ? addMinutes(values.start, slotMinutes) : null,
     interviewerId: values.interviewerId ?? null,
     interviewerName: user?.displayName ?? null,
     roomId: values.roomId ?? null,
@@ -659,13 +686,32 @@ export async function routeRequest({ request, state }) {
     if (applications.some((item) => item.screeningStatus === 'pendingReview')) fail(409, 'UNREVIEWED_APPLICATIONS', 'Review every application first.');
     const shortlisted = applications.filter((item) => item.screeningStatus === 'shortlisted');
     if (!shortlisted.length) fail(409, 'NO_SHORTLISTED_APPLICATIONS', 'There are no shortlisted applications.');
+    const settings = validateGenerateSettings(campaign, await parseRequestBody(request));
+    // Fixed PA#3 draft: the first two shortlisted applications start at the
+    // window's start (a real Conflict for Student A); the rest stay Unassigned.
+    // A placed row whose applicant or interviewer is not free then is left
+    // Unassigned with that reason instead.
+    const start = `${settings.interviewDate}T${settings.interviewWindow.start}:00+07:00`;
+    const end = addMinutes(start, settings.slotMinutes);
+    const unassignedReasons = {};
     const rows = shortlisted.map((application, index) => {
-      if (index > 1) return fullInterviewRow(state, campaign, application);
+      if (index > 1) return fullInterviewRow(state, campaign, application, {}, settings.slotMinutes);
       const assignment = campaign.assignments.find((item) => item.positionIds.includes(application.positionId));
-      return fullInterviewRow(state, campaign, application, { start: `${campaign.interviewDate}T09:00:00+07:00`, interviewerId: assignment?.interviewerId, roomId: campaign.roomIds[index] ?? campaign.roomIds[0] });
+      const applicantFree = application.slotIds.some((slotId) => {
+        const slot = campaign.slots.find((item) => item.id === slotId);
+        return slot && start >= slot.start && end <= slot.end;
+      });
+      const interviewerFree = assignment?.availability.some((slot) => start >= slot.start && end <= slot.end);
+      if (!applicantFree || !interviewerFree) {
+        unassignedReasons[application.id] = applicantFree
+          ? 'No assigned interviewer is available at the start of the chosen window.'
+          : 'The applicant is not available at the start of the chosen window.';
+        return fullInterviewRow(state, campaign, application, {}, settings.slotMinutes);
+      }
+      return fullInterviewRow(state, campaign, application, { start, interviewerId: assignment.interviewerId, roomId: campaign.roomIds[index] ?? campaign.roomIds[0] }, settings.slotMinutes);
     });
-    recalculateRows(rows);
-    const schedule = { status: 'draft', dirty: true, generatedAt: nextTime(state, 7), savedAt: null, confirmedAt: null, rows };
+    recalculateRows(rows, unassignedReasons);
+    const schedule = { status: 'draft', dirty: true, generatedAt: nextTime(state, 7), savedAt: null, confirmedAt: null, settings, unassignedReasons, rows };
     state.schedules[campaign.id] = schedule;
     return json(200, scheduleProjection(state, campaign, schedule));
   }
@@ -680,11 +726,12 @@ export async function routeRequest({ request, state }) {
     const row = schedule.rows.find((item) => item.applicationId === params.applicationId);
     if (!row) fail(409, 'APPLICATION_NOT_SHORTLISTED', 'Application is not shortlisted in this draft.');
     const body = await parseRequestBody(request);
+    const settings = scheduleSettings(campaign, schedule);
     const assignment = campaign.assignments.find((item) => item.interviewerId === body?.interviewerId && item.positionIds.includes(row.positionId));
     const room = body?.roomId && campaign.roomIds.includes(body.roomId) ? findRoom(state, body.roomId) : null;
-    const end = typeof body?.start === 'string' ? addMinutes(body.start, campaign.slotMinutes) : null;
+    const end = typeof body?.start === 'string' ? addMinutes(body.start, settings.slotMinutes) : null;
     const fieldErrors = {};
-    if (!body?.start || !end || !body.start.startsWith(`${campaign.interviewDate}T`) || body.start.slice(11, 16) < campaign.interviewWindow.start || end.slice(11, 16) > campaign.interviewWindow.end) fieldErrors.start = 'Start must align within the campaign window.';
+    if (!body?.start || !end || !body.start.startsWith(`${settings.interviewDate}T`) || body.start.slice(11, 16) < settings.interviewWindow.start || end.slice(11, 16) > settings.interviewWindow.end) fieldErrors.start = 'Start must align within the draft window.';
     if (!assignment || !assignment.availability.some((slot) => body.start >= slot.start && end <= slot.end)) fieldErrors.interviewerId = 'Choose an eligible and available interviewer.';
     if (!room) fieldErrors.roomId = 'Choose a selected campaign room.';
     const application = findApplication(state, row.applicationId);
@@ -696,7 +743,7 @@ export async function routeRequest({ request, state }) {
     if (Object.keys(fieldErrors).length) fail(400, 'VALIDATION_ERROR', 'Schedule row is invalid.', { fieldErrors });
     Object.assign(row, { start: body.start, end, interviewerId: assignment.interviewerId, interviewerName: interviewerName(state, assignment.interviewerId), roomId: room.id, roomName: room.name });
     schedule.dirty = true;
-    recalculateRows(schedule.rows);
+    recalculateRows(schedule.rows, schedule.unassignedReasons);
     return json(200, scheduleProjection(state, campaign, schedule));
   }
 
@@ -754,7 +801,7 @@ export async function routeRequest({ request, state }) {
       scheduleConfirmed: schedule?.status === 'confirmed',
       campaignId: campaign.id,
       campaignName: campaign.name,
-      interviewDate: campaign.interviewDate,
+      interviewDate: scheduleSettings(campaign, schedule).interviewDate,
       interviews: rows.map((row) => ({
         interviewId: row.interviewId,
         applicationId: row.applicationId,
@@ -846,7 +893,7 @@ export async function routeRequest({ request, state }) {
         publishedAt: result?.publishedAt ?? null,
       };
     });
-    return json(200, { scheduleConfirmed: schedule?.status === 'confirmed', interviewDate: campaign.interviewDate, rejectedIds, rows });
+    return json(200, { scheduleConfirmed: schedule?.status === 'confirmed', interviewDate: scheduleSettings(campaign, schedule).interviewDate, rejectedIds, rows });
   }
 
   if (method === 'GET' && pathname === '/api/me/notifications') {

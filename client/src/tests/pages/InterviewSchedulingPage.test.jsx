@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import * as applicationService from '../../services/applicationService.js';
 import { EXECUTIVE, renderApp } from '../helpers/renderApp.jsx';
-import { setMockApiDelay, setMockApiMode } from '../helpers/mockApi.js';
+import { getMockApiState, setMockApiDelay, setMockApiMode } from '../helpers/mockApi.js';
 
 const PATH = '/executive/scheduling';
 
@@ -125,22 +125,55 @@ describe('Interview Scheduling', () => {
     expect(screen.getByRole('button', { name: 'Xuất lịch' })).toBeEnabled();
   });
 
-  it('summarizes the locked Campaign Interview Setup and still permits draft generation (Q-03)', async () => {
+  it('lets the Executive choose the date, time window and duration, and generates the draft on them (C8)', async () => {
     await openScheduling();
 
-    const configuration = screen.getByRole('region', { name: 'Cấu hình phỏng vấn của chiến dịch' });
-    expect(within(configuration).getByText('05/11/2026 · một ngày cho cả chiến dịch')).toBeInTheDocument();
-    expect(within(configuration).getByText('09:00–12:00')).toBeInTheDocument();
-    expect(within(configuration).getByText('15 phút · dùng chung cho mọi buổi phỏng vấn')).toBeInTheDocument();
-    expect(within(configuration).getByText(/đã khóa từ khi chiến dịch được công bố/)).toBeInTheDocument();
-    // No form control pretends the campaign configuration could be changed here.
-    const page = within(screen.getByRole('main'));
-    expect(page.queryAllByRole('combobox')).toEqual([]);
-    expect(page.queryAllByRole('textbox')).toEqual([]);
-
+    const form = within(screen.getByRole('form', { name: 'Cấu hình lịch nháp' }));
+    expect(form.getByLabelText('Ngày phỏng vấn')).toHaveValue('2026-11-05');
+    expect(form.getByLabelText('Giờ bắt đầu')).toHaveValue('09:00');
+    expect(form.getByLabelText('Giờ kết thúc')).toHaveValue('12:00');
+    expect(form.getByLabelText('Thời lượng mỗi ca')).toHaveValue('15');
+    // Rooms come from Interview Setup and are only summarized (Q-03).
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.getByText('A-201, B-105')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeEnabled();
+
+    fireEvent.change(form.getByLabelText('Giờ bắt đầu'), { target: { value: '10:00' } });
+    fireEvent.change(form.getByLabelText('Thời lượng mỗi ca'), { target: { value: '20' } });
+    fireEvent.click(form.getByRole('button', { name: 'Tạo lại lịch nháp' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Tạo lại lịch nháp?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Thay thế lịch nháp' }));
+
+    expect(await screen.findByText('Đã tạo lịch nháp')).toBeInTheDocument();
+    expect(screen.getByText(/10:00–12:00, ca 20 phút/)).toBeInTheDocument();
+    expect(getMockApiState().schedule.settings).toEqual({
+      interviewDate: '2026-11-05',
+      interviewWindow: { start: '10:00', end: '12:00' },
+      slotMinutes: 20,
+    });
+  });
+
+  it('checks the draft settings before sending and shows each message on its field', async () => {
+    await openScheduling();
+
+    const form = within(screen.getByRole('form', { name: 'Cấu hình lịch nháp' }));
+    fireEvent.change(form.getByLabelText('Ngày phỏng vấn'), { target: { value: '' } });
+    fireEvent.change(form.getByLabelText('Giờ kết thúc'), { target: { value: '08:00' } });
+    fireEvent.click(form.getByRole('button', { name: 'Tạo lại lịch nháp' }));
+
+    const date = form.getByLabelText('Ngày phỏng vấn');
+    const end = form.getByLabelText('Giờ kết thúc');
+    expect(date).toHaveAttribute('aria-invalid', 'true');
+    expect(date).toHaveAccessibleDescription(/Chọn ngày phỏng vấn\./);
+    expect(end).toHaveAccessibleDescription('Giờ kết thúc phải sau giờ bắt đầu.');
+    expect(form.getByLabelText('Giờ bắt đầu')).not.toHaveAttribute('aria-invalid');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(getMockApiState().schedule.settings).toBeUndefined();
+
+    // Fixing the date before the closing date is still refused, with the reason.
+    fireEvent.change(date, { target: { value: '2026-10-30' } });
+    fireEvent.change(end, { target: { value: '12:00' } });
+    expect(date).toHaveAccessibleDescription(/phải sau ngày đóng đơn/);
+    expect(end).not.toHaveAttribute('aria-invalid');
   });
 
   it('asks before replacing an existing draft', async () => {
@@ -165,6 +198,7 @@ describe('Interview Scheduling', () => {
     expect(screen.getByText('A-201, B-105')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^(Edit|Resolve|Assign Slot) / })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeDisabled();
+    for (const label of ['Ngày phỏng vấn', 'Giờ bắt đầu', 'Giờ kết thúc', 'Thời lượng mỗi ca']) expect(screen.getByLabelText(label)).toBeDisabled();
   });
 
   it('explains the skipped confirmation when no application is shortlisted', async () => {

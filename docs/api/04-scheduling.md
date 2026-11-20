@@ -6,7 +6,7 @@ These Executive endpoints cover C8 and C9. Generate Draft, Edit/Resolve, Save Ch
 
 The canonical `GET` schedule view contains:
 
-- `settings`: `{ interviewDate, interviewWindow, slotMinutes, roomIds }`.
+- `settings`: `{ interviewDate, interviewWindow, slotMinutes, roomIds }`. Before the first Generate, the date, window and duration are the Campaign's; after it, they are the values chosen for the current draft. `roomIds` are the Campaign's rooms.
 - `assignments`: Interviewer Assignment array.
 - `rooms`: available Room array.
 - `rows`: Interview array with `status`, `reasons`, and `conflictWith` arrays.
@@ -89,20 +89,79 @@ Content-Type: application/json
 
 ## POST /api/campaigns/{campaignId}/schedule/draft/generate
 
-**Purpose**: Replace any unconfirmed draft with the deterministic PA#3 draft for current shortlisted Applications.
+**Purpose**: Replace any unconfirmed draft with the deterministic PA#3 draft for current shortlisted Applications, on the date, time window and duration the Executive chooses (C8).
 
 **Allowed roles**: Executive.
 
-**Request body**: None.
+| Request field | Type | Rules |
+| --- | --- | --- |
+| `interviewDate` | string `YYYY-MM-DD` | Required; a real date after the Campaign's `closesOn`. |
+| `interviewWindow` | object `{ start, end }` | Required; `start` and `end` are `HH:MM` (24-hour), `start` before `end`, and the window fits at least one interview of `slotMinutes`. Errors use the key `interviewWindow`. |
+| `slotMinutes` | integer | Required; `15`, `20` or `30`. |
 
-**Behavior**: Only shortlisted Applications enter. PA#3 may use fixed deterministic generation; the endpoint does not claim a production first-fit optimizer. It evaluates position eligibility, Applicant and Interviewer availability, Campaign window, selected rooms, and overlaps.
+**Behavior**: Only shortlisted Applications enter. PA#3 may use fixed deterministic generation; the endpoint does not claim a production first-fit optimizer. The chosen values become the draft's `settings`; row edits must then fall inside that date and window, and every interview lasts `slotMinutes`. The Campaign's own interview configuration is not changed. The PA#3 mock places the first two shortlisted Applications at the window's start and leaves the others Unassigned; a placed Application whose Applicant or Interviewer is not available at that time is left Unassigned with that reason.
 
-**Success**: `200` draft action projection with recalculated rows, summary, readiness, and timestamps. Errors: `401`; `403`; `404`; `409 APPLICATIONS_STILL_OPEN`; `409 UNREVIEWED_APPLICATIONS`; `409 SCHEDULE_CONFIRMED`; `409 NO_SHORTLISTED_APPLICATIONS`.
+**Success**: `200` canonical schedule view with recalculated rows, summary, readiness, and timestamps. Errors: `400 VALIDATION_ERROR` with `fieldErrors` keyed `interviewDate`, `interviewWindow`, `slotMinutes`; `401`; `403`; `404`; `409 APPLICATIONS_STILL_OPEN`; `409 UNREVIEWED_APPLICATIONS`; `409 SCHEDULE_CONFIRMED`; `409 NO_SHORTLISTED_APPLICATIONS`. The `409` checks run before the body is validated.
+
+A body without the settings is refused field by field:
 
 ```http
 POST /api/campaigns/cmp-2026-hk1/schedule/draft/generate HTTP/1.1
 Authorization: Bearer {{token:exec}}
+Content-Type: application/json
+
+{}
+```
+
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "Schedule settings are invalid.",
+  "code": "VALIDATION_ERROR",
+  "fieldErrors": {
+    "interviewDate": "Interview date is required.",
+    "interviewWindow": "A start and an end time are required.",
+    "slotMinutes": "Duration is required."
+  }
+}
+```
+
+Impossible values are refused the same way:
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/draft/generate HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Content-Type: application/json
+
+{"interviewDate": "2026-11-20", "interviewWindow": {"start": "12:00", "end": "09:00"}, "slotMinutes": 45}
+```
+
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "Schedule settings are invalid.",
+  "code": "VALIDATION_ERROR",
+  "fieldErrors": {
+    "interviewDate": "Interview date must be after the campaign closes.",
+    "interviewWindow": "Start must be before end.",
+    "slotMinutes": "Must be 15, 20, or 30."
+  }
+}
+```
+
+A valid request generates the draft:
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/draft/generate HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Content-Type: application/json
 Accept: application/json
+
+{"interviewDate": "2026-12-02", "interviewWindow": {"start": "09:00", "end": "12:00"}, "slotMinutes": 30}
 ```
 
 ```http
@@ -185,6 +244,33 @@ Content-Type: application/json
 }
 ```
 
+On this fresh draft, `POST .../schedule/confirm` (C9, described below) is refused and names the applications that block it:
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/confirm HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Accept: application/json
+```
+
+```http
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+
+{
+  "error": "Schedule cannot be confirmed.",
+  "code": "SCHEDULE_NOT_READY",
+  "details": {
+    "conditions": [
+      { "code": "APPLICATIONS_CLOSED", "label": "Applications are closed", "met": true, "detail": "Closed." },
+      { "code": "ALL_REVIEWED", "label": "All applications are reviewed", "met": true, "detail": "3 of 3 applications reviewed." },
+      { "code": "DRAFT_SAVED", "label": "Draft changes are saved", "met": false, "detail": "Unsaved generated draft." },
+      { "code": "ALL_ASSIGNED", "label": "Every shortlisted application is assigned", "met": false, "detail": "A03 is unassigned." },
+      { "code": "NO_CONFLICTS", "label": "No conflicts remain", "met": false, "detail": "A01 and A02 conflict." }
+    ]
+  }
+}
+```
+
 ## PATCH /api/campaigns/{campaignId}/schedule/draft/rows/{applicationId}
 
 **Purpose**: Edit or resolve one draft row, then recalculate every row affected by Applicant, Interviewer, and Room conflicts.
@@ -193,7 +279,7 @@ Content-Type: application/json
 
 | Request field | Type | Rules |
 | --- | --- | --- |
-| `start` | timestamp | Required; aligned to duration within Campaign window and Applicant/Interviewer availability. |
+| `start` | timestamp | Required; on the draft's `interviewDate`, the interview (`slotMinutes` long) inside the draft's `interviewWindow` and Applicant/Interviewer availability. |
 | `interviewerId` | string | Required; Interviewer is eligible for the Position. |
 | `roomId` | string | Required selected Campaign Room. |
 
@@ -374,7 +460,29 @@ Content-Type: application/json
 }
 ```
 
+After confirmation the schedule is read-only, so generating again is refused:
+
+```http
+POST /api/campaigns/cmp-2026-hk1/schedule/draft/generate HTTP/1.1
+Authorization: Bearer {{token:exec}}
+Content-Type: application/json
+
+{"interviewDate": "2026-12-02", "interviewWindow": {"start": "09:00", "end": "12:00"}, "slotMinutes": 30}
+```
+
+```http
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+
+{
+  "error": "Schedule is already confirmed.",
+  "code": "SCHEDULE_CONFIRMED"
+}
+```
+
 ## Changes
+
+- 2026-11-20: `POST .../schedule/draft/generate` now takes a required body `{ interviewDate, interviewWindow: { start, end }, slotMinutes }`, validated field by field (`400 VALIDATION_ERROR`). Before, it took no body and the draft always used the Campaign's date, window and duration, so the Executive could not choose them on the Scheduling screen as step C8 requires. The chosen values are kept as the draft's `settings` (row edits are checked against them); the Campaign's configuration, which Q-03 locks and Applicants' availability depends on, is unchanged. Added error examples: two `400` for generate (missing fields, impossible values), `409 SCHEDULE_NOT_READY` for a confirmation refused on the fresh draft, and `409 SCHEDULE_CONFIRMED` for a generate after confirmation. Requested by the team (2026-11-20); the front end is changed in the same commit.
 
 - 2026-11-19: Schedule rows now carry `availabilityText` (the Applicant's chosen slots, for example `09:00-10:00, 10:00-11:00`). The Scheduling screen has a column for it that was always empty because the contract and the mock did not send it; the Executive needs it to place an interview inside the Applicant's availability.
 - 2026-11-19: The mock now names the applications in the confirmation conditions (`ALL_ASSIGNED`: "A03 is unassigned.", `NO_CONFLICTS`: "A01 and A02 conflict.") and uses the example texts for the unsaved and no-draft cases, as the examples already showed; it said "Resolve draft conflicts." and "0 of 3 assigned." before, so a refused confirmation did not name the applications. The `APPLICATIONS_CLOSED` example detail is now `Closed.`, which is what the mock answers.

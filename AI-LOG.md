@@ -1193,3 +1193,32 @@ Verified:
 - `npm run lint` clean; client tests 282/282.
 
 Incident: The full client suite is flaky under parallel load: one run had 1 timeout, the next 5 different timeouts (each file passes alone, three runs of `InterviewSchedulingPage.test.jsx` in a row), the next 282/282. The same flake appeared once before this change, on 2026-11-20, so it is not caused by it; not fixed here.
+
+## 2026-11-20 - PA#3 Phase 19 - C8: choose the date, time window and duration on the Scheduling screen
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Extend the contract of `POST .../schedule/draft/generate` with a body `{date, window, slotMinutes}` and a `## Changes` line; validate it in the mock (400 for missing fields); add error examples (400, 409); add a form with a date picker, a time-window selector and a duration dropdown to `InterviewSchedulingPage.jsx`; rebuild and run `contract-check`.
+
+Kept: The fixed PA#3 draft (first two shortlisted at one time, a real Conflict for Student A; the rest Unassigned); the Campaign's interview configuration, which Q-03 locks and Applicants' availability depends on; rooms from Interview Setup.
+
+Changed:
+- `docs/api/04-scheduling.md`: generate takes `{ interviewDate, interviewWindow: { start, end }, slotMinutes }`, a field table, `400 VALIDATION_ERROR`, and four error examples (two `400`, `409 SCHEDULE_NOT_READY` on the fresh draft, `409 SCHEDULE_CONFIRMED` after confirmation); dated `## Changes` line. The file named in the request (`docs/api/interview-scheduling.md`) does not exist; the scheduling contract is `04-scheduling.md`. The body uses the field names the schedule view's `settings` already had, not `date`/`window`.
+- `mock/lib/routes.mjs`: `validateGenerateSettings` (400 per field, checked after the 409 checks); the chosen values are stored as the draft's `settings` and used for the placed rows, row edits, and the interview date in `/api/me/interviews` and results; a placed row whose applicant or interviewer is not free is left Unassigned with that reason.
+- `mock/tests/generate-settings.test.mjs` (new, 3 tests), `mock/tests/helpers.mjs`, `mock/tests/scheduling.test.mjs`, `tools/verify-pa3-http.mjs`: send the body.
+- `client/src/components/organisms/ScheduleSettingsCard/ScheduleSettingsCard.jsx`: now a form (date, start, end, duration); one message per field through `FormField`'s `aria-describedby`; an API `400` shown on the matching field (`interviewWindow` on the end time) until that field changes; inputs and the button disabled once confirmed. Rules in `client/src/utils/scheduleSettings.js`.
+- `client/src/services/scheduleService.js`, `hooks/useSchedule.js`, `pages/InterviewSchedulingPage.jsx`: pass the settings; the regenerate dialog keeps the values chosen; the description reads the draft's date.
+- Tests: the old test "no form control pretends the campaign configuration could be changed here" replaced by two page tests (settings sent, per-field validation), a component test file, and the service test; the test fetch stub validates the body like the mock.
+
+Rejected:
+- Writing the chosen values into the Campaign: Applicants' availability slots and the interviewers' availability are dated on the Campaign's interview date, and Q-03 locks it after the first application.
+- My first version of the card set the API errors with `setState` inside a `useEffect`; ESLint (`react-hooks/set-state-in-effect`) refused it, so it adjusts the state during render when the error prop changes. The helpers moved to `utils/` after `react-refresh/only-export-components` warned.
+
+Verified:
+- `node tools/contract-check.mjs` on a freshly started mock: 56/56 examples answered as written (52 before + 4 error examples), 0 FAIL, 37/37 endpoints have an example; then `npm run build`.
+- `npm run test:mock` 17/17; `node tools/verify-pa3-http.mjs` passed; `npm run lint` clean; client 287/287.
+- `scheduleHttpService.test.js` failed twice in a row after the change: it called `generateDraft()` with no settings and the stub, now like the contract, answered 400. Updated the test to send the settings and added a check of the 400's field errors.
+
+Incident: The full client suite still has the timing flake recorded in Phase 18 ("shows loading, then supports retry" timed out in one of two full runs; the file passed three runs alone).
+
+Limitations: Not walked in a real browser at 360/768/1280 px; the four controls use the existing `field-grid` layout and `FormField` labels.

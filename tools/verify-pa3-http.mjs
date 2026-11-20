@@ -133,7 +133,11 @@ export async function verifyHttpWorkflow(baseUrl) {
   const cv = await call(baseUrl, '/api/applications/A01/cv', { headers: auth(tokens.exec) });
   check(cv.response.status === 200 && cv.response.headers.get('content-type') === 'application/pdf', 'Protected CV failed.');
 
-  const generated = await call(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', { method: 'POST', headers: auth(tokens.exec) });
+  const generated = await call(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', {
+    method: 'POST',
+    headers: auth(tokens.exec, { 'content-type': 'application/json' }),
+    body: JSON.stringify({ interviewDate: '2026-12-02', interviewWindow: { start: '09:00', end: '12:00' }, slotMinutes: 30 }),
+  });
   check(generated.body.summary.conflict === 2 && generated.body.summary.unassigned === 1, 'Deterministic draft shape changed.');
   for (const [id, start] of [['A02', '2026-12-02T09:30:00+07:00'], ['A03', '2026-12-02T10:00:00+07:00']]) {
     const edited = await call(baseUrl, `/api/campaigns/cmp-2026-hk1/schedule/draft/rows/${id}`, {

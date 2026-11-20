@@ -37,6 +37,8 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
   const [editing, setEditing] = useState(null);
   const [rowError, setRowError] = useState(null);
   const [regenerateOpen, setRegenerateOpen] = useState(false);
+  const [pendingSettings, setPendingSettings] = useState(null);
+  const [settingsError, setSettingsError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [message, setMessage] = useState(null);
   const action = useAction();
@@ -59,12 +61,23 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
     return result;
   }
 
-  function generate() {
+  async function generate(settings) {
     setRegenerateOpen(false);
-    run(() => actions.generateDraft(), {
+    setSettingsError(null);
+    const result = await run(() => actions.generateDraft(settings), {
       title: 'Đã tạo lịch nháp',
-      text: 'Lịch nháp mẫu đã được tạo cho các hồ sơ qua vòng CV. Kiểm tra các bản ghi Conflict và Unassigned.',
+      text: `Lịch nháp ngày ${formatDate(settings.interviewDate)}, ${settings.interviewWindow.start}–${settings.interviewWindow.end}, ca ${settings.slotMinutes} phút. Kiểm tra các bản ghi Conflict và Unassigned.`,
     });
+    if (!result.ok && result.error?.fieldErrors) setSettingsError(result.error);
+  }
+
+  function requestGenerate(settings) {
+    if (hasDraft) {
+      setPendingSettings(settings);
+      setRegenerateOpen(true);
+    } else {
+      generate(settings);
+    }
   }
 
   async function submitRow(values) {
@@ -106,8 +119,8 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
       .map((assignment) => ({ id: assignment.interviewerId, name: assignment.interviewerName }));
 
   const description = confirmed
-    ? `Lịch đã xác nhận cho ${summary.shortlisted} hồ sơ qua vòng CV · ngày phỏng vấn ${formatDate(campaign.interviewDate)}.`
-    : `Lịch nháp cho ${summary.shortlisted} hồ sơ qua vòng CV · ngày phỏng vấn ${formatDate(campaign.interviewDate)}.`;
+    ? `Lịch đã xác nhận cho ${summary.shortlisted} hồ sơ qua vòng CV · ngày phỏng vấn ${formatDate(schedule.settings.interviewDate)}.`
+    : `Lịch nháp cho ${summary.shortlisted} hồ sơ qua vòng CV · ngày phỏng vấn ${formatDate(schedule.settings.interviewDate)}.`;
 
   if (schedule.zeroShortlisted) {
     return (
@@ -137,11 +150,13 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
         <ScheduleSettingsCard
           settings={schedule.settings}
           rooms={schedule.rooms}
+          closesOn={campaign.closesOn}
           hasDraft={schedule.status !== 'none'}
           disabled={action.pending}
           readOnly={confirmed}
           roomsReadOnly
-          onGenerate={() => (hasDraft ? setRegenerateOpen(true) : generate())}
+          apiError={settingsError}
+          onGenerate={requestGenerate}
         />
 
         <section aria-label="Tổng quan trạng thái lịch">
@@ -244,7 +259,7 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
         confirmLabel="Thay thế lịch nháp"
         tone="danger"
         busy={action.pending}
-        onConfirm={generate}
+        onConfirm={() => generate(pendingSettings)}
         onCancel={() => setRegenerateOpen(false)}
       >
         <p>Lịch nháp hiện tại, kể cả các chỉnh sửa thủ công, sẽ bị thay thế.</p>

@@ -10,7 +10,7 @@ export default function useSchedule() {
   }, []);
   return {
     ...resource,
-    generateDraft: useCallback((options) => scheduleService.generateDraft(options), []),
+    generateDraft: useCallback((settings, options) => scheduleService.generateDraft(settings, options), []),
     updateRow: useCallback((applicationId, change, options) => scheduleService.updateRow(applicationId, change, options), []),
     saveDraft: useCallback((options) => scheduleService.saveDraft(options), []),
     confirm: useCallback((options) => scheduleService.confirm(options), []),
