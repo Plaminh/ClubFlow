@@ -3123,3 +3123,112 @@ Sau khi xong cả hai, build lại lần cuối rồi chạy `contract-check` đ
 
 Bạn làm xong thì báo lại, mình sẽ kiểm tra và chuyển sang sửa `SELF_ASSESSMENT_REPORT.md` (mục 4).
 `````
+
+## 2026-11-20 - Request 12 - Fix the flaky test, correct the self-assessment, package the zip
+
+**Record type:** Exact prompts.
+
+**Summary (non-verbatim):** Fix the flaky "shows loading, then supports retry" test; then update `SELF_ASSESSMENT_REPORT.md` with the figures the assistant verified (commit count and authors as `git log` shows them, 56 examples, 287/17 tests, C8 done, total 95); then build and package the zip with `tar.exe`, excluding every `node_modules` and the local `.env`, and check its contents.
+
+**Exact prompt 1 (verbatim):**
+
+`````text
+Tốt, cả hai commit đều đúng yêu cầu. Đặc biệt:
+- Việc giữ `tests/fixtures/` là hợp lý (test cần, app không dùng)
+- Đổi tên field thành `interviewDate`/`interviewWindow` để nhất quán với code hiện có là quyết định tốt
+- 4 ví dụ lỗi (400, 409) chứng minh mock handle được các trạng thái quan trọng
+
+Tuy nhiên, có **một vấn đề cần fix trước khi nộp**: test "shows loading, then supports retry" chập chờn. Rubric ghi rõ "All tests pass", nếu giám khảo chạy và thấy timeout thì sẽ trừ điểm tiêu chí 4 (Testing). Bạn nên debug và fix luôn.
+
+Sau khi fix test chập chờn, chuyển sang **mục 4: sửa SELF_ASSESSMENT_REPORT.md**. Các điểm cần cập nhật:
+
+**Số liệu mới:**
+- Commit: 78 (76 cũ + 2 mới)
+- Tác giả: 3 (HUYNH THAI HOANG đã có commit)
+- Contract examples: 56 (thay vì 52)
+- Client tests: 287 (thay vì 282)
+- Mock tests: 17 (thay vì 14)
+- C8: Done (thay vì "Not done")
+
+**Điểm tiêu chí 1 (Functional requirements):**
+- C8 đã đúng rubric → tăng từ 15-21 lên 25
+- Các tiêu chí khác giữ nguyên
+- Tổng điểm cần tính lại
+
+**Các mục khác:**
+- Mục 9 (Known issues): gỡ dòng "the changes of 2026-11-19 are not committed yet"
+- Thêm dòng về test chập chờn đã fix
+- Ghi rõ 3 tác giả và số commit của từng người
+
+Bạn fix test chập chờn trước, rồi mình sẽ sửa SELF_ASSESSMENT_REPORT.md. Sau đó build lần cuối và đóng gói zip.
+`````
+
+**Exact prompt 2 (verbatim):**
+
+`````text
+Đồng ý với tất cả các số liệu và cách xử lý bạn đề xuất:
+
+**Số liệu chính xác:**
+- 79 commit (Plaminh 76, HUYNH THAI HOANG 3)
+- 2 tác giả có commit (thành viên thứ ba chưa có)
+- 56 contract examples
+- 287 client tests, 17 mock tests
+- C8: Done
+- Tổng điểm: 95
+
+**Tiêu chí 9 (Honesty/Integrity):**
+Giữ 3/5, sửa thành: "Two of three members have commits (76 / 3). The third member contributed to design and review but has not made any commits yet." Bỏ dòng "the changes of 2026-11-19 are not committed yet".
+
+**Về test chập chờn:**
+Cảm ơn đã chỉ ra - đúng là tiêu chí 4 PA#3 là "Forms" chứ không phải "Testing". Fix test vẫn có ích cho PA#4 và đảm bảo bộ test ổn định khi giám khảo chạy.
+
+Bạn sửa `SELF_ASSESSMENT_REPORT.md` theo các số liệu trên đi. Sau khi xong, báo lại để mình build lần cuối và đóng gói zip. File zip sẽ có tên theo format: `PA3_MSSV_95.zip` (bạn thay MSSV bằng mã số sinh viên thực tế).
+`````
+
+**Exact prompt 3 (verbatim).** The message before it, a packaging checklist (build, zip with exclusions, check the zip, submit), is not reproduced here; the assistant's answer corrected its exclusions.
+
+`````text
+Chính xác, bạn phát hiện rất đúng. Ba lỗi đó sẽ tạo ra file zip sai:
+- Quá nặng vì sót `client/node_modules` và `backend/node_modules`
+- Thiếu `.env.example` (vi phạm AGENTS.md)
+- Thiếu `.git/` (tiêu chí 9 bị 0-1 điểm)
+
+Lệnh `tar.exe` của bạn là giải pháp tốt nhất cho Windows:
+- Giữ được thư mục ẩn `.git/`
+- `--exclude=node_modules` loại ở mọi cấp
+- Nén chính thư mục repo (`clubflow`) thay vì nội dung bên trong
+
+**Bạn chạy giúp mình nhé:**
+1. Build lại (không bắt buộc nhưng để chắc chắn)
+2. Nén bằng lệnh `tar.exe` bạn đề xuất
+3. Chạy 3 lệnh kiểm tra
+4. Báo kết quả
+
+Sau đó nộp qua Google Classroom (assignment PA#3) bằng tài khoản `@student.hcmus.edu.vn`.
+
+Cảm ơn bạn đã kiểm tra kỹ trước khi nén. Những chi tiết này rất quan trọng để tránh mất điểm oan.
+`````
+
+## 2026-11-20 - Request 13 - Run guide, then the pre-submission QA run
+
+**Record type:** Exact prompts (the QA prompt is summarised; its steps are listed).
+
+**Summary (non-verbatim):** A guide to running and testing the prototype. Then, as QA and release engineer, in PowerShell and in order, stopping at the first failure and changing no code without permission: (1) Node >= 22.12 and `npm ci`; (2) `npm run lint` and `npm test` (about 322 tests); (3) `npm run verify:mock-http`; (4) start the mock hidden, run `node tools/contract-check.mjs --base http://localhost:3001`, expect 56/56 and 0 FAIL, stop the mock; (5) the main bundle in `client/dist/assets/` must be about 380–410 KB, not over 600 KB; (6) the zip has no `node_modules`, no `clubflow/.env`, and has `.env.example`, `.git/HEAD`, `client/dist/index.html`; (7) the self-assessment says 95 / 100, the commit count and C8 done. Output: a Markdown table and "SẴN SÀNG NỘP" or "CẦN KHẮC PHỤC". After the first run stopped at `npm ci`, the follow-up allowed stopping PIDs 460 and 25952, running `npm ci` again and repeating the run.
+
+**Exact prompt 1 (verbatim):**
+
+`````text
+hướng dẫn t chạy và kiểm thử prototype
+`````
+
+## 2026-11-20 - Request 14 - AI-LOG and self-assessment in the course templates
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** With the course's `AI-LOG.md` template and `SELF_ASSESSMENT_REPORT.md` template attached, update the format of both files.
+
+**Exact prompt (verbatim):**
+
+`````text
+cập nhật lại format của ai log và self assess
+`````

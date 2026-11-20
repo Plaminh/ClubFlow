@@ -2,13 +2,23 @@
 
 ## How to use this file
 
-Add one entry for each task where AI was used.
+Format of the CSC13008 AI-LOG template.
 
-Keep each entry short and clear. Record what AI was asked to do, what was kept, what was changed or rejected, and what the team did manually.
+- One entry per task where an assistant did part of the work, written as we go.
+- Every entry uses the six lines below, in this order. `Rejected` and `By hand` are the lines read most closely.
+- A line that was not written down when the work was done says `Not recorded at the time.`; it is not filled in afterwards.
+- Lines after `By hand` (`Verified`, `Incident`, `Limitations`, …) record which check caught a problem.
+- No secrets in prompts: no API keys, no real user data, no classmate's work. The team must be able to explain every line it accepts.
 
-Do not include passwords, API keys, private data, or other students' work.
-
-The team must review and understand all AI-assisted work before accepting it.
+```md
+## <YYYY-MM-DD> — <what we were working on>
+Tool: <Claude Code / Codex / ChatGPT / none>
+Asked for: <the task, in one sentence>
+Kept: <what we took as it came>
+Changed: <what we rewrote, and why>
+Rejected: <what we threw away, and why>
+By hand: <the parts we did ourselves>
+```
 
 ---
 
@@ -109,9 +119,9 @@ Changed: Constitution title to `ClubFlow Constitution` with a PATCH amendment (1
 
 Rejected: Fake dashboards or placeholder controls for features that do not exist yet, new pages or routes, new dependencies, edits to Spec Kit templates, and rewording historical references to the earlier scaffold name.
 
-Verified: `npm run lint`, `npm test`, `npm run build`, `npm run verify`, and `git diff --check` passed; no active source file references the old component name.
-
 By hand: A team member confirmed team approval of the constitution title change before it was edited. The team reviews the diff, checks the preview page in a browser, and commits; this entry does not mean the phase has been committed.
+
+Verified: `npm run lint`, `npm test`, `npm run build`, `npm run verify`, and `git diff --check` passed; no active source file references the old component name.
 
 ---
 
@@ -123,6 +133,12 @@ Asked for: Integrate and review the prepared ClubFlow requirements documentation
 
 Kept: All prepared documentation as supplied; no wording was changed. Frontend, backend, database, Docker, and dependencies were not touched.
 
+Changed: Not recorded at the time.
+
+Rejected: Writing a replacement `docs/README.md` or rewording any prepared document.
+
+By hand: The team reviews the documentation and this entry, resolves the missing hub file, and commits; this entry does not mean the phase has been committed.
+
 Checked:
 
 - BR-01 to BR-14 in `BUSINESS_RULES.md` match the source Business Description v1.1; each BR has at least one acceptance criterion and one traceability row.
@@ -133,10 +149,6 @@ Checked:
 Finding (not fixed): `docs/README.md` (the "Documentation Hub") does not exist, but `docs/requirements/README.md` links to it as `../README.md`. Its contents were not invented; the team should add the prepared hub file or remove the link.
 
 Verified: `git diff --check` passed. `npm run verify` passed (lint, frontend 3 tests, backend 18 tests, build) when run from an uppercase `D:` drive path (`D:\nam3\clubflow`). When run from a lowercase `d:` drive path, the frontend Vitest run failed with `Cannot read properties of undefined (reading 'config')`. This is a Windows drive-letter casing issue in the local environment, not a documentation issue.
-
-Rejected: Writing a replacement `docs/README.md` or rewording any prepared document.
-
-By hand: The team reviews the documentation and this entry, resolves the missing hub file, and commits; this entry does not mean the phase has been committed.
 
 ---
 
@@ -155,13 +167,13 @@ Changed:
 - Created the Spec Kit feature `specs/001-frontend-ui/` with the project's scripts (`spec.md`, `checklists/requirements.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/ui-services.md`, `quickstart.md`, `tasks.md`). The scripts also wrote `.specify/feature.json` (the active-feature pointer).
 - Proposed UI decisions D-UI-01…D-UI-07 in `research.md`: Vietnamese UI with English identifiers, `react-router-dom` (to be installed in UI-1 after approval), one rem-based token system from the original PA#2 CSS, stacked mobile tables, one fixture set with four demo scenarios and fixed demo clocks, a demo session context that is not authentication, and service/hook boundaries without invented API endpoints.
 
-Found: `reference.js` gives CF-030 and CF-031 an unpublished Pass, while `UI_REFERENCE_NOTES.md` and the Final Results preview show them awaiting assessment; the fixtures will follow the notes (recorded in `research.md`).
-
 Rejected: Editing `reference.js` to satisfy lint, ignoring all JavaScript, installing the router in UI-0, placeholder pages, and running the optional Spec Kit agent-context hook (it would edit agent files outside this phase).
 
-Verified: `npm run lint`, `npm test` (frontend 3, backend 18), `npm run build`, `npm run verify`, and `git diff --check` all exited 0 (run from `D:` uppercase path); 49 relative Markdown links in the new and hub documents resolve.
-
 By hand: The team reviews and approves the spec, plan, and the router dependency before UI-1, and commits; this entry does not mean the phase has been committed.
+
+Found: `reference.js` gives CF-030 and CF-031 an unpublished Pass, while `UI_REFERENCE_NOTES.md` and the Final Results preview show them awaiting assessment; the fixtures will follow the notes (recorded in `research.md`).
+
+Verified: `npm run lint`, `npm test` (frontend 3, backend 18), `npm run build`, `npm run verify`, and `git diff --check` all exited 0 (run from `D:` uppercase path); 49 relative Markdown links in the new and hub documents resolve.
 
 ---
 
@@ -186,12 +198,12 @@ Changed:
 
 Rejected: Five separate placeholder page files (one shared placeholder is clearer and is replaced screen by screen), relying on the browser's default `toLocaleDateString` (output varies by browser), and copying `reference.css` (px fonts, `overflow-x: hidden`).
 
+By hand: The team reviews the diff, opens the routes in a browser, and commits; this entry does not mean the phase has been committed.
+
 Verified:
 
 - `npm run lint`, `npm test` (frontend 29, backend 18), `npm run build`, and `npm run verify` exited 0 (run from the uppercase `D:` path).
 - Browser (headless Microsoft Edge against the Vite dev server): all six paths rendered the expected `<h1>`; `/` showed the real "API unavailable" state because the backend was not running. Headless Edge cannot shrink its window below 492 px, so widths were tested by loading each route in an iframe of exact width (360, 640, 768, 853, 1024, 1280 CSS px) through a same-origin local proxy: no horizontal overflow on any route. 640/853/1024 approximate a 1280 px window at 200/150/125% zoom; real browser zoom was not tested.
-
-By hand: The team reviews the diff, opens the routes in a browser, and commits; this entry does not mean the phase has been committed.
 
 ---
 
@@ -213,9 +225,9 @@ Changed:
 
 Rejected: Adding `@testing-library/user-event` (not installed; tests use `fireEvent` instead of a new dependency); a hamburger menu (at most four links, wrapping is enough).
 
-Verified: `npm run lint` 0, frontend tests 43 passed, `npm run build` 0, no React `act()` warnings. Headless Edge (same-origin iframe at exact widths): `/`, `/executive/review`, and a not-found path at 360/768/1280 px have one `<h1>` and no horizontal overflow; screenshots at 360 and 1280 checked against the reference header.
-
 By hand: The team reviews the commit.
+
+Verified: `npm run lint` 0, frontend tests 43 passed, `npm run build` 0, no React `act()` warnings. Headless Edge (same-origin iframe at exact widths): `/`, `/executive/review`, and a not-found path at 360/768/1280 px have one `<h1>` and no horizontal overflow; screenshots at 360 and 1280 checked against the reference header.
 
 ---
 
@@ -239,9 +251,11 @@ Changed:
 
 Found and fixed during self-review: escape sequences in generated text were written as literal invisible characters (a CSV byte-order mark and a diacritics regex); replaced with `String.fromCharCode` and `\p{M}` and scanned the source tree for invisible characters (none left). A synchronous `setState` in `useServiceData` was flagged by `react-hooks/set-state-in-effect` and rewritten.
 
-Verified: `npm run lint` 0; `npm run verify` 0 (frontend 92 tests, backend 18); no `act()` warnings.
+Rejected: Not recorded at the time.
 
 By hand: The team reviews the commit; backend developers should treat `mocks/derive.js` and `mocks/guards.js` as descriptions of expected responses, not as reusable business logic.
+
+Verified: `npm run lint` 0; `npm run verify` 0 (frontend 92 tests, backend 18); no `act()` warnings.
 
 ---
 
@@ -251,17 +265,21 @@ Tool: Claude Code
 
 Asked for: Implement `/executive/campaign` from `index.html` and SCREEN_REQUIREMENTS Screen 1 (BR-01, BR-02, BR-04, BR-14) against the mock services.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - `pages/CampaignManagementPage.jsx` + `hooks/useCampaign.js`: campaign information, timeline, departments/positions with quotas and requirements, interview preparation, Save Draft, Preview (modal), Publish (confirmation dialog), "Lưu thay đổi" once published, inline errors with an error banner and focus on the first invalid field, published state with a link to Application Review, read-only state after schedule confirmation, BR-04 block when removing a position that has applications.
 - New components: molecules `AsyncContent` (loading / error + retry), `Timeline`, `PositionCard`; organisms `ConfirmDialog`, `CampaignPreview`, `CampaignDetailsCard`, `PositionsEditor`, `InterviewSetupCard`. `routes/RoleGate.jsx` shows a restricted state for other demo roles (UI only, not access control).
 - Self-review fixes after the browser check: native date inputs showed the browser's US order (11/05/2026 for 5 Nov), so each date field now also shows "Ngày đã chọn: dd/MM/yyyy"; the header showed "Ban tuyển dụng · Ban tuyển dụng" and now shows the club; the demo bar took about 300 px on mobile and is now a collapsed `<details>` summary.
 
+Rejected: Not recorded at the time.
+
+By hand: The team reviews the commit.
+
 Assumptions: interview date/window/duration are locked once applications exist (pending Q-03); a published campaign stays editable until schedule confirmation, as the reference states.
 
 Verified: lint 0; frontend tests 99 passed. Headless Edge as the demo Executive (`draft` scenario): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 360 and 1280 compared with `index-360.png`/`index-1280.png`.
-
-By hand: The team reviews the commit.
 
 ---
 
@@ -271,6 +289,8 @@ Tool: Claude Code
 
 Asked for: Implement `/executive/review?tab=screening` from `review.html` and SCREEN_REQUIREMENTS Screen 2 (BR-06…BR-09, BR-14). Work resumed after a pause; the uncommitted UI-2.2 changes were re-verified before committing.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - `pages/ApplicationReviewPage.jsx` with URL-synced tabs (`?tab=screening|results`, no separate routes). CV Screening: campaign-wide statistics with applications and distinct applicants counted separately and the scope stated (BR-06); search (accent-insensitive), position/status filters, sort, pagination (5 per page) with a "filtered" summary; a detail panel beside the list (student info, availability, link to the fictional sample CV, full SOP, Executive-only private note); Shortlist / Reject for the selected application only, with a confirmation before rejecting (BR-07); CSV export of the current filter without private notes or CV files (BR-09); empty, filtered-empty, loading, and error-with-retry states; decisions read-only after schedule confirmation (BR-14). The Final Results tab shows a labeled interim state until UI-2.3.
@@ -278,9 +298,11 @@ Changed:
 - Decision hint follows the reference ("Áp dụng riêng cho CF-026; hồ sơ CF-027 được duyệt độc lập") and adds the reason when the buttons are unavailable (already decided — reversal is not defined by WORKFLOWS §3 — or locked by BR-14).
 - Test timing: `tests/setup.js` raises the Testing Library async timeout from 1 s to 3 s, and `frontend/vitest.config.js` sets `testTimeout: 10000`. On resume, `npm run verify` failed twice intermittently (a full-page test still loading after 1 s when all files ran in parallel; the slowest page test takes about 3.4 s against the 5 s default). Both passed when rerun; no assertion was changed.
 
-Verified: `npm run verify` 0 twice in a row (frontend 110 tests after adding the Tabs test, backend 18); no `act()` warnings. Headless Edge as the demo Executive (`screening`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px for both tabs; screenshots at 360 and 1280 compared with `review-360.png`/`review-1280.png`. The detail-panel-open state is covered by tests but was not captured in the browser (the headless check cannot click).
+Rejected: Not recorded at the time.
 
 By hand: The team reviews the commit.
+
+Verified: `npm run verify` 0 twice in a row (frontend 110 tests after adding the Tabs test, backend 18); no `act()` warnings. Headless Edge as the demo Executive (`screening`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px for both tabs; screenshots at 360 and 1280 compared with `review-360.png`/`review-1280.png`. The detail-panel-open state is covered by tests but was not captured in the browser (the headless check cannot click).
 
 ---
 
@@ -290,15 +312,19 @@ Tool: Claude Code
 
 Asked for: Implement `/executive/review?tab=results` from `review-final-results-preview.html` (F6; BR-08, BR-14): results per application, assessment viewing, Executive Pass/Fail, publication with confirmation, in-app notifications.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - `ApplicationReviewPage.jsx` Final Results panel: info alert (Shortlisted ≠ Pass; CV-rejected applications listed as excluded from the service data), results table, selected-application panel with "View Assessment" (advisory, `aria-expanded`), Record Pass / Record Fail (only with a submitted assessment and before publication), "Công bố kết quả" card with a confirmation dialog; empty state with a link to scheduling before the schedule is confirmed.
 - New: organism `DataTable` (stacked label/value cards below 48rem so status and actions stay visible; explicit table roles so the semantics survive the card layout; `data-selected` instead of the invalid `aria-selected` on table rows), organisms `FinalResultsTable`, `FinalDecisionPanel`, `PublishResultsCard`, hook `hooks/useFinalResults.js`; `resultService.list()` also returns the interview date and the CV-rejected IDs.
 - Tests: `tests/pages/FinalResults.test.jsx` (visibility rules, assessment view, Pass/Fail gating, publish → notification only for that applicant, pre-confirmation state).
 
-Verified: `npm run verify` 0 (frontend 116, backend 18). Headless Edge as the demo Executive (`confirmed`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 1280 (table + side-by-side panels) and 360 (stacked result cards) compared with `review-final-results-1280.png`/`-360.png`.
+Rejected: Not recorded at the time.
 
 By hand: The team reviews the commit.
+
+Verified: `npm run verify` 0 (frontend 116, backend 18). Headless Edge as the demo Executive (`confirmed`): one `<h1>`, no horizontal overflow at 360/640/768/853/1024/1280/1600 px; screenshots at 1280 (table + side-by-side panels) and 360 (stacked result cards) compared with `review-final-results-1280.png`/`-360.png`.
 
 ---
 
@@ -308,6 +334,8 @@ Tool: Claude Code
 
 Asked for: Implement `/executive/scheduling` from `scheduling.html` and SCREEN_REQUIREMENTS Screen 3 (BR-07, BR-08, BR-10…BR-14) using verified mock responses, without a frontend scheduling algorithm.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - `pages/InterviewSchedulingPage.jsx` + `hooks/useSchedule.js`: draft parameters (one interview date and window from the campaign; common duration; available rooms), Generate / Regenerate (confirmation before replacing a draft), summary counts taken from the same rows as the table, interviewer assignments and availability, draft table with Proposed / Conflict / Unassigned and the reason for each, a conflict alert listing the real overlaps (including the same applicant across positions), manual Edit / Resolve / Assign Slot dialog, Save Changes with an unsaved-changes badge, timetable CSV export, BR-13 conditions with ✓/✗ text, confirmation dialog, confirmed read-only state (export still allowed), and the BR-13 "no shortlisted applications → skip confirmation" state.
@@ -315,9 +343,11 @@ Changed:
 - Self-review fixes from the browser check: short table values were breaking mid-word ("A-" / "201") because the global `overflow-wrap: anywhere` let columns shrink below a word — tables now use `break-word`; the 8-column tables overflowed their containers at 768–1024 px and hid the action column, so `DataTable` stacks rows as cards below 80rem (recorded in `research.md` D-UI-04); after confirmation the disabled button read "Tạo lịch nháp" and now reads "Tạo lại lịch nháp".
 - Tests: `tests/pages/InterviewSchedulingPage.test.jsx` (counts equal rows, conflict reasons, blocked confirmation with each condition, room double-booking, resolve → save → confirm → read-only, regenerate confirmation, confirmed scenario, zero-shortlisted skip).
 
-Verified: `npm run verify` 0 three times in a row (frontend 124, backend 18). One earlier `verify` run, started right after the headless-browser checks, had 1 intermittent frontend test failure that could not be reproduced in 4 later full runs; its name was not captured. Open item for UI-5: find the flaky test under load (logs are now kept for every verify run). Headless Edge as the demo Executive: one `<h1>`, no page overflow and no table-container overflow (`scrollWidth == clientWidth`) at 360/640/768/853/1024/1280/1600 px in the `screening` and `confirmed` scenarios; screenshot at 1280 compared with `scheduling-1280.png`.
+Rejected: Not recorded at the time.
 
 By hand: The team reviews the commit.
+
+Verified: `npm run verify` 0 three times in a row (frontend 124, backend 18). One earlier `verify` run, started right after the headless-browser checks, had 1 intermittent frontend test failure that could not be reproduced in 4 later full runs; its name was not captured. Open item for UI-5: find the flaky test under load (logs are now kept for every verify run). Headless Edge as the demo Executive: one `<h1>`, no page overflow and no table-container overflow (`scrollWidth == clientWidth`) at 360/640/768/853/1024/1280/1600 px in the `screening` and `confirmed` scenarios; screenshot at 1280 compared with `scheduling-1280.png`.
 
 ---
 
@@ -327,6 +357,8 @@ Tool: Claude Code
 
 Asked for: Implement the Applicant Portal on `/` from `applicant.html` (F2, F6, F7; BR-02, BR-03, BR-05, BR-08): public campaign, Apply, My Applications, Notifications, shared sign-in, no registration or recovery.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - `pages/ApplicantPortalPage.jsx` replaces the UI-1.1 `HomePage` on `/`. URL-driven tabs (`?tab=campaign|apply|mine|notifications`) with an unread count; public campaign (timeline, submission-window message per phase, positions, Apply Now → shared demo sign-in for visitors); a drafts-are-not-public state (BR-02); Apply form (read-only name/student ID, email, faculty, PDF CV ≤ 5 MB, SOP ≤ 300 words with live counter, club slots, summary, duplicate-position notice "(đã nộp)", field errors with banner and focus, disabled outside the submission window); My Applications (each application tracked separately; interview only once confirmed; result only once published, otherwise "Chưa công bố"); in-app notifications with "Mới" and mark-all-read; sign-in gates on private tabs and a notice for non-applicant demo roles.
@@ -334,11 +366,13 @@ Changed:
 - Separate commit `fix: never show another account's data while reloading`: found while testing the portal — the demo session learned the role only after the account list loaded, so a restored applicant session briefly loaded as a visitor and showed that data during the refresh. The provider now restores the account synchronously and `useServiceData` never returns data loaded for another account.
 - Tests: `tests/pages/ApplicantPortalPage.test.jsx` (public access and sign-in prompt, private-tab gates, before-open state, draft hidden, validation and preserved input with focus, 300/301-word boundary, 6 MB CV, successful submission appearing as Pending Review, duplicate notice, BR-08 visibility in screening vs confirmed, notification and mark-as-read).
 
+Rejected: Not recorded at the time.
+
+By hand: The team reviews both commits.
+
 Not done as suggested: the two suggested UI-3 commits are one, because the tracking and notification tabs live in the same page file as the form.
 
 Verified: `npm run verify` 0 (frontend 134, backend 18); the isolated fix commit also passed verify (frontend 124, backend 18); no `act()` warnings. Headless Edge: one `<h1>`, no page or table-container overflow for visitor `/` and `?tab=apply` (accepting) at 360/768/1280, applicant `?tab=apply` (accepting) at 360/640/768/1024/1280/1600, and `?tab=mine` / `?tab=notifications` (confirmed) at 360/768/1024/1280; screenshots of Apply at 1280 and My Applications at 360 compared with `applicant-1280.png` / `applicant-results-360.png`. The native file button shows the browser's own language ("Choose File"); the Vietnamese status line under it states the chosen file.
-
-By hand: The team reviews both commits.
 
 ---
 
@@ -348,6 +382,8 @@ Tool: Claude Code
 
 Asked for: Implement `/interviewer` from `interviewer.html` (F6, F7; BR-14): assigned interviews only, details and CV access, one assessment per completed interview, submitted / upcoming / empty / restricted states, no Executive notes, no Pass/Fail publishing.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - `pages/InterviewerWorkspacePage.jsx` + `hooks/useInterviewerWorkspace.js`: interviewer identity badge, campaign and interview-date context, four stats, "Assigned Interviews" table (only the signed-in interviewer's confirmed interviews, with Confirmed + assessment status), selected application details (faculty/year, interview time and room, SOP, link to the fictional sample CV), Interview Assessment form, success message that Pass/Fail is recorded by the Executive elsewhere.
@@ -355,9 +391,11 @@ Changed:
 - Assumption (Q-04 open): the assessment has the reference fields only — notes (required) and a three-option overall recommendation (required); no numeric scores. The form is a single organism so the fields are easy to change once Q-04 is answered.
 - Tests: `tests/pages/InterviewerWorkspacePage.test.jsx` (own interviews only, no private notes, submitted read-only, validation then submit → locked, upcoming interview locked after confirming a schedule in the `screening` scenario, empty state, restricted state for other roles).
 
-Verified: `npm run verify` 0 (frontend 141, backend 18), run with the QA servers stopped. Headless Edge as Hà My (`confirmed`): one `<h1>`, no page or table-container overflow at 360/640/768/853/1024/1280/1600 px; empty state (`screening`) at 360 and 1280; screenshot at 1280 compared with `interviewer-1280.png`.
+Rejected: Not recorded at the time.
 
 By hand: The team reviews the commit.
+
+Verified: `npm run verify` 0 (frontend 141, backend 18), run with the QA servers stopped. Headless Edge as Hà My (`confirmed`): one `<h1>`, no page or table-container overflow at 360/640/768/853/1024/1280/1600 px; empty state (`screening`) at 360 and 1280; screenshot at 1280 compared with `interviewer-1280.png`.
 
 ---
 
@@ -374,6 +412,18 @@ Changed (four commits):
 - `feat: prepare api client for integration` — query strings, JSON bodies, `FormData` without a forced content type (CV upload), optional Bearer token provider, 204/empty → `null`, failures as `UiError` keeping the backend `{ error }` message with a status-based kind and optional `fieldErrors`/`details`; tests in `tests/services/apiClient.test.js`.
 - `docs: document frontend backend integration contracts` — `docs/frontend/INTEGRATION.md` (route ownership, layer boundary, every service function with what the backend must enforce, error/loading conventions, auth replacement, CV boundary, mock-only code not to reuse, open questions), linked from `docs/README.md`; `quickstart.md` results log; `tasks.md` T025, T027, T060–T064.
 
+Kept: Not recorded at the time.
+
+Changed: Not recorded at the time.
+
+Rejected: Not recorded at the time.
+
+By hand: The team reviews the four UI-5 commits and does the manual keyboard pass.
+
+Follow-up (2026-11-15, after the UI-5 docs commit): the final verification failed once more with no browser load, so the earlier "CPU load" explanation was wrong. Code review found the cause: in `ApplicationReviewPage.test.jsx`, "shows the reference header…" waited for the screening panel's request and then synchronously read the campaign context, which comes from the page header's separate `useCampaign()` request. A throwaway experiment that delayed only the header request made the old assertion fail and the awaited version pass. The test now awaits that text (`test: await the separately loaded campaign context`). No product change; the page shows the context as soon as its own request finishes.
+
+Follow-up 2 (2026-11-15): the final gate failed once more (`npm test` and `verify` in the same run; the failing test name was not captured because that run was not logged — every later run is). A review of all page tests for "act on something found before its data arrived" found a **product bug**: when a different application or interview is selected, `useServiceData` kept showing the previous detail until the new one loaded, while the Shortlist / Reject / Save note / Submit Assessment handlers used the newly selected ID. With real network latency a user could act on the wrong application. Fixed (`fix: never show or act on a previous selection while it loads`): the CV-screening detail panel and the interviewer detail/assessment panel render only when the loaded data matches the selection (loading state otherwise), and the handlers use the ID of the displayed data. Two regression tests assert synchronously that the previous item disappears right after another is selected; both failed with the old page code and pass with the fix. The interviewer test that took the stale "Submit Assessment" button now waits for the new item, which is the most likely cause of the remaining intermittent failure. Verified: lint/test/build/verify sequence twice in a row, all exit 0 (frontend 157, backend 18), `--reporter=verbose` with 0 stderr blocks.
+
 Checked:
 
 - Contrast of all text/background token pairs: all pass WCAG AA (lowest 6.53:1; most AAA).
@@ -388,12 +438,6 @@ Open item from UI-2.4 (intermittent failure after browser QA): not reproduced in
 
 Verified: `npm run verify` 0 (frontend 156, backend 18, build OK); `--reporter=verbose` run with 0 stderr blocks; 57 relative Markdown links in the hub, the guide, and the spec folder resolve.
 
-By hand: The team reviews the four UI-5 commits and does the manual keyboard pass.
-
-Follow-up (2026-11-15, after the UI-5 docs commit): the final verification failed once more with no browser load, so the earlier "CPU load" explanation was wrong. Code review found the cause: in `ApplicationReviewPage.test.jsx`, "shows the reference header…" waited for the screening panel's request and then synchronously read the campaign context, which comes from the page header's separate `useCampaign()` request. A throwaway experiment that delayed only the header request made the old assertion fail and the awaited version pass. The test now awaits that text (`test: await the separately loaded campaign context`). No product change; the page shows the context as soon as its own request finishes.
-
-Follow-up 2 (2026-11-15): the final gate failed once more (`npm test` and `verify` in the same run; the failing test name was not captured because that run was not logged — every later run is). A review of all page tests for "act on something found before its data arrived" found a **product bug**: when a different application or interview is selected, `useServiceData` kept showing the previous detail until the new one loaded, while the Shortlist / Reject / Save note / Submit Assessment handlers used the newly selected ID. With real network latency a user could act on the wrong application. Fixed (`fix: never show or act on a previous selection while it loads`): the CV-screening detail panel and the interviewer detail/assessment panel render only when the loaded data matches the selection (loading state otherwise), and the handlers use the ID of the displayed data. Two regression tests assert synchronously that the previous item disappears right after another is selected; both failed with the old page code and pass with the fix. The interviewer test that took the stale "Submit Assessment" button now waits for the new item, which is the most likely cause of the remaining intermittent failure. Verified: lint/test/build/verify sequence twice in a row, all exit 0 (frontend 157, backend 18), `--reporter=verbose` with 0 stderr blocks.
-
 ---
 
 ## 2026-11-15 — UI-6 — Pre-integration audit and cleanup
@@ -401,6 +445,14 @@ Follow-up 2 (2026-11-15): the final gate failed once more (`npm test` and `verif
 Tool: Claude Code (implementation); Codex using the `speckit-analyze` skill (read-only audit).
 
 Asked for: A read-only audit of the repository before backend integration (unused files, code quality, CSS, mocks, backend scaffold, docs, quality gate), then the approved cleanup batches 1–5. Batch 6 (code splitting) is deferred, as the audit recommended.
+
+Kept: Not recorded at the time.
+
+Changed: Not recorded at the time.
+
+Rejected: Not recorded at the time.
+
+By hand: The team reviews the five UI-6 commits, especially the `studentInfo` snapshot (the backend must store the submitted values too) and the Executive-only `getCampaign()`.
 
 Audit result: no Critical Constitution violation, no P0; four P1 issues, each confirmed in the code before it was changed.
 
@@ -424,8 +476,6 @@ Checked: each new regression test was confirmed to fail without its fix where pr
 
 Verified: `npm run verify` exit 0 — lint clean, frontend 166 tests (18 files), backend 18 tests, build OK (same >500 kB chunk warning as before).
 
-By hand: The team reviews the five UI-6 commits, especially the `studentInfo` snapshot (the backend must store the submitted values too) and the Executive-only `getCampaign()`.
-
 ---
 
 ## 2026-11-16 — UI-7.1 — Q-06 irreversible workflow actions
@@ -443,14 +493,16 @@ Changed:
 - Application and assessment screens explicitly explain their read-only-after-submit behavior. Regression tests cover cancel, stale selection, immutable screening controls and submitted read-only states.
 - Added the Q-06 decision record and backend state-transition contract (still `TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION`); aligned the UI service contract, feature requirement and Spec Kit tasks T071–T073.
 
+Rejected: Not recorded at the time.
+
+By hand: The team must review and understand the immutable-workflow policy and code before accepting it; Product Owner confirmation is still pending.
+
 Verified:
 
 - Recovery baseline before edits: `npm run verify` exit 0 — frontend 191/191, backend 18/18, lint and build passed.
 - Targeted tests: 23/23 passed across `ApplicationReviewPage.test.jsx` and `InterviewerWorkspacePage.test.jsx`.
 - Full `npm run verify` exit 0 — frontend 193/193 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
 - Headless Microsoft Edge against the Vite dev server: Shortlist and assessment confirmation dialogs checked at 360, 768 and 1280 CSS px. In all six checks the page and dialog had no horizontal overflow, the dialog fit the 900 px viewport, and Cancel had initial focus. Escape/cancel caused no screening mutation; assessment cancel preserved its draft. This was real-browser viewport simulation, not real browser zoom.
-
-By hand: The team must review and understand the immutable-workflow policy and code before accepting it; Product Owner confirmation is still pending.
 
 ---
 
@@ -471,14 +523,16 @@ Changed:
 - Added a regression that reverses all fixture arrays and creates an equal-submission-time tie, then verifies the service order remains deterministic.
 - Added the complete Q-01 decision record and backend algorithm contract: explicit ordering, first valid combination, Unassigned on failure, no backtracking/optimization, transactional overlap protection. Updated the integration guide, service contract, research note and tasks T074–T076. Product Owner approval remains pending.
 
+Rejected: Not recorded at the time.
+
+By hand: The team reviews the first-fit ordering and accepts its intentionally non-optimal/no-backtracking limitation before backend implementation.
+
 Verified:
 
 - Q-02 boundary and five-screen date audit suite: 135/135 tests passed (8 files). All JSX date/timestamp displays use the shared `formatDate`/`formatDateTime`; native date inputs retain ISO values and show an explicit `dd/MM/yyyy` hint.
 - Q-01 targeted lint and scheduling tests: lint exit 0; 38/38 tests passed (2 files).
 - Full `npm run verify` exit 0: frontend 194/194 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
 - No browser check was repeated in this phase because the default fixture order and rendered UI did not change; only order stability under rearranged service input changed.
-
-By hand: The team reviews the first-fit ordering and accepts its intentionally non-optimal/no-backtracking limitation before backend implementation.
 
 ---
 
@@ -496,13 +550,15 @@ Changed:
 - Added service and page regressions proving repeat publication is rejected and cannot duplicate an application's in-app notification.
 - Added the complete Q-05 decision record and integration contract: atomic result publication + unique in-app notification + unique email outbox record; server-side Brevo worker; delivery status and provider ID; retry the failed record without republishing or duplicating side effects. Tasks T077–T079 are complete. Product Owner confirmation remains pending because email is excluded by the supplied product scope.
 
+Rejected: Not recorded at the time.
+
+By hand: Backend developers must review the outbox/idempotency model and verify the Brevo account, sender, template, retry policy and credential handling before implementation.
+
 Verified:
 
 - Targeted lint and notification tests: lint exit 0; 48/48 tests passed (3 files).
 - Full `npm run verify` exit 0: frontend 195/195 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
 - Headless Microsoft Edge at 360, 768 and 1280 CSS px: Publish Results confirmation fit the viewport with Cancel initially focused; after confirmation, the updated success alert containing the Brevo/mock disclaimer fit the viewport and the page had no horizontal overflow at all three widths. This was viewport simulation, not real browser zoom. No external email was sent.
-
-By hand: Backend developers must review the outbox/idempotency model and verify the Brevo account, sender, template, retry policy and credential handling before implementation.
 
 ---
 
@@ -520,13 +576,15 @@ Changed:
 - Added the Q-07 decision record and integration contract: Express/Multer one-file/size enforcement, actual PDF content inspection, protected Cloudinary storage, PostgreSQL asset metadata, JWT plus Executive/assigned-interviewer authorization, short-lived signed delivery or backend streaming, and orphan cleanup.
 - Explicitly documented that a public `secure_url` is not authorization, Cloudinary secrets must never use `VITE_`, the repository's fictional PDF is not a real-data delivery model, and account delivery capabilities must be verified. Tasks T080–T082 are complete; Product Owner/team confirmation remains pending.
 
+Rejected: Not recorded at the time.
+
+By hand: Backend developers must verify the Cloudinary account's protected/authenticated PDF delivery features and review retention, malware scanning, applicant self-access and recovery policy before implementation.
+
 Verified:
 
 - Targeted lint and upload tests: lint exit 0; 49/49 tests passed (3 files: API client, Applicant Portal, mock services).
 - Full `npm run verify` exit 0: frontend 195/195 (18 files), backend 18/18 (5 files), lint and build passed; the existing Vite >500 kB chunk warning remains.
 - No browser check was repeated because this phase changed only a service boundary test and documentation; the upload UI and rendered copy were unchanged from the previously verified screen.
-
-By hand: Backend developers must verify the Cloudinary account's protected/authenticated PDF delivery features and review retention, malware scanning, applicant self-access and recovery policy before implementation.
 
 ---
 
@@ -535,6 +593,14 @@ By hand: Backend developers must verify the Cloudinary account's protected/authe
 Tool: Codex using the `speckit-implement` skill.
 
 Asked for: Complete the Q-01…Q-07 frontend and documentation work, audit the requested UI cleanups, verify all five screens, keep backend production work deferred, and leave a clean phase-by-phase Git history.
+
+Kept: Not recorded at the time.
+
+Changed: Not recorded at the time.
+
+Rejected: Not recorded at the time.
+
+By hand: Product Owner confirmation is still required for Q-01…Q-07. Backend engineers must implement and review the documented production contracts, migrations, authorization, provider configuration and failure handling before the UI can replace mock services.
 
 Completed:
 
@@ -549,8 +615,6 @@ Verified:
 - Headless Microsoft Edge at 360, 768 and 1280 CSS px: 24/24 checks across 8 key states and all 5 screens passed with one h1, no page/data-table overflow and no raw ISO date text. Dialog-specific checks for Q-05 and Q-06 also passed at all three widths. This was viewport simulation, not real browser zoom.
 - `git diff --check` passed; the relevant local Markdown links resolved; the branch remained `feature/q01-q07-decisions`; scope and ignored-file checks found no backend or `.env` change.
 
-By hand: Product Owner confirmation is still required for Q-01…Q-07. Backend engineers must implement and review the documented production contracts, migrations, authorization, provider configuration and failure handling before the UI can replace mock services.
-
 ---
 
 ## 2026-11-16 — UI-8 — Sign In and My Profile prototypes (simulated authentication)
@@ -558,6 +622,14 @@ By hand: Product Owner confirmation is still required for Q-01…Q-07. Backend e
 Tool: Claude Code.
 
 Asked for: Finish, debug, test and document the partially implemented UI-8 screens using React and mock data only; no backend, token, database, registration or password features; no commit.
+
+Kept: Not recorded at the time.
+
+Changed: Not recorded at the time.
+
+Rejected: Not recorded at the time.
+
+By hand: The team must review this AI-assisted change before committing, and should repeat a keyboard-only pass in a real browser. Backend engineers own real authentication, authorization and profile persistence.
 
 Completed:
 
@@ -573,8 +645,6 @@ Verified:
 
 Limitations: authentication and profile changes are simulated in browser memory and reset on reload, scenario switch or demo reset; route guards are UI convenience, not security; lists that resolve a person's name by account ID still show the fixture name after a profile rename.
 
-By hand: The team must review this AI-assisted change before committing, and should repeat a keyboard-only pass in a real browser. Backend engineers own real authentication, authorization and profile persistence.
-
 ---
 
 ## 2026-11-16 — Final frontend documentation synchronization after UI-8
@@ -583,6 +653,8 @@ Tool: Codex.
 
 Asked for: Audit the current React implementation and synchronize frontend documentation only; cover five business screens plus shared Sign In and My Profile, align service contracts and backend handoff guidance, preserve canonical requirements, validate links/diff, and stop before commit.
 
+Kept: Not recorded at the time.
+
 Changed:
 
 - Updated the detailed frontend walkthrough to describe all seven product screens, the current `/login` and `/profile` flows, role-safe redirects, account menu/Sign Out, `AuthGate`/`RoleGate`, `dataVersion`/`sessionEpoch`, mock reset/isolation, immutable application snapshots, loading/error/empty states, and current limitations.
@@ -590,6 +662,10 @@ Changed:
 - Synchronized `docs/frontend/INTEGRATION.md`, the UI service contracts, data model, routing research, plan, spec, tasks, quickstart and root README. Historical references to five screens now say five **business** screens where needed; historical `SignInDialog` work is explicitly marked as superseded by UI-8.
 - Preserved `docs/requirements/` unchanged. Flagged the Q-05 conflict instead of silently resolving it: canonical scope excludes email/SMS/push, while the team's Brevo idea is provisional and still lacks Product Owner approval.
 - Added a complete UI-8 manual checklist for all three roles, invalid credentials, Profile Save/Cancel/duplicate email, changed-email sign-in, account switching/reset, Sign Out, protected routes, responsive navigation, five-business-screen regressions, real zoom and screen-reader review.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Evidence used:
 
@@ -611,8 +687,6 @@ Tool: Codex.
 
 Asked for: Verify Git state, inventory all dependencies on the `frontend/` path, move the existing React workspace to `client/`, align PA#3 rules and required documentation, run the real quality gates, review the diff, and stop before commit. The request explicitly excluded API contract implementation, an HTTP mock server, domain service changes, C1–C11 business changes, backend/database changes, dependency installation, commit, and push.
 
-Rejected: None
-
 Kept:
 
 - Preserved all 214 tracked React workspace files with 100% rename similarity, including components, hooks, services, browser fixtures, tests, Vite/Vitest configuration, and the fictional PDF asset.
@@ -623,6 +697,10 @@ Changed:
 - Moved `frontend/` to `client/` with `git mv` and updated root workspaces/scripts, `package-lock.json`, ESLint globs, ignore paths, Spec Kit templates, active design documentation, and current source-path references.
 - Extended `AGENTS.md` with PA#3 contract-first, HTTP mock-first, relative `/api`, loading/error/empty/success, change-control, dependency-approval, UI-preservation, C1–C11, mock-mode, direct-route, responsive, and semantic constraints.
 - Added `brief.md` with only the verified audit and Phase 1 prompts, plus `FRONTEND.md` with the seven required rubric sections. Unverified team IDs, canonical PA#3 accounts, public decision links, endpoints, and runtime evidence remain explicitly marked as missing or requiring team input.
+
+Rejected: None
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -642,7 +720,7 @@ Tool: Codex.
 
 Asked for: Review and finalize Phase 1 documentation only; preserve verbatim prompt history, add the Phase 1 `Rejected` field, distinguish required PA#3 accounts from browser-demo accounts, restore historical Spec Kit accuracy with dated migration notes, verify documentation consistency and diff checks, and avoid source, configuration, dependency, contract, mock, commit, or push changes.
 
-Rejected: None
+Kept: Not recorded at the time.
 
 Changed:
 
@@ -650,6 +728,10 @@ Changed:
 - Added `Rejected: None.` to the existing Phase 1 entry and verified its `Tool: Codex.` field. Existing earlier AI log entries were not edited.
 - Split `FRONTEND.md` demo accounts into required PA#3 names in examples and existing browser-demo credentials. Required HTTP credentials remain explicitly unverified, and browser-demo mappings remain unapproved.
 - Restored the original `frontend/` paths in the UI feature plan, research, data model, and service contract, with explicit 2026-11-17 notes explaining the later move to `client/`.
+
+Rejected: None
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -668,12 +750,6 @@ Tool: Codex.
 
 Asked for: Autonomously complete PA#3 from Phase 2B through Phase 6 using the order audit, plan, implement, verify, fix, reverify, commit, and continue; begin with a complete C1-C11 API contract, preserve existing UI/backend work, use local commits only after green gates, never push, and report final evidence in Vietnamese.
 
-Rejected:
-
-- Rejected the older prototype rule that publication makes the entire Campaign read-only. The supplied PA#3 Q-03 direction instead permits constrained published details/Position/quota/window edits, locks Interview Setup after the first valid Application, blocks linked Position deletion, and locks required records after Schedule confirmation.
-- Rejected an auxiliary upload-only primary Campaign and any clock-control endpoint. The contract uses one primary Campaign, a real early-close business action, and internal deterministic workflow timestamps that callers cannot manipulate.
-- Rejected creating a homemade `tools/contract-check.mjs`. The exact official course checker was not present in the repository or available attachments, so its status remains NOT RUN; the repository validator is explicitly structural and non-official.
-
 Kept:
 
 - Existing React pages, Atomic Design structure, hooks/service interfaces where practical, browser fixture identities, Express/PostgreSQL scaffold, one root environment-file policy, and all unrelated working-tree content.
@@ -685,6 +761,14 @@ Changed:
 - Completed `docs/api/README.md` and resource documents `00` through `07`: 37 inventory endpoints, common success/error conventions, canonical accounts/tokens, one coherent Campaign journey, three multipart Applications, review/files/CSV, Conflict/Unassigned scheduling, meaningful Save Changes, confirmation locks, assigned assessments, results/notifications, constrained Q-03 edits, and `## Changes` history.
 - Added `tools/validate-api-docs.mjs` plus a Vitest contract-document test. The validator checks required files, inventory/heading links, C1-C11 trace, request/response fence pairing, endpoint example coverage, token/file placeholders, Markdown links, and username-based login examples.
 - Updated `FRONTEND.md` with approved contract credentials, route-to-endpoint mapping, decision status, libraries, and honest remaining work. Updated the frontend integration guide where the historical Q-03 service assumptions conflicted with the approved PA#3 direction. Appended the exact current master prompt to `brief.md`.
+
+Rejected:
+
+- Rejected the older prototype rule that publication makes the entire Campaign read-only. The supplied PA#3 Q-03 direction instead permits constrained published details/Position/quota/window edits, locks Interview Setup after the first valid Application, blocks linked Position deletion, and locks required records after Schedule confirmation.
+- Rejected an auxiliary upload-only primary Campaign and any clock-control endpoint. The contract uses one primary Campaign, a real early-close business action, and internal deterministic workflow timestamps that callers cannot manipulate.
+- Rejected creating a homemade `tools/contract-check.mjs`. The exact official course checker was not present in the repository or available attachments, so its status remains NOT RUN; the repository validator is explicitly structural and non-official.
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -704,10 +788,7 @@ Tool: Codex.
 
 Asked for: Continue from the next incomplete Spec Kit task through PA#3 Phase 6, verifying and committing every completed phase. During this phase the Git policy was explicitly updated to permit a fetch/fast-forward safety check and push of each green phase to `origin/pa3-finalize`, without force-push, merge, rebase, or pushes to other branches.
 
-Rejected:
-
-- Did not add Express or another mock-server dependency. The provider uses Node's built-in HTTP, Fetch, FormData, URL, and stream-compatible APIs with the existing Vitest installation.
-- Did not create or label a replacement `contract-check.mjs`. The official course checker remains **NOT RUN** because its exact file is unavailable.
+Kept: Not recorded at the time.
 
 Changed:
 
@@ -717,6 +798,13 @@ Changed:
 - Implemented `normal`, `slow`, `error`, and `empty` modes, clean startup/shutdown, and root scripts for the mock, its Vitest suite, and a clearly non-official fresh-state HTTP workflow verifier.
 - Added six HTTP integration test files covering stable restart tokens, multipart/file rules, duplicate/ownership isolation, constrained campaign edits, review/CSV/CV permissions, Conflict/Unassigned recalculation, meaningful Save Changes, confirmation locks, assignment privacy, assessment immutability, result publication idempotency, notification uniqueness, modes, logging, and reset.
 - Updated `FRONTEND.md` with runnable mock/mode/verification commands and accurate provider-versus-frontend integration status.
+
+Rejected:
+
+- Did not add Express or another mock-server dependency. The provider uses Node's built-in HTTP, Fetch, FormData, URL, and stream-compatible APIs with the existing Vitest installation.
+- Did not create or label a replacement `contract-check.mjs`. The official course checker remains **NOT RUN** because its exact file is unavailable.
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -735,6 +823,10 @@ Limitations: The provider is intentionally an in-memory deterministic PA#3 mock,
 
 Tool: Codex.
 
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
+
 Changed:
 
 - Reworked the shared client to enforce relative `/api` requests, bearer-token injection, JSON/FormData handling, CSV/PDF/204 responses, abort preservation, and structured contract errors without `VITE_API_URL`.
@@ -742,6 +834,10 @@ Changed:
 - Replaced browser-only authentication and profile persistence with `/auth/login`, `/auth/me`, `/auth/logout`, and `/me/profile` adapters. The session context now owns the bearer token, restores it safely on reload, clears invalid/logout sessions, and preserves intended-route and role navigation.
 - Kept scenario controls and legacy browser domain identity as an explicitly temporary migration bridge; non-canonical identities are available only through the test harness, never through product sign-in.
 - Updated sign-in/profile UI copy and tests for the five approved username credentials, HTTP errors, token storage/clearing, reload, deep links, role navigation, profile validation, and ownership.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -759,6 +855,10 @@ Limitations: Story-specific Campaign, Applicant, review, scheduling, assessment,
 
 Tool: Codex.
 
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
+
 Changed:
 
 - Replaced the Campaign browser store with contract adapters for composite read, create, detail/Position save, Position delete, Interview Setup save, and publish. DTO mapping strips UI fields and converts quotas/durations to contract numbers.
@@ -766,6 +866,10 @@ Changed:
 - Corrected Q-03 behavior: published details and Positions remain constrained-editable until Schedule confirmation; Interview Setup locks after the first valid Application, and linked Positions cannot be deleted.
 - Expanded Interview Setup UI to select Rooms, map Interviewers to Positions, capture availability intervals, and use only 15/20/30-minute durations.
 - Added HTTP adapter and page coverage for composite setup, field errors, retry, empty Positions, linked deletion, publication, constrained edits, application locks, and confirmed locks. Removed obsolete browser-service tests that asserted the superseded publication lock.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -784,6 +888,10 @@ Limitations: Applicant, review, and scheduling UI services remain on the tempora
 
 Tool: Codex.
 
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
+
 Changed:
 
 - Replaced public Campaign, multipart Application submission, own Application list, Notification list, and mark-read browser calls with relative `/api` adapters.
@@ -791,6 +899,10 @@ Changed:
 - Submission now adds the stable Campaign ID to a fresh FormData body without overriding the browser multipart boundary. Product copy now describes actual HTTP/file behavior instead of browser-only simulation.
 - Added cancellation-aware parallel loading and stable mutation callbacks. Successful submissions/refetches reset the form; duplicate, validation, and closed-during-submit failures preserve valid draft values.
 - Migrated obsolete browser-service Applicant tests into dedicated HTTP adapter/page coverage while leaving unrelated downstream browser services isolated until Phase 6.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -809,6 +921,10 @@ Limitations: Executive review and scheduling services still use the temporary br
 
 Tool: Codex.
 
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
+
 Changed:
 
 - Replaced Executive Application list/statistics, detail, private-note, independent screening decision, filtered CSV, and protected CV browser-store calls with relative `/api` adapters.
@@ -817,6 +933,10 @@ Changed:
 - Added abort-aware review/detail/schedule reads and stable mutation callbacks. Mutations refetch canonical server state, preserving filters and avoiding full-page reloads.
 - Adapted protected CV handling, removed browser-simulation copy, made Interview Setup rooms truthfully read-only in Scheduling, and retained draft regeneration, staged row edits, explicit Save, refusal reasons, export, and confirmation locks.
 - Added dedicated HTTP adapter tests plus page coverage for loading, retry, empty data, independent decisions, immutable decisions, filtering, protected files, CSV, conflicts, meaningful Save, invalid confirmation, successful confirmation, and post-confirmation locks. Removed superseded browser-store review/scheduling service tests while retaining unrelated Interviewer/result coverage for Phase 7.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 
@@ -830,12 +950,15 @@ Verified:
 
 Limitations: Interviewer assessment and Executive result services remain on the temporary browser bridge until Phase 7. Route/mode/responsive evidence remains assigned to later Spec Kit phases.
 
-
 ---
 
 ## 2026-11-18 — PA#3 Phase 7 — Interviewer assessment and final results HTTP integration
 
 Tool: Claude Code.
+
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
 
 Changed:
 - Replaced Interviewer Workspace browser-store calls with contract adapters for `GET /api/me/interviews`, `GET /api/interviews/{id}`, `POST /api/interviews/{id}/assessment`, and authorized CV downloads via `apiDownload`.
@@ -843,6 +966,10 @@ Changed:
 - Updated `apiClient` to parse JSON error bodies for blob downloads so CV 403 responses preserve their error code and message.
 - Removed obsolete `(mô phỏng)` labels from UI components.
 - Added dedicated Vitest tests in `outcomeHttpService.test.js` and updated `InterviewerWorkspacePage.test.jsx` and `FinalResults.test.jsx`.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 - 10 new HTTP adapter tests passed in `outcomeHttpService.test.js`.
@@ -857,6 +984,10 @@ Verified:
 
 Tool: Claude Code.
 
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
+
 Changed:
 - Aligned mock modes with the PA#3 brief: normal mode adds ~150 ms latency; slow mode adds ~2000 ms; error mode returns 500 for all endpoints except `POST /api/auth/login`; empty mode recursively empties all arrays and zeroes counts.
 - Updated session persistence: reload in error mode retains the user snapshot so screens render their own Error + Retry states rather than unceremoniously signing out.
@@ -868,6 +999,10 @@ Changed:
 - Implemented Q-03 early application closing action on Campaign Management.
 - Enabled creating new draft campaigns (C3) from the UI.
 - Fixed faculty selection in the application form to support non-standard department values.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 - `npm test`: 280 frontend tests in 29 files, 18 backend tests in 5 files, 14 mock tests in 7 files. All passed (312 total).
@@ -882,6 +1017,10 @@ Verified:
 
 Tool: Antigravity (Gemini 3.8 Flash).
 
+Asked for: Not recorded in this entry; the prompts given on 2026-11-18 are in `brief.md` (Requests 5 and 6).
+
+Kept: Not recorded at the time.
+
 Changed:
 - Updated `specs/002-pa3-http-integration/tasks.md` marking T061–T083 completed.
 - Updated `FRONTEND.md` with verified run commands, demo accounts, route inventory, Product Owner decisions, and explicit Not Done section.
@@ -889,6 +1028,10 @@ Changed:
 - Completely rewrote `SELF_ASSESSMENT_REPORT.md` with all nine PA#3 rubric criteria, evidence-based scoring (claimed 99.5/100), full C1–C11 verification matrix, and Quality Gate results.
 - Rebuilt `client/dist/` production assets.
 - Audited repository contents for submission readiness: verified `.git`, `client/dist`, `mock/`, `docs/api/`, rules, and excluded `node_modules/`, `.env` secrets, and temporary files.
+
+Rejected: Not recorded at the time.
+
+By hand: Not recorded at the time.
 
 Verified:
 - `npm run lint` passed (0 errors, 0 warnings).
@@ -900,7 +1043,6 @@ Verified:
 - W3C automated validator: NOT RUN (no local package installed).
 - Four mock modes (`normal`, `slow`, `error`, `empty`) verified via automated test suite.
 - Working tree staged explicitly, fast-forward confirmed, and changes pushed to origin/pa3-finalize.
-
 
 ---
 
@@ -916,6 +1058,8 @@ Changed:
 - Updated `FRONTEND.md` Section 1 with Phan Lê Anh Minh (24127082), Huỳnh Thái Hoàng (24127171), and Hồ Phan Như Nguyệt (24127211).
 - Updated `SELF_ASSESSMENT_REPORT.md` Section 1 and Section 5 with the verified team members and the official archive name `24127082_24127171_24127211_PA3.zip`.
 
+Rejected: Not recorded at the time.
+
 By hand: The user supplied the exact team member names and student IDs.
 
 Verified:
@@ -925,7 +1069,7 @@ Verified:
 
 ---
 
-## 2026-11-19 - PA#3 Phase 10 - Contract check against the lecturer's documents
+## 2026-11-19 — PA#3 Phase 10 — Contract check against the lecturer's documents
 
 Tool: Claude Code.
 
@@ -960,7 +1104,7 @@ Limitations: No commit was made in this task. The checker used is an approximati
 
 ---
 
-## 2026-11-19 - PA#3 Phase 11 - W3C and width check in a real browser
+## 2026-11-19 — PA#3 Phase 11 — W3C and width check in a real browser
 
 Tool: Claude Code.
 
@@ -991,7 +1135,7 @@ Limitations: Dialogs, the review drawer, the slow, error and empty mode screens 
 
 ---
 
-## 2026-11-19 - PA#3 Phase 12 - Course contract-check and delivery-mode run
+## 2026-11-19 — PA#3 Phase 12 — Course contract-check and delivery-mode run
 
 Tool: Claude Code.
 
@@ -1024,7 +1168,7 @@ Limitations: The empty-mode screens were not read one by one and C1-C11 was not 
 
 ---
 
-## 2026-11-19 - PA#3 Phase 13 - Duplicate requests: wrong first diagnosis, one real cause
+## 2026-11-19 — PA#3 Phase 13 — Duplicate requests: wrong first diagnosis, one real cause
 
 Tool: Claude Code.
 
@@ -1057,7 +1201,7 @@ Limitations: Empty-mode screens were not read one by one and C1-C11 was not clic
 
 ---
 
-## 2026-11-19 - PA#3 Phase 14 - Browser walk of C1-C11 and fixes for criteria 1 to 7
+## 2026-11-19 — PA#3 Phase 14 — Browser walk of C1-C11 and fixes for criteria 1 to 7
 
 Tool: Claude Code.
 
@@ -1096,7 +1240,7 @@ Limitations: Pressing a submit button twice and the slow-mode text of every scre
 
 ---
 
-## 2026-11-19 - PA#3 Phase 15 - Slow-mode loading text and double submit
+## 2026-11-19 — PA#3 Phase 15 — Slow-mode loading text and double submit
 
 Tool: Claude Code.
 
@@ -1119,10 +1263,9 @@ Incidents: None in this task. The checks that ran were the two above.
 
 Limitations: The double-click test clicks twice within one script tick, not two real mouse clicks 100 ms apart. No commit was made in this task.
 
-
 ---
 
-## 2026-11-19 - PA#3 Phase 16 - Self-assessment marks for criteria 1, 8 and 9
+## 2026-11-19 — PA#3 Phase 16 — Self-assessment marks for criteria 1, 8 and 9
 
 Tool: Claude Code.
 
@@ -1145,7 +1288,7 @@ Limitations: Pushes to the remote were not inspected, so no claim about force-pu
 
 ---
 
-## 2026-11-19 - PA#3 Phase 17 - Applicant availability missing on the Scheduling screen
+## 2026-11-19 — PA#3 Phase 17 — Applicant availability missing on the Scheduling screen
 
 Tool: Claude Code.
 
@@ -1170,7 +1313,7 @@ Incident: My earlier walk of C1-C11 checked button names and flow but did not co
 
 Limitations: Not re-walked in a browser after the fix; the mock test and the component test cover the field and its display.
 
-## 2026-11-20 - PA#3 Phase 18 - Remove the PA#2 browser fixtures from the production bundle
+## 2026-11-20 — PA#3 Phase 18 — Remove the PA#2 browser fixtures from the production bundle
 
 Tool: Claude Code (Claude Opus 5.5).
 
@@ -1187,6 +1330,8 @@ Changed:
 
 Rejected: Deleting the fixture files outright. `tests/helpers/mockApi.js` builds its stubbed API state from them, and 282 client tests depend on it; moving them under `tests/` removes them from the bundle without rewriting the harness.
 
+By hand: None. Every edit was made by the assistant; the team set the order of the two tasks, approved moving the fixtures under `tests/` instead of deleting them, and reviewed commit `df3c968`.
+
 Verified:
 - `grep` in `client/src`: no reference to `mocks/`, `demoSessionService`, `restoreDemoState`, `resetMockStore`.
 - After `npm run build`, the bundle has 0 matches for "Nguyễn Minh Anh", "Nguyen Minh Anh", "Gia Huy", "Linh Tran", "Pham Quoc Bao", "Hà My". Before the change "Gia Huy và cả hai phòng…" and "Nguyễn Minh Anh" were in it; after removing the fixtures, "Gia Huy" was still in it once, from the shortcut labels in `authService.js`, which is why those labels changed.
@@ -1194,7 +1339,7 @@ Verified:
 
 Incident: The full client suite is flaky under parallel load: one run had 1 timeout, the next 5 different timeouts (each file passes alone, three runs of `InterviewSchedulingPage.test.jsx` in a row), the next 282/282. The same flake appeared once before this change, on 2026-11-20, so it is not caused by it; not fixed here.
 
-## 2026-11-20 - PA#3 Phase 19 - C8: choose the date, time window and duration on the Scheduling screen
+## 2026-11-20 — PA#3 Phase 19 — C8: choose the date, time window and duration on the Scheduling screen
 
 Tool: Claude Code (Claude Opus 5.5).
 
@@ -1214,6 +1359,8 @@ Rejected:
 - Writing the chosen values into the Campaign: Applicants' availability slots and the interviewers' availability are dated on the Campaign's interview date, and Q-03 locks it after the first application.
 - My first version of the card set the API errors with `setState` inside a `useEffect`; ESLint (`react-hooks/set-state-in-effect`) refused it, so it adjusts the state during render when the error prop changes. The helpers moved to `utils/` after `react-refresh/only-export-components` warned.
 
+By hand: None. Every edit was made by the assistant; the team approved the contract change before it was made, accepted the field names `interviewDate`/`interviewWindow`, and reviewed commit `b44bb87`.
+
 Verified:
 - `node tools/contract-check.mjs` on a freshly started mock: 56/56 examples answered as written (52 before + 4 error examples), 0 FAIL, 37/37 endpoints have an example; then `npm run build`.
 - `npm run test:mock` 17/17; `node tools/verify-pa3-http.mjs` passed; `npm run lint` clean; client 287/287.
@@ -1223,16 +1370,62 @@ Incident: The full client suite still has the timing flake recorded in Phase 18 
 
 Limitations: Not walked in a real browser at 360/768/1280 px; the four controls use the existing `field-grid` layout and `FormField` labels.
 
-## 2026-11-20 - PA#3 Phase 20 - Flaky client suite: CPU oversubscription, not a race
+## 2026-11-20 — PA#3 Phase 20 — Flaky client suite: CPU oversubscription, not a race
 
 Tool: Claude Code (Claude Opus 5.5).
 
 Asked for: Debug and fix the flaky "shows loading, then supports retry" test before hand-in.
 
-Found: Not one flaky test. Across full runs the timed-out test changed (Interview Scheduling retry, Campaign Management save/preview/publish, and in earlier runs Review search, Final Results, Profile, a11y); each passes alone (the retry test in 380 ms, the campaign test in 1.2 s). Timing the same test under different worker counts on this 16-core machine: 15 workers 5.7 s, 8 workers 4.2-5.8 s, 4 workers 2.2 s. The page tests render the whole app in jsdom and are CPU-bound, so one worker per core starves them; under extra machine load they cross the 10 s `testTimeout`.
+Kept: The tests themselves and the 10 s `testTimeout`.
 
 Changed: `client/vitest.config.js`: `maxWorkers: '25%'` (4 workers here, fewer on smaller machines), with the measurements in a comment.
 
 Rejected: Raising `testTimeout` alone; it would hide the slowdown instead of removing it. Rewriting the retry test; it was not the cause.
 
+By hand: None. The team asked for the root cause to be fixed and accepted the worker cap (commit `36500c3`).
+
+Found: Not one flaky test. Across full runs the timed-out test changed (Interview Scheduling retry, Campaign Management save/preview/publish, and in earlier runs Review search, Final Results, Profile, a11y); each passes alone (the retry test in 380 ms, the campaign test in 1.2 s). Timing the same test under different worker counts on this 16-core machine: 15 workers 5.7 s, 8 workers 4.2-5.8 s, 4 workers 2.2 s. The page tests render the whole app in jsdom and are CPU-bound, so one worker per core starves them; under extra machine load they cross the 10 s `testTimeout`.
+
 Verified: 5 full client runs in a row with the new setting: 287/287 each, slowest test 2.0-2.4 s, suite 38-39 s (45 s before, with 15 workers).
+
+---
+
+## 2026-11-20 — PA#3 Phase 21 — Production build for the zip, and the pre-submission QA run
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: A guide to running and testing the prototype; then, as QA and release engineer, run every pre-submission check in order (install, lint, tests, mock HTTP flow, contract-check, production bundle, zip contents, self-assessment) and stop at the first failure.
+
+Kept: The zip command (`tar.exe` with `--exclude=node_modules`, run on the repository folder from `D:
+am3`) and the check list.
+
+Changed: Rebuilt `client/dist/` with `NODE_ENV=production` and recreated `24127082-24127171-24127211_95.zip`. The local `.env` itself was not edited.
+
+Rejected: Killing every `node` process after contract-check (`Get-Process node | Stop-Process`): it would also stop the assistant and any other Node tool on the machine; only the hidden mock window and its child were stopped. `npm audit fix`: it changes dependencies and the lock file after the checks had passed.
+
+By hand: None. The team allowed the two dev-server processes to be stopped before `npm ci` was run again.
+
+Incident: The assistant's first zip held a development bundle. The root `.env` sets `NODE_ENV=development` (as `.env.example` does), so `npm run build` produced 662 kB with `jsxDEV` and React StrictMode, which sends every request twice. Caught while writing the run guide: `FRONTEND.md` warns that a development build is about 676 kB, and the built file was 662 kB; `grep jsxDEV` on the bundle confirmed it. Rebuilt with `NODE_ENV=production`: 392 kB (383 KiB), 0 `jsxDEV`.
+
+Incident: The first `npm ci` of the QA run failed with EPERM: a Vite dev server (PIDs 460 and 25952) still held `rolldown-binding.win32-x64-msvc.node`, and the half-finished `npm ci` had already removed `vite`, `vitest`, `eslint` and `react` from `node_modules`. The run stopped there; after the team's go-ahead the two processes were stopped and `npm ci` succeeded.
+
+Verified: `npm ci` exit 0; `npm run lint` clean; `npm test` 322/322 (client 287, backend 18, mock 17); `npm run verify:mock-http` passed; `contract-check` on a freshly started mock 56/56, 0 FAIL; `client/dist/assets/index-HyKAjLi9.js` 383.4 KB with no `jsxDEV`; the zip has no `node_modules` and no `.env`, has `.env.example`, `.git/HEAD`, `client/dist/index.html` and the same bundle; extracted, it has 80 commits and a clean `git status`.
+
+---
+
+## 2026-11-20 — PA#3 Phase 22 — AI-LOG and self-assessment in the course templates
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Update the format of `AI-LOG.md` and `SELF_ASSESSMENT_REPORT.md` to the course templates (AI-LOG template and SELF_ASSESSMENT_REPORT template).
+
+Kept: The text of every entry and every claim, mark and evidence line.
+
+Changed: `AI-LOG.md`: each of the 48 dated entries now has the six template lines in template order; 72 missing lines were added, as `Not recorded at the time.` (or, for the 2026-11-18 `Asked for` lines, a pointer to that day's prompts in `brief.md`), except the Phase 18–20 lines the assistant could state; heading separators are ` — `; the header shows the template format. `SELF_ASSESSMENT_REPORT.md`: the template's order (title, `Submitted by` one line per member, `Total I claim`, the four-column table, `What I did not manage`, `What I would do differently`); the other sections moved to an appendix; commit figures updated for this commit.
+
+Rejected: Writing `Kept`, `Rejected` or `By hand` lines for older entries from memory; that would be reconstructing the log after the fact. Dropping the `Verified`/`Incident` lines that the template does not list; they show which check caught each problem.
+
+By hand: None. The team asked for the change and reviews the commit.
+
+Verified: A script reordered the entries; comparing the lines before and after, nothing was lost except the 11 old headings with ` - `, and every line added is one of the six template lines. A second pass found 48 of 48 dated entries with the six lines in order.
+
