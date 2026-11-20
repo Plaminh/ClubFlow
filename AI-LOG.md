@@ -1222,3 +1222,17 @@ Verified:
 Incident: The full client suite still has the timing flake recorded in Phase 18 ("shows loading, then supports retry" timed out in one of two full runs; the file passed three runs alone).
 
 Limitations: Not walked in a real browser at 360/768/1280 px; the four controls use the existing `field-grid` layout and `FormField` labels.
+
+## 2026-11-20 - PA#3 Phase 20 - Flaky client suite: CPU oversubscription, not a race
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Debug and fix the flaky "shows loading, then supports retry" test before hand-in.
+
+Found: Not one flaky test. Across full runs the timed-out test changed (Interview Scheduling retry, Campaign Management save/preview/publish, and in earlier runs Review search, Final Results, Profile, a11y); each passes alone (the retry test in 380 ms, the campaign test in 1.2 s). Timing the same test under different worker counts on this 16-core machine: 15 workers 5.7 s, 8 workers 4.2-5.8 s, 4 workers 2.2 s. The page tests render the whole app in jsdom and are CPU-bound, so one worker per core starves them; under extra machine load they cross the 10 s `testTimeout`.
+
+Changed: `client/vitest.config.js`: `maxWorkers: '25%'` (4 workers here, fewer on smaller machines), with the measurements in a comment.
+
+Rejected: Raising `testTimeout` alone; it would hide the slowdown instead of removing it. Rewriting the retry test; it was not the cause.
+
+Verified: 5 full client runs in a row with the new setting: 287/287 each, slowest test 2.0-2.4 s, suite 38-39 s (45 s before, with 15 workers).
