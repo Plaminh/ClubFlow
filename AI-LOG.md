@@ -1169,3 +1169,27 @@ Verified:
 Incident: My earlier walk of C1-C11 checked button names and flow but did not compare this column with the data, so I missed the bug until the demo.
 
 Limitations: Not re-walked in a browser after the fix; the mock test and the component test cover the field and its display.
+
+## 2026-11-20 - PA#3 Phase 18 - Remove the PA#2 browser fixtures from the production bundle
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Delete `client/src/mocks/`, stop `DemoSessionContext.jsx` importing `demoSessionService`, find any other reference to the legacy data, rebuild, and check that `client/dist/assets/index-*.js` no longer contains "Nguyễn Minh Anh" or "Gia Huy".
+
+Kept: The session context API used by the screens (`account`, `role`, `signIn`, `signOut`, `selectDemoAccount`, `dataVersion`, `sessionEpoch`); the test harness (`client/src/tests/helpers/mockApi.js`), which stubs `fetch` from the same fixture data.
+
+Changed:
+- `client/src/contexts/DemoSessionContext.jsx`: no longer imports `demoSessionService`; removed the unused `scenarios`, `scenarioId`, `setScenario`, `resetDemo`, `simulation`, `setSimulation` (no screen read them).
+- Deleted `client/src/services/demoSessionService.js` and `client/src/mocks/auth.js`, `guards.js`, `store.js`.
+- Moved `fixtures.js`, `scenarios.js`, `derive.js` and their test to `client/src/tests/fixtures/` (test-only, never imported by app code, so not bundled); updated `tests/setup.js`, `tests/helpers/renderApp.jsx`, `tests/helpers/mockApi.js`.
+- `client/src/services/authService.js`: demo shortcut labels are role labels ("Executive", "Student A", "Interviewer – Content"…) instead of people's names; the names come from the API after sign-in. `AppLayout.test.jsx` selects the new labels. `FRONTEND.md` display-mapping table updated (it still listed old names such as "Hoàng Long").
+- Three comments that still mentioned scenario switches or demo resets.
+
+Rejected: Deleting the fixture files outright. `tests/helpers/mockApi.js` builds its stubbed API state from them, and 282 client tests depend on it; moving them under `tests/` removes them from the bundle without rewriting the harness.
+
+Verified:
+- `grep` in `client/src`: no reference to `mocks/`, `demoSessionService`, `restoreDemoState`, `resetMockStore`.
+- After `npm run build`, the bundle has 0 matches for "Nguyễn Minh Anh", "Nguyen Minh Anh", "Gia Huy", "Linh Tran", "Pham Quoc Bao", "Hà My". Before the change "Gia Huy và cả hai phòng…" and "Nguyễn Minh Anh" were in it; after removing the fixtures, "Gia Huy" was still in it once, from the shortcut labels in `authService.js`, which is why those labels changed.
+- `npm run lint` clean; client tests 282/282.
+
+Incident: The full client suite is flaky under parallel load: one run had 1 timeout, the next 5 different timeouts (each file passes alone, three runs of `InterviewSchedulingPage.test.jsx` in a row), the next 282/282. The same flake appeared once before this change, on 2026-11-20, so it is not caused by it; not fixed here.

@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
-import { ACCOUNTS } from '../../mocks/fixtures.js';
-import { evaluateSchedule } from '../../mocks/derive.js';
-import { addMinutes, buildScenarioState } from '../../mocks/scenarios.js';
+import { ACCOUNTS } from '../fixtures/fixtures.js';
+import { evaluateSchedule } from '../fixtures/derive.js';
+import { addMinutes, buildScenarioState } from '../fixtures/scenarios.js';
 
 const BASE_USERS = [
   { id: 'exec-recruitment', handle: 'exec', role: 'executive', displayName: 'Recruitment Executive', email: 'executive@clubflow.demo.example', description: 'Technology and Innovation Club' },

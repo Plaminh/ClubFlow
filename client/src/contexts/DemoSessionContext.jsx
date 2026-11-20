@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as authService from '../services/authService.js';
 import { setAuthTokenProvider } from '../services/apiClient.js';
-import * as demoSessionService from '../services/demoSessionService.js';
 import { DemoSessionContext } from './demoSession.js';
 
 const STORAGE_KEY = 'clubflow.demoSession';
@@ -25,24 +24,19 @@ function save(value) {
 export function DemoSessionProvider({ children }) {
   const [initial] = useState(() => {
     const saved = readSaved();
-    demoSessionService.restoreDemoState({ scenarioId: saved.scenarioId });
     const token = typeof saved.token === 'string' ? saved.token : null;
     const user = token && saved.user && typeof saved.user.id === 'string' ? saved.user : null;
-    return { ...demoSessionService.getDemoState(), token, user };
+    return { token, user };
   });
   const [status, setStatus] = useState(initial.token ? 'loading' : 'ready');
   const [account, setAccount] = useState(null);
   const [token, setToken] = useState(initial.token);
-  const [scenarioId, setScenarioId] = useState(initial.scenarioId);
-  const [simulation, setSimulationState] = useState(initial.simulation);
   const [dataVersion, setDataVersion] = useState(0);
   const [sessionEpoch, setSessionEpoch] = useState(0);
-  const [scenarios] = useState(() => demoSessionService.listScenarios());
   const [accounts] = useState(() => authService.DEMO_CREDENTIALS.map(({ password: _password, username: _username, ...user }) => user));
 
   const applyIdentity = useCallback((user) => {
     setAccount(user);
-    demoSessionService.syncLegacyDomainIdentity(user?.id ?? null);
   }, [setAccount]);
 
   const clearSession = useCallback(() => {
@@ -58,10 +52,7 @@ export function DemoSessionProvider({ children }) {
   }, [token]);
 
   useEffect(() => {
-    if (!initial.token) {
-      demoSessionService.syncLegacyDomainIdentity(null);
-      return undefined;
-    }
+    if (!initial.token) return undefined;
     const controller = new AbortController();
     let active = true;
     authService.getCurrentUser({ signal: controller.signal }).then(
@@ -90,8 +81,8 @@ export function DemoSessionProvider({ children }) {
   }, [applyIdentity, clearSession, initial.token, initial.user]);
 
   useEffect(() => {
-    save({ token, scenarioId, user: token && account ? account : null });
-  }, [token, scenarioId, account]);
+    save({ token, user: token && account ? account : null });
+  }, [token, account]);
 
   const signIn = useCallback(async (credentials) => {
     const session = await authService.signIn(credentials);
@@ -127,27 +118,6 @@ export function DemoSessionProvider({ children }) {
     setDataVersion((version) => version + 1);
   }, [setAccount, setDataVersion]);
 
-  const setScenario = useCallback((id) => {
-    demoSessionService.setScenario(id);
-    setScenarioId(id);
-    demoSessionService.syncLegacyDomainIdentity(account?.id ?? null);
-    setDataVersion((version) => version + 1);
-    setSessionEpoch((epoch) => epoch + 1);
-  }, [account?.id, setDataVersion, setScenarioId, setSessionEpoch]);
-
-  const resetDemo = useCallback(() => {
-    demoSessionService.resetDemoData();
-    demoSessionService.syncLegacyDomainIdentity(account?.id ?? null);
-    setDataVersion((version) => version + 1);
-    setSessionEpoch((epoch) => epoch + 1);
-  }, [account?.id, setDataVersion, setSessionEpoch]);
-
-  const setSimulation = useCallback((mode) => {
-    demoSessionService.setSimulation(mode);
-    setSimulationState(mode);
-    setDataVersion((version) => version + 1);
-  }, [setDataVersion, setSimulationState]);
-
   const accountId = account?.id ?? null;
   const value = useMemo(() => ({
     status,
@@ -159,16 +129,9 @@ export function DemoSessionProvider({ children }) {
     signOut,
     selectDemoAccount,
     updateCurrentAccount,
-    scenarios,
-    scenarioId,
-    scenario: scenarios.find((item) => item.id === scenarioId) ?? null,
-    setScenario,
-    resetDemo,
-    simulation,
-    setSimulation,
     dataVersion,
     sessionEpoch,
-  }), [status, accounts, account, accountId, signIn, signOut, selectDemoAccount, updateCurrentAccount, scenarios, scenarioId, setScenario, resetDemo, simulation, setSimulation, dataVersion, sessionEpoch]);
+  }), [status, accounts, account, accountId, signIn, signOut, selectDemoAccount, updateCurrentAccount, dataVersion, sessionEpoch]);
 
   return <DemoSessionContext.Provider value={value}>{children}</DemoSessionContext.Provider>;
 }

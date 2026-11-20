@@ -6,9 +6,8 @@ import { toUiError } from '../services/uiError.js';
  * Loads data through a service function.
  * Returns { data, status: 'idle' | 'loading' | 'success' | 'error', error (UiError), reload, refreshing }.
  * With `{ enabled: false }` nothing is requested and the status is 'idle'.
- * Reloads when `deps` change, when the signed-in account changes, and when demo
- * data is replaced (scenario switch / reset). With a real backend the demo
- * version simply never changes.
+ * Reloads when `deps` change, when the signed-in account changes, and when the
+ * session's data version changes (for example after the own profile is updated).
  *
  * State is only set from the async callbacks; "loading" is derived by
  * comparing the key of the last finished request with the current one.

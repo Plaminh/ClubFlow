@@ -25,7 +25,7 @@ describe('AppLayout', () => {
   it('switches to Executive navigation after a DemoBar account switch and lands on the campaign screen', async () => {
     renderApp('/');
 
-    await signInAs('Recruitment Executive · Technology and Innovation Club');
+    await signInAs('Executive');
 
     await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(navLinks()).toEqual(['Chiến dịch', 'Duyệt hồ sơ', 'Xếp lịch', 'Trang công khai']);
@@ -35,7 +35,7 @@ describe('AppLayout', () => {
 
   it('marks the active link and focuses the main region when navigating', async () => {
     renderApp('/');
-    await signInAs('Recruitment Executive · Technology and Innovation Club');
+    await signInAs('Executive');
 
     fireEvent.click(screen.getByRole('link', { name: 'Xếp lịch' }));
 
@@ -47,7 +47,7 @@ describe('AppLayout', () => {
 
   it('sends an Interviewer to the workspace and signs out back to the public portal', async () => {
     renderApp('/');
-    await signInAs('Gia Huy · Content');
+    await signInAs('Interviewer – Content');
 
     await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
     expect(navLinks()).toEqual(['Interviewer Workspace']);
@@ -60,7 +60,7 @@ describe('AppLayout', () => {
 
   it('keeps an Applicant on the portal after signing in there', async () => {
     renderApp('/');
-    await signInAs('Nguyen Minh Anh');
+    await signInAs('Student A');
 
     expect(screen.getByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
     expect(who('Nguyen Minh Anh · Ứng viên')).toBeInTheDocument();
@@ -68,10 +68,10 @@ describe('AppLayout', () => {
 
   it('switches between demo accounts and back to guest from the DemoBar', async () => {
     renderApp('/');
-    await signInAs('Gia Huy · Content');
+    await signInAs('Interviewer – Content');
     await screen.findByRole('heading', { level: 1, name: 'Interviewer Workspace' });
 
-    await signInAs('Nguyen Minh Anh');
+    await signInAs('Student A');
     await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
     expect(who('Nguyen Minh Anh · Ứng viên')).toBeInTheDocument();
 

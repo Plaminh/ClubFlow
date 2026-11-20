@@ -8,7 +8,7 @@
  */
 import { ACCOUNTS, at } from './fixtures.js';
 import { addMinutes } from './scenarios.js';
-import { formatDate, formatTimeRange } from '../utils/format.js';
+import { formatDate, formatTimeRange } from '../../utils/format.js';
 
 const DAY_MINUTES = 24 * 60;
 

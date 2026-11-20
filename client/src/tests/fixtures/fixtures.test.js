@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { ACCOUNTS } from '../../mocks/fixtures.js';
-import { campaignPhase, evaluateSchedule, submissionWindow } from '../../mocks/derive.js';
-import { SCENARIOS, buildScenarioState } from '../../mocks/scenarios.js';
+import { ACCOUNTS } from './fixtures.js';
+import { campaignPhase, evaluateSchedule, submissionWindow } from './derive.js';
+import { SCENARIOS, buildScenarioState } from './scenarios.js';
 import { formatDateTime } from '../../utils/format.js';
 
 const accountIds = new Set(ACCOUNTS.map((account) => account.id));

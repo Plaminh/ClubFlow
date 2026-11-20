@@ -67,7 +67,7 @@ export default function AppLayout() {
         navigate(HOME_BY_ROLE[selected.role]);
       }
     } catch {
-      // A switch cancelled by a scenario change or simulated network error keeps the current account.
+      // A failed or cancelled sign-in keeps the current account.
     }
   }
 

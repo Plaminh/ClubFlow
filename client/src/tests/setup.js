@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
-import { resetMockStore } from '../mocks/store.js';
 import { installMockApi, resetMockApi } from './helpers/mockApi.js';
 
 // Full-page tests render the whole app shell; when every test file runs in
@@ -14,7 +13,6 @@ vi.mock('../services/healthService.js', () => ({
 }));
 
 function resetDemo() {
-  resetMockStore();
   window.sessionStorage.clear();
   resetMockApi();
 }

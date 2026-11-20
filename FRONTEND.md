@@ -96,15 +96,15 @@ The HTTP mock and its fresh-state verifier runtime-check these deterministic fic
 
 ### Demo Account Display Mapping
 
-All authentication is handled by `POST /api/auth/login`, returning real deterministic HTTP bearer tokens that are attached to all subsequent requests. The development DemoBar provides quick-switch buttons mapping to these accounts:
+All authentication is handled by `POST /api/auth/login`, returning deterministic HTTP bearer tokens that are attached to all subsequent requests. The sign-in screen and the DemoBar quick switch label each shortcut by role only; the person's name shown after sign-in comes from the API (`mock/data/users.json`), never from client source.
 
-| Demo Account ID | Role | Display Name | Username | Password |
+| Demo Account ID | Role | Shortcut label | Username | Password |
 | --- | --- | --- | --- | --- |
-| `exec-recruitment` | Executive | Hoàng Long | `exec` | `ClubFlowDemo!` |
-| `ap-minhanh` | Applicant | Minh Anh | `studentA` | `ClubFlowDemo!` |
-| `ap-quocbao` | Applicant | Quốc Bảo | `studentB` | `ClubFlowDemo!` |
-| `iv-giahuy` | Interviewer - Content | Gia Huy | `int-content` | `ClubFlowDemo!` |
-| `iv-hamy` | Interviewer - UX/Comms | Hà My | `int-comms` | `ClubFlowDemo!` |
+| `exec-recruitment` | Executive | Executive | `exec` | `ClubFlowDemo!` |
+| `ap-minhanh` | Applicant | Student A | `studentA` | `ClubFlowDemo!` |
+| `ap-quocbao` | Applicant | Student B | `studentB` | `ClubFlowDemo!` |
+| `iv-giahuy` | Interviewer - Content | Interviewer – Content | `int-content` | `ClubFlowDemo!` |
+| `iv-comms` | Interviewer - Communications | Interviewer – Communications | `int-comms` | `ClubFlowDemo!` |
 
 ## 4. Routes and HTTP Integration
 

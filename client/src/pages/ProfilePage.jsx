@@ -10,7 +10,7 @@ import { useDemoSession } from '../contexts/demoSession.js';
 import useProfile from '../hooks/useProfile.js';
 
 // Keyed by the session epoch so unsaved edits, errors, and the success message
-// are discarded on sign-out, account switch, scenario switch, and demo reset.
+// are discarded on sign-out and account switch.
 export default function ProfilePage() {
   const { sessionEpoch } = useDemoSession();
   return <ProfileContent key={sessionEpoch} />;

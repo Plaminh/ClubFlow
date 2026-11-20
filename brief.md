@@ -3086,3 +3086,40 @@ mục 8, 9. bỏ qua.
 Bạn kiểm tra và làm làm 1->7 ngay bây giờ.
 `````
 
+
+## 2026-11-20 - Request 11 - Check the repository against PA#3, then remove the legacy browser data and add the C8 scheduling form
+
+**Record type:** Exact prompts.
+
+**Summary (non-verbatim):** First, check whether the current source meets the PA#3 requirements (the lecturer's PA#3 rubric, contract-check README and milestone document were attached). The check found a stale `client/dist/`, PA#2 browser fixtures still in the production bundle, the C8 date/time window/duration not chosen on the Scheduling screen, and an out-of-date self-assessment. Second, fix two of them in order and in separate commits: remove `client/src/mocks/` and the legacy demo-session service and verify the bundle no longer contains fixture names; then extend the contract of `POST .../schedule/draft/generate` with a `{date, window, slotMinutes}` body, a `## Changes` line, mock validation with 400 errors, error examples (400, 409), and a form on `InterviewSchedulingPage.jsx`; finally rebuild and run `contract-check`.
+
+**Exact prompt 1 (verbatim):**
+
+`````text
+check xem source hiện tại đã thỏa các yêu cầu trong PA3 chưa
+`````
+
+**Exact prompt 2 (verbatim):**
+
+`````text
+Đồng ý, bạn bắt tay vào cả hai việc đi. Thứ tự nên là:
+
+**Mục 3 trước (gỡ legacy):**
+- Xóa `client/src/mocks/` hoàn toàn
+- Sửa `DemoSessionContext.jsx` để không import `demoSessionService` nữa
+- Kiểm tra xem có file nào khác còn reference đến legacy data không
+- Build lại và verify `dist/assets/index-*.js` không còn chuỗi "Nguyễn Minh Anh" hay "Gia Huy"
+- Commit riêng với message rõ ràng
+
+**Rồi đến mục 2 (C8):**
+- Sửa contract `docs/api/interview-scheduling.md`: thêm `Request body: {date, window, slotMinutes}` cho endpoint `POST .../schedule/draft/generate`
+- Thêm `## Changes` section ghi rõ thay đổi
+- Cập nhật mock để handle body mới (validate date/window/slotMinutes, trả lỗi 400 nếu thiếu)
+- Thêm vài ví dụ lỗi vào contract (400 cho missing fields, 409 cho conflict)
+- Sửa `InterviewSchedulingPage.jsx`: thêm form với 3 input (date picker, time window selector, duration dropdown)
+- Commit riêng, message ghi rõ "Add C8 scheduling form with date/window/duration selection"
+
+Sau khi xong cả hai, build lại lần cuối rồi chạy `contract-check` để đảm bảo mock vẫn pass.
+
+Bạn làm xong thì báo lại, mình sẽ kiểm tra và chuyển sang sửa `SELF_ASSESSMENT_REPORT.md` (mục 4).
+`````
