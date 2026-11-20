@@ -8,6 +8,10 @@ This file records only assistant requests available from the current conversatio
 - **Summary (non-verbatim)** is a labeled navigation aid and is not a substitute for the exact prompt.
 - Missing or unavailable prompts are not reconstructed.
 
+## Language of this file
+
+The PA#3 brief records the prompts exactly as they were given to the assistants. Requests 4, 5 and 6 — including the two main implementation prompts (Request 5, the PA#3 master prompt, and Request 6, the remediation prompt) — were written in English. Requests 1–3 and 7–14 were written in Vietnamese, the team's working language. Each of those is kept verbatim and followed by an **English translation (non-verbatim)**; Request 2, which mostly restates the official PA#3 rubric, is translated as a section-by-section outline. Every request also has a one-line English summary.
+
 ## 2026-11-17 — Request 1 — Initial Repository Audit
 
 **Record type:** Exact prompt available from the attached file `144c23b3-bb53-4e58-970a-661526d75f48/pasted-text.txt`.
@@ -201,6 +205,49 @@ QUY TẮC:
 - Không gộp yêu cầu PA#3 với PA#4.
 - Mọi kết luận phải có evidence; nếu không xác minh được, ghi UNVERIFIED.
 - Kết thúc bằng báo cáo audit và chờ tôi review.
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+You are the Senior Frontend Engineer and Technical Auditor of the ClubFlow project (CSC13008, PA#3).
+
+CURRENT TASK: Only audit the whole open repository to assess progress from PA#2 to PA#3. Do NOT implement, do NOT create/edit/delete files, do NOT commit, push, checkout, reset, install packages or change configuration. After the audit, stop and wait for my approval of the plan.
+
+1. SOURCES OF REQUIREMENTS
+Read every requirement document in the repository, in this priority: the ClubFlow final project brief; the ClubFlow Business Description (if any); PA3.txt and the full PA#3 rubric (if any); the final project milestones/features/rubrics; Product Owner Q&A/decisions (if any); the PA#2 artifacts, README, brief.md, AI-LOG.md, SELF_ASSESSMENT_REPORT.md; the rules file (CLAUDE.md, AGENTS.md or equivalent); contract-check.mjs and its README if present.
+If an important document is missing from the repo, report MISSING REFERENCE; do not infer rubric content you have not read.
+Separate mandatory PA#3 requirements, what carries over from PA#2, and requirements that belong only to PA#4/PA#5/PA#6. Do not widen the scope.
+
+2. AUDIT THE WHOLE REPOSITORY
+Read the folder structure and the actual code. Check: the current Git branch, the working tree and uncommitted changes; the commit history for PA#2/PA#3; package.json, package-lock.json, scripts, dependencies; the PA#2 HTML/CSS/JS pages; client/, src/, components/, pages/, routes/, hooks/, services/ (if any); docs/api/, mock/, public/, assets/, test/, scripts/; documentation and harness configuration; duplicate, unused or confusing files.
+Judge only from actual code, imports/call sites and evidence. A file existing does not mean the feature is finished. Do not claim a flow works without evidence.
+
+3. CHECK THE PA#3 ARCHITECTURE
+A. Is React + Vite in client/? B. Have the PA#2 pages become React components, or are they still static HTML? C. Is there a router and protected routes? D. Sign-in, sign-out and role-based navigation? E. An API client using relative /api paths? F. Does data come from the API or is it still hardcoded? G. Shared state for campaign, applications, schedule and session? H. Loading, error + Retry and empty states on data views? I. Responsive behaviour and semantic markup? J. UI, business logic and API services kept apart? K. Tests/build/checker and automatic checks configured?
+
+4. AUDIT C1–C11
+A table of all 11 steps: C1 Public Published Campaign; C2 Sign-in, Roles, Sign-out; C3 Create/Save Draft/Preview/Publish Campaign; C4 Interview Setup; C5 Applicant Submission; C6 My Applications; C7 Application Review; C8 Draft Interview Scheduling; C9 Approve & Confirm Schedule; C10 Interviewer Workspace & Assessments; C11 Final Results & In-app Notifications.
+For each step: role; business requirement; current file/component/route; is there a UI; does the UI work; does it call the API; correct state transitions; validation/exception flow; Status DONE / PARTIAL / MISSING / UNVERIFIED; evidence (file path + line numbers); what is missing.
+Check in particular: one applicant can apply for two positions independently; a duplicate application for the same position; Shortlist/Reject changes exactly one application; only Shortlisted applications enter scheduling; Conflict by applicant, interviewer and room; Unassigned has a reason; Confirm is blocked while Conflict/Unassigned remain; a confirmed schedule becomes read-only; an Interviewer sees only assigned interviews and CVs; an assessment belongs to the right application; final Pass/Fail appears only after publishing; internal screening notes are not shown to other roles; separate business states are not merged.
+
+5. AUDIT THE API CONTRACT AND THE MOCK
+docs/api/: written before the implementation? Enough endpoints for C1–C11? Request/response examples fenced as http? Status codes and one error shape? Role/authorization behaviour, pagination, filters, validation? Data and state transitions described? A Changes section?
+mock/server.mjs: Node.js built-in modules only? The normal, slow, error, empty modes? Answers as the contract says? Deterministic demo data? Mutations update state sensibly? Can the PA#4 Express server replace the mock without changing how the front end calls the API? If contract-check exists, find how to run it and how far it passes now.
+
+6. COMPARE WITH PA#2
+Which HTML/CSS/assets can be reused; what must become React components; what should become shared layouts; what is not yet enough for PA#3; whether problems from the brief's Fix these list remain; any wrong or inconsistent UI or business logic. Never propose a full rewrite where reasonable reuse is possible.
+
+7. AUDIT FORMS AND UI STATES
+Required fields, date validation, quota, PDF <= 5 MB, statement <= 300 words, availability selection, inline errors, valid data kept after an error, disabled/loading submission, duplicate submission, responsiveness and keyboard accessibility.
+
+8. AUDIT THE HARNESS AND DOCUMENTATION
+The rules file, formatting, linting, tests, CI, AI-LOG.md, brief.md, FRONTEND.md, SELF_ASSESSMENT_REPORT.md, git history. Record only what has evidence. Do not create a fake AI log, fake commits or fake CI runs. Say what should be done early for PA#5, but do not do PA#5 in this phase.
+
+9. REQUIRED OUTPUT
+A report in Vietnamese: I. Executive Summary (actual state, what is done, main blockers, missing PA#3 requirements). II. Repository Inventory (short tree, important files, actual stack, git status/history). III. C1–C11 Coverage Matrix (11 rows, DONE/PARTIAL/MISSING/UNVERIFIED, evidence). IV. Rubric Gap Analysis (the 9 PA#3 criteria with evidence; estimate marks only with the full rubric and evidence, never as an official mark). V. Reusable PA#2 Assets (Keep, Refactor, Migrate, Replace, Missing, with technical reasons). VI. Architecture and Contract Gaps (routing, state, services, mock, contract, validation, tests). VII. Prioritized Backlog (P0 blocking, P1 required, P2 polish; each with files/scope, done condition, dependency). VIII. Suggested Implementation Phases (contract-first and mock-first, then React; each with goal, scope, dependencies, acceptance criteria, manual tests, commit boundary; parts that can run in parallel). IX. Next Recommended Action (exactly one first phase, and briefly why).
+
+RULES: Edit no file. Run no command that changes the repository. Install no package or dependency. Create no git commit. Do not assume a feature is DONE because it has a UI. Skip none of C1–C11. Do not mix PA#3 and PA#4 requirements. Every conclusion needs evidence; if it cannot be verified, write UNVERIFIED. End with the audit report and wait for my review.
 `````
 
 ## 2026-11-17 — Request 2 — Full Rubric-Based Repository Audit
@@ -1335,6 +1382,44 @@ Mục tiêu cuối là giúp nhóm biết chính xác:
 Sau khi hoàn tất báo cáo, DỪNG LẠI và chờ tôi review trước khi thực hiện bất kỳ thay đổi nào.
 `````
 
+**English translation (non-verbatim):**
+
+`````text
+(English outline, section by section. Most of this prompt restates the official PA#3 rubric, which is in English in the course documents; sections that only restate it are summarised in one line.)
+
+Role: Senior React Engineer, Software Architect and Technical Auditor of ClubFlow (CSC13008, 24KTPM1). Task: audit the whole open repository against PA#3 — Front end in React. The official PA#3 requirements and the business decisions are included below; use them as the standard and do not invent another rubric. AUDIT ONLY, DO NOT IMPLEMENT.
+
+0. Working rules. Must: read the actual code, not only the README or task checklists; read the Git history and working tree; compare every conclusion with PA#3; give file paths and line numbers as evidence; tell implemented, simulated, documented and tested apart; tell an in-browser UI mock from the HTTP mock server; never call a feature DONE because a component or button exists; do not trust earlier audits, re-check the current source; do not widen the scope to PA#4 or PA#5; invent no requirement outside the rubric; write UNVERIFIED for what cannot be verified. Forbidden: editing, creating, deleting or moving any file; commit, push, merge, checkout, reset or rebase; installing dependencies; changing Git history; editing tests, mock, contract or documentation; fake AI-LOG entries, CI evidence, screenshots or test results; destructive commands; fixing what was found. Read-only commands (git status/log/show/diff, rg, reading package.json and the source) are allowed. If running tests/build would create or change files, do not run them on the working tree and write NOT EXECUTED; old test logs are not new results. Answer in Vietnamese, keeping technical terms, file names and rubric terms in English.
+
+1. Official PA#3 requirements (restated from the rubric): React + Vite in client/, one CSS framework or plain CSS, React Router (BrowserRouter or HashRouter), no Next.js or Remix framework mode; C1–C11 reachable through real navigation; no main-flow business data hardcoded; contract first, committed, then the HTTP mock, committed, then React connected, then the flow validated; sign-in for the three roles with demo accounts, protected routes and return after sign-in, role refusal, sign-out clearing the session, user and token in one context read through a hook, Bearer header on every request (real JWT/DB security is PA#4); loading, error with Retry, empty and success states on every data screen; forms with labels, inline per-field errors, API 400 errors on the matching fields, values kept after an error, no double submit, no full-page reload; 360/768/1280 px with no horizontal scroll, 44 px tap targets at 360 px, wide tables in a wrapper, landmarks, one h1, no skipped heading level, links for navigation and buttons for actions, 0 W3C errors.
+
+2. Main flow C1–C11 (restated from the rubric and the brief's example: Student A applies for Content and Communications, A01 and A02), with what each step must do and the checks for each.
+
+3. Fix these (mandatory): one consistent timeline on every screen; each screen's own title; drawer and list both readable; counts that add up, computed from API data; a Conflict that is a real overlap; nobody both an Applicant and an Interviewer in the sample data; no "Verified Student", "100% verified" or university-verification wording; no template footer (Privacy Policy, Terms of Service, Support Center, wrong copyright).
+
+4. API contract (mandatory, restated from the rubric), audited with: A. is every front-end request in the contract; B. does every endpoint have an example; C. are method, path and status right; D. can each request body really be sent; E. do field names match the front end and the mock; F. one error shape; G. coverage of C1–C11; H. a correct ## Changes history; I. contract-first commit history; J. unused or out-of-scope endpoints.
+
+5. HTTP mock (mandatory): mock/server.mjs with data in mock/data/, Node built-in modules only, no npm install, PORT default 3001, started with node mock/server.mjs, state in memory and reset on restart, demo accounts with roles, a made-up token that stays valid after a restart, one log line per request (method, path, status), and the four modes normal (~150 ms), slow, error, empty as the rubric defines them.
+
+6. Contract checker: the official tool is contract-check.mjs, run with the mock in one terminal and node tools/contract-check.mjs --base http://localhost:3001 in another; check whether it is in the repo; it reads README.md first, then the other files alphabetically, top to bottom, against one mock instance, so the mock must be restarted before each full run.
+
+7. React HTTP integration: relative /api paths only, no absolute localhost URL at runtime; Vite server.proxy and preview.proxy both forward /api to http://localhost:3001; audit the API client, auth headers, request/response handling, service layers, context/hooks, mutations, error handling, file/FormData handling, loading and empty states.
+
+8. Product owner decisions Q-01 to Q-07, given for comparison (report a missing source link rather than deny or invent content): Q-01 first-fit scheduling (Shortlisted only, by submission time then application ID, earliest slots first, interviewers and rooms in a fixed order, first valid combination, otherwise Unassigned with a reason, no global optimisation; the real first-fit belongs to PA#4 and the PA#3 mock may use fixed answers); Q-02 Vietnam time (UTC+7), applications only before the closing timestamp, a date-only closing date accepts the whole day and closes at 00:00 the next day; Q-03 to Q-07 on published-campaign editing, assessments, notifications, optional edits and CV privacy, as recorded in FRONTEND.md section 5.
+
+9. Known findings of the previous audit: verify the current Git HEAD and working tree; re-check each finding against the real code; report what changed since; do not repeat a finding the new source has fixed; do not treat a first-fit engine, PostgreSQL or real JWT as a PA#3 DONE condition.
+
+10. Official rubric, 100 points (restated: the nine criteria and their bands).
+
+11. Submission requirements (restated): one ZIP named <StudentID1>-<StudentID2>-<StudentID3>_<total>.zip with IDs ascending, containing .git, client/ and a fresh client/dist/, mock/server.mjs and mock/data/, docs/api/, the rules file, FRONTEND.md (team, how to run, demo accounts, routes, product owner decisions, libraries, not done), brief.md, AI-LOG.md with ## PA#3, SELF_ASSESSMENT_REPORT.md.
+
+12. Audit procedure, in order: Step A source inventory (branch/HEAD/status, tree, dependencies, front end/back end/mock structure, documentation, tests and quality gates, duplicate files, runtime versus reference-only assets); Step B PA#3 structural compliance (React/Vite, client/, router, relative /api, proxy and preview.proxy, mock/server.mjs, mock/data/, …); then the later steps for C1–C11, contract, mock, integration, business rules and rubric scoring.
+
+13. Required report format: I. Executive summary; II. Repository and Git inventory; III. PA#3 structural compliance matrix; IV. C1–C11 coverage matrix; V. API contract gap analysis; VI. Mock server gap analysis; VII. React integration gap analysis; VIII. Business rules and Fix these; IX. Official rubric scoring; X. Reusable source analysis; XI. Prioritized backlog; XII. Phased implementation plan (requirements and repository alignment; API contract; HTTP mock; React HTTP integration; functional gap fixes; testing and submission); XIII. Next action.
+
+14. Final instructions: write no new code; edit no source; no commit; do not move on to implementation; do not score against a missing rubric, since the official PA#3 requirements are all in this prompt; do not claim first-fit, PostgreSQL, production JWT or an Express back end are required to be finished in PA#3; React UI completion is not evidence of API integration; the number of checked tasks is not evidence of DONE; every finding needs specific evidence or the label UNVERIFIED. The goal is for the team to know exactly what exists and what is still missing.
+`````
+
 ## 2026-11-17 — Request 3 — Phase 1 Requirements and Repository Alignment
 
 **Record type:** Exact prompt available from the user message that authorized Phase 1 implementation.
@@ -1454,6 +1539,41 @@ B. docs: align PA3 frontend requirements and rules
 
 Không thực hiện hai commit này.
 Dừng lại để tôi review và phê duyệt.
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+You are the Senior React Engineer of the ClubFlow project.
+
+Carry out Phase 1 — PA#3 Requirements & Repository Alignment.
+
+This is an implementation phase, but you may not commit on your own.
+
+CONTEXT:
+- PA#3 requires React/Vite in client/.
+- The source is currently in frontend/.
+- The UI, components, hooks and services already exist.
+- The API contract and the HTTP mock are not implemented yet.
+- The current business source must be preserved.
+
+TASKS:
+1. Check the Git branch, HEAD and working tree. If there are uncommitted changes, report them and do not overwrite them.
+2. Inventory the paths that depend on frontend/: root package.json/workspaces/scripts; Vite/Vitest/ESLint configuration; import paths and aliases; test scripts; documentation; build/output paths; CI workflows if any.
+3. Turn frontend/ into client/ with a Git-aware move: keep all React source; do not rewrite components; do not change UI behaviour; do not change business logic; update the paths that need it; do not move the back end or the database.
+4. Check AGENTS.md: keep the valid rules; add the PA#3 constraints (contract-first, HTTP mock-first, relative /api, no hardcoded business data, loading/error/empty states, no unauthorised contract/mock changes, preserve the existing UI, no dependency changes without approval); do not rewrite the whole rules file if not needed.
+5. Prepare brief.md: record only the PA#3 requirements/prompts actually given to the assistant that can be verified; do not reconstruct past prompts; do not claim steps not yet done are DONE.
+6. Prepare FRONTEND.md: the sections the rubric requires; fill in only verified information; mark demo accounts, routes and team details that are not verified as to be completed; no fake evidence or fake test results.
+7. Check the structure of client/ after the move.
+8. If the environment allows, run npm run lint, npm test and npm run build, as the actual scripts define them. Never edit or drop a test just to pass. If a command cannot run, report why.
+9. Review the whole diff: files moved; files modified; behaviour changes (if any); unexpected modifications; test/build results.
+
+CONSTRAINTS: Do not implement the API contract in this phase. Do not create the HTTP mock server. Do not edit domain services. Do not change C1–C11 business logic. Do not touch Express/PostgreSQL. Do not commit or push. Do not install dependencies without approval.
+
+OUTPUT: I. Summary; II. Files moved/modified; III. Git diff review; IV. Test/build results; V. PA#3 structural compliance; VI. Remaining issues; VII. Proposed commit boundaries.
+
+Proposed commits: A. refactor: move React frontend into client; B. docs: align PA3 frontend requirements and rules.
+Do not make these two commits. Stop so I can review and approve.
 `````
 
 ## 2026-11-17 — Request 4 — Phase 1 Documentation Finalization
@@ -3049,6 +3169,12 @@ Begin by auditing the current repository and resuming the next incomplete task.
 Đọc toàn bộ files trong thư mục tài liệu của giảng viên và check repo đã hoàn thiện theo yêu cầu này chưa? Không tự sinh các yêu cầu, bám theo trong tài liệu.
 `````
 
+**English translation (non-verbatim):**
+
+`````text
+Read every file in the lecturer's documents folder and check whether the repo is finished according to these requirements. Do not invent requirements; stick to the documents.
+`````
+
 ## 2026-11-19 - Request 8 - Fix the contract, the logs and the report
 
 **Record type:** Exact prompt.
@@ -3061,6 +3187,12 @@ Begin by auditing the current repository and resuming the next incomplete task.
 Bạn hãy làm (1), (2), (3), (4).
 `````
 
+**English translation (non-verbatim):**
+
+`````text
+Do (1), (2), (3), (4).
+`````
+
 ## 2026-11-19 - Request 9 - Fix the repeated requests
 
 **Record type:** Exact prompt.
@@ -3071,6 +3203,12 @@ Bạn hãy làm (1), (2), (3), (4).
 
 `````text
 Sửa lỗi request lặp.
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+Fix the repeated requests.
 `````
 
 ## 2026-11-19 - Request 10 - Check and fix criteria 1 to 7
@@ -3086,6 +3224,13 @@ mục 8, 9. bỏ qua.
 Bạn kiểm tra và làm làm 1->7 ngay bây giờ.
 `````
 
+**English translation (non-verbatim):**
+
+`````text
+Skip items 8 and 9.
+Check and do 1 to 7 right now.
+`````
+
 
 ## 2026-11-20 - Request 11 - Check the repository against PA#3, then remove the legacy browser data and add the C8 scheduling form
 
@@ -3097,6 +3242,12 @@ Bạn kiểm tra và làm làm 1->7 ngay bây giờ.
 
 `````text
 check xem source hiện tại đã thỏa các yêu cầu trong PA3 chưa
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+Check whether the current source meets the PA3 requirements.
 `````
 
 **Exact prompt 2 (verbatim):**
@@ -3122,6 +3273,31 @@ check xem source hiện tại đã thỏa các yêu cầu trong PA3 chưa
 Sau khi xong cả hai, build lại lần cuối rồi chạy `contract-check` để đảm bảo mock vẫn pass.
 
 Bạn làm xong thì báo lại, mình sẽ kiểm tra và chuyển sang sửa `SELF_ASSESSMENT_REPORT.md` (mục 4).
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+Agreed, start on both tasks. The order should be:
+
+Item 3 first (remove the legacy data):
+- Delete client/src/mocks/ entirely
+- Change DemoSessionContext.jsx so it no longer imports demoSessionService
+- Check whether any other file still references the legacy data
+- Rebuild and verify that dist/assets/index-*.js no longer contains "Nguyễn Minh Anh" or "Gia Huy"
+- A separate commit with a clear message
+
+Then item 2 (C8):
+- Edit the contract docs/api/interview-scheduling.md: add "Request body: {date, window, slotMinutes}" to POST .../schedule/draft/generate
+- Add a ## Changes line stating the change
+- Update the mock to handle the new body (validate date/window/slotMinutes, return 400 when missing)
+- Add a few error examples to the contract (400 for missing fields, 409 for conflict)
+- Edit InterviewSchedulingPage.jsx: add a form with 3 inputs (date picker, time window selector, duration dropdown)
+- A separate commit, with a message that says "Add C8 scheduling form with date/window/duration selection"
+
+After both, build one last time and run contract-check to make sure the mock still passes.
+
+When you are done, report back; I will check and move on to fixing SELF_ASSESSMENT_REPORT.md (item 4).
 `````
 
 ## 2026-11-20 - Request 12 - Fix the flaky test, correct the self-assessment, package the zip
@@ -3163,6 +3339,41 @@ Sau khi fix test chập chờn, chuyển sang **mục 4: sửa SELF_ASSESSMENT_R
 Bạn fix test chập chờn trước, rồi mình sẽ sửa SELF_ASSESSMENT_REPORT.md. Sau đó build lần cuối và đóng gói zip.
 `````
 
+**English translation (non-verbatim):**
+
+`````text
+Good, both commits are as asked. In particular:
+- Keeping tests/fixtures/ is sensible (the tests need it, the app does not use it)
+- Naming the fields interviewDate/interviewWindow to stay consistent with the existing code is a good decision
+- The 4 error examples (400, 409) show the mock handles the important states
+
+However, there is one problem to fix before hand-in: the test "shows loading, then supports retry" is flaky. The rubric clearly says "All tests pass"; if the examiner runs it and sees a timeout, criterion 4 (Testing) loses marks. Debug and fix it now.
+
+After fixing the flaky test, move on to item 4: fix SELF_ASSESSMENT_REPORT.md. Points to update:
+
+New figures:
+- Commits: 78 (76 old + 2 new)
+- Authors: 3 (HUYNH THAI HOANG has commits)
+- Contract examples: 56 (instead of 52)
+- Client tests: 287 (instead of 282)
+- Mock tests: 17 (instead of 14)
+- C8: Done (instead of "Not done")
+
+Criterion 1 (Functional requirements):
+- C8 now meets the rubric → raise from 15-21 to 25
+- Keep the other criteria
+- Recompute the total
+
+Other items:
+- Item 9 (Known issues): remove the line "the changes of 2026-11-19 are not committed yet"
+- Add a line about the fixed flaky test
+- State the 3 authors and each one's number of commits
+
+Fix the flaky test first, then I will fix SELF_ASSESSMENT_REPORT.md. Then build one last time and package the zip.
+
+(Note from the assistant's answer at the time: the PA#3 rubric has no "All tests pass" line and its criterion 4 is Forms, not Testing; git log showed two authors, not three; criterion 1 was already claimed at 25.)
+`````
+
 **Exact prompt 2 (verbatim):**
 
 `````text
@@ -3183,6 +3394,30 @@ Giữ 3/5, sửa thành: "Two of three members have commits (76 / 3). The third 
 Cảm ơn đã chỉ ra - đúng là tiêu chí 4 PA#3 là "Forms" chứ không phải "Testing". Fix test vẫn có ích cho PA#4 và đảm bảo bộ test ổn định khi giám khảo chạy.
 
 Bạn sửa `SELF_ASSESSMENT_REPORT.md` theo các số liệu trên đi. Sau khi xong, báo lại để mình build lần cuối và đóng gói zip. File zip sẽ có tên theo format: `PA3_MSSV_95.zip` (bạn thay MSSV bằng mã số sinh viên thực tế).
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+I agree with all the figures and the handling you proposed:
+
+Correct figures:
+- 79 commits (Plaminh 76, HUYNH THAI HOANG 3)
+- 2 authors with commits (the third member has none yet)
+- 56 contract examples
+- 287 client tests, 17 mock tests
+- C8: Done
+- Total: 95
+
+Criterion 9 (Honesty/Integrity):
+Keep 3/5, changed to: "Two of three members have commits (76 / 3). The third member contributed to design and review but has not made any commits yet." Remove the line "the changes of 2026-11-19 are not committed yet".
+
+About the flaky test:
+Thanks for pointing it out — PA#3 criterion 4 is indeed "Forms", not "Testing". Fixing the test still helps for PA#4 and keeps the suite stable when the examiner runs it.
+
+Update SELF_ASSESSMENT_REPORT.md with the figures above. When done, report back so I can build one last time and package the zip. The zip will be named PA3_MSSV_95.zip (replace MSSV with the real student IDs).
+
+(Note: criterion 9 of the rubric is Commit history; the assistant's answer pointed out that the file name must be <IDs ascending>_<total>.zip.)
 `````
 
 **Exact prompt 3 (verbatim).** The message before it, a packaging checklist (build, zip with exclusions, check the zip, submit), is not reproduced here; the assistant's answer corrected its exclusions.
@@ -3209,6 +3444,30 @@ Sau đó nộp qua Google Classroom (assignment PA#3) bằng tài khoản `@stud
 Cảm ơn bạn đã kiểm tra kỹ trước khi nén. Những chi tiết này rất quan trọng để tránh mất điểm oan.
 `````
 
+**English translation (non-verbatim):**
+
+`````text
+Exactly, you spotted it correctly. Those three mistakes would make a wrong zip file:
+- Too large, because client/node_modules and backend/node_modules slip in
+- Missing .env.example (against AGENTS.md)
+- Missing .git/ (criterion 9 would get 0-1 points)
+
+Your tar.exe command is the best solution on Windows:
+- It keeps the hidden .git/ folder
+- --exclude=node_modules excludes it at every level
+- It zips the repo folder itself (clubflow) rather than its contents
+
+Please run it for me:
+1. Build again (not required, but to be sure)
+2. Zip with the tar.exe command you proposed
+3. Run the 3 check commands
+4. Report the results
+
+Then I will submit on Google Classroom (the PA#3 assignment) with the @student.hcmus.edu.vn account.
+
+Thanks for checking carefully before zipping. These details matter to avoid losing marks for nothing.
+`````
+
 ## 2026-11-20 - Request 13 - Run guide, then the pre-submission QA run
 
 **Record type:** Exact prompts (the QA prompt is summarised; its steps are listed).
@@ -3219,6 +3478,12 @@ Cảm ơn bạn đã kiểm tra kỹ trước khi nén. Những chi tiết này 
 
 `````text
 hướng dẫn t chạy và kiểm thử prototype
+`````
+
+**English translation (non-verbatim):**
+
+`````text
+Show me how to run and test the prototype.
 `````
 
 ## 2026-11-20 - Request 14 - AI-LOG and self-assessment in the course templates
@@ -3232,3 +3497,16 @@ hướng dẫn t chạy và kiểm thử prototype
 `````text
 cập nhật lại format của ai log và self assess
 `````
+
+**English translation (non-verbatim):**
+
+`````text
+Update the format of the AI log and the self-assessment.
+`````
+
+## 2026-11-20 - Request 15 - Act on a second review of the submission
+
+**Record type:** Summary only. The message was a review of the submission produced in another assistant session and pasted by the team; it is not reproduced here.
+
+**Summary (non-verbatim):** The pasted review found the package, the mock modes, contract-check (56/56) and the commit order correct, and proposed four fixes: an English version of the Vietnamese prompts in `brief.md`; the "Not recorded at the time" lines in `AI-LOG.md` (no change proposed); `FRONTEND.md` still saying 52 of 52 and a "Verified" status column in its team table; and the stale `.git/.MERGE_MSG.swp`. It ended by offering to fix items 1 and 3.
+

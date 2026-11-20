@@ -1429,3 +1429,21 @@ By hand: None. The team asked for the change and reviews the commit.
 
 Verified: A script reordered the entries; comparing the lines before and after, nothing was lost except the 11 old headings with ` - `, and every line added is one of the six template lines. A second pass found 48 of 48 dated entries with the six lines in order.
 
+---
+
+## 2026-11-20 — PA#3 Phase 23 — English translations in brief.md, FRONTEND.md figures
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Act on a second review of the submission (pasted from another assistant session): add English to the Vietnamese prompts in `brief.md`, and fix `FRONTEND.md` (contract-check figure, "Verified" column).
+
+Kept: Every prompt in `brief.md` verbatim; the `AI-LOG.md` entries as they are; the self-assessment marks (total 95).
+
+Changed: `brief.md`: a "Language of this file" section and an English translation under each of the 15 Vietnamese prompts (Requests 1–3, 7–14); Request 2, which mostly restates the PA#3 rubric, as a section-by-section outline. `FRONTEND.md`: section 7 now says 56 of 56 (52 plus the four error examples of Phase 19) on 2026-11-20; the team table has no "Status: Verified" column. `SELF_ASSESSMENT_REPORT.md`: criterion 7 evidence and the commit figures (82 commits, 79 / 3). Removed the stale vim swap file `.git/.MERGE_MSG.swp` (from 2026-11-16, not part of any commit).
+
+Rejected: Three points of the review, after checking them in the repository: `brief.md` "written in Vietnamese" (every request already had an English summary, Requests 4–6 are in English, and Vietnamese characters are about 3% of the file); "Verified" as a Fix these problem (that list is about screens, and no screen in `client/src` says "verified"); filling the "Not recorded at the time" lines (that would reconstruct the log after the fact).
+
+By hand: None. The team relayed the review and asked for the fixes.
+
+Verified: `grep` finds no "Verified" in `FRONTEND.md`; 15 translation blocks in `brief.md`, each directly under its prompt; `npm run lint` clean.
+

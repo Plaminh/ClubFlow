@@ -2,11 +2,11 @@
 
 ## 1. Team Members
 
-| Member | Student ID | Role | Status |
-| --- | --- | --- | --- |
-| Phan Lê Anh Minh | 24127082 | Full-Stack / React Frontend / QA Lead | Verified |
-| Huỳnh Thái Hoàng | 24127171 | Full-Stack / HTTP Mock & Contracts / QA | Verified |
-| Hồ Phan Như Nguyệt | 24127211 | Full-Stack / UI & Accessibility / QA | Verified |
+| Member | Student ID | Role |
+| --- | --- | --- |
+| Phan Lê Anh Minh | 24127082 | Full-Stack / React Frontend / QA Lead |
+| Huỳnh Thái Hoàng | 24127171 | Full-Stack / HTTP Mock & Contracts / QA |
+| Hồ Phan Như Nguyệt | 24127211 | Full-Stack / UI & Accessibility / QA |
 
 ## 2. How to Run
 
@@ -156,7 +156,7 @@ Zero dependencies were added for the contract or HTTP mock.
 
 ## 7. Remaining Not Done
 
-- **Official course `contract-check.mjs`**: `node tools/contract-check.mjs --base http://localhost:3001` on a freshly started mock answered 52 of 52 examples as written (exit 0) and found an example for each of the 37 endpoints in the README table, on 2026-11-19. It also lists 3 notes (the CSV and PDF answers have no body in the example block by design), which do not count as failures. Before the fixes of that day the first run found 44 failures: the Demo accounts table sat under a sub-heading so the tool could not sign in, and the CSV and PDF answer blocks carried a body. `node tools/validate-api-docs.mjs` and `node tools/verify-pa3-http.mjs` are our own non-official checks.
+- **Official course `contract-check.mjs`**: `node tools/contract-check.mjs --base http://localhost:3001` on a freshly started mock answered 56 of 56 examples as written (exit 0) and found an example for each of the 37 endpoints in the README table, on 2026-11-20. The 56 are the 52 examples of 2026-11-19 plus four error examples added to `docs/api/04-scheduling.md` with the C8 settings change (two `400`, `409 SCHEDULE_NOT_READY`, `409 SCHEDULE_CONFIRMED`). It also lists notes for the CSV and PDF answers (no body in the example block, by design) and one example value, which do not count as failures. Before the fixes of that day the first run found 44 failures: the Demo accounts table sat under a sub-heading so the tool could not sign in, and the CSV and PDF answer blocks carried a body. `node tools/validate-api-docs.mjs` and `node tools/verify-pa3-http.mjs` are our own non-official checks.
 - **Schedule generation**: the mock returns a fixed draft schedule; the first-fit rule of Q-01 is not computed (planned for PA#4).
 - **W3C Automated Validation**: On 2026-11-19 the rendered HTML of 17 screens, 4 applicant-portal tabs and 13 states with data (lists, review drawer, final results, assessment, confirmed schedule, interviewer, preview) gave 0 errors and 0 warnings in the W3C Nu checker. Structural rules are also tested in `client/src/tests/a11y/screens.a11y.test.jsx`.
 - **Draft campaign after a reload**: the campaign page edits the current campaign, so a draft created earlier is not reopened after a reload.
