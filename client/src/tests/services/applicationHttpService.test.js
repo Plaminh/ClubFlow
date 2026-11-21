@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { setAuthTokenProvider } from '../../services/apiClient.js';
 import * as applicationService from '../../services/applicationService.js';
 import { setMockApiScenario } from '../helpers/mockApi.js';
+import { readBlobText } from '../helpers/blob.js';
 
 describe('application review HTTP adapter', () => {
   beforeEach(() => {
@@ -37,8 +38,11 @@ describe('application review HTTP adapter', () => {
 
   it('downloads protected PDF and filtered CSV through bearer requests', async () => {
     const pdf = await applicationService.downloadCv('CF-026');
-    expect(pdf).toBeInstanceOf(Blob);
+    // Not toBeInstanceOf(Blob): on Node 22, fetch's Blob is Node's while the jsdom global Blob is
+    // jsdom's, so instanceof fails across realms although the value is a Blob.
+    expect(Object.prototype.toString.call(pdf)).toBe('[object Blob]');
     expect(pdf.type).toBe('application/pdf');
+    expect(await readBlobText(pdf)).toMatch(/^%PDF-/);
     const csv = await applicationService.exportCsv({ status: 'shortlisted' });
     expect(csv).toMatchObject({ fileName: 'clubflow-applications.csv', rowCount: 4 });
     expect(csv.content).not.toContain('privateNote');

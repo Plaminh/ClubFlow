@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, apiDownload, setAuthTokenProvider } from '../../services/apiClient.js';
+import { readBlobText } from '../helpers/blob.js';
 
 function jsonResponse(status, body) {
   return new Response(body === undefined ? null : JSON.stringify(body), {
@@ -64,7 +65,11 @@ describe('apiClient', () => {
       )
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
     const pdf = await apiDownload('/applications/A01/cv');
-    expect(pdf).toBeInstanceOf(Blob);
+    // Not toBeInstanceOf(Blob): on Node 22, fetch's Blob is Node's while the jsdom global Blob is
+    // jsdom's, so instanceof fails across realms although the value is a Blob.
+    expect(Object.prototype.toString.call(pdf)).toBe('[object Blob]');
+    expect(pdf.type).toBe('application/pdf');
+    expect(await readBlobText(pdf)).toBe('%PDF');
     await expect(apiClient('/campaigns/cmp/schedule.csv', { responseType: 'text' })).resolves.toBe(
       'A,B\n1,2\n',
     );
