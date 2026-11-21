@@ -59,6 +59,11 @@ jobs:
       - name: Tests (client, mock)
         run: npm test
 
+      - name: Production build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
       - name: Install server (as the marker does)
         working-directory: server
         run: npm ci --ignore-scripts
@@ -66,8 +71,3 @@ jobs:
       - name: Server tests
         working-directory: server
         run: npm test
-
-      - name: Production build
-        run: npm run build
-        env:
-          NODE_ENV: production
