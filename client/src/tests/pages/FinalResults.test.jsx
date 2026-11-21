@@ -20,12 +20,11 @@ describe('Application Review — Final Results', () => {
     await openResults();
     await screen.findByRole('heading', { name: 'Kết quả cuối theo hồ sơ' });
 
-    expect(resultRows().map((row) => within(row).getAllByRole('cell')[0].querySelector('strong').textContent)).toEqual([
-      'CF-026',
-      'CF-027',
-      'CF-030',
-      'CF-031',
-    ]);
+    expect(
+      resultRows().map(
+        (row) => within(row).getAllByRole('cell')[0].querySelector('strong').textContent,
+      ),
+    ).toEqual(['CF-026', 'CF-027', 'CF-030', 'CF-031']);
     expect(screen.getByText(/CF-028 và CF-029 bị loại ở vòng CV/)).toBeInTheDocument();
     expect(screen.getByText(/“Qua vòng CV” không có nghĩa là Pass/)).toBeInTheDocument();
   });
@@ -51,10 +50,14 @@ describe('Application Review — Final Results', () => {
     fireEvent.click(toggle);
 
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    const assessment = (await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')).closest('.panel-subtle');
+    const assessment = (
+      await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')
+    ).closest('.panel-subtle');
     // CF-027 has notes but no recommendation; the Executive recorded Fail on their own.
     expect(within(assessment).getByText(/Ý tưởng nội dung còn chung chung/)).toBeInTheDocument();
-    expect(within(assessment).getByText('Đề xuất của người phỏng vấn:').parentElement).toHaveTextContent('Không nêu đề xuất');
+    expect(
+      within(assessment).getByText('Đề xuất của người phỏng vấn:').parentElement,
+    ).toHaveTextContent('Không nêu đề xuất');
     expect(within(assessment).getByText(/Đề xuất không phải kết quả cuối/)).toBeInTheDocument();
   });
 
@@ -63,8 +66,12 @@ describe('Application Review — Final Results', () => {
     await screen.findByRole('heading', { name: 'CF-026 · Nguyễn Minh Anh' });
     fireEvent.click(screen.getByRole('button', { name: 'View Assessment' }));
 
-    const assessment = (await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')).closest('.panel-subtle');
-    expect(within(assessment).getByText('Đề xuất của người phỏng vấn:').parentElement).toHaveTextContent('Đề xuất Pass');
+    const assessment = (
+      await screen.findByText('Đánh giá của người phỏng vấn · chỉ để tham khảo')
+    ).closest('.panel-subtle');
+    expect(
+      within(assessment).getByText('Đề xuất của người phỏng vấn:').parentElement,
+    ).toHaveTextContent('Đề xuất Pass');
     // The recommendation is plain text: Pass/Fail badges belong to the final decision only.
     expect(assessment.querySelector('.badge')).toBeNull();
 
@@ -77,7 +84,9 @@ describe('Application Review — Final Results', () => {
     await openResults();
     fireEvent.click(await screen.findByRole('button', { name: 'Mở CF-030 · Phạm Quốc Bảo' }));
     expect(screen.getByRole('button', { name: 'Record Pass' })).toBeDisabled();
-    expect(screen.getByText('Cần có đánh giá phỏng vấn trước khi ghi nhận quyết định.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Cần có đánh giá phỏng vấn trước khi ghi nhận quyết định.'),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Mở CF-026 · Nguyễn Minh Anh' }));
     expect(screen.getByRole('button', { name: 'Record Fail' })).toBeDisabled();
@@ -89,7 +98,9 @@ describe('Application Review — Final Results', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Mở CF-027 · Nguyễn Minh Anh' }));
     fireEvent.click(screen.getByRole('button', { name: 'Record Pass' }));
     expect(await screen.findByText('Đã ghi nhận Pass cho CF-027')).toBeInTheDocument();
-    expect(await screen.findByText(/1 kết quả đã ghi nhận nhưng chưa công bố \(CF-027\)/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/1 kết quả đã ghi nhận nhưng chưa công bố \(CF-027\)/),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Publish Results' }));
     const dialog = await screen.findByRole('dialog', { name: 'Công bố kết quả?' });
@@ -101,14 +112,21 @@ describe('Application Review — Final Results', () => {
 
     // Notifications are created server-side, once per published application, only for its applicant.
     const notifications = getMockApiState().notifications;
-    expect(notifications.filter((item) => item.applicationId === 'CF-027').map((item) => item.accountId)).toEqual(['ap-minhanh']);
-    expect(getMockApiState().results.find((item) => item.applicationId === 'CF-027')).toMatchObject({ decision: 'pass', publishedAt: expect.any(String) });
+    expect(
+      notifications.filter((item) => item.applicationId === 'CF-027').map((item) => item.accountId),
+    ).toEqual(['ap-minhanh']);
+    expect(getMockApiState().results.find((item) => item.applicationId === 'CF-027')).toMatchObject(
+      { decision: 'pass', publishedAt: expect.any(String) },
+    );
   });
 
   it('explains that results start after schedule confirmation', async () => {
     await openResults('screening');
 
     expect(await screen.findByText('Chưa có lịch phỏng vấn đã xác nhận')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Mở Interview Scheduling →' })).toHaveAttribute('href', '/executive/scheduling');
+    expect(screen.getByRole('link', { name: 'Mở Interview Scheduling →' })).toHaveAttribute(
+      'href',
+      '/executive/scheduling',
+    );
   });
 });

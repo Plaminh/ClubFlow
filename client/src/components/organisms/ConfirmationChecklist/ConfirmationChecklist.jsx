@@ -12,7 +12,9 @@ export default function ConfirmationChecklist({ conditions, canConfirm, pending,
     <Card
       title="Điều kiện xác nhận"
       actions={
-        <Badge tone={canConfirm ? 'success' : 'danger'}>{canConfirm ? 'Sẵn sàng xác nhận' : 'Chưa thể xác nhận'}</Badge>
+        <Badge tone={canConfirm ? 'success' : 'danger'}>
+          {canConfirm ? 'Sẵn sàng xác nhận' : 'Chưa thể xác nhận'}
+        </Badge>
       }
     >
       <div className="stack">
@@ -20,7 +22,9 @@ export default function ConfirmationChecklist({ conditions, canConfirm, pending,
           {conditions.map((condition) => (
             <li
               key={condition.id}
-              className={condition.met ? 'confirmation-checklist__met' : 'confirmation-checklist__failed'}
+              className={
+                condition.met ? 'confirmation-checklist__met' : 'confirmation-checklist__failed'
+              }
             >
               <span aria-hidden="true">{condition.met ? '✓' : '✗'}</span>
               <span>

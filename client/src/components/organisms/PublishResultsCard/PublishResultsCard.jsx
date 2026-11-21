@@ -21,7 +21,8 @@ export default function PublishResultsCard({ pendingIds, onPublish, pending, mes
           Publish Results
         </Button>
         <p className="hint">
-          Chỉ kết quả đã công bố mới hiển thị cho ứng viên trong Applicant Portal. Ghi nhận quyết định không tự công bố.
+          Chỉ kết quả đã công bố mới hiển thị cho ứng viên trong Applicant Portal. Ghi nhận quyết
+          định không tự công bố.
         </p>
       </div>
     </Card>

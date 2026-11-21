@@ -16,13 +16,7 @@ import './AppLayout.css';
  * /login and remembers the current location as the intended destination.
  */
 export default function AppLayout() {
-  const {
-    account,
-    role,
-    accounts,
-    selectDemoAccount,
-    signOut,
-  } = useDemoSession();
+  const { account, role, accounts, selectDemoAccount, signOut } = useDemoSession();
   const { status: apiStatus } = useApiHealth();
   const navigate = useNavigate();
   const location = useLocation();

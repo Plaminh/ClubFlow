@@ -8,12 +8,17 @@ export function useAssignedInterviews() {
 
 /** Detail of one assigned interview (no Executive-only screening notes). */
 export function useInterviewDetail(interviewId) {
-  return useServiceData((options) => interviewerService.getInterview(interviewId, options), [interviewId], {
-    enabled: Boolean(interviewId),
-  });
+  return useServiceData(
+    (options) => interviewerService.getInterview(interviewId, options),
+    [interviewId],
+    {
+      enabled: Boolean(interviewId),
+    },
+  );
 }
 
 export const interviewerActions = {
-  submitAssessment: (interviewId, values) => interviewerService.submitAssessment(interviewId, values),
+  submitAssessment: (interviewId, values) =>
+    interviewerService.submitAssessment(interviewId, values),
   downloadCv: (applicationId) => interviewerService.downloadCv(applicationId),
 };

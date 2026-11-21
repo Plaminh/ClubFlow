@@ -4,12 +4,19 @@ import Button from '../../atoms/Button/index.js';
 import Alert from '../../molecules/Alert/index.js';
 import Card from '../../molecules/Card/index.js';
 import FormField from '../../molecules/FormField/index.js';
-import { getLabel, SCREENING_STATUS_LABELS, SCREENING_STATUS_TONES } from '../../../constants/labels.js';
+import {
+  getLabel,
+  SCREENING_STATUS_LABELS,
+  SCREENING_STATUS_TONES,
+} from '../../../constants/labels.js';
 import { formatDateTime } from '../../../utils/format.js';
 import './ApplicationDetail.css';
 
 function decisionHint(detail) {
-  const others = detail.siblingIds.length > 0 ? `; hồ sơ ${detail.siblingIds.join(', ')} được duyệt độc lập` : '';
+  const others =
+    detail.siblingIds.length > 0
+      ? `; hồ sơ ${detail.siblingIds.join(', ')} được duyệt độc lập`
+      : '';
   const scope = `Áp dụng riêng cho ${detail.id}${others}.`;
   if (detail.locked) {
     return `${scope} Lịch phỏng vấn đã được xác nhận nên quyết định vòng CV đã khóa (BR-14).`;
@@ -21,7 +28,17 @@ function decisionHint(detail) {
 }
 
 /** Selected application beside the list (reference detail card). */
-export default function ApplicationDetail({ detail, pending, message, focusOnMount, onOpenCv, onSaveNote, onShortlist, onReject, onClose }) {
+export default function ApplicationDetail({
+  detail,
+  pending,
+  message,
+  focusOnMount,
+  onOpenCv,
+  onSaveNote,
+  onShortlist,
+  onReject,
+  onClose,
+}) {
   const [note, setNote] = useState(detail.privateNote ?? '');
   const panelRef = useRef(null);
   const canDecide = !detail.locked && detail.screeningStatus === 'pendingReview';
@@ -89,7 +106,8 @@ export default function ApplicationDetail({ detail, pending, message, focusOnMou
               Mở CV được bảo vệ (PDF)
             </Button>
             <p className="hint">
-              {detail.cv.fileName} · {Math.round(detail.cv.sizeBytes / 1024)} KB · chỉ tải qua endpoint có bearer token.
+              {detail.cv.fileName} · {Math.round(detail.cv.sizeBytes / 1024)} KB · chỉ tải qua
+              endpoint có bearer token.
             </p>
           </div>
           <section aria-labelledby={`sop-${detail.id}`}>
@@ -99,8 +117,18 @@ export default function ApplicationDetail({ detail, pending, message, focusOnMou
             ))}
           </section>
           <div className="panel-subtle stack stack--tight">
-            <FormField id={`note-${detail.id}`} label="Ghi chú nội bộ · chỉ Ban tuyển dụng nhìn thấy">
-              {(props) => <textarea {...props} rows={5} value={note} onChange={(event) => setNote(event.target.value)} />}
+            <FormField
+              id={`note-${detail.id}`}
+              label="Ghi chú nội bộ · chỉ Ban tuyển dụng nhìn thấy"
+            >
+              {(props) => (
+                <textarea
+                  {...props}
+                  rows={5}
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                />
+              )}
             </FormField>
             <div>
               <Button variant="secondary" onClick={() => onSaveNote(note)} disabled={pending}>

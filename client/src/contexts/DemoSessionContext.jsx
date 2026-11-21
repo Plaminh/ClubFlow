@@ -33,11 +33,18 @@ export function DemoSessionProvider({ children }) {
   const [token, setToken] = useState(initial.token);
   const [dataVersion, setDataVersion] = useState(0);
   const [sessionEpoch, setSessionEpoch] = useState(0);
-  const [accounts] = useState(() => authService.DEMO_CREDENTIALS.map(({ password: _password, username: _username, ...user }) => user));
+  const [accounts] = useState(() =>
+    authService.DEMO_CREDENTIALS.map(
+      ({ password: _password, username: _username, ...user }) => user,
+    ),
+  );
 
-  const applyIdentity = useCallback((user) => {
-    setAccount(user);
-  }, [setAccount]);
+  const applyIdentity = useCallback(
+    (user) => {
+      setAccount(user);
+    },
+    [setAccount],
+  );
 
   const clearSession = useCallback(() => {
     setToken(null);
@@ -84,14 +91,17 @@ export function DemoSessionProvider({ children }) {
     save({ token, user: token && account ? account : null });
   }, [token, account]);
 
-  const signIn = useCallback(async (credentials) => {
-    const session = await authService.signIn(credentials);
-    setToken(session.token);
-    applyIdentity(session.user);
-    setStatus('ready');
-    setSessionEpoch((epoch) => epoch + 1);
-    return session.user;
-  }, [applyIdentity, setSessionEpoch, setStatus, setToken]);
+  const signIn = useCallback(
+    async (credentials) => {
+      const session = await authService.signIn(credentials);
+      setToken(session.token);
+      applyIdentity(session.user);
+      setStatus('ready');
+      setSessionEpoch((epoch) => epoch + 1);
+      return session.user;
+    },
+    [applyIdentity, setSessionEpoch, setStatus, setToken],
+  );
 
   const signOut = useCallback(async () => {
     try {
@@ -103,35 +113,55 @@ export function DemoSessionProvider({ children }) {
 
   // Development-only shortcut. It still uses the real HTTP login endpoint and
   // therefore never creates a second browser-only authentication path.
-  const selectDemoAccount = useCallback(async (id) => {
-    if (!id) {
-      await signOut();
-      return null;
-    }
-    const credential = authService.DEMO_CREDENTIALS.find((item) => item.id === id);
-    if (!credential) return null;
-    return signIn({ username: credential.username, password: credential.password });
-  }, [signIn, signOut]);
+  const selectDemoAccount = useCallback(
+    async (id) => {
+      if (!id) {
+        await signOut();
+        return null;
+      }
+      const credential = authService.DEMO_CREDENTIALS.find((item) => item.id === id);
+      if (!credential) return null;
+      return signIn({ username: credential.username, password: credential.password });
+    },
+    [signIn, signOut],
+  );
 
-  const updateCurrentAccount = useCallback((updated) => {
-    setAccount((current) => (current?.id === updated.id ? { ...current, ...updated } : current));
-    setDataVersion((version) => version + 1);
-  }, [setAccount, setDataVersion]);
+  const updateCurrentAccount = useCallback(
+    (updated) => {
+      setAccount((current) => (current?.id === updated.id ? { ...current, ...updated } : current));
+      setDataVersion((version) => version + 1);
+    },
+    [setAccount, setDataVersion],
+  );
 
   const accountId = account?.id ?? null;
-  const value = useMemo(() => ({
-    status,
-    accounts,
-    account,
-    accountId,
-    role: account?.role ?? 'visitor',
-    signIn,
-    signOut,
-    selectDemoAccount,
-    updateCurrentAccount,
-    dataVersion,
-    sessionEpoch,
-  }), [status, accounts, account, accountId, signIn, signOut, selectDemoAccount, updateCurrentAccount, dataVersion, sessionEpoch]);
+  const value = useMemo(
+    () => ({
+      status,
+      accounts,
+      account,
+      accountId,
+      role: account?.role ?? 'visitor',
+      signIn,
+      signOut,
+      selectDemoAccount,
+      updateCurrentAccount,
+      dataVersion,
+      sessionEpoch,
+    }),
+    [
+      status,
+      accounts,
+      account,
+      accountId,
+      signIn,
+      signOut,
+      selectDemoAccount,
+      updateCurrentAccount,
+      dataVersion,
+      sessionEpoch,
+    ],
+  );
 
   return <DemoSessionContext.Provider value={value}>{children}</DemoSessionContext.Provider>;
 }

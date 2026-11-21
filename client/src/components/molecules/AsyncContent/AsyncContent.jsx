@@ -6,7 +6,13 @@ import './AsyncContent.css';
  * Consistent loading and error presentation for data-driven content.
  * status: 'loading' | 'success' | 'error' (from useServiceData).
  */
-export default function AsyncContent({ status, error, onRetry, loadingLabel = 'Đang tải dữ liệu…', children }) {
+export default function AsyncContent({
+  status,
+  error,
+  onRetry,
+  loadingLabel = 'Đang tải dữ liệu…',
+  children,
+}) {
   if (status === 'loading') {
     return (
       <div className="async-content__loading" role="status">

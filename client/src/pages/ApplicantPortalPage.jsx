@@ -108,10 +108,15 @@ export default function ApplicantPortalPage() {
   } else if (!isApplicant) {
     const gates = {
       apply: ['Cần đăng nhập để nộp hồ sơ', 'Bạn có thể xem chiến dịch mà không cần đăng nhập.'],
-      mine: ['Đăng nhập để xem hồ sơ của bạn', 'Chỉ hồ sơ của tài khoản đang đăng nhập được hiển thị.'],
+      mine: [
+        'Đăng nhập để xem hồ sơ của bạn',
+        'Chỉ hồ sơ của tài khoản đang đăng nhập được hiển thị.',
+      ],
       notifications: ['Đăng nhập để xem thông báo', 'Thông báo là riêng tư theo từng ứng viên.'],
     };
-    panel = <SignInGate role={role} title={gates[tab][0]} text={gates[tab][1]} onSignIn={openSignIn} />;
+    panel = (
+      <SignInGate role={role} title={gates[tab][0]} text={gates[tab][1]} onSignIn={openSignIn} />
+    );
   } else if (tab === 'apply') {
     const status = phaseMessage(phase, campaign);
     panel = (
@@ -137,12 +142,15 @@ export default function ApplicantPortalPage() {
     );
   } else if (tab === 'mine') {
     panel = (
-      <Card title="Hồ sơ của tôi" subtitle={`${applications.length} hồ sơ của ${account.displayName}`}>
+      <Card
+        title="Hồ sơ của tôi"
+        subtitle={`${applications.length} hồ sơ của ${account.displayName}`}
+      >
         <div className="stack">
           <Alert tone="info" title="Mỗi hồ sơ được xử lý độc lập">
             <p>
-              Trạng thái sàng lọc, lịch phỏng vấn và kết quả cuối của hồ sơ này không quyết định hồ sơ khác của cùng bạn.
-              “Qua vòng CV” chưa phải kết quả cuối.
+              Trạng thái sàng lọc, lịch phỏng vấn và kết quả cuối của hồ sơ này không quyết định hồ
+              sơ khác của cùng bạn. “Qua vòng CV” chưa phải kết quả cuối.
             </p>
           </Alert>
           {applications.length > 0 ? (
@@ -188,7 +196,10 @@ export default function ApplicantPortalPage() {
             <NotificationList notifications={notifications} />
           ) : (
             <EmptyState title="Chưa có thông báo" headingLevel={3}>
-              <p>Thông báo về kết quả đã công bố sẽ hiện ở đây. ClubFlow không gửi email, SMS hay thông báo đẩy.</p>
+              <p>
+                Thông báo về kết quả đã công bố sẽ hiện ở đây. ClubFlow không gửi email, SMS hay
+                thông báo đẩy.
+              </p>
             </EmptyState>
           )}
         </div>
@@ -198,7 +209,13 @@ export default function ApplicantPortalPage() {
 
   return (
     <MainTemplate {...HEADING} context={campaign.name}>
-      <Tabs idPrefix="portal" label="Các phần của cổng ứng viên" tabs={tabs} value={tab} onChange={setTab} />
+      <Tabs
+        idPrefix="portal"
+        label="Các phần của cổng ứng viên"
+        tabs={tabs}
+        value={tab}
+        onChange={setTab}
+      />
       <div role="tabpanel" id={`portal-panel-${tab}`} aria-labelledby={`portal-tab-${tab}`}>
         {panel}
       </div>

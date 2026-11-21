@@ -50,7 +50,10 @@ export default function ProfileEditForm({ profile, saving, serviceError, onSave,
   }
 
   return (
-    <Card title="Chỉnh sửa hồ sơ" subtitle="Chỉ họ tên hiển thị và email có thể thay đổi trong bản mẫu.">
+    <Card
+      title="Chỉnh sửa hồ sơ"
+      subtitle="Chỉ họ tên hiển thị và email có thể thay đổi trong bản mẫu."
+    >
       <form className="stack" noValidate onSubmit={handleSubmit}>
         {serviceError ? (
           <Alert tone="error" title="Chưa thể lưu thay đổi" live>

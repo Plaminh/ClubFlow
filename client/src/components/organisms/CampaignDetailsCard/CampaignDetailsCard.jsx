@@ -11,7 +11,15 @@ const chosen = (value) => (value ? `Ngày đã chọn: ${formatDate(value)}.` : 
  * editable form; with `readOnly` (published campaign) the same values are
  * shown as text, not as disabled fields.
  */
-export default function CampaignDetailsCard({ values, errors, statusLabel, statusTone, disabled, readOnly, onChange }) {
+export default function CampaignDetailsCard({
+  values,
+  errors,
+  statusLabel,
+  statusTone,
+  disabled,
+  readOnly,
+  onChange,
+}) {
   const status = <Badge tone={statusTone}>{statusLabel}</Badge>;
 
   if (readOnly) {
@@ -33,7 +41,8 @@ export default function CampaignDetailsCard({ values, errors, statusLabel, statu
           <div>
             <dt>Thời gian nhận đơn</dt>
             <dd>
-              Từ {formatDate(values.opensOn)} đến hết ngày {formatDate(values.closesOn)} (giờ Việt Nam)
+              Từ {formatDate(values.opensOn)} đến hết ngày {formatDate(values.closesOn)} (giờ Việt
+              Nam)
             </dd>
           </div>
           <div>
@@ -83,7 +92,11 @@ export default function CampaignDetailsCard({ values, errors, statusLabel, statu
             {(props) => <input {...props} type="date" {...bind('closesOn')} />}
           </FormField>
         </div>
-        <FormField id="campaign-instructions" label="Hướng dẫn ứng tuyển" error={errors.instructions}>
+        <FormField
+          id="campaign-instructions"
+          label="Hướng dẫn ứng tuyển"
+          error={errors.instructions}
+        >
           {(props) => <textarea {...props} rows={4} {...bind('instructions')} />}
         </FormField>
       </div>

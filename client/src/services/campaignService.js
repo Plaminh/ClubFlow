@@ -33,7 +33,11 @@ export function setupInput(draft) {
     roomIds: draft.roomIds ?? [],
     assignments: (draft.assignments ?? [])
       .filter((assignment) => assignment.positionIds?.length)
-      .map(({ interviewerId, positionIds, availability }) => ({ interviewerId, positionIds, availability })),
+      .map(({ interviewerId, positionIds, availability }) => ({
+        interviewerId,
+        positionIds,
+        availability,
+      })),
   };
 }
 
@@ -42,17 +46,29 @@ export function getCampaign(campaignId = PRIMARY_CAMPAIGN_ID, options = {}) {
 }
 
 export function createCampaign(draft, options = {}) {
-  return apiClient('/campaigns', { ...options, method: 'POST', body: { ...campaignInput(draft), ...setupInput(draft) } });
+  return apiClient('/campaigns', {
+    ...options,
+    method: 'POST',
+    body: { ...campaignInput(draft), ...setupInput(draft) },
+  });
 }
 
 export async function saveDraft(campaignId, draft, options = {}) {
-  const view = await apiClient(`/campaigns/${campaignId}`, { ...options, method: 'PATCH', body: campaignInput(draft) });
+  const view = await apiClient(`/campaigns/${campaignId}`, {
+    ...options,
+    method: 'PATCH',
+    body: campaignInput(draft),
+  });
   if (view.interviewSetup?.locked) return view;
   return saveInterviewSetup(campaignId, draft, options);
 }
 
 export function saveInterviewSetup(campaignId, draft, options = {}) {
-  return apiClient(`/campaigns/${campaignId}/interview-setup`, { ...options, method: 'PATCH', body: setupInput(draft) });
+  return apiClient(`/campaigns/${campaignId}/interview-setup`, {
+    ...options,
+    method: 'PATCH',
+    body: setupInput(draft),
+  });
 }
 
 export async function publish(campaignId, draft, options = {}) {
@@ -67,5 +83,8 @@ export async function closeApplications(campaignId, options = {}) {
 }
 
 export function removePosition(campaignId, positionId, options = {}) {
-  return apiClient(`/campaigns/${campaignId}/positions/${positionId}`, { ...options, method: 'DELETE' });
+  return apiClient(`/campaigns/${campaignId}/positions/${positionId}`, {
+    ...options,
+    method: 'DELETE',
+  });
 }

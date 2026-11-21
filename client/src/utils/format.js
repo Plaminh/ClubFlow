@@ -49,9 +49,7 @@ function toValidDate(value) {
 // Build the string from parts so locale punctuation differences in the
 // runtime's Intl data cannot change the result.
 function partsOf(formatter, date) {
-  return Object.fromEntries(
-    formatter.formatToParts(date).map(({ type, value }) => [type, value]),
-  );
+  return Object.fromEntries(formatter.formatToParts(date).map(({ type, value }) => [type, value]));
 }
 
 const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -62,7 +60,9 @@ function formatCalendarDate(value) {
   const [, year, month, day] = DATE_ONLY.exec(value);
   const check = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
   const real =
-    check.getUTCFullYear() === Number(year) && check.getUTCMonth() === Number(month) - 1 && check.getUTCDate() === Number(day);
+    check.getUTCFullYear() === Number(year) &&
+    check.getUTCMonth() === Number(month) - 1 &&
+    check.getUTCDate() === Number(day);
   return real ? `${day}/${month}/${year}` : null;
 }
 

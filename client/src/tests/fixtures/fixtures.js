@@ -15,7 +15,8 @@
 const BUSINESS_UTC_OFFSET = '+07:00';
 
 /** Instant of a Vietnam wall-clock date and time, serialized in UTC. */
-export const at = (date, time) => new Date(`${date}T${time}:00${BUSINESS_UTC_OFFSET}`).toISOString();
+export const at = (date, time) =>
+  new Date(`${date}T${time}:00${BUSINESS_UTC_OFFSET}`).toISOString();
 
 export const INTERVIEW_DATE = '2026-11-05';
 
@@ -250,9 +251,27 @@ const APPLICATIONS = [
 
 // Draft schedule as shown in scheduling.html (generated draft, before fixes).
 const DRAFT_INTERVIEWS = [
-  { id: 'iv-026', applicationId: 'CF-026', interviewerId: 'iv-hamy', roomId: 'room-a201', start: at(INTERVIEW_DATE, '09:00') },
-  { id: 'iv-027', applicationId: 'CF-027', interviewerId: 'iv-giahuy', roomId: 'room-b105', start: at(INTERVIEW_DATE, '09:00') },
-  { id: 'iv-030', applicationId: 'CF-030', interviewerId: 'iv-hamy', roomId: 'room-a201', start: at(INTERVIEW_DATE, '09:15') },
+  {
+    id: 'iv-026',
+    applicationId: 'CF-026',
+    interviewerId: 'iv-hamy',
+    roomId: 'room-a201',
+    start: at(INTERVIEW_DATE, '09:00'),
+  },
+  {
+    id: 'iv-027',
+    applicationId: 'CF-027',
+    interviewerId: 'iv-giahuy',
+    roomId: 'room-b105',
+    start: at(INTERVIEW_DATE, '09:00'),
+  },
+  {
+    id: 'iv-030',
+    applicationId: 'CF-030',
+    interviewerId: 'iv-hamy',
+    roomId: 'room-a201',
+    start: at(INTERVIEW_DATE, '09:15'),
+  },
   {
     id: 'iv-031',
     applicationId: 'CF-031',
@@ -265,10 +284,34 @@ const DRAFT_INTERVIEWS = [
 
 // Confirmed schedule (scheduling.html confirmed example and UI_REFERENCE_NOTES.md).
 const CONFIRMED_INTERVIEWS = [
-  { id: 'iv-026', applicationId: 'CF-026', interviewerId: 'iv-hamy', roomId: 'room-a201', start: at(INTERVIEW_DATE, '09:00') },
-  { id: 'iv-027', applicationId: 'CF-027', interviewerId: 'iv-giahuy', roomId: 'room-b105', start: at(INTERVIEW_DATE, '09:15') },
-  { id: 'iv-030', applicationId: 'CF-030', interviewerId: 'iv-hamy', roomId: 'room-a201', start: at(INTERVIEW_DATE, '09:15') },
-  { id: 'iv-031', applicationId: 'CF-031', interviewerId: 'iv-giahuy', roomId: 'room-b105', start: at(INTERVIEW_DATE, '09:00') },
+  {
+    id: 'iv-026',
+    applicationId: 'CF-026',
+    interviewerId: 'iv-hamy',
+    roomId: 'room-a201',
+    start: at(INTERVIEW_DATE, '09:00'),
+  },
+  {
+    id: 'iv-027',
+    applicationId: 'CF-027',
+    interviewerId: 'iv-giahuy',
+    roomId: 'room-b105',
+    start: at(INTERVIEW_DATE, '09:15'),
+  },
+  {
+    id: 'iv-030',
+    applicationId: 'CF-030',
+    interviewerId: 'iv-hamy',
+    roomId: 'room-a201',
+    start: at(INTERVIEW_DATE, '09:15'),
+  },
+  {
+    id: 'iv-031',
+    applicationId: 'CF-031',
+    interviewerId: 'iv-giahuy',
+    roomId: 'room-b105',
+    start: at(INTERVIEW_DATE, '09:00'),
+  },
 ];
 
 const CONFIRMED_ASSESSMENTS = [
@@ -292,8 +335,18 @@ const CONFIRMED_ASSESSMENTS = [
 ];
 
 const CONFIRMED_RESULTS = [
-  { applicationId: 'CF-026', decision: 'pass', recordedAt: at(INTERVIEW_DATE, '11:00'), publishedAt: at(INTERVIEW_DATE, '12:00') },
-  { applicationId: 'CF-027', decision: 'fail', recordedAt: at(INTERVIEW_DATE, '11:05'), publishedAt: null },
+  {
+    applicationId: 'CF-026',
+    decision: 'pass',
+    recordedAt: at(INTERVIEW_DATE, '11:00'),
+    publishedAt: at(INTERVIEW_DATE, '12:00'),
+  },
+  {
+    applicationId: 'CF-027',
+    decision: 'fail',
+    recordedAt: at(INTERVIEW_DATE, '11:05'),
+    publishedAt: null,
+  },
 ];
 
 const CONFIRMED_NOTIFICATIONS = [

@@ -8,9 +8,13 @@ export function useFinalResults() {
 
 /** Submitted assessment for one application (`null` if none or nothing selected). */
 export function useAssessment(applicationId, enabled) {
-  return useServiceData((options) => resultService.getAssessment(applicationId, options), [applicationId], {
-    enabled: Boolean(applicationId && enabled),
-  });
+  return useServiceData(
+    (options) => resultService.getAssessment(applicationId, options),
+    [applicationId],
+    {
+      enabled: Boolean(applicationId && enabled),
+    },
+  );
 }
 
 export const resultActions = {

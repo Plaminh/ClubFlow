@@ -39,7 +39,9 @@ describe('JWT Utility', () => {
 
   it('should throw an error if JWT_SECRET is missing', () => {
     vi.stubEnv('JWT_SECRET', '');
-    expect(() => generateToken({ userId: 1 })).toThrow('JWT_SECRET environment variable is missing');
+    expect(() => generateToken({ userId: 1 })).toThrow(
+      'JWT_SECRET environment variable is missing',
+    );
     expect(() => verifyToken('token')).toThrow('JWT_SECRET environment variable is missing');
   });
 });

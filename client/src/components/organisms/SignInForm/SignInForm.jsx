@@ -42,7 +42,15 @@ export default function SignInForm({ onSubmit, pending, serviceError, examples =
           ) : null}
           <FormField id="sign-in-username" label="Tên đăng nhập" error={errors.username}>
             {(props) => (
-              <input {...props} ref={usernameRef} type="text" autoComplete="username" value={values.username} disabled={pending} onChange={(event) => update('username', event.target.value)} />
+              <input
+                {...props}
+                ref={usernameRef}
+                type="text"
+                autoComplete="username"
+                value={values.username}
+                disabled={pending}
+                onChange={(event) => update('username', event.target.value)}
+              />
             )}
           </FormField>
           <FormField
@@ -50,28 +58,50 @@ export default function SignInForm({ onSubmit, pending, serviceError, examples =
             label="Mật khẩu"
             error={errors.password}
             extra={
-              <Button className="sign-in-form__toggle" variant="quiet" aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} onClick={() => setShowPassword((visible) => !visible)}>
+              <Button
+                className="sign-in-form__toggle"
+                variant="quiet"
+                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
                 {showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               </Button>
             }
           >
             {(props) => (
-              <input {...props} ref={passwordRef} type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={values.password} disabled={pending} onChange={(event) => update('password', event.target.value)} />
+              <input
+                {...props}
+                ref={passwordRef}
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={values.password}
+                disabled={pending}
+                onChange={(event) => update('password', event.target.value)}
+              />
             )}
           </FormField>
-          <Button type="submit" block disabled={pending}>{pending ? 'Đang đăng nhập…' : 'Đăng nhập'}</Button>
+          <Button type="submit" block disabled={pending}>
+            {pending ? 'Đang đăng nhập…' : 'Đăng nhập'}
+          </Button>
         </form>
       </Card>
 
       <Card as="aside" title="Tài khoản demo" subtitle="Dữ liệu hư cấu dành riêng cho bản mẫu.">
         <Alert tone="warning" title="Không phải tài khoản thật">
-          <p>Mật khẩu dưới đây được công khai cho môi trường phát triển và chỉ được lưu dưới dạng phiên bearer trong tab hiện tại.</p>
+          <p>
+            Mật khẩu dưới đây được công khai cho môi trường phát triển và chỉ được lưu dưới dạng
+            phiên bearer trong tab hiện tại.
+          </p>
         </Alert>
         <dl className="summary-list sign-in-form__examples">
           {examples.map((example) => (
             <div key={example.username}>
               <dt>{example.displayName}</dt>
-              <dd><code>{example.username}</code><br /><code>{example.password}</code></dd>
+              <dd>
+                <code>{example.username}</code>
+                <br />
+                <code>{example.password}</code>
+              </dd>
             </div>
           ))}
         </dl>

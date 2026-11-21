@@ -38,13 +38,19 @@ export default function AssessmentForm({ interview, onSubmit }) {
   // UI-FR-017: after a failed submit, move focus to the first invalid field.
   useEffect(() => {
     if (focusErrors > 0) {
-      formRef.current?.querySelector('[aria-invalid="true"], .choice-group--invalid input')?.focus();
+      formRef.current
+        ?.querySelector('[aria-invalid="true"], .choice-group--invalid input')
+        ?.focus();
     }
   }, [focusErrors]);
 
   if (interview.assessment) {
     return (
-      <Card title="Interview Assessment" subtitle={subtitle} actions={<Badge tone="success">Đã gửi</Badge>}>
+      <Card
+        title="Interview Assessment"
+        subtitle={subtitle}
+        actions={<Badge tone="success">Đã gửi</Badge>}
+      >
         <div className="stack">
           {banner ? (
             <Alert tone={banner.tone} title={banner.title} live>
@@ -62,7 +68,13 @@ export default function AssessmentForm({ interview, onSubmit }) {
             </div>
             <div>
               <dt>Đề xuất của bạn · chỉ để tham khảo</dt>
-              <dd>{getLabel(RECOMMENDATION_LABELS, interview.assessment.recommendation, RECOMMENDATION_LABELS.none)}</dd>
+              <dd>
+                {getLabel(
+                  RECOMMENDATION_LABELS,
+                  interview.assessment.recommendation,
+                  RECOMMENDATION_LABELS.none,
+                )}
+              </dd>
             </div>
             <div>
               <dt>Thời gian gửi</dt>
@@ -79,7 +91,11 @@ export default function AssessmentForm({ interview, onSubmit }) {
 
   if (!interview.canAssess) {
     return (
-      <Card title="Interview Assessment" subtitle={subtitle} actions={<Badge tone="warning">Chưa diễn ra</Badge>}>
+      <Card
+        title="Interview Assessment"
+        subtitle={subtitle}
+        actions={<Badge tone="warning">Chưa diễn ra</Badge>}
+      >
         <div className="stack">
           <Alert tone="warning" title="Chưa thể đánh giá">
             <p>Buổi phỏng vấn chưa diễn ra xong. Biểu mẫu mở sau khi buổi phỏng vấn kết thúc.</p>
@@ -106,7 +122,11 @@ export default function AssessmentForm({ interview, onSubmit }) {
     const fieldErrors = validateAssessmentInput(values);
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
-      setBanner({ tone: 'error', title: 'Chưa thể gửi đánh giá', text: 'Hãy nhập nhận xét phỏng vấn. Nội dung đã nhập được giữ lại.' });
+      setBanner({
+        tone: 'error',
+        title: 'Chưa thể gửi đánh giá',
+        text: 'Hãy nhập nhận xét phỏng vấn. Nội dung đã nhập được giữ lại.',
+      });
       setFocusErrors((count) => count + 1);
       return;
     }
@@ -128,7 +148,11 @@ export default function AssessmentForm({ interview, onSubmit }) {
     setPending(false);
     if (!result.ok) {
       setErrors(result.error?.fieldErrors ?? {});
-      setBanner({ tone: 'error', title: 'Chưa thể gửi đánh giá', text: result.error?.message ?? '' });
+      setBanner({
+        tone: 'error',
+        title: 'Chưa thể gửi đánh giá',
+        text: result.error?.message ?? '',
+      });
       if (result.error?.fieldErrors) {
         setFocusErrors((count) => count + 1);
       }
@@ -143,7 +167,12 @@ export default function AssessmentForm({ interview, onSubmit }) {
             <p>{banner.text}</p>
           </Alert>
         ) : null}
-        <FormField id="assessment-notes" label="Nhận xét phỏng vấn" hint="Bắt buộc." error={errors.notes}>
+        <FormField
+          id="assessment-notes"
+          label="Nhận xét phỏng vấn"
+          hint="Bắt buộc."
+          error={errors.notes}
+        >
           {(props) => (
             <textarea
               {...props}
@@ -170,7 +199,8 @@ export default function AssessmentForm({ interview, onSubmit }) {
           </Button>
         </div>
         <p className="hint">
-          Mỗi buổi phỏng vấn đã diễn ra chỉ có một đánh giá. Sau khi gửi, đánh giá chỉ đọc: không thể sửa hay gửi lại.
+          Mỗi buổi phỏng vấn đã diễn ra chỉ có một đánh giá. Sau khi gửi, đánh giá chỉ đọc: không
+          thể sửa hay gửi lại.
         </p>
       </form>
       <ConfirmDialog
@@ -183,8 +213,14 @@ export default function AssessmentForm({ interview, onSubmit }) {
       >
         <p>
           Đề xuất:{' '}
-          <strong>{getLabel(RECOMMENDATION_LABELS, confirmation?.values.recommendation, RECOMMENDATION_LABELS.none)}</strong>.
-          Ban tuyển dụng sẽ đọc đánh giá này trước khi ghi nhận kết quả cuối.
+          <strong>
+            {getLabel(
+              RECOMMENDATION_LABELS,
+              confirmation?.values.recommendation,
+              RECOMMENDATION_LABELS.none,
+            )}
+          </strong>
+          . Ban tuyển dụng sẽ đọc đánh giá này trước khi ghi nhận kết quả cuối.
         </p>
         <p>
           <strong>Sau khi gửi, đánh giá không thể sửa hay gửi lại.</strong>

@@ -21,9 +21,9 @@ export const cloudinaryService = {
             public_id: result.public_id,
             resource_type: result.resource_type,
           });
-        }
+        },
       );
-      
+
       uploadStream.end(buffer);
     });
   },
@@ -44,5 +44,5 @@ export const cloudinaryService = {
         resolve(result);
       });
     });
-  }
+  },
 };

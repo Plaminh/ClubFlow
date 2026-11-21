@@ -102,7 +102,9 @@ function baseState(scenario) {
 
 /** Builds a fresh, independent state for the given scenario id. */
 export function buildScenarioState(scenarioId) {
-  const scenario = SCENARIOS.find((item) => item.id === scenarioId) ?? SCENARIOS.find((item) => item.id === DEFAULT_SCENARIO_ID);
+  const scenario =
+    SCENARIOS.find((item) => item.id === scenarioId) ??
+    SCENARIOS.find((item) => item.id === DEFAULT_SCENARIO_ID);
   const state = baseState(scenario);
   const minutes = state.campaign.slotMinutes;
 
@@ -118,7 +120,12 @@ export function buildScenarioState(scenarioId) {
     case 'accepting':
       state.applications = state.applications
         .filter((application) => new Date(application.submittedAt) <= new Date(scenario.now))
-        .map((application) => ({ ...application, screeningStatus: 'pendingReview', reviewedAt: null, privateNote: '' }));
+        .map((application) => ({
+          ...application,
+          screeningStatus: 'pendingReview',
+          reviewedAt: null,
+          privateNote: '',
+        }));
       break;
     case 'screening':
       state.interviews = withEnd(BASE.draftInterviews, minutes);

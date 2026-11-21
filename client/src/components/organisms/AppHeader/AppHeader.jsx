@@ -8,11 +8,21 @@ import './AppHeader.css';
  * Site header: brand, role-specific navigation, current demo identity, and
  * the sign-in / sign-out entry. Pure presentation; the layout supplies data.
  */
-export default function AppHeader({ homeTo, navItems, account, role, signInTo, signInState, profileTo, onSignOut }) {
+export default function AppHeader({
+  homeTo,
+  navItems,
+  account,
+  role,
+  signInTo,
+  signInState,
+  profileTo,
+  onSignOut,
+}) {
   let who = 'Khách (chưa đăng nhập)';
   if (account) {
     // The Executive account is named after its role; show the club instead of repeating it.
-    const detail = account.displayName === ROLE_LABELS[role] ? account.description : ROLE_LABELS[role];
+    const detail =
+      account.displayName === ROLE_LABELS[role] ? account.description : ROLE_LABELS[role];
     who = `${account.displayName} · ${detail}`;
   }
 
@@ -36,7 +46,11 @@ export default function AppHeader({ homeTo, navItems, account, role, signInTo, s
         <div className="app-header__session">
           <span className="app-header__who">{who}</span>
           {account ? (
-            <AccountMenu displayName={account.displayName} profileTo={profileTo} onSignOut={onSignOut} />
+            <AccountMenu
+              displayName={account.displayName}
+              profileTo={profileTo}
+              onSignOut={onSignOut}
+            />
           ) : (
             <Button to={signInTo} state={signInState}>
               Đăng nhập

@@ -17,16 +17,31 @@ describe('deterministic mock modes and lifecycle', () => {
     expect(errorToken).toBe('mock-token-exec');
     const domainError = await request(mock.baseUrl, '/api/campaigns/current');
     expect(domainError.response.status).toBe(500);
-    expect(domainError.body).toEqual({ error: 'The mock is running in deterministic error mode.', code: 'MOCK_ERROR_MODE' });
+    expect(domainError.body).toEqual({
+      error: 'The mock is running in deterministic error mode.',
+      code: 'MOCK_ERROR_MODE',
+    });
     // Only sign-in is exempt: health, current user and logout fail too.
     expect((await request(mock.baseUrl, '/api/health')).response.status).toBe(500);
-    expect((await request(mock.baseUrl, '/api/auth/me', { headers: bearer(errorToken) })).response.status).toBe(500);
-    expect((await request(mock.baseUrl, '/api/auth/logout', { method: 'POST', headers: bearer(errorToken) })).response.status).toBe(500);
+    expect(
+      (await request(mock.baseUrl, '/api/auth/me', { headers: bearer(errorToken) })).response
+        .status,
+    ).toBe(500);
+    expect(
+      (
+        await request(mock.baseUrl, '/api/auth/logout', {
+          method: 'POST',
+          headers: bearer(errorToken),
+        })
+      ).response.status,
+    ).toBe(500);
     await mock.close();
 
     mock = await startMock('empty');
     const token = await login(mock.baseUrl, 'exec');
-    const campaign = await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1', { headers: bearer(token) });
+    const campaign = await request(mock.baseUrl, '/api/campaigns/cmp-2026-hk1', {
+      headers: bearer(token),
+    });
     expect(campaign.body.positions).toEqual([]);
     expect(campaign.body.interviewSetup.interviewers).toEqual([]);
     expect(campaign.body.campaign.id).toBe('cmp-2026-hk1');
@@ -45,10 +60,24 @@ describe('deterministic mock modes and lifecycle', () => {
     mock = await startMock();
     const student = await login(mock.baseUrl, 'studentA');
     await submitApplication(mock.baseUrl, student, 'pos-content');
-    expect((await request(mock.baseUrl, '/api/me/applications', { headers: bearer(student) })).body.items).toHaveLength(1);
-    expect(mock.logs.at(-1)).toEqual(expect.objectContaining({ method: 'GET', path: '/api/me/applications', status: 200, mode: 'normal', durationMs: expect.any(Number) }));
+    expect(
+      (await request(mock.baseUrl, '/api/me/applications', { headers: bearer(student) })).body
+        .items,
+    ).toHaveLength(1);
+    expect(mock.logs.at(-1)).toEqual(
+      expect.objectContaining({
+        method: 'GET',
+        path: '/api/me/applications',
+        status: 200,
+        mode: 'normal',
+        durationMs: expect.any(Number),
+      }),
+    );
     mock.reset();
-    expect((await request(mock.baseUrl, '/api/me/applications', { headers: bearer(student) })).body.items).toEqual([]);
+    expect(
+      (await request(mock.baseUrl, '/api/me/applications', { headers: bearer(student) })).body
+        .items,
+    ).toEqual([]);
     expect(await login(mock.baseUrl, 'studentA')).toBe(student);
   });
 });

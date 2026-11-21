@@ -13,7 +13,8 @@ async function openScheduling(scenarioId = 'screening') {
 
 function stat(label) {
   const region = screen.getByRole('region', { name: 'Tổng quan trạng thái lịch' });
-  return within(region).getByText(label, { selector: '.stat-card__label' }).previousSibling.textContent;
+  return within(region).getByText(label, { selector: '.stat-card__label' }).previousSibling
+    .textContent;
 }
 
 const tableRows = () =>
@@ -29,7 +30,9 @@ async function editRow(buttonName, { start, room }) {
   fireEvent.change(startSelect, { target: { value: startOption.value } });
   if (room) {
     const roomSelect = within(dialog).getByLabelText('Phòng');
-    fireEvent.change(roomSelect, { target: { value: within(roomSelect).getByRole('option', { name: room }).value } });
+    fireEvent.change(roomSelect, {
+      target: { value: within(roomSelect).getByRole('option', { name: room }).value },
+    });
   }
   fireEvent.click(within(dialog).getByRole('button', { name: 'Cập nhật ca' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -64,7 +67,9 @@ describe('Interview Scheduling', () => {
     expect(stat('Proposed')).toBe('1');
     expect(stat('Conflict')).toBe('2');
     expect(stat('Unassigned')).toBe('1');
-    const statuses = tableRows().map((row) => within(row).getAllByRole('cell')[6].querySelector('.badge').textContent);
+    const statuses = tableRows().map(
+      (row) => within(row).getAllByRole('cell')[6].querySelector('.badge').textContent,
+    );
     expect(statuses.filter((status) => status === 'Conflict')).toHaveLength(2);
     expect(statuses.filter((status) => status === 'Proposed')).toHaveLength(1);
     expect(statuses.filter((status) => status === 'Unassigned')).toHaveLength(1);
@@ -74,8 +79,12 @@ describe('Interview Scheduling', () => {
     await openScheduling();
 
     const alert = screen.getByText('2 bản ghi Conflict cần xử lý').closest('.alert');
-    expect(within(alert).getByText(/CF-026 · Nguyễn Minh Anh: Chồng giờ với CF-027 của cùng ứng viên/)).toBeInTheDocument();
-    expect(within(alert).getByText(/CF-027 · Nguyễn Minh Anh: Chồng giờ với CF-026 của cùng ứng viên/)).toBeInTheDocument();
+    expect(
+      within(alert).getByText(/CF-026 · Nguyễn Minh Anh: Chồng giờ với CF-027 của cùng ứng viên/),
+    ).toBeInTheDocument();
+    expect(
+      within(alert).getByText(/CF-027 · Nguyễn Minh Anh: Chồng giờ với CF-026 của cùng ứng viên/),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/Gia Huy và cả hai phòng đã được xếp/).length).toBeGreaterThan(0);
   });
 
@@ -96,7 +105,9 @@ describe('Interview Scheduling', () => {
     await editRow('Assign Slot CF-031', { start: '09:15–09:30', room: 'A-201' });
 
     expect(await screen.findByText('Đã cập nhật CF-031: vẫn còn vấn đề')).toBeInTheDocument();
-    expect(screen.getAllByText(/Chồng giờ với CF-030 \(cùng phòng A-201\)/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Chồng giờ với CF-030 \(cùng phòng A-201\)/).length).toBeGreaterThan(
+      0,
+    );
     expect(stat('Unassigned')).toBe('0');
   });
 
@@ -192,19 +203,26 @@ describe('Interview Scheduling', () => {
 
     expect(screen.getByText('Confirmed · chỉ đọc')).toBeInTheDocument();
     expect(tableRows()).toHaveLength(4);
-    expect(screen.queryByRole('button', { name: 'Approve & Confirm Schedule' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Approve & Confirm Schedule' }),
+    ).not.toBeInTheDocument();
     // Rooms are part of the locked schedule now: shown as text, not as disabled checkboxes.
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.getByText('A-201, B-105')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^(Edit|Resolve|Assign Slot) / })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /^(Edit|Resolve|Assign Slot) / }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tạo lại lịch nháp' })).toBeDisabled();
-    for (const label of ['Ngày phỏng vấn', 'Giờ bắt đầu', 'Giờ kết thúc', 'Thời lượng mỗi ca']) expect(screen.getByLabelText(label)).toBeDisabled();
+    for (const label of ['Ngày phỏng vấn', 'Giờ bắt đầu', 'Giờ kết thúc', 'Thời lượng mỗi ca'])
+      expect(screen.getByLabelText(label)).toBeDisabled();
   });
 
   it('explains the skipped confirmation when no application is shortlisted', async () => {
     renderApp(PATH, { accountId: EXECUTIVE, scenarioId: 'accepting' });
 
     expect(await screen.findByText('Không có hồ sơ qua vòng CV')).toBeInTheDocument();
-    expect(screen.getByText(/bước xác nhận lịch phỏng vấn được bỏ qua \(BR-13\)/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/bước xác nhận lịch phỏng vấn được bỏ qua \(BR-13\)/),
+    ).toBeInTheDocument();
   });
 });

@@ -17,12 +17,26 @@ export function renderApp(path = '/', { accountId, scenarioId } = {}) {
   if (scenarioId) setMockApiScenario(scenarioId);
   const credential = DEMO_CREDENTIALS.find((item) => item.id === accountId);
   if (credential) {
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-token-${credential.username}`, scenarioId, user: sessionUserFor(accountId) }));
+    window.sessionStorage.setItem(
+      'clubflow.demoSession',
+      JSON.stringify({
+        token: `mock-token-${credential.username}`,
+        scenarioId,
+        user: sessionUserFor(accountId),
+      }),
+    );
   } else if (accountId) {
     // Legacy fixture identities remain available only to domain-screen tests
     // while those screens are migrated in later phases. Product sign-in never
     // accepts these test-only tokens.
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: `mock-test-token-${accountId}`, scenarioId, user: sessionUserFor(accountId) }));
+    window.sessionStorage.setItem(
+      'clubflow.demoSession',
+      JSON.stringify({
+        token: `mock-test-token-${accountId}`,
+        scenarioId,
+        user: sessionUserFor(accountId),
+      }),
+    );
   }
   // StrictMode as in main.jsx, so effects run twice like in development.
   return render(
@@ -42,7 +56,9 @@ export async function signInAs(accountLabel) {
   const select = within(demo).getByLabelText(/Đổi tài khoản nhanh/);
   const option = await within(select).findByRole('option', { name: accountLabel });
   fireEvent.change(select, { target: { value: option.value } });
-  await waitFor(() => expect(screen.queryByRole('link', { name: 'Đăng nhập' })).not.toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.queryByRole('link', { name: 'Đăng nhập' })).not.toBeInTheDocument(),
+  );
 }
 
 export const DEMO_PASSWORD = 'ClubFlowDemo!';

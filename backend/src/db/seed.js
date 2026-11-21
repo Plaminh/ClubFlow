@@ -4,9 +4,7 @@ import path from 'node:path';
 import pool from './pool.js';
 import { withTransaction } from './transaction.js';
 
-const seedsDirectory = fileURLToPath(
-  new URL('../../../database/seeds/', import.meta.url),
-);
+const seedsDirectory = fileURLToPath(new URL('../../../database/seeds/', import.meta.url));
 
 async function seed() {
   const filenames = (await readdir(seedsDirectory))

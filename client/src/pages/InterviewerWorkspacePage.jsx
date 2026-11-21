@@ -12,7 +12,11 @@ import MainTemplate from '../components/templates/MainTemplate/index.js';
 import { SCREEN_LABELS } from '../constants/labels.js';
 import { useDemoSession } from '../contexts/demoSession.js';
 import useAction from '../hooks/useAction.js';
-import { interviewerActions, useAssignedInterviews, useInterviewDetail } from '../hooks/useInterviewerWorkspace.js';
+import {
+  interviewerActions,
+  useAssignedInterviews,
+  useInterviewDetail,
+} from '../hooks/useInterviewerWorkspace.js';
 import { formatDate } from '../utils/format.js';
 
 export default function InterviewerWorkspacePage() {
@@ -22,7 +26,9 @@ export default function InterviewerWorkspacePage() {
   const [message, setMessage] = useState(null);
   const action = useAction();
   const interviews = assigned.data?.interviews ?? [];
-  const selectedId = interviews.some((item) => item.interviewId === chosenId) ? chosenId : interviews[0]?.interviewId ?? null;
+  const selectedId = interviews.some((item) => item.interviewId === chosenId)
+    ? chosenId
+    : (interviews[0]?.interviewId ?? null);
   const detail = useInterviewDetail(selectedId);
   // Never show (or submit for) the previous interview while the newly selected one loads.
   const current = detail.data && detail.data.interviewId === selectedId ? detail.data : null;
@@ -33,8 +39,12 @@ export default function InterviewerWorkspacePage() {
     eyebrow: 'Không gian phỏng vấn · CLB Công nghệ & Sáng tạo',
     title: SCREEN_LABELS.interviewerWorkspace,
     description: 'Xem các buổi phỏng vấn được phân công cho bạn và gửi đánh giá sau phỏng vấn.',
-    actions: account ? <Badge tone="info">{`${account.displayName} · ${account.description}`}</Badge> : null,
-    context: campaignName ? `${campaignName}${interviewDate ? ` · Phỏng vấn ${formatDate(interviewDate)}` : ''}` : null,
+    actions: account ? (
+      <Badge tone="info">{`${account.displayName} · ${account.description}`}</Badge>
+    ) : null,
+    context: campaignName
+      ? `${campaignName}${interviewDate ? ` · Phỏng vấn ${formatDate(interviewDate)}` : ''}`
+      : null,
   };
 
   if (assigned.status !== 'success') {
@@ -50,8 +60,8 @@ export default function InterviewerWorkspacePage() {
       <MainTemplate {...heading}>
         <EmptyState title="Chưa có buổi phỏng vấn nào được phân công cho bạn">
           <p>
-            Khi Ban tuyển dụng xác nhận lịch phỏng vấn, các buổi của bạn sẽ hiển thị tại đây. Bạn không thể xem lịch của
-            người phỏng vấn khác.
+            Khi Ban tuyển dụng xác nhận lịch phỏng vấn, các buổi của bạn sẽ hiển thị tại đây. Bạn
+            không thể xem lịch của người phỏng vấn khác.
           </p>
         </EmptyState>
       </MainTemplate>
@@ -111,7 +121,8 @@ export default function InterviewerWorkspacePage() {
               }}
             />
             <p className="hint">
-              Bạn chỉ thấy các buổi được phân công cho mình; máy chủ từ chối truy cập buổi phỏng vấn của người khác.
+              Bạn chỉ thấy các buổi được phân công cho mình; máy chủ từ chối truy cập buổi phỏng vấn
+              của người khác.
             </p>
           </div>
         </Card>
@@ -129,10 +140,18 @@ export default function InterviewerWorkspacePage() {
               onOpenCv={() => openCv(current.applicationId)}
               cvPending={action.pending}
             />
-            <AssessmentForm key={current.interviewId} interview={current} onSubmit={submitAssessment} />
+            <AssessmentForm
+              key={current.interviewId}
+              interview={current}
+              onSubmit={submitAssessment}
+            />
           </div>
         ) : (
-          <AsyncContent status={detail.status === 'error' ? 'error' : 'loading'} error={detail.error} onRetry={detail.reload} />
+          <AsyncContent
+            status={detail.status === 'error' ? 'error' : 'loading'}
+            error={detail.error}
+            onRetry={detail.reload}
+          />
         )}
       </div>
     </MainTemplate>

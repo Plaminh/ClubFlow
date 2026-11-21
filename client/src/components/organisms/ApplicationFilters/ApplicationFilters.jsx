@@ -29,7 +29,11 @@ export default function ApplicationFilters({ query, positions, onChange, onExpor
         </FormField>
         <FormField id="position-filter" label="Vị trí">
           {(props) => (
-            <select {...props} value={query.positionId} onChange={(event) => onChange({ positionId: event.target.value })}>
+            <select
+              {...props}
+              value={query.positionId}
+              onChange={(event) => onChange({ positionId: event.target.value })}
+            >
               <option value="">Tất cả vị trí</option>
               {positions.map((position) => (
                 <option key={position.id} value={position.id}>
@@ -41,7 +45,11 @@ export default function ApplicationFilters({ query, positions, onChange, onExpor
         </FormField>
         <FormField id="status-filter" label="Trạng thái">
           {(props) => (
-            <select {...props} value={query.status} onChange={(event) => onChange({ status: event.target.value })}>
+            <select
+              {...props}
+              value={query.status}
+              onChange={(event) => onChange({ status: event.target.value })}
+            >
               <option value="">Tất cả trạng thái</option>
               {Object.entries(SCREENING_STATUS_LABELS).map(([id, label]) => (
                 <option key={id} value={id}>
@@ -53,7 +61,11 @@ export default function ApplicationFilters({ query, positions, onChange, onExpor
         </FormField>
         <FormField id="sort-order" label="Sắp xếp">
           {(props) => (
-            <select {...props} value={query.sort} onChange={(event) => onChange({ sort: event.target.value })}>
+            <select
+              {...props}
+              value={query.sort}
+              onChange={(event) => onChange({ sort: event.target.value })}
+            >
               <option value="newest">Mới nhất trước</option>
               <option value="oldest">Cũ nhất trước</option>
             </select>

@@ -21,7 +21,11 @@ import { useDemoSession } from '../contexts/demoSession.js';
 import useAction from '../hooks/useAction.js';
 import useCampaign from '../hooks/useCampaign.js';
 import { resultActions, useAssessment, useFinalResults } from '../hooks/useFinalResults.js';
-import { applicationActions, useApplicationDetail, useApplications } from '../hooks/useApplications.js';
+import {
+  applicationActions,
+  useApplicationDetail,
+  useApplications,
+} from '../hooks/useApplications.js';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
 import { ROUTES, TAB_QUERY_PARAM } from '../routes/paths.js';
 import { downloadText } from '../utils/csv.js';
@@ -48,7 +52,10 @@ function ScreeningPanel({ campaign }) {
   // Typing waits ~300 ms before requesting; useServiceData aborts superseded
   // requests and ignores late responses, so older results never overwrite newer ones.
   const debouncedSearch = useDebouncedValue(query.search, SEARCH_DEBOUNCE_MS);
-  const requestQuery = useMemo(() => ({ ...query, search: debouncedSearch }), [query, debouncedSearch]);
+  const requestQuery = useMemo(
+    () => ({ ...query, search: debouncedSearch }),
+    [query, debouncedSearch],
+  );
   const overview = useApplications(requestQuery);
   const detail = useApplicationDetail(selectedId);
   const action = useAction();
@@ -59,7 +66,13 @@ function ScreeningPanel({ campaign }) {
     const failed = [campaign, overview].filter((resource) => resource.status === 'error');
     // One retry reloads every request that failed.
     const retry = () => failed.forEach((resource) => resource.reload());
-    return <AsyncContent status={failed.length > 0 ? 'error' : 'loading'} error={failed[0]?.error} onRetry={retry} />;
+    return (
+      <AsyncContent
+        status={failed.length > 0 ? 'error' : 'loading'}
+        error={failed[0]?.error}
+        onRetry={retry}
+      />
+    );
   }
 
   const { list, stats } = overview.data;
@@ -83,14 +96,24 @@ function ScreeningPanel({ campaign }) {
     setMessage(
       result.ok
         ? { applicationId: id, tone: 'success', title: 'Đã lưu ghi chú nội bộ' }
-        : { applicationId: id, tone: 'error', title: 'Chưa lưu được ghi chú', text: result.error?.message },
+        : {
+            applicationId: id,
+            tone: 'error',
+            title: 'Chưa lưu được ghi chú',
+            text: result.error?.message,
+          },
     );
   }
 
   async function openCv(detailValue) {
     const result = await action.run(() => applicationActions.downloadCv(detailValue.id));
     if (!result.ok) {
-      setMessage({ applicationId: detailValue.id, tone: 'error', title: 'Chưa mở được CV', text: result.error?.message });
+      setMessage({
+        applicationId: detailValue.id,
+        tone: 'error',
+        title: 'Chưa mở được CV',
+        text: result.error?.message,
+      });
       return;
     }
     const url = URL.createObjectURL(result.value);
@@ -112,7 +135,12 @@ function ScreeningPanel({ campaign }) {
       overview.reload();
       detail.reload();
     } else {
-      setMessage({ applicationId: id, tone: 'error', title: 'Chưa ghi nhận được quyết định', text: result.error?.message });
+      setMessage({
+        applicationId: id,
+        tone: 'error',
+        title: 'Chưa ghi nhận được quyết định',
+        text: result.error?.message,
+      });
     }
   }
 
@@ -140,7 +168,10 @@ function ScreeningPanel({ campaign }) {
           <StatCard value={totals.applications} label="Tổng hồ sơ" />
           <StatCard value={totals.applicants} label="Ứng viên riêng biệt" />
           <StatCard value={totals.shortlisted} label="Qua vòng CV" />
-          <StatCard value={`${totals.pendingReview} + ${totals.rejected}`} label="Chờ duyệt + Loại" />
+          <StatCard
+            value={`${totals.pendingReview} + ${totals.rejected}`}
+            label="Chờ duyệt + Loại"
+          />
         </div>
         <p className="hint">
           Số liệu toàn chiến dịch. Một ứng viên có thể nộp nhiều hồ sơ cho các vị trí khác nhau.
@@ -182,7 +213,10 @@ function ScreeningPanel({ campaign }) {
               />
             ) : (
               <EmptyState title="Chưa có hồ sơ nào" headingLevel={3}>
-                <p>Hồ sơ sẽ xuất hiện khi chiến dịch được công bố và ứng viên nộp hồ sơ trong thời gian nhận đơn.</p>
+                <p>
+                  Hồ sơ sẽ xuất hiện khi chiến dịch được công bố và ứng viên nộp hồ sơ trong thời
+                  gian nhận đơn.
+                </p>
               </EmptyState>
             )
           ) : (
@@ -216,7 +250,11 @@ function ScreeningPanel({ campaign }) {
               }}
             />
           ) : (
-            <AsyncContent status={detail.status === 'error' ? 'error' : 'loading'} error={detail.error} onRetry={detail.reload} />
+            <AsyncContent
+              status={detail.status === 'error' ? 'error' : 'loading'}
+              error={detail.error}
+              onRetry={detail.reload}
+            />
           )
         ) : null}
       </div>
@@ -227,7 +265,8 @@ function ScreeningPanel({ campaign }) {
             <strong>
               {totals.shortlisted} hồ sơ đã qua vòng CV; {totals.pendingReview} hồ sơ vẫn chờ duyệt.
             </strong>{' '}
-            “Qua vòng CV” chỉ nghĩa là đủ điều kiện được đưa vào lịch nháp, chưa phải kết quả tuyển cuối.
+            “Qua vòng CV” chỉ nghĩa là đủ điều kiện được đưa vào lịch nháp, chưa phải kết quả tuyển
+            cuối.
           </p>
           {totals.shortlisted > 0 ? (
             <Button to={ROUTES.EXECUTIVE_SCHEDULING}>Continue to Interview Scheduling →</Button>
@@ -244,8 +283,8 @@ function ScreeningPanel({ campaign }) {
         onCancel={() => setConfirming(null)}
       >
         <p>
-          Hồ sơ sẽ đủ điều kiện được xếp lịch phỏng vấn; đây chưa phải kết quả tuyển cuối. Quyết định chỉ áp dụng cho hồ
-          sơ này.
+          Hồ sơ sẽ đủ điều kiện được xếp lịch phỏng vấn; đây chưa phải kết quả tuyển cuối. Quyết
+          định chỉ áp dụng cho hồ sơ này.
         </p>
         <p>
           <strong>Quyết định vòng CV đã lưu không thể thay đổi hay hoàn tác.</strong>
@@ -260,7 +299,10 @@ function ScreeningPanel({ campaign }) {
         onConfirm={() => decide(confirming)}
         onCancel={() => setConfirming(null)}
       >
-        <p>Hồ sơ sẽ kết thúc ở vòng CV và không được xếp lịch phỏng vấn. Quyết định chỉ áp dụng cho hồ sơ này.</p>
+        <p>
+          Hồ sơ sẽ kết thúc ở vòng CV và không được xếp lịch phỏng vấn. Quyết định chỉ áp dụng cho
+          hồ sơ này.
+        </p>
         <p>
           <strong>Quyết định vòng CV đã lưu không thể thay đổi hay hoàn tác.</strong>
         </p>
@@ -279,7 +321,10 @@ function ResultsPanel() {
   const action = useAction();
   const rows = results.data?.rows ?? [];
   const selected = rows.find((row) => row.applicationId === chosenId) ?? rows[0] ?? null;
-  const assessment = useAssessment(selected?.applicationId, assessmentOpen && selected?.assessmentStatus === 'submitted');
+  const assessment = useAssessment(
+    selected?.applicationId,
+    assessmentOpen && selected?.assessmentStatus === 'submitted',
+  );
 
   if (results.status !== 'success') {
     return <AsyncContent status={results.status} error={results.error} onRetry={results.reload} />;
@@ -293,14 +338,16 @@ function ResultsPanel() {
         actions={<Button to={ROUTES.EXECUTIVE_SCHEDULING}>Mở Interview Scheduling →</Button>}
       >
         <p>
-          Final Results là giai đoạn sau phỏng vấn. Danh sách chỉ xuất hiện sau khi lịch được xác nhận và buổi phỏng vấn
-          diễn ra.
+          Final Results là giai đoạn sau phỏng vấn. Danh sách chỉ xuất hiện sau khi lịch được xác
+          nhận và buổi phỏng vấn diễn ra.
         </p>
       </EmptyState>
     );
   }
 
-  const pendingIds = rows.filter((row) => row.decision && !row.publishedAt).map((row) => row.applicationId);
+  const pendingIds = rows
+    .filter((row) => row.decision && !row.publishedAt)
+    .map((row) => row.applicationId);
 
   function select(id) {
     setChosenId(id);
@@ -319,7 +366,11 @@ function ResultsPanel() {
       });
       results.reload();
     } else {
-      setDecisionMessage({ tone: 'error', title: 'Chưa ghi nhận được quyết định', text: result.error?.message });
+      setDecisionMessage({
+        tone: 'error',
+        title: 'Chưa ghi nhận được quyết định',
+        text: result.error?.message,
+      });
     }
   }
 
@@ -335,11 +386,19 @@ function ResultsPanel() {
               title: `Đã công bố ${ids.join(', ')}`,
               text: 'Mỗi hồ sơ được công bố tạo một thông báo trong ứng dụng cho đúng ứng viên. HTTP mock không gửi email; không có SMS hay push.',
             }
-          : { tone: 'info', title: 'Không có kết quả mới để công bố', text: 'Các kết quả đã công bố trước đó không bị gửi thông báo lần hai.' },
+          : {
+              tone: 'info',
+              title: 'Không có kết quả mới để công bố',
+              text: 'Các kết quả đã công bố trước đó không bị gửi thông báo lần hai.',
+            },
       );
       results.reload();
     } else {
-      setPublishMessage({ tone: 'error', title: 'Chưa công bố được kết quả', text: result.error?.message });
+      setPublishMessage({
+        tone: 'error',
+        title: 'Chưa công bố được kết quả',
+        text: result.error?.message,
+      });
     }
   }
 
@@ -347,9 +406,11 @@ function ResultsPanel() {
     <div className="stack stack--roomy">
       <Alert tone="info" title="Final Results là giai đoạn sau phỏng vấn">
         <p>
-          “Qua vòng CV” không có nghĩa là Pass. Mỗi quyết định thuộc về từng hồ sơ riêng, nên cùng một ứng viên có thể có
-          kết quả khác nhau ở các vị trí.
-          {rejectedIds.length > 0 ? ` ${rejectedIds.join(' và ')} bị loại ở vòng CV nên không nằm trong danh sách này.` : ''}
+          “Qua vòng CV” không có nghĩa là Pass. Mỗi quyết định thuộc về từng hồ sơ riêng, nên cùng
+          một ứng viên có thể có kết quả khác nhau ở các vị trí.
+          {rejectedIds.length > 0
+            ? ` ${rejectedIds.join(' và ')} bị loại ở vòng CV nên không nằm trong danh sách này.`
+            : ''}
         </p>
       </Alert>
       <Card
@@ -386,8 +447,8 @@ function ResultsPanel() {
         onCancel={() => setPublishOpen(false)}
       >
         <p>
-          Công bố {pendingIds.join(', ')}. Ứng viên sẽ thấy kết quả và nhận thông báo trong ứng dụng; kết quả đã công bố
-          không thể thay đổi.
+          Công bố {pendingIds.join(', ')}. Ứng viên sẽ thấy kết quả và nhận thông báo trong ứng
+          dụng; kết quả đã công bố không thể thay đổi.
         </p>
       </ConfirmDialog>
     </div>
@@ -424,7 +485,11 @@ export default function ApplicationReviewPage() {
         onChange={(id) => setSearchParams({ [TAB_QUERY_PARAM]: id }, { replace: true })}
       />
       <div role="tabpanel" id={`review-panel-${tab}`} aria-labelledby={`review-tab-${tab}`}>
-        {tab === 'screening' ? <ScreeningPanel key={dataVersion} campaign={campaignResource} /> : <ResultsPanel key={dataVersion} />}
+        {tab === 'screening' ? (
+          <ScreeningPanel key={dataVersion} campaign={campaignResource} />
+        ) : (
+          <ResultsPanel key={dataVersion} />
+        )}
       </div>
     </MainTemplate>
   );

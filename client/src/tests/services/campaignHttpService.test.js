@@ -39,18 +39,32 @@ describe('campaign HTTP adapter', () => {
 
   it('surfaces setup field errors and linked-position conflicts', async () => {
     const view = await campaignService.getCampaign();
-    await expect(campaignService.saveInterviewSetup(view.campaign.id, { ...draftOf(view), roomIds: [], assignments: [] })).rejects.toMatchObject({
-      kind: 'validation', code: 'VALIDATION_ERROR', fieldErrors: { roomIds: expect.any(String), assignments: expect.any(String) },
+    await expect(
+      campaignService.saveInterviewSetup(view.campaign.id, {
+        ...draftOf(view),
+        roomIds: [],
+        assignments: [],
+      }),
+    ).rejects.toMatchObject({
+      kind: 'validation',
+      code: 'VALIDATION_ERROR',
+      fieldErrors: { roomIds: expect.any(String), assignments: expect.any(String) },
     });
     setMockApiScenario('screening');
-    await expect(campaignService.removePosition(view.campaign.id, 'pos-ux')).rejects.toMatchObject({ kind: 'conflict', code: 'POSITION_HAS_APPLICATIONS' });
+    await expect(campaignService.removePosition(view.campaign.id, 'pos-ux')).rejects.toMatchObject({
+      kind: 'conflict',
+      code: 'POSITION_HAS_APPLICATIONS',
+    });
   });
 
   it('publishes after saving and permits constrained published detail edits', async () => {
     const view = await campaignService.getCampaign();
     const published = await campaignService.publish(view.campaign.id, draftOf(view));
     expect(published.campaign.status).toBe('published');
-    const edited = await campaignService.saveDraft(view.campaign.id, { ...draftOf(published), name: 'Published edit' });
+    const edited = await campaignService.saveDraft(view.campaign.id, {
+      ...draftOf(published),
+      name: 'Published edit',
+    });
     expect(edited.campaign.name).toBe('Published edit');
   });
 });

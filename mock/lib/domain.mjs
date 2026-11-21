@@ -26,7 +26,9 @@ export function requireRole(user, role) {
 }
 
 export function validateEmail(email) {
-  return typeof email === 'string' && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email);
+  return (
+    typeof email === 'string' && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email)
+  );
 }
 
 export function wordCount(value) {

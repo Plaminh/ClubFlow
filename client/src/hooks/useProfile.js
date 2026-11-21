@@ -26,5 +26,12 @@ export default function useProfile() {
   }
 
   const data = saved && saved.id === accountId && query.data ? saved : query.data;
-  return { ...query, data, save, saving: action.pending, saveError: action.error, clearSaveError: action.clearError };
+  return {
+    ...query,
+    data,
+    save,
+    saving: action.pending,
+    saveError: action.error,
+    clearSaveError: action.clearError,
+  };
 }

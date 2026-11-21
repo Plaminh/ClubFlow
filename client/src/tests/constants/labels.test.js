@@ -30,6 +30,8 @@ describe('labels', () => {
   });
 
   it('supports a custom fallback, e.g. for a decision that is not recorded yet', () => {
-    expect(getLabel(RESULT_DECISION_LABELS, null, RESULT_DECISION_LABELS.none)).toBe('Chưa ghi nhận');
+    expect(getLabel(RESULT_DECISION_LABELS, null, RESULT_DECISION_LABELS.none)).toBe(
+      'Chưa ghi nhận',
+    );
   });
 });

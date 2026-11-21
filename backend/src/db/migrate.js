@@ -47,10 +47,7 @@ async function migrate() {
 
     await withTransaction(async (client) => {
       await client.query(sql);
-      await client.query(
-        'INSERT INTO schema_migrations (filename) VALUES ($1)',
-        [filename],
-      );
+      await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [filename]);
     });
 
     console.log(`Applied ${filename}`);

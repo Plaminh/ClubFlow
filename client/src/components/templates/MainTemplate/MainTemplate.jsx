@@ -9,7 +9,15 @@ const EXECUTIVE_STEPS = ['Tạo chiến dịch', 'Duyệt hồ sơ', 'Xếp lị
  * optional campaign context and Executive step strip, then page content.
  * The surrounding <main> landmark is provided by AppLayout.
  */
-export default function MainTemplate({ eyebrow, title, description, actions, context, step, children }) {
+export default function MainTemplate({
+  eyebrow,
+  title,
+  description,
+  actions,
+  context,
+  step,
+  children,
+}) {
   useEffect(() => {
     document.title = title ? `${title} · ClubFlow` : 'ClubFlow';
   }, [title]);
@@ -29,7 +37,9 @@ export default function MainTemplate({ eyebrow, title, description, actions, con
           <strong>Chiến dịch:</strong> {context}
         </p>
       ) : null}
-      {step ? <StepIndicator steps={EXECUTIVE_STEPS} current={step} label="Tiến trình tuyển thành viên" /> : null}
+      {step ? (
+        <StepIndicator steps={EXECUTIVE_STEPS} current={step} label="Tiến trình tuyển thành viên" />
+      ) : null}
       {children}
     </div>
   );

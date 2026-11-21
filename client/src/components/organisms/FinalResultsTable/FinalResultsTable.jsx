@@ -64,7 +64,11 @@ export default function FinalResultsTable({ rows, selectedId, onSelect }) {
         if (row.publishedAt) {
           return <Badge tone="success">{PUBLICATION_STATUS_LABELS.published}</Badge>;
         }
-        return row.decision ? <Badge tone="warning">{PUBLICATION_STATUS_LABELS.unpublished}</Badge> : <Badge>—</Badge>;
+        return row.decision ? (
+          <Badge tone="warning">{PUBLICATION_STATUS_LABELS.unpublished}</Badge>
+        ) : (
+          <Badge>—</Badge>
+        );
       },
     },
     {
@@ -76,7 +80,9 @@ export default function FinalResultsTable({ rows, selectedId, onSelect }) {
           onClick={() => onSelect(row.applicationId)}
           disabled={row.applicationId === selectedId}
           aria-label={
-            row.applicationId === selectedId ? `Đang xem ${row.applicationId}` : `Mở ${row.applicationId} · ${row.applicantName}`
+            row.applicationId === selectedId
+              ? `Đang xem ${row.applicationId}`
+              : `Mở ${row.applicationId} · ${row.applicantName}`
           }
         >
           {row.applicationId === selectedId ? 'Đang xem' : 'Mở'}

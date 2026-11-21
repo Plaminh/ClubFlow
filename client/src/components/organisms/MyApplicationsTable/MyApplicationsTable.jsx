@@ -1,6 +1,10 @@
 import Badge from '../../atoms/Badge/index.js';
 import DataTable from '../DataTable/index.js';
-import { SCREENING_STATUS_LABELS, SCREENING_STATUS_TONES, getLabel } from '../../../constants/labels.js';
+import {
+  SCREENING_STATUS_LABELS,
+  SCREENING_STATUS_TONES,
+  getLabel,
+} from '../../../constants/labels.js';
 import { formatDate, formatDateTime, formatTimeRange } from '../../../utils/format.js';
 
 function interviewCell(application) {
@@ -15,7 +19,11 @@ function interviewCell(application) {
       </>
     );
   }
-  return <Badge>{application.screeningStatus === 'rejected' ? 'Không có phỏng vấn' : 'Chưa có lịch'}</Badge>;
+  return (
+    <Badge>
+      {application.screeningStatus === 'rejected' ? 'Không có phỏng vấn' : 'Chưa có lịch'}
+    </Badge>
+  );
 }
 
 function resultCell(application) {
@@ -26,7 +34,11 @@ function resultCell(application) {
   if (application.screeningStatus === 'rejected') {
     return <span className="muted">Không áp dụng</span>;
   }
-  return application.interview ? <Badge tone="warning">Chưa công bố</Badge> : <span className="muted">Chưa có</span>;
+  return application.interview ? (
+    <Badge tone="warning">Chưa công bố</Badge>
+  ) : (
+    <span className="muted">Chưa có</span>
+  );
 }
 
 function noteFor(application) {
@@ -50,7 +62,11 @@ export default function MyApplicationsTable({ applications }) {
   const columns = [
     { key: 'id', header: 'Hồ sơ', render: (application) => <strong>{application.id}</strong> },
     { key: 'position', header: 'Vị trí', render: (application) => application.positionName },
-    { key: 'submitted', header: 'Ngày nộp', render: (application) => formatDateTime(application.submittedAt) },
+    {
+      key: 'submitted',
+      header: 'Ngày nộp',
+      render: (application) => formatDateTime(application.submittedAt),
+    },
     {
       key: 'screening',
       header: 'Sàng lọc CV',
@@ -62,7 +78,11 @@ export default function MyApplicationsTable({ applications }) {
     },
     { key: 'interview', header: 'Phỏng vấn', render: interviewCell },
     { key: 'result', header: 'Kết quả cuối', render: resultCell },
-    { key: 'note', header: 'Ghi chú', render: (application) => <span className="data-table__sub">{noteFor(application)}</span> },
+    {
+      key: 'note',
+      header: 'Ghi chú',
+      render: (application) => <span className="data-table__sub">{noteFor(application)}</span>,
+    },
   ];
 
   return (

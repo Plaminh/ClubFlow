@@ -85,9 +85,11 @@ export function sessionStarts(state) {
   return starts;
 }
 
-const contains = (range, start, end) => toMs(range.start) <= toMs(start) && toMs(end) <= toMs(range.end);
+const contains = (range, start, end) =>
+  toMs(range.start) <= toMs(start) && toMs(end) <= toMs(range.end);
 const overlaps = (a, b) => toMs(a.start) < toMs(b.end) && toMs(b.start) < toMs(a.end);
-const isPlaced = (interview) => Boolean(interview?.start && interview.roomId && interview.interviewerId);
+const isPlaced = (interview) =>
+  Boolean(interview?.start && interview.roomId && interview.interviewerId);
 
 export function evaluateSchedule(state) {
   const { campaign, schedule } = state;
@@ -95,7 +97,9 @@ export function evaluateSchedule(state) {
   const shortlisted = state.applications
     .filter((application) => application.screeningStatus === 'shortlisted')
     .sort(compareApplicationsForScheduling);
-  const byApplication = new Map(state.interviews.map((interview) => [interview.applicationId, interview]));
+  const byApplication = new Map(
+    state.interviews.map((interview) => [interview.applicationId, interview]),
+  );
   const windowRange = {
     start: at(campaign.interviewDate, campaign.interviewWindow.start),
     end: at(campaign.interviewDate, campaign.interviewWindow.end),
@@ -138,7 +142,9 @@ export function evaluateSchedule(state) {
       return row;
     }
 
-    const assignment = state.assignments.find((item) => item.interviewerId === interview.interviewerId);
+    const assignment = state.assignments.find(
+      (item) => item.interviewerId === interview.interviewerId,
+    );
     if (!contains(windowRange, interview.start, interview.end)) {
       row.reasons.push('Ngoài khung giờ phỏng vấn của chiến dịch.');
     }
@@ -148,7 +154,9 @@ export function evaluateSchedule(state) {
     }
     if (!assignment?.positionIds.includes(application.positionId)) {
       row.reasons.push('Người phỏng vấn không được phân công cho vị trí này.');
-    } else if (!assignment.availability.some((range) => contains(range, interview.start, interview.end))) {
+    } else if (
+      !assignment.availability.some((range) => contains(range, interview.start, interview.end))
+    ) {
       row.reasons.push('Ngoài giờ rảnh của người phỏng vấn.');
     }
     if (!schedule.roomIds.includes(interview.roomId)) {
@@ -163,9 +171,13 @@ export function evaluateSchedule(state) {
       if (other.application.applicantId === application.applicantId) {
         row.reasons.push(`Chồng giờ với ${otherId} của cùng ứng viên.`);
       } else if (other.interview.interviewerId === interview.interviewerId) {
-        row.reasons.push(`Chồng giờ với ${otherId} (cùng người phỏng vấn ${accountName(interview.interviewerId)}).`);
+        row.reasons.push(
+          `Chồng giờ với ${otherId} (cùng người phỏng vấn ${accountName(interview.interviewerId)}).`,
+        );
       } else if (other.interview.roomId === interview.roomId) {
-        row.reasons.push(`Chồng giờ với ${otherId} (cùng phòng ${roomName(state, interview.roomId)}).`);
+        row.reasons.push(
+          `Chồng giờ với ${otherId} (cùng phòng ${roomName(state, interview.roomId)}).`,
+        );
       } else {
         continue;
       }
@@ -190,7 +202,9 @@ export function evaluateSchedule(state) {
   };
 
   const { closesAt } = submissionWindow(campaign);
-  const pending = state.applications.filter((application) => application.screeningStatus === 'pendingReview');
+  const pending = state.applications.filter(
+    (application) => application.screeningStatus === 'pendingReview',
+  );
   const unassigned = rows.filter((row) => row.status === 'unassigned');
   const closed = toMs(state.now) >= toMs(closesAt);
   const conditions = [
@@ -212,7 +226,10 @@ export function evaluateSchedule(state) {
     {
       id: 'conflict',
       met: summary.conflict === 0,
-      text: summary.conflict === 0 ? 'Không còn bản ghi Conflict.' : `Còn ${summary.conflict} bản ghi Conflict.`,
+      text:
+        summary.conflict === 0
+          ? 'Không còn bản ghi Conflict.'
+          : `Còn ${summary.conflict} bản ghi Conflict.`,
     },
     {
       id: 'unassigned',

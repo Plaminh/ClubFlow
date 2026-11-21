@@ -6,7 +6,14 @@ export function setAuthTokenProvider(provider) {
   getAuthToken = typeof provider === 'function' ? provider : () => null;
 }
 
-const STATUS_KINDS = { 400: 'validation', 401: 'forbidden', 403: 'forbidden', 404: 'notFound', 409: 'conflict', 422: 'validation' };
+const STATUS_KINDS = {
+  400: 'validation',
+  401: 'forbidden',
+  403: 'forbidden',
+  404: 'notFound',
+  409: 'conflict',
+  422: 'validation',
+};
 const DEFAULT_MESSAGES = {
   validation: 'Dữ liệu gửi lên chưa hợp lệ.',
   forbidden: 'Bạn không có quyền thực hiện thao tác này.',
@@ -16,9 +23,11 @@ const DEFAULT_MESSAGES = {
 };
 
 function buildUrl(path, query) {
-  if (typeof path !== 'string' || /^https?:\/\//iu.test(path)) throw new TypeError('apiClient requires a relative API path.');
+  if (typeof path !== 'string' || /^https?:\/\//iu.test(path))
+    throw new TypeError('apiClient requires a relative API path.');
   const normalized = path.startsWith('/') ? path : `/${path}`;
-  const apiPath = normalized === '/api' || normalized.startsWith('/api/') ? normalized : `/api${normalized}`;
+  const apiPath =
+    normalized === '/api' || normalized.startsWith('/api/') ? normalized : `/api${normalized}`;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value === undefined || value === null || value === '') continue;
@@ -31,7 +40,11 @@ function buildUrl(path, query) {
 async function readBody(response, responseType = 'auto') {
   if (response.status === 204) return null;
   const contentType = response.headers.get('content-type') ?? '';
-  if (responseType === 'blob' || (responseType === 'auto' && contentType.includes('application/pdf'))) return response.blob();
+  if (
+    responseType === 'blob' ||
+    (responseType === 'auto' && contentType.includes('application/pdf'))
+  )
+    return response.blob();
   const text = await response.text();
   if (!text) return null;
   if (responseType !== 'text' && contentType.includes('application/json')) {
@@ -44,7 +57,10 @@ async function readBody(response, responseType = 'auto') {
   return text;
 }
 
-export async function apiClient(path, { method = 'GET', query, body, headers = {}, responseType = 'auto', ...fetchOptions } = {}) {
+export async function apiClient(
+  path,
+  { method = 'GET', query, body, headers = {}, responseType = 'auto', ...fetchOptions } = {},
+) {
   const finalHeaders = { Accept: 'application/json', ...headers };
   let payload = body;
   if (body !== undefined && !(body instanceof FormData) && typeof body !== 'string') {
@@ -67,7 +83,8 @@ export async function apiClient(path, { method = 'GET', query, body, headers = {
   const data = await readBody(response, response.ok ? responseType : 'auto');
   if (!response.ok) {
     const kind = STATUS_KINDS[response.status] ?? 'unknown';
-    const message = (data && typeof data === 'object' && (data.error || data.message)) || DEFAULT_MESSAGES[kind];
+    const message =
+      (data && typeof data === 'object' && (data.error || data.message)) || DEFAULT_MESSAGES[kind];
     const backendDetails = data?.details && typeof data.details === 'object' ? data.details : {};
     throw new UiError(kind, message, {
       code: data?.code,

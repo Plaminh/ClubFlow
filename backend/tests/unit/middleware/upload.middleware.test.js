@@ -14,13 +14,13 @@ describe('Upload Middleware', () => {
     let fileFilter;
 
     beforeEach(() => {
-       fileFilter = upload.fileFilter;
+      fileFilter = upload.fileFilter;
     });
 
     it('should accept allowed image files', () => {
       const cb = vi.fn();
       const mimetypes = ['image/jpeg', 'image/png', 'image/webp'];
-      mimetypes.forEach(mimetype => {
+      mimetypes.forEach((mimetype) => {
         const file = { mimetype };
         fileFilter({}, file, cb);
         expect(cb).toHaveBeenCalledWith(null, true);
@@ -37,7 +37,7 @@ describe('Upload Middleware', () => {
     it('should reject unsupported files', () => {
       const cb = vi.fn();
       const mimetypes = ['text/plain', 'image/svg+xml'];
-      mimetypes.forEach(mimetype => {
+      mimetypes.forEach((mimetype) => {
         const file = { mimetype };
         fileFilter({}, file, cb);
         expect(cb).toHaveBeenCalledWith(expect.any(Error), false);
@@ -48,7 +48,7 @@ describe('Upload Middleware', () => {
   describe('Integration Test', () => {
     it('should reject files larger than 5MB', async () => {
       const app = express();
-      
+
       app.post('/upload', upload.single('file'), (req, res) => {
         res.status(200).json({ message: 'Success' });
       });
@@ -74,7 +74,7 @@ describe('Upload Middleware', () => {
 
     it('should store file in memory as a buffer', async () => {
       const app = express();
-      
+
       app.post('/upload', upload.single('file'), (req, res) => {
         // Assert req.file has buffer and no destination/filename (which exist for disk storage)
         if (req.file.buffer && !req.file.destination) {
@@ -96,4 +96,3 @@ describe('Upload Middleware', () => {
     });
   });
 });
-

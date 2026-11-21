@@ -76,7 +76,10 @@ describe('AppRoutes', () => {
   });
 
   it('clears an invalid stored token before redirecting a protected reload to Sign In', async () => {
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: 'invalid-token' }));
+    window.sessionStorage.setItem(
+      'clubflow.demoSession',
+      JSON.stringify({ token: 'invalid-token' }),
+    );
 
     renderApp(ROUTES.PROFILE);
 
@@ -85,7 +88,10 @@ describe('AppRoutes', () => {
   });
 
   it('keeps a saved session through a server error on reload and shows Retry instead of signing out', async () => {
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: 'invalid-token', user: { id: 'x', role: 'executive' } }));
+    window.sessionStorage.setItem(
+      'clubflow.demoSession',
+      JSON.stringify({ token: 'invalid-token', user: { id: 'x', role: 'executive' } }),
+    );
     renderApp(ROUTES.PROFILE);
     // 401 still ends a session even when a user snapshot exists.
     await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
@@ -94,15 +100,21 @@ describe('AppRoutes', () => {
     setMockApiMode('error');
     renderApp(ROUTES.EXECUTIVE_CAMPAIGN, { accountId: EXECUTIVE, scenarioId: 'draft' });
     expect(await screen.findByRole('button', { name: /Thử lại/ })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 1, name: 'Create Recruitment Campaign' })).toBeInTheDocument();
-    expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBe('mock-token-exec');
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Create Recruitment Campaign' }),
+    ).toBeInTheDocument();
+    expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBe(
+      'mock-token-exec',
+    );
   });
 
   it('shows the screen heading and a loading state while a saved session is restored', async () => {
     setMockApiDelay(200);
     renderApp(ROUTES.INTERVIEWER, { accountId: 'iv-giahuy', scenarioId: 'confirmed' });
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Interviewer Workspace' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Interviewer Workspace' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Đang khôi phục phiên đăng nhập…');
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });

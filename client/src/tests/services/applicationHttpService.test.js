@@ -12,14 +12,26 @@ describe('application review HTTP adapter', () => {
   it('loads one paginated composite list with filter-aware statistics', async () => {
     const response = await applicationService.list({ status: 'shortlisted', sort: 'oldest' });
     expect(response.items).toHaveLength(4);
-    expect(response.stats).toMatchObject({ campaign: { applications: 6, applicants: 5 }, filtered: { shortlisted: 4 }, isFiltered: true });
+    expect(response.stats).toMatchObject({
+      campaign: { applications: 6, applicants: 5 },
+      filtered: { shortlisted: 4 },
+      isFiltered: true,
+    });
   });
 
   it('reads detail, saves a private note, and mutates only the chosen Application', async () => {
     const detail = await applicationService.get('CF-028');
-    expect(detail).toMatchObject({ id: 'CF-028', cv: { downloadPath: '/api/applications/CF-028/cv' } });
-    await expect(applicationService.saveNote('CF-028', 'HTTP note')).resolves.toMatchObject({ privateNote: 'HTTP note' });
-    await expect(applicationService.setScreening('CF-028', 'shortlisted')).resolves.toMatchObject({ id: 'CF-028', screeningStatus: 'shortlisted' });
+    expect(detail).toMatchObject({
+      id: 'CF-028',
+      cv: { downloadPath: '/api/applications/CF-028/cv' },
+    });
+    await expect(applicationService.saveNote('CF-028', 'HTTP note')).resolves.toMatchObject({
+      privateNote: 'HTTP note',
+    });
+    await expect(applicationService.setScreening('CF-028', 'shortlisted')).resolves.toMatchObject({
+      id: 'CF-028',
+      screeningStatus: 'shortlisted',
+    });
     expect((await applicationService.get('CF-031')).screeningStatus).toBe('shortlisted');
   });
 
@@ -33,8 +45,14 @@ describe('application review HTTP adapter', () => {
   });
 
   it('surfaces immutable and confirmed lock conflicts', async () => {
-    await expect(applicationService.setScreening('CF-026', 'rejected')).rejects.toMatchObject({ kind: 'conflict', code: 'SCREENING_ALREADY_DECIDED' });
+    await expect(applicationService.setScreening('CF-026', 'rejected')).rejects.toMatchObject({
+      kind: 'conflict',
+      code: 'SCREENING_ALREADY_DECIDED',
+    });
     setMockApiScenario('confirmed');
-    await expect(applicationService.setScreening('CF-028', 'shortlisted')).rejects.toMatchObject({ kind: 'conflict', code: 'SCHEDULE_CONFIRMED' });
+    await expect(applicationService.setScreening('CF-028', 'shortlisted')).rejects.toMatchObject({
+      kind: 'conflict',
+      code: 'SCHEDULE_CONFIRMED',
+    });
   });
 });

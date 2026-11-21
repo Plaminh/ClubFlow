@@ -20,8 +20,9 @@ export default function InterviewerAssignmentsCard({ assignments }) {
           ))}
         </div>
         <p className="hint">
-          {assignments.map((assignment) => assignment.interviewerName).join(' và ')} là người phỏng vấn; họ không xuất hiện
-          trong danh sách ứng viên. Ban tuyển dụng nhập giờ rảnh do người phỏng vấn cung cấp.
+          {assignments.map((assignment) => assignment.interviewerName).join(' và ')} là người phỏng
+          vấn; họ không xuất hiện trong danh sách ứng viên. Ban tuyển dụng nhập giờ rảnh do người
+          phỏng vấn cung cấp.
         </p>
       </div>
     </Card>

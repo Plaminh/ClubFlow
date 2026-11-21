@@ -25,13 +25,18 @@ export default function DemoBar({ accounts = [], accountId = '', onAccountChange
         </summary>
         <div className="demo-bar__panel">
           <p className="hint">
-            Mọi dữ liệu đến từ HTTP mock qua <code>/api</code>. Chọn chế độ normal/slow/error/empty bằng biến{' '}
-            <code>MOCK_MODE</code> khi khởi động mock; khởi động lại mock để đặt lại dữ liệu.
+            Mọi dữ liệu đến từ HTTP mock qua <code>/api</code>. Chọn chế độ normal/slow/error/empty
+            bằng biến <code>MOCK_MODE</code> khi khởi động mock; khởi động lại mock để đặt lại dữ
+            liệu.
           </p>
           <div className="demo-bar__controls">
             <label className="demo-bar__field" htmlFor={accountFieldId}>
               <span>Đổi tài khoản nhanh (chỉ để thử nghiệm)</span>
-              <select id={accountFieldId} value={accountId} onChange={(event) => onAccountChange(event.target.value)}>
+              <select
+                id={accountFieldId}
+                value={accountId}
+                onChange={(event) => onAccountChange(event.target.value)}
+              >
                 <option value="">Không đăng nhập (khách)</option>
                 {ROLE_ORDER.map((role) => (
                   <optgroup key={role} label={ROLE_LABELS[role]}>

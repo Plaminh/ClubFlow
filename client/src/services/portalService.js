@@ -12,7 +12,14 @@ export async function getPublicCampaign(options = {}) {
   try {
     return await apiClient('/campaigns/current', options);
   } catch (error) {
-    if (error?.code === 'NO_PUBLIC_CAMPAIGN') return { campaign: null, phase: 'draft', acceptingApplications: false, positions: [], slots: [] };
+    if (error?.code === 'NO_PUBLIC_CAMPAIGN')
+      return {
+        campaign: null,
+        phase: 'draft',
+        acceptingApplications: false,
+        positions: [],
+        slots: [],
+      };
     throw error;
   }
 }
@@ -26,7 +33,9 @@ export async function submitApplication(formData, campaignId = PRIMARY_CAMPAIGN_
   const payload = new FormData();
   payload.set('campaignId', campaignId);
   for (const [key, value] of formData.entries()) payload.append(key, value);
-  return applicationView(await apiClient('/applications', { ...options, method: 'POST', body: payload }));
+  return applicationView(
+    await apiClient('/applications', { ...options, method: 'POST', body: payload }),
+  );
 }
 
 export async function listNotifications(options = {}) {

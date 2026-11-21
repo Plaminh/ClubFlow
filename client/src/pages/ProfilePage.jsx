@@ -68,8 +68,8 @@ function ProfileContent() {
             )}
             <Card title="Bảo mật tài khoản">
               <p>
-                Quản lý mật khẩu nằm ngoài phạm vi PA#3. Phiên đăng nhập dùng bearer token chỉ trong tab hiện tại và không
-                lưu mật khẩu trong trình duyệt.
+                Quản lý mật khẩu nằm ngoài phạm vi PA#3. Phiên đăng nhập dùng bearer token chỉ trong
+                tab hiện tại và không lưu mật khẩu trong trình duyệt.
               </p>
             </Card>
           </div>

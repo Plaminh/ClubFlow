@@ -3,7 +3,11 @@ import Button from '../../atoms/Button/index.js';
 import Card from '../../molecules/Card/index.js';
 import ChoiceGroup from '../../molecules/ChoiceGroup/index.js';
 import FormField from '../../molecules/FormField/index.js';
-import { SLOT_MINUTES, toGenerateBody, validateScheduleSettings } from '../../../utils/scheduleSettings.js';
+import {
+  SLOT_MINUTES,
+  toGenerateBody,
+  validateScheduleSettings,
+} from '../../../utils/scheduleSettings.js';
 
 function fromSettings(settings) {
   return {
@@ -87,26 +91,71 @@ export default function ScheduleSettingsCard({
 
   return (
     <Card title="Cấu hình lịch nháp">
-      <form ref={formRef} className="stack" noValidate onSubmit={submit} aria-label="Cấu hình lịch nháp">
+      <form
+        ref={formRef}
+        className="stack"
+        noValidate
+        onSubmit={submit}
+        aria-label="Cấu hình lịch nháp"
+      >
         <div className="field-grid">
-          <FormField id="schedule-date" label="Ngày phỏng vấn" error={errors.interviewDate} hint="Một ngày cho cả chiến dịch, sau ngày đóng đơn.">
+          <FormField
+            id="schedule-date"
+            label="Ngày phỏng vấn"
+            error={errors.interviewDate}
+            hint="Một ngày cho cả chiến dịch, sau ngày đóng đơn."
+          >
             {(props) => (
-              <input {...props} type="date" value={values.interviewDate} onChange={set('interviewDate')} disabled={readOnly} required />
+              <input
+                {...props}
+                type="date"
+                value={values.interviewDate}
+                onChange={set('interviewDate')}
+                disabled={readOnly}
+                required
+              />
             )}
           </FormField>
           <FormField id="schedule-window-start" label="Giờ bắt đầu" error={errors.windowStart}>
             {(props) => (
-              <input {...props} type="time" step={300} value={values.windowStart} onChange={set('windowStart')} disabled={readOnly} required />
+              <input
+                {...props}
+                type="time"
+                step={300}
+                value={values.windowStart}
+                onChange={set('windowStart')}
+                disabled={readOnly}
+                required
+              />
             )}
           </FormField>
           <FormField id="schedule-window-end" label="Giờ kết thúc" error={errors.windowEnd}>
             {(props) => (
-              <input {...props} type="time" step={300} value={values.windowEnd} onChange={set('windowEnd')} disabled={readOnly} required />
+              <input
+                {...props}
+                type="time"
+                step={300}
+                value={values.windowEnd}
+                onChange={set('windowEnd')}
+                disabled={readOnly}
+                required
+              />
             )}
           </FormField>
-          <FormField id="schedule-slot-minutes" label="Thời lượng mỗi ca" error={errors.slotMinutes} hint="Dùng chung cho mọi buổi phỏng vấn.">
+          <FormField
+            id="schedule-slot-minutes"
+            label="Thời lượng mỗi ca"
+            error={errors.slotMinutes}
+            hint="Dùng chung cho mọi buổi phỏng vấn."
+          >
             {(props) => (
-              <select {...props} value={values.slotMinutes} onChange={set('slotMinutes')} disabled={readOnly} required>
+              <select
+                {...props}
+                value={values.slotMinutes}
+                onChange={set('slotMinutes')}
+                disabled={readOnly}
+                required
+              >
                 <option value="">Chọn thời lượng</option>
                 {SLOT_MINUTES.map((minutes) => (
                   <option key={minutes} value={String(minutes)}>
@@ -138,12 +187,18 @@ export default function ScheduleSettingsCard({
         )}
 
         {readOnly ? (
-          <p className="hint">Lịch đã xác nhận: ngày, khoảng giờ và thời lượng không thể đổi và không thể tạo lại lịch.</p>
+          <p className="hint">
+            Lịch đã xác nhận: ngày, khoảng giờ và thời lượng không thể đổi và không thể tạo lại
+            lịch.
+          </p>
         ) : (
           <p className="hint">
-            Ứng viên chọn giờ rảnh theo cấu hình của chiến dịch; ca nằm ngoài giờ rảnh đó sẽ là Unassigned kèm lý do.
+            Ứng viên chọn giờ rảnh theo cấu hình của chiến dịch; ca nằm ngoài giờ rảnh đó sẽ là
+            Unassigned kèm lý do.
             {hasDraft ? ' Bạn sẽ được hỏi trước khi thay thế lịch nháp hiện tại.' : ''}
-            {roomsReadOnly ? ' Phòng đã được chọn trong Interview Setup và khóa sau hồ sơ hợp lệ đầu tiên.' : ''}
+            {roomsReadOnly
+              ? ' Phòng đã được chọn trong Interview Setup và khóa sau hồ sơ hợp lệ đầu tiên.'
+              : ''}
           </p>
         )}
         <div className="button-row">

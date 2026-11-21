@@ -24,7 +24,7 @@ export default [
       'docs/reference/ui/assets/**',
     ],
   },
-  
+
   // 2. Shared Baseline Rules
   {
     files: ['**/*.js', '**/*.jsx'],
@@ -34,11 +34,14 @@ export default [
     },
     rules: {
       ...js.configs.recommended.rules,
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
       'no-undef': 'error',
     },
   },
-  
+
   // 3. Backend Configuration
   {
     files: ['backend/**/*.js'],
@@ -58,7 +61,7 @@ export default [
       },
     },
   },
-  
+
   // 4. Frontend Configuration
   {
     files: ['client/**/*.js', 'client/**/*.jsx'],
@@ -90,10 +93,15 @@ export default [
       },
     },
   },
-  
+
   // 5. Backend Test Configuration
   {
-    files: ['backend/**/*.test.js', 'backend/**/*.test.jsx', 'backend/**/*.spec.js', 'backend/**/*.spec.jsx'],
+    files: [
+      'backend/**/*.test.js',
+      'backend/**/*.test.jsx',
+      'backend/**/*.spec.js',
+      'backend/**/*.spec.jsx',
+    ],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -111,7 +119,12 @@ export default [
 
   // 6. Frontend Test Configuration
   {
-    files: ['client/**/*.test.js', 'client/**/*.test.jsx', 'client/**/*.spec.js', 'client/**/*.spec.jsx'],
+    files: [
+      'client/**/*.test.js',
+      'client/**/*.test.jsx',
+      'client/**/*.spec.js',
+      'client/**/*.spec.jsx',
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,

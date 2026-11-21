@@ -54,9 +54,14 @@ export default function PublicCampaignPanel({ data, role, onApply }) {
         </Card>
         <Card as="aside" title="Ứng tuyển">
           <div className="stack">
-            <p className="muted">Khách có thể xem thông tin công khai của chiến dịch. Nộp hồ sơ cần đăng nhập.</p>
+            <p className="muted">
+              Khách có thể xem thông tin công khai của chiến dịch. Nộp hồ sơ cần đăng nhập.
+            </p>
             <div>
-              <Button onClick={onApply} disabled={phase !== 'open' || (role !== 'visitor' && role !== 'applicant')}>
+              <Button
+                onClick={onApply}
+                disabled={phase !== 'open' || (role !== 'visitor' && role !== 'applicant')}
+              >
                 Apply Now
               </Button>
             </div>

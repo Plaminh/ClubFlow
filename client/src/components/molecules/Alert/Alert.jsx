@@ -5,7 +5,14 @@ import './Alert.css';
  * Pass `live` for messages that appear after a user action so screen readers
  * announce them (errors use role="alert", others role="status").
  */
-export default function Alert({ tone = 'info', title, children, live = false, className = '', ...props }) {
+export default function Alert({
+  tone = 'info',
+  title,
+  children,
+  live = false,
+  className = '',
+  ...props
+}) {
   const role = live ? (tone === 'error' ? 'alert' : 'status') : undefined;
 
   return (

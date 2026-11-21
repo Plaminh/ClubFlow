@@ -35,14 +35,23 @@ describe('authentication and profile HTTP contract', () => {
       body: JSON.stringify({ displayName: '', email: 'invalid' }),
     });
     expect(badProfile.response.status).toBe(400);
-    expect(badProfile.body.fieldErrors).toEqual(expect.objectContaining({ displayName: expect.any(String), email: expect.any(String) }));
+    expect(badProfile.body.fieldErrors).toEqual(
+      expect.objectContaining({ displayName: expect.any(String), email: expect.any(String) }),
+    );
 
     const updated = await request(mock.baseUrl, '/api/me/profile', {
       method: 'PATCH',
       headers: bearer(token, { 'content-type': 'application/json' }),
       body: JSON.stringify({ displayName: 'Minh Anh Demo', email: 'minhanh.updated@demo.example' }),
     });
-    expect(updated.body).toMatchObject({ displayName: 'Minh Anh Demo', email: 'minhanh.updated@demo.example', studentId: '26DEMO0142' });
-    expect((await request(mock.baseUrl, '/api/auth/logout', { method: 'POST', headers: bearer(token) })).response.status).toBe(204);
+    expect(updated.body).toMatchObject({
+      displayName: 'Minh Anh Demo',
+      email: 'minhanh.updated@demo.example',
+      studentId: '26DEMO0142',
+    });
+    expect(
+      (await request(mock.baseUrl, '/api/auth/logout', { method: 'POST', headers: bearer(token) }))
+        .response.status,
+    ).toBe(204);
   });
 });

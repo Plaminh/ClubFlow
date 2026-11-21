@@ -84,7 +84,11 @@ describe('My Profile over HTTP', () => {
     fireEvent.click(button);
     fireEvent.click(button);
     expect(await screen.findByText('Đã lưu thay đổi')).toBeInTheDocument();
-    expect(fetch.mock.calls.filter(([url, init]) => String(url).includes('/api/me/profile') && init?.method === 'PATCH')).toHaveLength(1);
+    expect(
+      fetch.mock.calls.filter(
+        ([url, init]) => String(url).includes('/api/me/profile') && init?.method === 'PATCH',
+      ),
+    ).toHaveLength(1);
   });
 
   it('validates required fields locally and focuses the first error', async () => {
@@ -102,7 +106,9 @@ describe('My Profile over HTTP', () => {
     await startEditing();
     fill('Nguyen Minh Anh', 'quoc.bao@demo.example');
     save();
-    await waitFor(() => expect(screen.getByLabelText('Email')).toHaveAccessibleDescription(/already in use/i));
+    await waitFor(() =>
+      expect(screen.getByLabelText('Email')).toHaveAccessibleDescription(/already in use/i),
+    );
     expect(screen.getByRole('region', { name: 'Chỉnh sửa hồ sơ' })).toBeInTheDocument();
   });
 

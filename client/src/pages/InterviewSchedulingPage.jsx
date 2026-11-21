@@ -101,7 +101,10 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
     const result = await action.run(() => actions.exportTimetable());
     if (result.ok) {
       downloadText(result.value.fileName, result.value.content);
-      setMessage({ tone: 'success', title: `Đã xuất lịch ${result.value.rowCount} buổi phỏng vấn` });
+      setMessage({
+        tone: 'success',
+        title: `Đã xuất lịch ${result.value.rowCount} buổi phỏng vấn`,
+      });
     }
   }
 
@@ -130,8 +133,8 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
           actions={<Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review</Button>}
         >
           <p>
-            Khi không có hồ sơ nào qua vòng CV, bước xác nhận lịch phỏng vấn được bỏ qua (BR-13). Lịch chỉ được lập cho hồ
-            sơ “Qua vòng CV”.
+            Khi không có hồ sơ nào qua vòng CV, bước xác nhận lịch phỏng vấn được bỏ qua (BR-13).
+            Lịch chỉ được lập cho hồ sơ “Qua vòng CV”.
           </p>
         </EmptyState>
       </MainTemplate>
@@ -182,7 +185,9 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
           actions={
             <>
               {confirmed ? <Badge tone="success">Confirmed · chỉ đọc</Badge> : null}
-              {!confirmed && schedule.hasUnsavedChanges ? <Badge tone="warning">Có thay đổi chưa lưu</Badge> : null}
+              {!confirmed && schedule.hasUnsavedChanges ? (
+                <Badge tone="warning">Có thay đổi chưa lưu</Badge>
+              ) : null}
               {!confirmed ? (
                 <Button
                   variant="secondary"
@@ -200,10 +205,13 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
         >
           <div className="stack">
             {confirmed ? (
-              <Alert tone="success" title={`Lịch đã được xác nhận ${formatDateTime(schedule.confirmedAt)}`}>
+              <Alert
+                tone="success"
+                title={`Lịch đã được xác nhận ${formatDateTime(schedule.confirmedAt)}`}
+              >
                 <p>
-                  Cấu hình chiến dịch, quyết định vòng CV và lịch được khóa (BR-14). Phần đánh giá và kết quả cuối vẫn
-                  thực hiện ở giai đoạn sau.
+                  Cấu hình chiến dịch, quyết định vòng CV và lịch được khóa (BR-14). Phần đánh giá
+                  và kết quả cuối vẫn thực hiện ở giai đoạn sau.
                 </p>
               </Alert>
             ) : null}
@@ -273,8 +281,8 @@ function SchedulingWorkspace({ initial, campaign, actions }) {
         onCancel={() => setConfirmOpen(false)}
       >
         <p>
-          Sau khi xác nhận, lịch chỉ đọc và không thể tạo lại. Ứng viên và người phỏng vấn thấy buổi của mình. Xác nhận
-          lịch không công bố kết quả tuyển dụng.
+          Sau khi xác nhận, lịch chỉ đọc và không thể tạo lại. Ứng viên và người phỏng vấn thấy buổi
+          của mình. Xác nhận lịch không công bố kết quả tuyển dụng.
         </p>
       </ConfirmDialog>
     </MainTemplate>
@@ -293,5 +301,12 @@ export default function InterviewSchedulingPage() {
     );
   }
 
-  return <SchedulingWorkspace key={dataVersion} initial={data.schedule} campaign={data.campaign} actions={actions} />;
+  return (
+    <SchedulingWorkspace
+      key={dataVersion}
+      initial={data.schedule}
+      campaign={data.campaign}
+      actions={actions}
+    />
+  );
 }

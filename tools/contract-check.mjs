@@ -46,7 +46,10 @@ const opt = (name, dflt) => {
   return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : dflt;
 };
 if (argv.includes('-h') || argv.includes('--help')) {
-  const head = fs.readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(1, 33);
+  const head = fs
+    .readFileSync(new URL(import.meta.url), 'utf8')
+    .split('\n')
+    .slice(1, 33);
   console.log(head.map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
   process.exit(0);
 }
@@ -57,8 +60,8 @@ const ONLY = opt('--only', null);
 const JSON_OUT = opt('--json', null);
 const STRICT = argv.includes('--strict-values');
 const TIMEOUT_MS = Number(opt('--timeout', '10000'));
-const ANY = Symbol('any');            // a value written …
-const OPEN = Symbol('open');          // `, …` at the end of an object or a list
+const ANY = Symbol('any'); // a value written …
+const OPEN = Symbol('open'); // `, …` at the end of an object or a list
 
 const results = [];
 let fails = 0;
@@ -87,8 +90,15 @@ function fencedBlocks(text) {
       body.push(lines[j]);
     }
     // strip the indentation the block shares (blocks inside a list item)
-    const indent = Math.min(...body.filter((l) => l.trim()).map((l) => l.match(/^\s*/)[0].length), 99);
-    blocks.push({ lang, line: i + 1, lines: body.map((l) => l.slice(Math.min(indent, l.match(/^\s*/)[0].length))) });
+    const indent = Math.min(
+      ...body.filter((l) => l.trim()).map((l) => l.match(/^\s*/)[0].length),
+      99,
+    );
+    blocks.push({
+      lang,
+      line: i + 1,
+      lines: body.map((l) => l.slice(Math.min(indent, l.match(/^\s*/)[0].length))),
+    });
     i = j;
   }
   return blocks;
@@ -103,8 +113,12 @@ function examplesOf(file) {
     const first = b.lines.find((l) => l.trim()) || '';
     if (b.lang === 'http') {
       if (/^HTTP\/\d(\.\d)?\s+\d{3}/.test(first.trim())) items.push({ kind: 'answer', ...b });
-      else if (/^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+\S+/.test(first.trim())) items.push({ kind: 'request', form: 'http', ...b });
-    } else if (['sh', 'bash', 'shell', 'console'].includes(b.lang) && /(^|\s)curl\s/.test(b.lines.join(' '))) {
+      else if (/^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+\S+/.test(first.trim()))
+        items.push({ kind: 'request', form: 'http', ...b });
+    } else if (
+      ['sh', 'bash', 'shell', 'console'].includes(b.lang) &&
+      /(^|\s)curl\s/.test(b.lines.join(' '))
+    ) {
       items.push({ kind: 'request', form: 'curl', ...b });
     }
   }
@@ -133,13 +147,16 @@ function examplesOf(file) {
 function parseLoose(src) {
   let s = '';
   const stack = [];
-  let prev = '';            // last significant character outside strings
+  let prev = ''; // last significant character outside strings
   for (let i = 0; i < src.length; i++) {
     const ch = src[i];
     if (ch === '"') {
       let j = i + 1;
       for (; j < src.length; j++) {
-        if (src[j] === '\\') { j++; continue; }
+        if (src[j] === '\\') {
+          j++;
+          continue;
+        }
         if (src[j] === '"') break;
       }
       s += src.slice(i, j + 1);
@@ -186,43 +203,73 @@ function parseLoose(src) {
   return mark(v);
 }
 
-const kind = (v) => (v === null ? 'null' : Array.isArray(v) ? 'list' : typeof v === 'object' ? 'object' : typeof v);
+const kind = (v) =>
+  v === null ? 'null' : Array.isArray(v) ? 'list' : typeof v === 'object' ? 'object' : typeof v;
 const show = (v) => (v === ANY ? '…' : JSON.stringify(v)?.slice(0, 60));
 
 /** Compare field names (problems) and values (notes). */
 function compare(exp, act, at, problems, notes, namesOnly = false) {
   if (exp === ANY) return;
-  const note = (m) => { if (!namesOnly) notes.push(m); };
+  const note = (m) => {
+    if (!namesOnly) notes.push(m);
+  };
   const ke = kind(exp);
   const ka = kind(act);
   if (ke === 'object') {
-    if (ka !== 'object') { problems.push(`${at}: the example shows an object, the answer has ${ka} ${show(act)}`); return; }
+    if (ka !== 'object') {
+      problems.push(`${at}: the example shows an object, the answer has ${ka} ${show(act)}`);
+      return;
+    }
     const ek = Object.keys(exp);
     const ak = Object.keys(act);
-    for (const k of ek) if (!(k in act)) problems.push(`${at}.${k}: in the example, missing from the answer`);
-    if (!exp[OPEN]) for (const k of ak) if (!(k in exp)) problems.push(`${at}.${k}: in the answer, not in the example`);
-    for (const k of ek) if (k in act) compare(exp[k], act[k], `${at}.${k}`, problems, notes, namesOnly);
+    for (const k of ek)
+      if (!(k in act)) problems.push(`${at}.${k}: in the example, missing from the answer`);
+    if (!exp[OPEN])
+      for (const k of ak)
+        if (!(k in exp)) problems.push(`${at}.${k}: in the answer, not in the example`);
+    for (const k of ek)
+      if (k in act) compare(exp[k], act[k], `${at}.${k}`, problems, notes, namesOnly);
     return;
   }
   if (ke === 'list') {
-    if (ka !== 'list') { problems.push(`${at}: the example shows a list, the answer has ${ka} ${show(act)}`); return; }
+    if (ka !== 'list') {
+      problems.push(`${at}: the example shows a list, the answer has ${ka} ${show(act)}`);
+      return;
+    }
     if (exp.length === 0) {
-      if (act.length && !exp[OPEN]) note(`${at}: the example shows [], the answer has ${act.length} item(s)`);
+      if (act.length && !exp[OPEN])
+        note(`${at}: the example shows [], the answer has ${act.length} item(s)`);
       return;
     }
     if (act.length === 0) {
       // nothing to compare names with: a shape problem only when the example's items are objects or lists
       const shaped = exp.some((e) => e !== ANY && (kind(e) === 'object' || kind(e) === 'list'));
-      if (shaped && !namesOnly) problems.push(`${at}: the example shows ${exp.length} item(s), the answer is an empty list`);
+      if (shaped && !namesOnly)
+        problems.push(
+          `${at}: the example shows ${exp.length} item(s), the answer is an empty list`,
+        );
       else note(`${at}: the example shows ${exp.length} item(s), the answer is an empty list`);
       return;
     }
-    if (!exp[OPEN] && act.length !== exp.length) note(`${at}: ${exp.length} item(s) in the example, ${act.length} in the answer`);
+    if (!exp[OPEN] && act.length !== exp.length)
+      note(`${at}: ${exp.length} item(s) in the example, ${act.length} in the answer`);
     // items past the ones the example shows: field names only
-    act.forEach((a, i) => compare(exp[Math.min(i, exp.length - 1)], a, `${at}[${i}]`, problems, notes, namesOnly || i >= exp.length));
+    act.forEach((a, i) =>
+      compare(
+        exp[Math.min(i, exp.length - 1)],
+        a,
+        `${at}[${i}]`,
+        problems,
+        notes,
+        namesOnly || i >= exp.length,
+      ),
+    );
     return;
   }
-  if (ka === 'object' || ka === 'list') { problems.push(`${at}: the example shows ${ke} ${show(exp)}, the answer has ${ka}`); return; }
+  if (ka === 'object' || ka === 'list') {
+    problems.push(`${at}: the example shows ${ke} ${show(exp)}, the answer has ${ka}`);
+    return;
+  }
   if (exp !== act) note(`${at}: example ${show(exp)}, answer ${show(act)}`);
 }
 
@@ -237,7 +284,10 @@ function parseHttpRequest(lines) {
     const m = lines[i].match(/^([\w-]+)\s*:\s*(.*)$/);
     if (m) headers[m[1]] = m[2].trim();
   }
-  const body = lines.slice(i + 1).join('\n').trim();
+  const body = lines
+    .slice(i + 1)
+    .join('\n')
+    .trim();
   return { method: method.toUpperCase(), target, headers, body: body || null };
 }
 
@@ -273,7 +323,11 @@ function shellWords(text) {
 }
 
 function standIn(name, bytes) {
-  const head = /\.pdf$/i.test(name) ? '%PDF-1.4\n%contract-check stand-in\n' : /\.png$/i.test(name) ? '\x89PNG\r\n\x1a\n' : '';
+  const head = /\.pdf$/i.test(name)
+    ? '%PDF-1.4\n%contract-check stand-in\n'
+    : /\.png$/i.test(name)
+      ? '\x89PNG\r\n\x1a\n'
+      : '';
   const buf = Buffer.alloc(Math.max(bytes, head.length), 0x20);
   buf.write(head, 0, 'latin1');
   return buf;
@@ -288,7 +342,8 @@ function fileFor(spec) {
   }
   for (const base of [DOCS, REPO]) {
     const p = path.resolve(base, spec);
-    if (p.startsWith(REPO + path.sep) && fs.existsSync(p) && fs.statSync(p).isFile()) return { name: path.basename(p), data: fs.readFileSync(p) };
+    if (p.startsWith(REPO + path.sep) && fs.existsSync(p) && fs.statSync(p).isFile())
+      return { name: path.basename(p), data: fs.readFileSync(p) };
   }
   return { name: path.basename(spec), data: standIn(spec, 1024), standIn: true };
 }
@@ -314,7 +369,9 @@ function parseCurl(lines) {
         const [file, ...params] = rest.slice(1).split(';');
         const f = fileFor(file);
         if (f.standIn) req.notes.push(`${file} not found in the repository: sent a 1 KB stand-in`);
-        const type = (params.find((p) => p.startsWith('type=')) || '').slice(5) || (/\.pdf$/i.test(f.name) ? 'application/pdf' : 'application/octet-stream');
+        const type =
+          (params.find((p) => p.startsWith('type=')) || '').slice(5) ||
+          (/\.pdf$/i.test(f.name) ? 'application/pdf' : 'application/octet-stream');
         const fname = (params.find((p) => p.startsWith('filename=')) || '').slice(9) || f.name;
         req.form.push({ field, file: f.data, type, fname });
       } else req.form.push({ field, value: rest });
@@ -356,11 +413,27 @@ async function send(req) {
   const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
   try {
     const t0 = Date.now();
-    const r = await fetch(BASE + p + query, { method: req.method, headers, body, signal: ctl.signal, redirect: 'manual' });
+    const r = await fetch(BASE + p + query, {
+      method: req.method,
+      headers,
+      body,
+      signal: ctl.signal,
+      redirect: 'manual',
+    });
     const text = await r.text();
-    return { status: r.status, type: r.headers.get('content-type') || '', text, ms: Date.now() - t0 };
+    return {
+      status: r.status,
+      type: r.headers.get('content-type') || '',
+      text,
+      ms: Date.now() - t0,
+    };
   } catch (e) {
-    return { error: e.name === 'AbortError' ? `no answer within ${TIMEOUT_MS / 1000} s` : `${e.cause?.code || e.message}` };
+    return {
+      error:
+        e.name === 'AbortError'
+          ? `no answer within ${TIMEOUT_MS / 1000} s`
+          : `${e.cause?.code || e.message}`,
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -375,7 +448,14 @@ function parseAnswer(lines) {
     const m = lines[i].match(/^([\w-]+)\s*:\s*(.*)$/);
     if (m) headers[m[1].toLowerCase()] = m[2].trim();
   }
-  return { status, headers, body: lines.slice(i + 1).join('\n').trim() };
+  return {
+    status,
+    headers,
+    body: lines
+      .slice(i + 1)
+      .join('\n')
+      .trim(),
+  };
 }
 
 // ------------------------------------------------------------------ accounts and tokens
@@ -388,33 +468,54 @@ function demoAccounts() {
   for (const name of ['FRONTEND.md', 'BACKEND.md']) {
     const f = path.join(REPO, name);
     if (!fs.existsSync(f)) continue;
-    const sec = fs.readFileSync(f, 'utf8').match(/^#{1,6}\s*(?:\d+\.?\s*)?demo accounts.*$([\s\S]*?)(?=^#{1,6}\s|(?![\s\S]))/im);
+    const sec = fs
+      .readFileSync(f, 'utf8')
+      .match(/^#{1,6}\s*(?:\d+\.?\s*)?demo accounts.*$([\s\S]*?)(?=^#{1,6}\s|(?![\s\S]))/im);
     if (!sec) continue;
-    const rows = sec[1].split('\n').filter((l) => l.trim().startsWith('|'))
-      .map((l) => l.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim().replace(/^`(.*)`$/, '$1')))
+    const rows = sec[1]
+      .split('\n')
+      .filter((l) => l.trim().startsWith('|'))
+      .map((l) =>
+        l
+          .trim()
+          .replace(/^\||\|$/g, '')
+          .split('|')
+          .map((c) => c.trim().replace(/^`(.*)`$/, '$1')),
+      )
       .filter((r) => !r.every((c) => /^:?-+:?$/.test(c) || !c));
-    if (rows.length < 2) { errors.push(`the Demo accounts table of ${name} has no rows`); continue; }
+    if (rows.length < 2) {
+      errors.push(`the Demo accounts table of ${name} has no rows`);
+      continue;
+    }
     const head = rows[0].map((h) => h.toLowerCase());
     const col = (re) => head.findIndex((h) => re.test(h));
     const cName = col(/name in example|example|^name$|key/);
     const cLogin = col(/e-?mail|user ?name|login/);
     const cPass = col(/pass/);
     if (cName < 0 || cLogin < 0 || cPass < 0) {
-      errors.push(`the Demo accounts table of ${name} needs columns for the name in examples, the e-mail or user name and the password (found: ${rows[0].join(' | ')})`);
+      errors.push(
+        `the Demo accounts table of ${name} needs columns for the name in examples, the e-mail or user name and the password (found: ${rows[0].join(' | ')})`,
+      );
       continue;
     }
     for (const r of rows.slice(1)) {
       const n = (r[cName] || '').replace(/`/g, '');
-      if (n && !accounts[n]) accounts[n] = { login: (r[cLogin] || '').replace(/`/g, ''), password: (r[cPass] || '').replace(/`/g, '') };
+      if (n && !accounts[n])
+        accounts[n] = {
+          login: (r[cLogin] || '').replace(/`/g, ''),
+          password: (r[cPass] || '').replace(/`/g, ''),
+        };
     }
   }
-  if (!Object.keys(accounts).length) return { error: errors[0] || 'no "Demo accounts" section in FRONTEND.md or BACKEND.md' };
+  if (!Object.keys(accounts).length)
+    return { error: errors[0] || 'no "Demo accounts" section in FRONTEND.md or BACKEND.md' };
   return { accounts };
 }
 
 function findToken(v) {
   if (v && typeof v === 'object') {
-    for (const [k, x] of Object.entries(v)) if (/token/i.test(k) && typeof x === 'string' && x) return x;
+    for (const [k, x] of Object.entries(v))
+      if (/token/i.test(k) && typeof x === 'string' && x) return x;
     for (const x of Object.values(v)) {
       const t = findToken(x);
       if (t) return t;
@@ -428,8 +529,14 @@ async function tokenFor(name, accounts, loginExample) {
   if (tokens[name]) return tokens[name];
   if (!accounts) throw new Error(`{{token:${name}}}: no demo accounts to sign in with`);
   const acc = accounts[name];
-  if (!acc) throw new Error(`{{token:${name}}}: "${name}" is not in the Demo accounts table of FRONTEND.md or BACKEND.md`);
-  if (!loginExample) throw new Error('no sign-in example (a POST to …/login, …/signin, …/sessions or …/tokens) to sign in with');
+  if (!acc)
+    throw new Error(
+      `{{token:${name}}}: "${name}" is not in the Demo accounts table of FRONTEND.md or BACKEND.md`,
+    );
+  if (!loginExample)
+    throw new Error(
+      'no sign-in example (a POST to …/login, …/signin, …/sessions or …/tokens) to sign in with',
+    );
   let body;
   try {
     body = JSON.parse(loginExample.body);
@@ -440,12 +547,24 @@ async function tokenFor(name, accounts, loginExample) {
     if (/pass/i.test(k)) body[k] = acc.password;
     else if (/mail|user|login|account|name/i.test(k)) body[k] = acc.login;
   }
-  const r = await send({ method: 'POST', target: loginExample.target, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await send({
+    method: 'POST',
+    target: loginExample.target,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   if (r.error) throw new Error(`signing in as ${name}: ${r.error}`);
   let data = null;
-  try { data = JSON.parse(r.text); } catch { /* reported below */ }
+  try {
+    data = JSON.parse(r.text);
+  } catch {
+    /* reported below */
+  }
   const t = findToken(data);
-  if (r.status >= 300 || !t) throw new Error(`signing in as ${name} (${acc.login}) answered ${r.status} with no token: ${r.text.slice(0, 120)}`);
+  if (r.status >= 300 || !t)
+    throw new Error(
+      `signing in as ${name} (${acc.login}) answered ${r.status} with no token: ${r.text.slice(0, 120)}`,
+    );
   tokens[name] = t;
   return t;
 }
@@ -454,7 +573,10 @@ async function fillTokens(str, accounts, loginExample) {
   if (str == null) return str;
   const names = [...new Set([...str.matchAll(/\{\{token:([^}]+)\}\}/g)].map((m) => m[1].trim()))];
   let s = str;
-  for (const n of names) s = s.split(new RegExp(`\\{\\{token:\\s*${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\}\\}`)).join(await tokenFor(n, accounts, loginExample));
+  for (const n of names)
+    s = s
+      .split(new RegExp(`\\{\\{token:\\s*${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\}\\}`))
+      .join(await tokenFor(n, accounts, loginExample));
   return s;
 }
 
@@ -466,12 +588,20 @@ function endpointTable() {
   const rows = [];
   for (const line of fs.readFileSync(f, 'utf8').split('\n')) {
     if (!line.trim().startsWith('|')) continue;
-    const cells = line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim().replace(/`/g, ''));
+    const cells = line
+      .trim()
+      .replace(/^\||\|$/g, '')
+      .split('|')
+      .map((c) => c.trim().replace(/`/g, ''));
     let method = null;
     let p = null;
     for (const c of cells) {
       const both = c.match(/^(GET|POST|PUT|PATCH|DELETE)\s+(\/\S*)$/i);
-      if (both) { method = both[1].toUpperCase(); p = both[2]; break; }
+      if (both) {
+        method = both[1].toUpperCase();
+        p = both[2];
+        break;
+      }
       if (!method && /^(GET|POST|PUT|PATCH|DELETE)$/i.test(c)) method = c.toUpperCase();
       else if (!p && /^\/\S*$/.test(c)) p = c;
     }
@@ -481,8 +611,12 @@ function endpointTable() {
 }
 
 function templateRe(t) {
-  const parts = t.replace(/\/+$/, '').split('/').map((seg) =>
-    /^(:\w+|\{[^}]+\}|<[^>]+>)$/.test(seg) ? '[^/]+' : seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const parts = t
+    .replace(/\/+$/, '')
+    .split('/')
+    .map((seg) =>
+      /^(:\w+|\{[^}]+\}|<[^>]+>)$/.test(seg) ? '[^/]+' : seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+    );
   return new RegExp(`^${parts.join('/')}/?$`);
 }
 
@@ -493,25 +627,41 @@ async function main() {
     console.log(`docs/api/ not found under ${REPO}`);
     process.exit(2);
   }
-  let files = fs.readdirSync(DOCS).filter((f) => f.endsWith('.md')).sort();
-  files = [...files.filter((f) => f.toLowerCase() === 'readme.md'), ...files.filter((f) => f.toLowerCase() !== 'readme.md')];
+  let files = fs
+    .readdirSync(DOCS)
+    .filter((f) => f.endsWith('.md'))
+    .sort();
+  files = [
+    ...files.filter((f) => f.toLowerCase() === 'readme.md'),
+    ...files.filter((f) => f.toLowerCase() !== 'readme.md'),
+  ];
   const all = files.flatMap((f) => examplesOf(path.join(DOCS, f)));
   const acc = demoAccounts();
-  if (acc.error) out('INFO', 'FRONTEND.md', `${acc.error}: examples with {{token:…}} cannot be sent`);
+  if (acc.error)
+    out('INFO', 'FRONTEND.md', `${acc.error}: examples with {{token:…}} cannot be sent`);
 
   // the sign-in example, found before anything is sent
   let loginExample = null;
   for (const ex of all) {
     if (ex.error || ex.request.form !== 'http') continue;
     const r = parseHttpRequest(ex.request.lines);
-    if (r.method === 'POST' && /\/(auth\/)?(log-?in|sign-?in|sessions?|tokens?)\/?$/i.test(pathOf(r.target).path) && r.body && !/\{\{token:/.test(r.body)) {
+    if (
+      r.method === 'POST' &&
+      /\/(auth\/)?(log-?in|sign-?in|sessions?|tokens?)\/?$/i.test(pathOf(r.target).path) &&
+      r.body &&
+      !/\{\{token:/.test(r.body)
+    ) {
       loginExample = { ...r, where: ex.where };
       break;
     }
   }
 
-  console.log(`contract-check — ${all.length} example(s) in ${files.length} file(s) of ${(DOCS.startsWith(process.cwd() + path.sep) ? path.relative(process.cwd(), DOCS) : DOCS)}, sent to ${BASE}`);
-  console.log(`sign-in example: ${loginExample ? `${loginExample.method} ${loginExample.target} (${loginExample.where})` : 'none found'}\n`);
+  console.log(
+    `contract-check — ${all.length} example(s) in ${files.length} file(s) of ${DOCS.startsWith(process.cwd() + path.sep) ? path.relative(process.cwd(), DOCS) : DOCS}, sent to ${BASE}`,
+  );
+  console.log(
+    `sign-in example: ${loginExample ? `${loginExample.method} ${loginExample.target} (${loginExample.where})` : 'none found'}\n`,
+  );
 
   const table = endpointTable();
   const covered = new Set();
@@ -526,17 +676,25 @@ async function main() {
     if (ex.request.form === 'http') req = parseHttpRequest(ex.request.lines);
     else {
       req = parseCurl(ex.request.lines);
-      if (req.error) { out('FAIL', ex.where, req.error); results.push({ where: ex.where, ok: false, problems: [req.error] }); continue; }
+      if (req.error) {
+        out('FAIL', ex.where, req.error);
+        results.push({ where: ex.where, ok: false, problems: [req.error] });
+        continue;
+      }
     }
     const label = `${req.method} ${req.target.replace(/^https?:\/\/[^/]+/, '')}`;
     const ans = parseAnswer(ex.answer.lines);
     const problems = [];
     const notes = [...(req.notes || [])];
-    if (req.body && /(^|[^"\w])(…|\.\.\.)([^"\w]|$)/.test(req.body.replace(/"(?:[^"\\]|\\.)*"/g, '""'))) {
+    if (
+      req.body &&
+      /(^|[^"\w])(…|\.\.\.)([^"\w]|$)/.test(req.body.replace(/"(?:[^"\\]|\\.)*"/g, '""'))
+    ) {
       problems.push('the request body has … in it: write a value we can send');
     }
     try {
-      for (const k of Object.keys(req.headers)) req.headers[k] = await fillTokens(req.headers[k], acc.accounts, loginExample);
+      for (const k of Object.keys(req.headers))
+        req.headers[k] = await fillTokens(req.headers[k], acc.accounts, loginExample);
       req.target = await fillTokens(req.target, acc.accounts, loginExample);
       req.body = await fillTokens(req.body, acc.accounts, loginExample);
     } catch (e) {
@@ -553,37 +711,85 @@ async function main() {
       got = await send(req);
       if (got.error) problems.push(`no answer: ${got.error}`);
       else {
-        if (got.status !== ans.status) problems.push(`status: the example shows ${ans.status}, the answer is ${got.status}`);
+        if (got.status !== ans.status)
+          problems.push(`status: the example shows ${ans.status}, the answer is ${got.status}`);
         if (ans.body) {
           let exp;
           let act;
-          try { exp = parseLoose(ans.body); } catch (e) { problems.push(`the answer block's body is not JSON (… allowed): ${e.message}`); }
-          try { act = JSON.parse(got.text); } catch { problems.push(`the answer is not JSON: ${got.text.slice(0, 80)}`); }
+          try {
+            exp = parseLoose(ans.body);
+          } catch (e) {
+            problems.push(`the answer block's body is not JSON (… allowed): ${e.message}`);
+          }
+          try {
+            act = JSON.parse(got.text);
+          } catch {
+            problems.push(`the answer is not JSON: ${got.text.slice(0, 80)}`);
+          }
           if (exp !== undefined && act !== undefined) compare(exp, act, '$', problems, notes);
-        } else if (got.text.trim()) notes.push(`the example shows no body, the answer has ${got.text.trim().replace(/\s+/g, ' ').slice(0, 60)}`);
+        } else if (got.text.trim())
+          notes.push(
+            `the example shows no body, the answer has ${got.text.trim().replace(/\s+/g, ' ').slice(0, 60)}`,
+          );
       }
     }
     const valueFails = STRICT ? notes.filter((n) => !/stand-in/.test(n)) : [];
     const ok = problems.length === 0 && valueFails.length === 0;
-    out(ok ? 'PASS' : 'FAIL', ex.where, `${label} → ${got && !got.error ? got.status : '—'}${got && got.ms != null ? ` (${got.ms} ms)` : ''}`,
-      [...problems, ...notes.map((n) => `${STRICT && !/stand-in/.test(n) ? 'value' : 'note '}: ${n}`)]);
-    results.push({ where: ex.where, request: label, expected: ans.status, status: got?.status ?? null, ok, problems, notes });
+    out(
+      ok ? 'PASS' : 'FAIL',
+      ex.where,
+      `${label} → ${got && !got.error ? got.status : '—'}${got && got.ms != null ? ` (${got.ms} ms)` : ''}`,
+      [
+        ...problems,
+        ...notes.map((n) => `${STRICT && !/stand-in/.test(n) ? 'value' : 'note '}: ${n}`),
+      ],
+    );
+    results.push({
+      where: ex.where,
+      request: label,
+      expected: ans.status,
+      status: got?.status ?? null,
+      ok,
+      problems,
+      notes,
+    });
   }
 
   console.log('');
   if (!table) out('FAIL', 'README.md', 'docs/api/README.md not found, or it has no endpoint table');
-  else if (!table.length) out('FAIL', 'README.md', 'docs/api/README.md has no endpoint table (rows with a method and a path)');
+  else if (!table.length)
+    out(
+      'FAIL',
+      'README.md',
+      'docs/api/README.md has no endpoint table (rows with a method and a path)',
+    );
   else if (!ONLY) {
     const missing = table.filter((t) => !covered.has(`${t.method} ${t.path}`));
-    out(missing.length ? 'FAIL' : 'PASS', 'README.md', `every endpoint in the table has an example (${table.length - missing.length}/${table.length})`,
-      missing.map((t) => `no example: ${t.method} ${t.path}`));
+    out(
+      missing.length ? 'FAIL' : 'PASS',
+      'README.md',
+      `every endpoint in the table has an example (${table.length - missing.length}/${table.length})`,
+      missing.map((t) => `no example: ${t.method} ${t.path}`),
+    );
   }
   const n = results.length;
   const passed = results.filter((r) => r.ok).length;
   console.log(`\n${passed}/${n} examples answered as written; ${fails} FAIL line(s)`);
   if (JSON_OUT) {
-    fs.writeFileSync(JSON_OUT, JSON.stringify({ base: BASE, examples: results, endpoints: table?.map((t) => `${t.method} ${t.path}`) ?? [],
-      covered: [...covered], fails }, null, 1));
+    fs.writeFileSync(
+      JSON_OUT,
+      JSON.stringify(
+        {
+          base: BASE,
+          examples: results,
+          endpoints: table?.map((t) => `${t.method} ${t.path}`) ?? [],
+          covered: [...covered],
+          fails,
+        },
+        null,
+        1,
+      ),
+    );
   }
   process.exit(fails ? 1 : 0);
 }

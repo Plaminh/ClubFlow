@@ -28,7 +28,15 @@ function decisionHint(row) {
  * interviewer's recommendation is plain text inside the assessment box; only
  * the Executive's final decision uses the Pass/Fail badges.
  */
-export default function FinalDecisionPanel({ row, assessment, assessmentOpen, onToggleAssessment, onRecord, pending, message }) {
+export default function FinalDecisionPanel({
+  row,
+  assessment,
+  assessmentOpen,
+  onToggleAssessment,
+  onRecord,
+  pending,
+  message,
+}) {
   const assessmentId = useId();
   const canDecide = row.assessmentStatus === 'submitted' && !row.publishedAt;
 
@@ -41,7 +49,12 @@ export default function FinalDecisionPanel({ row, assessment, assessmentOpen, on
     >
       <div className="stack">
         <div>
-          <Button variant="secondary" aria-expanded={assessmentOpen} aria-controls={assessmentId} onClick={onToggleAssessment}>
+          <Button
+            variant="secondary"
+            aria-expanded={assessmentOpen}
+            aria-controls={assessmentId}
+            onClick={onToggleAssessment}
+          >
             {assessmentOpen ? 'Ẩn đánh giá' : 'View Assessment'}
           </Button>
         </div>
@@ -49,7 +62,10 @@ export default function FinalDecisionPanel({ row, assessment, assessmentOpen, on
           <div id={assessmentId}>
             {row.assessmentStatus !== 'submitted' ? (
               <Alert tone="warning" title="Chưa có đánh giá">
-                <p>Người phỏng vấn {row.interviewerName} chưa gửi đánh giá, nên chưa thể ghi nhận quyết định.</p>
+                <p>
+                  Người phỏng vấn {row.interviewerName} chưa gửi đánh giá, nên chưa thể ghi nhận
+                  quyết định.
+                </p>
               </Alert>
             ) : assessment.status === 'success' && assessment.data ? (
               <div className="panel-subtle stack stack--tight">
@@ -59,14 +75,19 @@ export default function FinalDecisionPanel({ row, assessment, assessmentOpen, on
                 </p>
                 <p>
                   <strong>Đề xuất của người phỏng vấn:</strong>{' '}
-                  {getLabel(RECOMMENDATION_LABELS, assessment.data.recommendation, RECOMMENDATION_LABELS.none)}
+                  {getLabel(
+                    RECOMMENDATION_LABELS,
+                    assessment.data.recommendation,
+                    RECOMMENDATION_LABELS.none,
+                  )}
                 </p>
                 <p className="hint">
-                  Đề xuất không phải kết quả cuối. Ban tuyển dụng tự ghi nhận Pass hoặc Fail ở phần “Quyết định cuối” bên
-                  dưới.
+                  Đề xuất không phải kết quả cuối. Ban tuyển dụng tự ghi nhận Pass hoặc Fail ở phần
+                  “Quyết định cuối” bên dưới.
                 </p>
                 <p className="hint">
-                  {assessment.data.interviewerName} · gửi {formatDateTime(assessment.data.submittedAt)}
+                  {assessment.data.interviewerName} · gửi{' '}
+                  {formatDateTime(assessment.data.submittedAt)}
                 </p>
               </div>
             ) : (
@@ -83,9 +104,13 @@ export default function FinalDecisionPanel({ row, assessment, assessmentOpen, on
             {row.decision ? (
               <>
                 Quyết định hiện tại:{' '}
-                <Badge tone={RESULT_DECISION_TONES[row.decision]}>{getLabel(RESULT_DECISION_LABELS, row.decision)}</Badge>{' '}
+                <Badge tone={RESULT_DECISION_TONES[row.decision]}>
+                  {getLabel(RESULT_DECISION_LABELS, row.decision)}
+                </Badge>{' '}
                 <Badge tone={row.publishedAt ? 'success' : 'warning'}>
-                  {row.publishedAt ? `${PUBLICATION_STATUS_LABELS.published} · chỉ đọc` : PUBLICATION_STATUS_LABELS.unpublished}
+                  {row.publishedAt
+                    ? `${PUBLICATION_STATUS_LABELS.published} · chỉ đọc`
+                    : PUBLICATION_STATUS_LABELS.unpublished}
                 </Badge>
               </>
             ) : (
@@ -97,11 +122,23 @@ export default function FinalDecisionPanel({ row, assessment, assessmentOpen, on
               {message.text ? <p>{message.text}</p> : null}
             </Alert>
           ) : null}
-          <div className="button-row" role="group" aria-label={`Quyết định cho ${row.applicationId}`}>
-            <Button variant="success" onClick={() => onRecord('pass')} disabled={!canDecide || pending}>
+          <div
+            className="button-row"
+            role="group"
+            aria-label={`Quyết định cho ${row.applicationId}`}
+          >
+            <Button
+              variant="success"
+              onClick={() => onRecord('pass')}
+              disabled={!canDecide || pending}
+            >
               Record Pass
             </Button>
-            <Button variant="danger" onClick={() => onRecord('fail')} disabled={!canDecide || pending}>
+            <Button
+              variant="danger"
+              onClick={() => onRecord('fail')}
+              disabled={!canDecide || pending}
+            >
               Record Fail
             </Button>
           </div>

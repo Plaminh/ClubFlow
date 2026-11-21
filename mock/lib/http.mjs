@@ -57,12 +57,23 @@ export function matchPath(pathname, pattern) {
   });
   const match = pathname.match(new RegExp(`^${source}$`, 'u'));
   if (!match) return null;
-  return Object.fromEntries(names.map((name, index) => [name, decodeURIComponent(match[index + 1])]));
+  return Object.fromEntries(
+    names.map((name, index) => [name, decodeURIComponent(match[index + 1])]),
+  );
 }
 
 export function projectForMode(response, mode) {
-  if (mode !== 'empty' || !response.headers.get('content-type')?.includes('application/json') || response.status === 204) return response;
-  return response.json().then((body) => json(response.status, emptyProjection(body), Object.fromEntries(response.headers.entries())));
+  if (
+    mode !== 'empty' ||
+    !response.headers.get('content-type')?.includes('application/json') ||
+    response.status === 204
+  )
+    return response;
+  return response
+    .json()
+    .then((body) =>
+      json(response.status, emptyProjection(body), Object.fromEntries(response.headers.entries())),
+    );
 }
 
 export function responseForError(error) {

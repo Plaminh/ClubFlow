@@ -72,5 +72,9 @@ export function confirm(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
 
 export async function exportTimetable(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
   const content = await apiClient(`${base(campaignId)}.csv`, { ...options, responseType: 'text' });
-  return { fileName: 'clubflow-schedule.csv', content, rowCount: Math.max(0, content.trim().split(/\r?\n/u).length - 1) };
+  return {
+    fileName: 'clubflow-schedule.csv',
+    content,
+    rowCount: Math.max(0, content.trim().split(/\r?\n/u).length - 1),
+  };
 }

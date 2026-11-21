@@ -7,7 +7,11 @@ describe('profileService HTTP adapter', () => {
   afterEach(() => setAuthTokenProvider(null));
 
   it('loads only the bearer token owner profile', async () => {
-    await expect(profileService.getProfile()).resolves.toMatchObject({ id: 'ap-minhanh', role: 'applicant', studentId: '26DEMO0142' });
+    await expect(profileService.getProfile()).resolves.toMatchObject({
+      id: 'ap-minhanh',
+      role: 'applicant',
+      studentId: '26DEMO0142',
+    });
   });
 
   it('sends only normalized editable fields', async () => {
@@ -18,17 +22,27 @@ describe('profileService HTTP adapter', () => {
       role: 'executive',
       studentId: 'HACKED',
     });
-    expect(updated).toMatchObject({ id: 'ap-minhanh', role: 'applicant', displayName: 'Minh Anh Updated', email: 'new.mail@demo.example', studentId: '26DEMO0142' });
+    expect(updated).toMatchObject({
+      id: 'ap-minhanh',
+      role: 'applicant',
+      displayName: 'Minh Anh Updated',
+      email: 'new.mail@demo.example',
+      studentId: '26DEMO0142',
+    });
     await expect(profileService.getProfile()).resolves.toEqual(updated);
   });
 
   it('passes backend field errors and conflict codes through', async () => {
-    await expect(profileService.updateProfile({ displayName: '', email: 'invalid' })).rejects.toMatchObject({
+    await expect(
+      profileService.updateProfile({ displayName: '', email: 'invalid' }),
+    ).rejects.toMatchObject({
       kind: 'validation',
       code: 'VALIDATION_ERROR',
       fieldErrors: { displayName: expect.any(String), email: expect.any(String) },
     });
-    await expect(profileService.updateProfile({ displayName: 'Minh Anh', email: 'quoc.bao@demo.example' })).rejects.toMatchObject({
+    await expect(
+      profileService.updateProfile({ displayName: 'Minh Anh', email: 'quoc.bao@demo.example' }),
+    ).rejects.toMatchObject({
       kind: 'conflict',
       code: 'EMAIL_ALREADY_USED',
       fieldErrors: { email: expect.any(String) },
@@ -37,6 +51,9 @@ describe('profileService HTTP adapter', () => {
 
   it('requires authentication', async () => {
     setAuthTokenProvider(null);
-    await expect(profileService.getProfile()).rejects.toMatchObject({ kind: 'forbidden', code: 'INVALID_TOKEN' });
+    await expect(profileService.getProfile()).rejects.toMatchObject({
+      kind: 'forbidden',
+      code: 'INVALID_TOKEN',
+    });
   });
 });

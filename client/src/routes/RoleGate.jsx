@@ -40,8 +40,9 @@ export default function RoleGate({ role, title, children }) {
         actions={<Button to={HOME_BY_ROLE[currentRole]}>Về trang của tôi</Button>}
       >
         <p>
-          Đăng nhập bằng tài khoản vai trò {ROLE_LABELS[role]} (hoặc đổi tài khoản trong tùy chọn demo) để xem nội dung. Đây chỉ là trạng thái giao diện;
-          quyền truy cập thật do backend kiểm soát.
+          Đăng nhập bằng tài khoản vai trò {ROLE_LABELS[role]} (hoặc đổi tài khoản trong tùy chọn
+          demo) để xem nội dung. Đây chỉ là trạng thái giao diện; quyền truy cập thật do backend
+          kiểm soát.
         </p>
       </EmptyState>
     </MainTemplate>

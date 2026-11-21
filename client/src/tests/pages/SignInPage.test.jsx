@@ -14,16 +14,22 @@ describe('Sign In over HTTP', () => {
     await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
     expect(screen.getByLabelText('Tên đăng nhập')).toHaveAttribute('type', 'text');
     expect(screen.getByLabelText('Mật khẩu')).toHaveAttribute('type', 'password');
-    expect(screen.getByRole('link', { name: 'Quay về trang tuyển dụng' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Quay về trang tuyển dụng' })).toHaveAttribute(
+      'href',
+      '/',
+    );
     const examples = screen.getByRole('complementary', { name: 'Tài khoản demo' });
-    for (const username of ['exec', 'studentA', 'studentB', 'int-content', 'int-comms']) expect(await within(examples).findByText(username)).toBeInTheDocument();
+    for (const username of ['exec', 'studentA', 'studentB', 'int-content', 'int-comms'])
+      expect(await within(examples).findByText(username)).toBeInTheDocument();
     expect(within(examples).getAllByText(DEMO_PASSWORD)).toHaveLength(5);
   });
 
   it('offers no registration, recovery, or social sign-in', async () => {
     renderApp(PATH);
     await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' });
-    expect(screen.queryByText(/đăng ký|quên mật khẩu|sign up|forgot|google/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/đăng ký|quên mật khẩu|sign up|forgot|google/i),
+    ).not.toBeInTheDocument();
   });
 
   it('toggles password visibility without submitting', async () => {
@@ -59,7 +65,9 @@ describe('Sign In over HTTP', () => {
     expect(await screen.findByText(/Không kết nối được tới máy chủ/)).toBeInTheDocument();
     setMockApiMode('normal');
     fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
-    expect(await screen.findByText('Nguyen Minh Anh · Ứng viên', { ignore: 'option' })).toBeInTheDocument();
+    expect(
+      await screen.findByText('Nguyen Minh Anh · Ứng viên', { ignore: 'option' }),
+    ).toBeInTheDocument();
   });
 
   it('disables the form and prevents duplicate submissions while pending', async () => {
@@ -88,8 +96,14 @@ describe('Sign In over HTTP', () => {
     renderApp(PATH);
     await submitSignIn('studentA');
     await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
-    await waitFor(() => expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession'))).toMatchObject({ token: 'mock-token-studentA' }));
-    expect(JSON.stringify({ ...window.sessionStorage, ...window.localStorage })).not.toContain(DEMO_PASSWORD);
+    await waitFor(() =>
+      expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession'))).toMatchObject({
+        token: 'mock-token-studentA',
+      }),
+    );
+    expect(JSON.stringify({ ...window.sessionStorage, ...window.localStorage })).not.toContain(
+      DEMO_PASSWORD,
+    );
   });
 
   it('signs out, clears the token, and returns to the public portal', async () => {
@@ -99,6 +113,8 @@ describe('Sign In over HTTP', () => {
     await signOut();
     await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
     expect(await screen.findByText('Khách (chưa đăng nhập)')).toBeInTheDocument();
-    await waitFor(() => expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBeNull());
+    await waitFor(() =>
+      expect(JSON.parse(window.sessionStorage.getItem('clubflow.demoSession')).token).toBeNull(),
+    );
   });
 });

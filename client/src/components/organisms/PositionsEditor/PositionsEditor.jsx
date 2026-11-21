@@ -11,7 +11,16 @@ import './PositionsEditor.css';
  * without add, edit, or remove controls.
  * positions: [{ key, id?, departmentName, name, quota, description, requirements, applicationCount }]
  */
-export default function PositionsEditor({ positions, errors, listError, disabled, readOnly, onAdd, onChange, onRemove }) {
+export default function PositionsEditor({
+  positions,
+  errors,
+  listError,
+  disabled,
+  readOnly,
+  onAdd,
+  onChange,
+  onRemove,
+}) {
   if (readOnly) {
     return (
       <Card title="Ban và vị trí tuyển">
@@ -61,7 +70,11 @@ export default function PositionsEditor({ positions, errors, listError, disabled
                 {position.name ? ` · ${position.name}` : ''}
               </legend>
               <div className="field-grid">
-                <FormField id={fieldId('department')} label="Ban (Department)" error={error('departmentName')}>
+                <FormField
+                  id={fieldId('department')}
+                  label="Ban (Department)"
+                  error={error('departmentName')}
+                >
                   {(props) => <input {...props} {...bind('departmentName')} />}
                 </FormField>
                 <FormField id={fieldId('name')} label="Tên vị trí (Position)" error={error('name')}>
@@ -76,7 +89,11 @@ export default function PositionsEditor({ positions, errors, listError, disabled
                   {(props) => <input {...props} inputMode="numeric" {...bind('quota')} />}
                 </FormField>
               </div>
-              <FormField id={fieldId('description')} label="Mô tả công việc" error={error('description')}>
+              <FormField
+                id={fieldId('description')}
+                label="Mô tả công việc"
+                error={error('description')}
+              >
                 {(props) => <textarea {...props} rows={2} {...bind('description')} />}
               </FormField>
               <FormField id={fieldId('requirements')} label="Yêu cầu" error={error('requirements')}>
@@ -87,7 +104,9 @@ export default function PositionsEditor({ positions, errors, listError, disabled
                   Xóa vị trí
                 </Button>
                 {position.applicationCount > 0 ? (
-                  <span className="hint">{position.applicationCount} hồ sơ đang liên kết với vị trí này.</span>
+                  <span className="hint">
+                    {position.applicationCount} hồ sơ đang liên kết với vị trí này.
+                  </span>
                 ) : null}
               </div>
             </fieldset>

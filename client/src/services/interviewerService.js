@@ -25,7 +25,9 @@ export async function listAssignedInterviews(options = {}, campaignId = PRIMARY_
   const view = await apiClient('/me/interviews', { ...options, query: { campaignId } });
   return {
     ...view,
-    interviews: (view.interviews ?? []).map((item) => summaryOf(item, Boolean(item.assessmentSubmitted))),
+    interviews: (view.interviews ?? []).map((item) =>
+      summaryOf(item, Boolean(item.assessmentSubmitted)),
+    ),
   };
 }
 

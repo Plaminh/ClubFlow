@@ -10,7 +10,7 @@ export const authenticate = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
-  
+
   try {
     const decoded = verifyToken(token);
     req.user = decoded;

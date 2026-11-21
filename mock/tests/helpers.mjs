@@ -3,10 +3,18 @@ import { createMockServer } from '../server.mjs';
 export const silentLogger = { info() {} };
 
 /** The C8 settings the contract examples use: the Campaign's own date, window and duration. */
-export const GENERATE_SETTINGS = Object.freeze({ interviewDate: '2026-12-02', interviewWindow: { start: '09:00', end: '12:00' }, slotMinutes: 30 });
+export const GENERATE_SETTINGS = Object.freeze({
+  interviewDate: '2026-12-02',
+  interviewWindow: { start: '09:00', end: '12:00' },
+  slotMinutes: 30,
+});
 
 export function generateRequest(token, settings = GENERATE_SETTINGS) {
-  return { method: 'POST', headers: bearer(token, { 'content-type': 'application/json' }), body: JSON.stringify(settings) };
+  return {
+    method: 'POST',
+    headers: bearer(token, { 'content-type': 'application/json' }),
+    body: JSON.stringify(settings),
+  };
 }
 
 export async function startMock(mode = 'normal', options = {}) {
@@ -22,7 +30,8 @@ export async function request(baseUrl, path, options = {}) {
   let body = null;
   if (response.status !== 204) {
     if (contentType.includes('application/json')) body = await response.json();
-    else if (contentType.includes('application/pdf')) body = Buffer.from(await response.arrayBuffer());
+    else if (contentType.includes('application/pdf'))
+      body = Buffer.from(await response.arrayBuffer());
     else body = await response.text();
   }
   return { response, body };
@@ -48,9 +57,12 @@ export function applicationForm({ positionId, student = 'A' }) {
   form.append('positionId', positionId);
   form.append('email', student === 'A' ? 'minh.anh@demo.example' : 'quoc.bao@demo.example');
   form.append('faculty', student === 'A' ? 'Information Technology' : 'Design');
-  form.append('sop', student === 'A'
-    ? 'I want to contribute clear and useful recruitment content for the club.'
-    : 'I want to support visual and written communications for recruitment.');
+  form.append(
+    'sop',
+    student === 'A'
+      ? 'I want to contribute clear and useful recruitment content for the club.'
+      : 'I want to support visual and written communications for recruitment.',
+  );
   if (student === 'A') form.append('slotIds', 'slot-0900');
   form.append('slotIds', 'slot-1000');
   form.append('cv', new Blob(['%PDF-1.4\n%%EOF'], { type: 'application/pdf' }), 'cv.pdf');
@@ -77,15 +89,26 @@ export async function seedApplications(baseUrl) {
 export async function prepareConfirmedSchedule(baseUrl) {
   const exec = await login(baseUrl, 'exec');
   const students = await seedApplications(baseUrl);
-  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/close-applications', { method: 'POST', headers: bearer(exec) });
+  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/close-applications', {
+    method: 'POST',
+    headers: bearer(exec),
+  });
   for (const applicationId of ['A01', 'A02', 'A03']) {
-    await request(baseUrl, `/api/campaigns/cmp-2026-hk1/applications/${applicationId}/screening-decision`, {
-      method: 'POST',
-      headers: bearer(exec, { 'content-type': 'application/json' }),
-      body: JSON.stringify({ decision: 'shortlisted' }),
-    });
+    await request(
+      baseUrl,
+      `/api/campaigns/cmp-2026-hk1/applications/${applicationId}/screening-decision`,
+      {
+        method: 'POST',
+        headers: bearer(exec, { 'content-type': 'application/json' }),
+        body: JSON.stringify({ decision: 'shortlisted' }),
+      },
+    );
   }
-  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/generate', generateRequest(exec));
+  await request(
+    baseUrl,
+    '/api/campaigns/cmp-2026-hk1/schedule/draft/generate',
+    generateRequest(exec),
+  );
   for (const [applicationId, start, interviewerId, roomId] of [
     ['A02', '2026-12-02T09:30:00+07:00', 'iv-comms', 'room-b105'],
     ['A03', '2026-12-02T10:00:00+07:00', 'iv-comms', 'room-b105'],
@@ -96,7 +119,13 @@ export async function prepareConfirmedSchedule(baseUrl) {
       body: JSON.stringify({ start, interviewerId, roomId }),
     });
   }
-  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/save', { method: 'POST', headers: bearer(exec) });
-  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/confirm', { method: 'POST', headers: bearer(exec) });
+  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/draft/save', {
+    method: 'POST',
+    headers: bearer(exec),
+  });
+  await request(baseUrl, '/api/campaigns/cmp-2026-hk1/schedule/confirm', {
+    method: 'POST',
+    headers: bearer(exec),
+  });
   return { exec, ...students };
 }

@@ -35,7 +35,9 @@ const LOCK_MESSAGES = {
 
 function toForm(view) {
   const { campaign } = view;
-  const existing = new Map(view.interviewSetup.assignments.map((assignment) => [assignment.interviewerId, assignment]));
+  const existing = new Map(
+    view.interviewSetup.assignments.map((assignment) => [assignment.interviewerId, assignment]),
+  );
   return {
     id: campaign.id,
     name: campaign.name,
@@ -51,16 +53,20 @@ function toForm(view) {
     roomIds: view.interviewSetup.roomIds,
     assignments: view.interviewSetup.interviewers.map((interviewer) => {
       const assignment = existing.get(interviewer.id);
-      return assignment ?? {
-        interviewerId: interviewer.id,
-        interviewerName: interviewer.name,
-        positionIds: [],
-        positionNames: [],
-        availability: [{
-          start: `${campaign.interviewDate}T${campaign.interviewWindow.start}:00+07:00`,
-          end: `${campaign.interviewDate}T${campaign.interviewWindow.end}:00+07:00`,
-        }],
-      };
+      return (
+        assignment ?? {
+          interviewerId: interviewer.id,
+          interviewerName: interviewer.name,
+          positionIds: [],
+          positionNames: [],
+          availability: [
+            {
+              start: `${campaign.interviewDate}T${campaign.interviewWindow.start}:00+07:00`,
+              end: `${campaign.interviewDate}T${campaign.interviewWindow.end}:00+07:00`,
+            },
+          ],
+        }
+      );
     }),
     positions: view.positions.map((position) => ({
       key: position.id,
@@ -93,7 +99,13 @@ function blankView(catalog) {
     },
     phase: 'draft',
     positions: [],
-    interviewSetup: { ...catalog.interviewSetup, assignments: [], roomIds: [], locked: false, lockReason: null },
+    interviewSetup: {
+      ...catalog.interviewSetup,
+      assignments: [],
+      roomIds: [],
+      locked: false,
+      lockReason: null,
+    },
     locked: false,
     lockReason: null,
   };
@@ -103,9 +115,15 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
   const [form, setForm] = useState(() => toForm(view));
   const [current, setCurrent] = useState(view);
   const [errors, setErrors] = useState({});
-  const [banner, setBanner] = useState(() => (created
-    ? { tone: 'success', title: 'Đã tạo bản nháp chiến dịch', text: 'Tiếp tục cấu hình Interview Setup, xem trước và công bố khi sẵn sàng.' }
-    : null));
+  const [banner, setBanner] = useState(() =>
+    created
+      ? {
+          tone: 'success',
+          title: 'Đã tạo bản nháp chiến dịch',
+          text: 'Tiếp tục cấu hình Interview Setup, xem trước và công bố khi sẵn sàng.',
+        }
+      : null,
+  );
   const [listError, setListError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
@@ -138,7 +156,9 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
   function changePosition(key, field, value) {
     setForm((previous) => ({
       ...previous,
-      positions: previous.positions.map((position) => (position.key === key ? { ...position, [field]: value } : position)),
+      positions: previous.positions.map((position) =>
+        position.key === key ? { ...position, [field]: value } : position,
+      ),
     }));
   }
 
@@ -162,15 +182,21 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
   }
 
   function showValidation(fieldErrors, message) {
-    const mapped = Object.fromEntries(Object.entries(fieldErrors).map(([field, value]) => {
-      const match = field.match(/^positions\.(\d+)\.(.+)$/u);
-      if (!match) return [field, value];
-      const position = form.positions[Number(match[1])];
-      return [position ? `position:${position.key}:${match[2]}` : field, value];
-    }));
+    const mapped = Object.fromEntries(
+      Object.entries(fieldErrors).map(([field, value]) => {
+        const match = field.match(/^positions\.(\d+)\.(.+)$/u);
+        if (!match) return [field, value];
+        const position = form.positions[Number(match[1])];
+        return [position ? `position:${position.key}:${match[2]}` : field, value];
+      }),
+    );
     setErrors(mapped);
     setListError(fieldErrors.positions ?? '');
-    setBanner({ tone: 'error', title: message ?? 'Chưa thể công bố chiến dịch', text: 'Hãy sửa các trường được đánh dấu. Dữ liệu hợp lệ bạn đã nhập vẫn được giữ lại.' });
+    setBanner({
+      tone: 'error',
+      title: message ?? 'Chưa thể công bố chiến dịch',
+      text: 'Hãy sửa các trường được đánh dấu. Dữ liệu hợp lệ bạn đã nhập vẫn được giữ lại.',
+    });
     setFocusErrors((count) => count + 1);
   }
 
@@ -193,7 +219,11 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
     if (result.ok) {
       applyView(result.value);
       setErrors({});
-      setBanner({ tone: 'success', title: 'Đã lưu thay đổi', text: 'Dữ liệu chiến dịch đã được dịch vụ ClubFlow xác nhận.' });
+      setBanner({
+        tone: 'success',
+        title: 'Đã lưu thay đổi',
+        text: 'Dữ liệu chiến dịch đã được dịch vụ ClubFlow xác nhận.',
+      });
     } else {
       handleFailure(result.error);
     }
@@ -244,7 +274,10 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
   function requestRemove(position) {
     setListError('');
     if (!position.id) {
-      setForm((previous) => ({ ...previous, positions: previous.positions.filter((item) => item.key !== position.key) }));
+      setForm((previous) => ({
+        ...previous,
+        positions: previous.positions.filter((item) => item.key !== position.key),
+      }));
       return;
     }
     setRemoving(position);
@@ -256,7 +289,10 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
     setRemoving(null);
     if (result.ok) {
       setCurrent(result.value);
-      setForm((previous) => ({ ...previous, positions: previous.positions.filter((item) => item.key !== position.key) }));
+      setForm((previous) => ({
+        ...previous,
+        positions: previous.positions.filter((item) => item.key !== position.key),
+      }));
     } else if (result.error) {
       setListError(result.error.message);
     }
@@ -291,7 +327,10 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
     </>
   );
 
-  const statusBadge = campaign.status === 'published' ? { label: 'Đã công bố', tone: 'success' } : { label: 'Bản nháp', tone: 'warning' };
+  const statusBadge =
+    campaign.status === 'published'
+      ? { label: 'Đã công bố', tone: 'success' }
+      : { label: 'Bản nháp', tone: 'warning' };
   const lockMessage = LOCK_MESSAGES[lockReason];
 
   return (
@@ -310,7 +349,10 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
         ) : null}
         {!locked && campaign.status === 'published' ? (
           <Alert tone="info" title="Chiến dịch đã được công bố">
-            <p>Chi tiết và vị trí vẫn chỉnh sửa được theo Q-03; vị trí đã có hồ sơ không thể xóa. Interview Setup khóa sau hồ sơ hợp lệ đầu tiên.</p>
+            <p>
+              Chi tiết và vị trí vẫn chỉnh sửa được theo Q-03; vị trí đã có hồ sơ không thể xóa.
+              Interview Setup khóa sau hồ sơ hợp lệ đầu tiên.
+            </p>
             <Button to={ROUTES.EXECUTIVE_REVIEW}>Mở Application Review →</Button>
           </Alert>
         ) : null}
@@ -366,13 +408,17 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
                 </div>
                 <div>
                   <dt>Vị trí</dt>
-                  <dd>{form.positions.map((position) => position.name || 'Chưa đặt tên').join(' · ') || '—'}</dd>
+                  <dd>
+                    {form.positions
+                      .map((position) => position.name || 'Chưa đặt tên')
+                      .join(' · ') || '—'}
+                  </dd>
                 </div>
                 <div>
                   <dt>Phỏng vấn</dt>
                   <dd>
-                    {formatDate(form.interviewDate)} · {form.interviewWindow.start}–{form.interviewWindow.end} ·{' '}
-                    {form.slotMinutes} phút/ca
+                    {formatDate(form.interviewDate)} · {form.interviewWindow.start}–
+                    {form.interviewWindow.end} · {form.slotMinutes} phút/ca
                   </dd>
                 </div>
               </dl>
@@ -384,7 +430,12 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
         </div>
       </div>
 
-      <Modal open={previewOpen} title="Xem trước chiến dịch" size="large" onClose={() => setPreviewOpen(false)}>
+      <Modal
+        open={previewOpen}
+        title="Xem trước chiến dịch"
+        size="large"
+        onClose={() => setPreviewOpen(false)}
+      >
         <CampaignPreview campaign={form} positions={form.positions} />
       </Modal>
       <ConfirmDialog
@@ -396,11 +447,12 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
         onCancel={() => setPublishOpen(false)}
       >
         <p>
-          Chiến dịch sẽ hiển thị công khai. Ứng viên chỉ nộp được hồ sơ từ {formatDate(form.opensOn)} đến hết ngày{' '}
-          {formatDate(form.closesOn)} (giờ Việt Nam).
+          Chiến dịch sẽ hiển thị công khai. Ứng viên chỉ nộp được hồ sơ từ{' '}
+          {formatDate(form.opensOn)} đến hết ngày {formatDate(form.closesOn)} (giờ Việt Nam).
         </p>
         <p>
-          Sau khi công bố, chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03; Interview Setup khóa sau hồ sơ hợp lệ đầu tiên và toàn bộ cấu hình khóa khi lịch được xác nhận.
+          Sau khi công bố, chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03; Interview
+          Setup khóa sau hồ sơ hợp lệ đầu tiên và toàn bộ cấu hình khóa khi lịch được xác nhận.
         </p>
       </ConfirmDialog>
       <ConfirmDialog
@@ -412,7 +464,10 @@ function CampaignWorkspace({ view, actions, onCreated, onCreateNew, created = fa
         onConfirm={submitClose}
         onCancel={() => setCloseOpen(false)}
       >
-        <p>Ứng viên sẽ không thể nộp thêm hồ sơ cho chiến dịch này (Q-03). Các hồ sơ đã nộp được giữ nguyên.</p>
+        <p>
+          Ứng viên sẽ không thể nộp thêm hồ sơ cho chiến dịch này (Q-03). Các hồ sơ đã nộp được giữ
+          nguyên.
+        </p>
       </ConfirmDialog>
       <ConfirmDialog
         open={Boolean(removing)}
@@ -436,7 +491,9 @@ export default function CampaignManagementPage() {
   const creating = searchParams.get('new') === '1';
   const campaignId = searchParams.get('campaignId') || undefined;
   // A new draft still loads the primary campaign (the hook default) for the interviewer/room catalog.
-  const { data, status, error, reload, ...actions } = useCampaign(creating ? undefined : campaignId);
+  const { data, status, error, reload, ...actions } = useCampaign(
+    creating ? undefined : campaignId,
+  );
 
   // While another campaign id loads, the hook still returns the previous one; never edit stale data.
   const stale = status === 'success' && campaignId && !creating && data.campaign.id !== campaignId;

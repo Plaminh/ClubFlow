@@ -5,11 +5,22 @@ import './ChoiceGroup.css';
  * Fieldset of checkboxes or radios (reference "choice-group" / chips).
  * type 'checkbox': value is an array; type 'radio': value is a string.
  */
-export default function ChoiceGroup({ legend, name, type = 'checkbox', options, value, onChange, hint, error, disabled }) {
+export default function ChoiceGroup({
+  legend,
+  name,
+  type = 'checkbox',
+  options,
+  value,
+  onChange,
+  hint,
+  error,
+  disabled,
+}) {
   const id = useId();
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
-  const selected = (optionValue) => (type === 'checkbox' ? value.includes(optionValue) : value === optionValue);
+  const selected = (optionValue) =>
+    type === 'checkbox' ? value.includes(optionValue) : value === optionValue;
 
   function toggle(optionValue, checked) {
     if (type === 'radio') {

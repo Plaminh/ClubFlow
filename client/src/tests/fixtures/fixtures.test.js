@@ -5,103 +5,141 @@ import { SCENARIOS, buildScenarioState } from './scenarios.js';
 import { formatDateTime } from '../../utils/format.js';
 
 const accountIds = new Set(ACCOUNTS.map((account) => account.id));
-const overlaps = (a, b) => new Date(a.start) < new Date(b.end) && new Date(b.start) < new Date(a.end);
+const overlaps = (a, b) =>
+  new Date(a.start) < new Date(b.end) && new Date(b.start) < new Date(a.end);
 
 // specs/001-frontend-ui/data-model.md — consistency invariants, checked for every scenario.
-describe.each(SCENARIOS.map((scenario) => scenario.id))('fixtures in scenario "%s"', (scenarioId) => {
-  const state = buildScenarioState(scenarioId);
-  const applicationIds = new Set(state.applications.map((application) => application.id));
+describe.each(SCENARIOS.map((scenario) => scenario.id))(
+  'fixtures in scenario "%s"',
+  (scenarioId) => {
+    const state = buildScenarioState(scenarioId);
+    const applicationIds = new Set(state.applications.map((application) => application.id));
 
-  it('1. every reference resolves to an existing record', () => {
-    for (const application of state.applications) {
-      expect(accountIds.has(application.applicantId)).toBe(true);
-      expect(state.positions.some((position) => position.id === application.positionId)).toBe(true);
-      for (const slotId of application.slotIds) {
-        expect(state.slots.some((slot) => slot.id === slotId)).toBe(true);
+    it('1. every reference resolves to an existing record', () => {
+      for (const application of state.applications) {
+        expect(accountIds.has(application.applicantId)).toBe(true);
+        expect(state.positions.some((position) => position.id === application.positionId)).toBe(
+          true,
+        );
+        for (const slotId of application.slotIds) {
+          expect(state.slots.some((slot) => slot.id === slotId)).toBe(true);
+        }
       }
-    }
-    for (const position of state.positions) {
-      expect(state.departments.some((department) => department.id === position.departmentId)).toBe(true);
-    }
-    for (const interview of state.interviews) {
-      expect(applicationIds.has(interview.applicationId)).toBe(true);
-      if (interview.interviewerId) {
-        expect(accountIds.has(interview.interviewerId)).toBe(true);
+      for (const position of state.positions) {
+        expect(
+          state.departments.some((department) => department.id === position.departmentId),
+        ).toBe(true);
       }
-      if (interview.roomId) {
-        expect(state.rooms.some((room) => room.id === interview.roomId)).toBe(true);
+      for (const interview of state.interviews) {
+        expect(applicationIds.has(interview.applicationId)).toBe(true);
+        if (interview.interviewerId) {
+          expect(accountIds.has(interview.interviewerId)).toBe(true);
+        }
+        if (interview.roomId) {
+          expect(state.rooms.some((room) => room.id === interview.roomId)).toBe(true);
+        }
       }
-    }
-    for (const notification of state.notifications) {
-      expect(accountIds.has(notification.accountId)).toBe(true);
-      expect(applicationIds.has(notification.applicationId)).toBe(true);
-    }
-  });
+      for (const notification of state.notifications) {
+        expect(accountIds.has(notification.accountId)).toBe(true);
+        expect(applicationIds.has(notification.applicationId)).toBe(true);
+      }
+    });
 
-  it('keeps at most one application per applicant and position, and one interview per application', () => {
-    const keys = state.applications.map((application) => `${application.applicantId}|${application.positionId}`);
-    expect(new Set(keys).size).toBe(keys.length);
-    const interviewApps = state.interviews.map((interview) => interview.applicationId);
-    expect(new Set(interviewApps).size).toBe(interviewApps.length);
-  });
+    it('keeps at most one application per applicant and position, and one interview per application', () => {
+      const keys = state.applications.map(
+        (application) => `${application.applicantId}|${application.positionId}`,
+      );
+      expect(new Set(keys).size).toBe(keys.length);
+      const interviewApps = state.interviews.map((interview) => interview.applicationId);
+      expect(new Set(interviewApps).size).toBe(interviewApps.length);
+    });
 
-  it('3. never gives a rejected application an interview, assessment, or result', () => {
-    const rejected = new Set(
-      state.applications.filter((application) => application.screeningStatus === 'rejected').map((a) => a.id),
-    );
-    expect(state.interviews.filter((interview) => rejected.has(interview.applicationId))).toEqual([]);
-    expect(state.results.filter((result) => rejected.has(result.applicationId))).toEqual([]);
-  });
+    it('3. never gives a rejected application an interview, assessment, or result', () => {
+      const rejected = new Set(
+        state.applications
+          .filter((application) => application.screeningStatus === 'rejected')
+          .map((a) => a.id),
+      );
+      expect(state.interviews.filter((interview) => rejected.has(interview.applicationId))).toEqual(
+        [],
+      );
+      expect(state.results.filter((result) => rejected.has(result.applicationId))).toEqual([]);
+    });
 
-  it('4. only records a decision when a submitted assessment exists', () => {
-    for (const result of state.results.filter((item) => item.decision)) {
-      const interview = state.interviews.find((item) => item.applicationId === result.applicationId);
-      expect(state.assessments.some((assessment) => assessment.interviewId === interview?.id)).toBe(true);
-    }
-  });
+    it('4. only records a decision when a submitted assessment exists', () => {
+      for (const result of state.results.filter((item) => item.decision)) {
+        const interview = state.interviews.find(
+          (item) => item.applicationId === result.applicationId,
+        );
+        expect(
+          state.assessments.some((assessment) => assessment.interviewId === interview?.id),
+        ).toBe(true);
+      }
+    });
 
-  it('5. only notifies about published results', () => {
-    for (const notification of state.notifications) {
-      const result = state.results.find((item) => item.applicationId === notification.applicationId);
-      expect(result?.publishedAt).toBeTruthy();
-    }
-  });
-});
+    it('5. only notifies about published results', () => {
+      for (const notification of state.notifications) {
+        const result = state.results.find(
+          (item) => item.applicationId === notification.applicationId,
+        );
+        expect(result?.publishedAt).toBeTruthy();
+      }
+    });
+  },
+);
 
 // Team-selected Q-02: instants are UTC ISO 8601; date-only fields are Vietnam calendar days.
 describe('date and time convention (Q-02)', () => {
   const UTC_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-  it.each(SCENARIOS.map((scenario) => scenario.id))('serializes every instant of scenario "%s" in UTC', (scenarioId) => {
-    const state = buildScenarioState(scenarioId);
-    const instants = [
-      state.now,
-      state.campaign.publishedAt,
-      state.schedule.savedAt,
-      state.schedule.confirmedAt,
-      ...state.slots.flatMap((slot) => [slot.start, slot.end]),
-      ...state.assignments.flatMap((assignment) => assignment.availability.flatMap((range) => [range.start, range.end])),
-      ...state.applications.flatMap((application) => [application.submittedAt, application.reviewedAt]),
-      ...state.interviews.flatMap((interview) => [interview.start, interview.end]),
-      ...state.assessments.map((assessment) => assessment.submittedAt),
-      ...state.results.flatMap((result) => [result.recordedAt, result.publishedAt]),
-      ...state.notifications.flatMap((notification) => [notification.createdAt, notification.readAt]),
-    ].filter(Boolean);
+  it.each(SCENARIOS.map((scenario) => scenario.id))(
+    'serializes every instant of scenario "%s" in UTC',
+    (scenarioId) => {
+      const state = buildScenarioState(scenarioId);
+      const instants = [
+        state.now,
+        state.campaign.publishedAt,
+        state.schedule.savedAt,
+        state.schedule.confirmedAt,
+        ...state.slots.flatMap((slot) => [slot.start, slot.end]),
+        ...state.assignments.flatMap((assignment) =>
+          assignment.availability.flatMap((range) => [range.start, range.end]),
+        ),
+        ...state.applications.flatMap((application) => [
+          application.submittedAt,
+          application.reviewedAt,
+        ]),
+        ...state.interviews.flatMap((interview) => [interview.start, interview.end]),
+        ...state.assessments.map((assessment) => assessment.submittedAt),
+        ...state.results.flatMap((result) => [result.recordedAt, result.publishedAt]),
+        ...state.notifications.flatMap((notification) => [
+          notification.createdAt,
+          notification.readAt,
+        ]),
+      ].filter(Boolean);
 
-    expect(instants.length).toBeGreaterThan(0);
-    for (const instant of instants) {
-      expect(instant).toMatch(UTC_ISO);
-    }
-  });
+      expect(instants.length).toBeGreaterThan(0);
+      for (const instant of instants) {
+        expect(instant).toMatch(UTC_ISO);
+      }
+    },
+  );
 
   it('keeps the campaign period and interview date as date-only calendar days', () => {
     const { campaign } = buildScenarioState('screening');
-    expect([campaign.opensOn, campaign.closesOn, campaign.interviewDate]).toEqual(['2026-10-12', '2026-10-30', '2026-11-05']);
+    expect([campaign.opensOn, campaign.closesOn, campaign.interviewDate]).toEqual([
+      '2026-10-12',
+      '2026-10-30',
+      '2026-11-05',
+    ]);
   });
 
   it('opens at 00:00 on the opening day and closes at 00:00 after the closing day, Vietnam time', () => {
     const window = submissionWindow(buildScenarioState('screening').campaign);
-    expect(window).toEqual({ opensAt: '2026-10-11T17:00:00.000Z', closesAt: '2026-10-30T17:00:00.000Z' });
+    expect(window).toEqual({
+      opensAt: '2026-10-11T17:00:00.000Z',
+      closesAt: '2026-10-30T17:00:00.000Z',
+    });
     expect(formatDateTime(window.opensAt)).toBe('12/10/2026, 00:00');
     expect(formatDateTime(window.closesAt)).toBe('31/10/2026, 00:00');
   });
@@ -125,7 +163,9 @@ describe('scenario specifics', () => {
     const state = buildScenarioState('screening');
     expect(state.applications).toHaveLength(6);
     expect(new Set(state.applications.map((application) => application.applicantId)).size).toBe(5);
-    const minhAnh = state.applications.filter((application) => application.applicantId === 'ap-minhanh');
+    const minhAnh = state.applications.filter(
+      (application) => application.applicantId === 'ap-minhanh',
+    );
     expect(minhAnh.map((application) => application.id)).toEqual(['CF-026', 'CF-027']);
     expect(new Set(minhAnh.map((application) => application.positionId)).size).toBe(2);
   });
@@ -133,14 +173,18 @@ describe('scenario specifics', () => {
   it('screening: the draft shows the reference statuses (2 Conflict, 1 Proposed, 1 Unassigned)', () => {
     const { summary, rows } = evaluateSchedule(buildScenarioState('screening'));
     expect(summary).toMatchObject({ shortlisted: 4, proposed: 1, conflict: 2, unassigned: 1 });
-    expect(rows.find((row) => row.applicationId === 'CF-026').reasons).toContain('Chồng giờ với CF-027 của cùng ứng viên.');
+    expect(rows.find((row) => row.applicationId === 'CF-026').reasons).toContain(
+      'Chồng giờ với CF-027 của cùng ứng viên.',
+    );
   });
 
   it('2. confirmed: no applicant, interviewer, or room has overlapping interviews', () => {
     const state = buildScenarioState('confirmed');
     const placed = state.interviews.map((interview) => ({
       ...interview,
-      applicantId: state.applications.find((application) => application.id === interview.applicationId).applicantId,
+      applicantId: state.applications.find(
+        (application) => application.id === interview.applicationId,
+      ).applicantId,
     }));
     for (const a of placed) {
       for (const b of placed) {

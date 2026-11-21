@@ -31,7 +31,9 @@ describe('format utilities', () => {
     // 31/10/2026 00:00 in Vietnam is 30/10/2026 17:00 UTC.
     expect(formatDateTime('2026-10-30T16:59:59.999Z')).toBe('30/10/2026, 23:59');
     expect(formatDateTime('2026-10-30T17:00:00.000Z')).toBe('31/10/2026, 00:00');
-    expect(formatTimeRange('2026-11-05T02:00:00.000Z', '2026-11-05T02:15:00.000Z')).toBe('09:00–09:15');
+    expect(formatTimeRange('2026-11-05T02:00:00.000Z', '2026-11-05T02:15:00.000Z')).toBe(
+      '09:00–09:15',
+    );
   });
 
   it('treats date-only values as calendar dates, never as instants (Q-02)', () => {

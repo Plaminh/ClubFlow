@@ -17,7 +17,10 @@ describe('AppLayout', () => {
 
     expect(await screen.findByText('Khách (chưa đăng nhập)')).toBeInTheDocument();
     expect(navLinks()).toEqual(['Applicant Portal']);
-    expect(screen.getByRole('link', { name: 'Applicant Portal' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Applicant Portal' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
     expect(screen.getByRole('link', { name: 'Đăng nhập' })).toHaveAttribute('href', '/login');
     expect(screen.queryByRole('button', { name: /^Tài khoản của/ })).not.toBeInTheDocument();
   });
@@ -29,7 +32,10 @@ describe('AppLayout', () => {
 
     await screen.findByRole('heading', { level: 1, name: 'Create Recruitment Campaign' });
     expect(navLinks()).toEqual(['Chiến dịch', 'Duyệt hồ sơ', 'Xếp lịch', 'Trang công khai']);
-    expect(screen.getByRole('link', { name: 'Chiến dịch' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Chiến dịch' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
     expect(who('Recruitment Executive · Ban tuyển dụng')).toBeInTheDocument();
   });
 

@@ -13,7 +13,14 @@ import './ApplicationForm.css';
 const FACULTIES = ['Công nghệ thông tin', 'Thiết kế', 'Truyền thông'];
 
 function emptyValues(account) {
-  return { positionId: '', email: account.email ?? '', faculty: account.faculty ?? FACULTIES[0], sop: '', slotIds: [], cv: null };
+  return {
+    positionId: '',
+    email: account.email ?? '',
+    faculty: account.faculty ?? FACULTIES[0],
+    sop: '',
+    slotIds: [],
+    cv: null,
+  };
 }
 
 /**
@@ -22,7 +29,17 @@ function emptyValues(account) {
  * Client checks give fast feedback; `onSubmit` returns the service result,
  * whose field errors are shown the same way.
  */
-export default function ApplicationForm({ account, positions, slots, slotMinutes, interviewDate, applications, disabled, onSubmit, onViewApplication }) {
+export default function ApplicationForm({
+  account,
+  positions,
+  slots,
+  slotMinutes,
+  interviewDate,
+  applications,
+  disabled,
+  onSubmit,
+  onViewApplication,
+}) {
   const [values, setValues] = useState(() => emptyValues(account));
   const [errors, setErrors] = useState({});
   const [banner, setBanner] = useState(null);
@@ -31,12 +48,19 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
   const formRef = useRef(null);
   const words = countWords(values.sop);
   // The account's own faculty must be selectable, or the select would show a different value than it submits.
-  const facultyOptions = account.faculty && !FACULTIES.includes(account.faculty) ? [account.faculty, ...FACULTIES] : FACULTIES;
-  const appliedByPosition = Object.fromEntries(applications.map((application) => [application.positionId, application.id]));
+  const facultyOptions =
+    account.faculty && !FACULTIES.includes(account.faculty)
+      ? [account.faculty, ...FACULTIES]
+      : FACULTIES;
+  const appliedByPosition = Object.fromEntries(
+    applications.map((application) => [application.positionId, application.id]),
+  );
 
   useEffect(() => {
     if (focusErrors > 0) {
-      formRef.current?.querySelector('[aria-invalid="true"], .choice-group--invalid input')?.focus();
+      formRef.current
+        ?.querySelector('[aria-invalid="true"], .choice-group--invalid input')
+        ?.focus();
     }
   }, [focusErrors]);
 
@@ -55,7 +79,11 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
 
   function fail(fieldErrors, title = 'Chưa thể gửi hồ sơ') {
     setErrors(fieldErrors);
-    setBanner({ tone: 'error', title, text: 'Hãy sửa các trường được đánh dấu. Dữ liệu hợp lệ bạn đã nhập vẫn được giữ lại.' });
+    setBanner({
+      tone: 'error',
+      title,
+      text: 'Hãy sửa các trường được đánh dấu. Dữ liệu hợp lệ bạn đã nhập vẫn được giữ lại.',
+    });
     setFocusErrors((count) => count + 1);
   }
 
@@ -138,7 +166,12 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
               hint="Bạn có thể ứng tuyển nhiều vị trí, mỗi vị trí một hồ sơ."
             >
               {(props) => (
-                <select {...props} value={values.positionId} disabled={disabled} onChange={(event) => set('positionId', event.target.value)}>
+                <select
+                  {...props}
+                  value={values.positionId}
+                  disabled={disabled}
+                  onChange={(event) => set('positionId', event.target.value)}
+                >
                   <option value="">Chọn vị trí…</option>
                   {positions.map((item) => (
                     <option key={item.id} value={item.id}>
@@ -169,7 +202,12 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
               </FormField>
               <FormField id="apply-faculty" label="Khoa" error={errors.faculty}>
                 {(props) => (
-                  <select {...props} value={values.faculty} disabled={disabled} onChange={(event) => set('faculty', event.target.value)}>
+                  <select
+                    {...props}
+                    value={values.faculty}
+                    disabled={disabled}
+                    onChange={(event) => set('faculty', event.target.value)}
+                  >
                     {facultyOptions.map((faculty) => (
                       <option key={faculty} value={faculty}>
                         {faculty}
@@ -194,7 +232,10 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
               label="Bài trình bày nguyện vọng (Statement of Purpose)"
               error={errors.sop}
               extra={
-                <p className={`sop-counter ${words > MAX_SOP_WORDS ? 'sop-counter--over' : ''}`.trim()} aria-live="polite">
+                <p
+                  className={`sop-counter ${words > MAX_SOP_WORDS ? 'sop-counter--over' : ''}`.trim()}
+                  aria-live="polite"
+                >
                   <span>Tối đa {MAX_SOP_WORDS} từ</span>
                   <strong>
                     {words} / {MAX_SOP_WORDS} từ
@@ -215,7 +256,10 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
             <ChoiceGroup
               legend={`Khung giờ phỏng vấn có thể tham gia · ${formatDate(interviewDate)}`}
               name="slotIds"
-              options={slots.map((slot) => ({ value: slot.id, label: formatTimeRange(slot.start, slot.end) }))}
+              options={slots.map((slot) => ({
+                value: slot.id,
+                label: formatTimeRange(slot.start, slot.end),
+              }))}
               value={values.slotIds}
               onChange={(slotIds) => set('slotIds', slotIds)}
               hint={`Mỗi ca kéo dài ${slotMinutes} phút. Lịch chính thức chỉ hiển thị sau khi Ban tuyển dụng xác nhận.`}
@@ -243,16 +287,22 @@ export default function ApplicationForm({ account, positions, slots, slotMinutes
               </div>
               <div>
                 <dt>Khung giờ</dt>
-                <dd>{chosenSlots.map((slot) => formatTimeRange(slot.start, slot.end)).join(', ') || 'Chưa chọn'}</dd>
+                <dd>
+                  {chosenSlots.map((slot) => formatTimeRange(slot.start, slot.end)).join(', ') ||
+                    'Chưa chọn'}
+                </dd>
               </div>
             </dl>
             <Button type="submit" block disabled={disabled || pending}>
               {pending ? 'Đang gửi…' : 'Submit Application'}
             </Button>
             <p className="hint">
-              Kiểm tra kỹ trước khi gửi: sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn.
+              Kiểm tra kỹ trước khi gửi: sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung
+              giờ đã chọn.
             </p>
-            <p className="hint">Gửi hồ sơ không bảo đảm kết quả. Mỗi vị trí chỉ nhận một hồ sơ từ cùng tài khoản.</p>
+            <p className="hint">
+              Gửi hồ sơ không bảo đảm kết quả. Mỗi vị trí chỉ nhận một hồ sơ từ cùng tài khoản.
+            </p>
           </div>
         </Card>
       </div>

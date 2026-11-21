@@ -10,7 +10,14 @@ import './DataTable.css';
  * Explicit table roles keep the semantics when rows are restyled as cards.
  * columns: [{ key, header, render(row) }]
  */
-export default function DataTable({ caption, columns, rows, getRowKey, selectedKey, emptyText = 'Không có dữ liệu.' }) {
+export default function DataTable({
+  caption,
+  columns,
+  rows,
+  getRowKey,
+  selectedKey,
+  emptyText = 'Không có dữ liệu.',
+}) {
   if (rows.length === 0) {
     return <p className="muted">{emptyText}</p>;
   }

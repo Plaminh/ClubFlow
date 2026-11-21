@@ -1,6 +1,10 @@
 import Badge from '../../atoms/Badge/index.js';
 import Button from '../../atoms/Button/index.js';
-import { getLabel, SCREENING_STATUS_LABELS, SCREENING_STATUS_TONES } from '../../../constants/labels.js';
+import {
+  getLabel,
+  SCREENING_STATUS_LABELS,
+  SCREENING_STATUS_TONES,
+} from '../../../constants/labels.js';
 import { formatDateTime } from '../../../utils/format.js';
 import './ApplicationList.css';
 
@@ -28,7 +32,9 @@ export default function ApplicationList({ items, selectedId, onSelect }) {
                 variant="quiet"
                 onClick={() => onSelect(item.id)}
                 disabled={current}
-                aria-label={current ? `Đang xem ${item.id}` : `Review ${item.id} · ${item.applicantName}`}
+                aria-label={
+                  current ? `Đang xem ${item.id}` : `Review ${item.id} · ${item.applicantName}`
+                }
               >
                 {current ? 'Đang xem' : 'Review'}
               </Button>

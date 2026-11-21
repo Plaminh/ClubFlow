@@ -7,9 +7,5 @@ const labels = {
 };
 
 export default function StatusBadge({ status }) {
-  return (
-    <span className={`status-badge status-badge--${status}`}>
-      {labels[status] ?? status}
-    </span>
-  );
+  return <span className={`status-badge status-badge--${status}`}>{labels[status] ?? status}</span>;
 }

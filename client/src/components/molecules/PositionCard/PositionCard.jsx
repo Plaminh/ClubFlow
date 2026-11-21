@@ -1,7 +1,14 @@
 import './PositionCard.css';
 
 /** Read-only department + position summary (reference "position-card"). */
-export default function PositionCard({ departmentName, name, quota, description, requirements, headingLevel = 3 }) {
+export default function PositionCard({
+  departmentName,
+  name,
+  quota,
+  description,
+  requirements,
+  headingLevel = 3,
+}) {
   const Heading = `h${headingLevel}`;
 
   return (

@@ -39,20 +39,28 @@ export async function list(options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
 
 export async function getAssessment(applicationId, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
   const [assessment, schedule] = await Promise.all([
-    apiClient(`${base(campaignId)}/applications/${encodeURIComponent(applicationId)}/assessment`, options),
+    apiClient(
+      `${base(campaignId)}/applications/${encodeURIComponent(applicationId)}/assessment`,
+      options,
+    ),
     apiClient(`${base(campaignId)}/schedule`, options),
   ]);
   if (!assessment) return null;
-  const row = (schedule?.rows ?? []).find((item) => item.interviewerId === assessment.interviewerId);
+  const row = (schedule?.rows ?? []).find(
+    (item) => item.interviewerId === assessment.interviewerId,
+  );
   return { ...assessment, interviewerName: row?.interviewerName ?? assessment.interviewerId };
 }
 
 export function record(applicationId, decision, options = {}, campaignId = PRIMARY_CAMPAIGN_ID) {
-  return apiClient(`${base(campaignId)}/applications/${encodeURIComponent(applicationId)}/final-result`, {
-    ...options,
-    method: 'PUT',
-    body: { decision },
-  });
+  return apiClient(
+    `${base(campaignId)}/applications/${encodeURIComponent(applicationId)}/final-result`,
+    {
+      ...options,
+      method: 'PUT',
+      body: { decision },
+    },
+  );
 }
 
 /** Publishes every recorded, unpublished decision; the server creates one notification each, idempotently. */

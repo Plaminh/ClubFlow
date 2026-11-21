@@ -29,7 +29,8 @@ async function send(outgoing, response) {
 
 export function createMockServer(options = {}) {
   const mode = options.mode ?? process.env.MOCK_MODE ?? 'normal';
-  if (!VALID_MODES.has(mode)) throw new Error(`Invalid MOCK_MODE "${mode}". Expected normal, slow, error, or empty.`);
+  if (!VALID_MODES.has(mode))
+    throw new Error(`Invalid MOCK_MODE "${mode}". Expected normal, slow, error, or empty.`);
   const slowDelayMs = options.slowDelayMs ?? 2000;
   const normalDelayMs = options.normalDelayMs ?? 150;
   const state = options.state ?? createState();
@@ -48,7 +49,10 @@ export function createMockServer(options = {}) {
         response = new Response(null, { status: 204 });
       } else if (mode === 'error' && !isSignIn) {
         // Brief: error mode returns 500 for every request except sign-in.
-        response = json(500, { error: 'The mock is running in deterministic error mode.', code: 'MOCK_ERROR_MODE' });
+        response = json(500, {
+          error: 'The mock is running in deterministic error mode.',
+          code: 'MOCK_ERROR_MODE',
+        });
       } else {
         response = await routeRequest({ request, state });
         response = await projectForMode(response, mode);
@@ -84,14 +88,17 @@ export function createMockServer(options = {}) {
     },
     async close() {
       if (!server.listening) return;
-      await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+      await new Promise((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
     },
   };
 }
 
 async function main() {
   const port = Number(process.env.PORT ?? 3001);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be an integer from 1 to 65535.');
+  if (!Number.isInteger(port) || port < 1 || port > 65535)
+    throw new Error('PORT must be an integer from 1 to 65535.');
   const mock = createMockServer();
   const baseUrl = await mock.listen(port, '0.0.0.0');
   console.info(`ClubFlow PA#3 mock listening at ${baseUrl} in ${mock.mode} mode.`);

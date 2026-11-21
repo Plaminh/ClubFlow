@@ -15,7 +15,9 @@ export default function StepIndicator({ steps, current, label }) {
           </span>
           <span>
             {step}
-            {index + 1 === current ? <span className="visually-hidden"> (bước hiện tại)</span> : null}
+            {index + 1 === current ? (
+              <span className="visually-hidden"> (bước hiện tại)</span>
+            ) : null}
           </span>
         </li>
       ))}

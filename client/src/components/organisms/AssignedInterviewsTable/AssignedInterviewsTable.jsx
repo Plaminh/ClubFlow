@@ -41,7 +41,11 @@ export default function AssignedInterviewsTable({ interviews, selectedId, onSele
           variant="secondary"
           onClick={() => onSelect(row.interviewId)}
           disabled={row.interviewId === selectedId}
-          aria-label={row.interviewId === selectedId ? `Đang xem ${row.applicationId}` : `Chọn ${row.applicationId} · ${row.applicantName}`}
+          aria-label={
+            row.interviewId === selectedId
+              ? `Đang xem ${row.applicationId}`
+              : `Chọn ${row.applicationId} · ${row.applicantName}`
+          }
         >
           {row.interviewId === selectedId ? 'Đang xem' : 'Chọn'}
         </Button>

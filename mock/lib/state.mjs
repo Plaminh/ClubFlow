@@ -21,7 +21,7 @@ export const FIXED_TIMES = [
   '2026-12-02T13:10:00+07:00',
   '2026-12-02T13:12:00+07:00',
   '2026-12-02T13:20:00+07:00',
-  '2026-12-02T13:30:00+07:00'
+  '2026-12-02T13:30:00+07:00',
 ];
 
 export function createState() {
@@ -96,9 +96,19 @@ export function publicPosition(position) {
 export function emptyProjection(value, key = '') {
   if (Array.isArray(value)) return [];
   if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).map(([childKey, child]) => [childKey, emptyProjection(child, childKey)]));
+    return Object.fromEntries(
+      Object.entries(value).map(([childKey, child]) => [
+        childKey,
+        emptyProjection(child, childKey),
+      ]),
+    );
   }
-  if (typeof value === 'number' && /^(total|pageCount|unreadCount|applications|applicants|pendingReview|shortlisted|rejected|proposed|conflict|unassigned|applicationCount)$/u.test(key)) {
+  if (
+    typeof value === 'number' &&
+    /^(total|pageCount|unreadCount|applications|applicants|pendingReview|shortlisted|rejected|proposed|conflict|unassigned|applicationCount)$/u.test(
+      key,
+    )
+  ) {
     return 0;
   }
   return value;

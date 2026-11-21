@@ -23,8 +23,8 @@ export default function CampaignPreview({ campaign, positions }) {
         <div>
           <dt>Phỏng vấn</dt>
           <dd>
-            {formatDate(campaign.interviewDate)} · {campaign.interviewWindow.start}–{campaign.interviewWindow.end} ·{' '}
-            {campaign.slotMinutes} phút/ca
+            {formatDate(campaign.interviewDate)} · {campaign.interviewWindow.start}–
+            {campaign.interviewWindow.end} · {campaign.slotMinutes} phút/ca
           </dd>
         </div>
       </dl>

@@ -17,7 +17,13 @@ function expectNoEditingControls() {
   expect(page.queryAllByRole('textbox')).toEqual([]);
   expect(page.queryAllByRole('combobox')).toEqual([]);
   expect(page.queryByLabelText('Ngày mở đơn')).not.toBeInTheDocument();
-  for (const name of ['Save as Draft', 'Publish Campaign', 'Lưu thay đổi', '+ Thêm vị trí', 'Xóa vị trí']) {
+  for (const name of [
+    'Save as Draft',
+    'Publish Campaign',
+    'Lưu thay đổi',
+    '+ Thêm vị trí',
+    'Xóa vị trí',
+  ]) {
     expect(page.queryAllByRole('button', { name })).toEqual([]);
   }
 }
@@ -60,7 +66,9 @@ describe('Campaign Management', () => {
     expect(screen.getByLabelText('Thời lượng mỗi ca')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Save as Draft' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Publish Campaign' })).toBeEnabled();
-    expect(screen.getByRole('heading', { level: 2, name: 'Xem trước chiến dịch' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Xem trước chiến dịch' }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/chỉ đọc/i)).not.toBeInTheDocument();
   });
 
@@ -73,7 +81,9 @@ describe('Campaign Management', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Publish Campaign' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Chưa thể công bố chiến dịch');
-    expect(screen.getByText('Mô tả chiến dịch là bắt buộc. Hãy thêm mô tả trước khi công bố.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Mô tả chiến dịch là bắt buộc. Hãy thêm mô tả trước khi công bố.'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Ngày đóng đơn phải sau ngày mở đơn.')).toBeInTheDocument();
     expect(screen.getByText('Chỉ tiêu phải là số nguyên dương (ví dụ 2).')).toBeInTheDocument();
     expect(screen.getByLabelText('Câu lạc bộ chủ trì')).toHaveValue('CLB Công nghệ & Sáng tạo');
@@ -116,14 +126,23 @@ describe('Campaign Management', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Publish Campaign' }));
     const confirm = await screen.findByRole('dialog', { name: 'Công bố chiến dịch?' });
-    expect(within(confirm).getByText(/chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03/)).toBeInTheDocument();
+    expect(
+      within(confirm).getByText(/chi tiết và vị trí chỉ được chỉnh sửa trong giới hạn Q-03/),
+    ).toBeInTheDocument();
     fireEvent.click(within(confirm).getByRole('button', { name: 'Công bố chiến dịch' }));
 
     expect(await screen.findByText('Đã công bố chiến dịch')).toBeInTheDocument();
-    expect(screen.getByText(/Chi tiết vẫn có thể chỉnh sửa theo giới hạn Q-03/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Mở Application Review →' })).toHaveAttribute('href', '/executive/review');
+    expect(
+      screen.getByText(/Chi tiết vẫn có thể chỉnh sửa theo giới hạn Q-03/),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Mở Application Review →' })).toHaveAttribute(
+      'href',
+      '/executive/review',
+    );
     expect(screen.getByRole('button', { name: 'Lưu thay đổi' })).toBeEnabled();
-    expect(screen.getAllByLabelText('Tên vị trí (Position)').at(-1)).toHaveValue('Event Coordinator');
+    expect(screen.getAllByLabelText('Tên vị trí (Position)').at(-1)).toHaveValue(
+      'Event Coordinator',
+    );
   });
 
   it('cancelling the publish confirmation keeps the draft editable', async () => {
@@ -142,7 +161,9 @@ describe('Campaign Management', () => {
     await openAs('screening');
 
     const alert = screen.getByText('Chiến dịch đã được công bố').closest('.alert');
-    expect(within(alert).getByText(/Interview Setup khóa sau hồ sơ hợp lệ đầu tiên/)).toBeInTheDocument();
+    expect(
+      within(alert).getByText(/Interview Setup khóa sau hồ sơ hợp lệ đầu tiên/),
+    ).toBeInTheDocument();
     expect(screen.getByText('Đã công bố')).toBeInTheDocument();
     expect(screen.getByLabelText('Tên chiến dịch')).toBeEnabled();
     expect(screen.queryByLabelText('Ngày phỏng vấn')).not.toBeInTheDocument();
@@ -161,7 +182,11 @@ describe('Campaign Management', () => {
     await openAs('confirmed');
 
     expect(screen.getByText('Cấu hình chiến dịch đang ở chế độ chỉ đọc')).toBeInTheDocument();
-    expect(screen.getByText(/lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa \(BR-14\)/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /lịch phỏng vấn đã được xác nhận, nên cấu hình chiến dịch được khóa \(BR-14\)/,
+      ),
+    ).toBeInTheDocument();
     expectNoEditingControls();
     expect(screen.getByRole('button', { name: 'Preview Campaign' })).toBeEnabled();
   });
@@ -189,22 +214,38 @@ describe('Campaign Management', () => {
     expect(await screen.findByText('Campaign fields are invalid.')).toBeInTheDocument();
     expect(getMockApiState().created).toBeUndefined();
 
-    fireEvent.change(screen.getByLabelText('Tên chiến dịch'), { target: { value: 'ClubFlow 2027 Recruitment' } });
-    fireEvent.change(screen.getByLabelText('Mô tả chiến dịch'), { target: { value: 'Recruit the next cohort.' } });
-    fireEvent.change(screen.getByLabelText('Hướng dẫn ứng tuyển'), { target: { value: 'Submit one PDF CV.' } });
+    fireEvent.change(screen.getByLabelText('Tên chiến dịch'), {
+      target: { value: 'ClubFlow 2027 Recruitment' },
+    });
+    fireEvent.change(screen.getByLabelText('Mô tả chiến dịch'), {
+      target: { value: 'Recruit the next cohort.' },
+    });
+    fireEvent.change(screen.getByLabelText('Hướng dẫn ứng tuyển'), {
+      target: { value: 'Submit one PDF CV.' },
+    });
     fireEvent.change(screen.getByLabelText('Ngày mở đơn'), { target: { value: '2027-01-10' } });
     fireEvent.change(screen.getByLabelText('Ngày đóng đơn'), { target: { value: '2027-01-25' } });
     fireEvent.change(screen.getByLabelText('Ngày phỏng vấn'), { target: { value: '2027-02-01' } });
     fireEvent.click(screen.getByRole('button', { name: '+ Thêm vị trí' }));
-    fireEvent.change(screen.getByLabelText('Ban (Department)'), { target: { value: 'Communications' } });
-    fireEvent.change(screen.getByLabelText('Tên vị trí (Position)'), { target: { value: 'Content' } });
+    fireEvent.change(screen.getByLabelText('Ban (Department)'), {
+      target: { value: 'Communications' },
+    });
+    fireEvent.change(screen.getByLabelText('Tên vị trí (Position)'), {
+      target: { value: 'Content' },
+    });
     fireEvent.change(screen.getByLabelText('Chỉ tiêu'), { target: { value: '2' } });
-    fireEvent.change(screen.getByLabelText('Mô tả công việc'), { target: { value: 'Write content.' } });
+    fireEvent.change(screen.getByLabelText('Mô tả công việc'), {
+      target: { value: 'Write content.' },
+    });
     fireEvent.change(screen.getByLabelText('Yêu cầu'), { target: { value: 'Clear writing.' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }));
 
     expect(await screen.findByText('Đã tạo bản nháp chiến dịch')).toBeInTheDocument();
-    expect(getMockApiState().campaign).toMatchObject({ id: 'cmp-2027-hk1', status: 'draft', name: 'ClubFlow 2027 Recruitment' });
+    expect(getMockApiState().campaign).toMatchObject({
+      id: 'cmp-2027-hk1',
+      status: 'draft',
+      name: 'ClubFlow 2027 Recruitment',
+    });
     expect(screen.getByRole('button', { name: 'Publish Campaign' })).toBeInTheDocument();
   });
 
@@ -216,11 +257,15 @@ describe('Campaign Management', () => {
   it('shows a retryable HTTP error and recovers without leaving the route', async () => {
     setMockApiMode('error');
     renderApp(PATH, { accountId: EXECUTIVE, scenarioId: 'draft' });
-    expect(await screen.findByText('The mock is running in deterministic error mode.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('The mock is running in deterministic error mode.'),
+    ).toBeInTheDocument();
 
     setMockApiMode('normal');
     fireEvent.click(screen.getByRole('button', { name: /Thử lại/ }));
-    expect(await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 2, name: 'Thông tin chiến dịch' }),
+    ).toBeInTheDocument();
   });
 
   it('renders an empty Position collection without inventing business data', async () => {

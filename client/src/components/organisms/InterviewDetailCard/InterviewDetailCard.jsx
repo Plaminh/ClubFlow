@@ -30,8 +30,8 @@ export default function InterviewDetailCard({ interview, onOpenCv, cvPending = f
           <div>
             <dt>Buổi phỏng vấn</dt>
             <dd>
-              {formatDate(interview.start)} · {formatTimeRange(interview.start, interview.end)} · Phòng{' '}
-              {interview.roomName}
+              {formatDate(interview.start)} · {formatTimeRange(interview.start, interview.end)} ·
+              Phòng {interview.roomName}
             </dd>
           </div>
         </dl>

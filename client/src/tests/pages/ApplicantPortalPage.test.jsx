@@ -4,7 +4,12 @@ import { describe, expect, it } from 'vitest';
 import { DemoSessionProvider } from '../../contexts/DemoSessionContext.jsx';
 import AppRoutes from '../../routes/AppRoutes.jsx';
 import { renderApp } from '../helpers/renderApp.jsx';
-import { addMockApiApplication, sessionUserFor, setMockApiMode, setMockApiScenario } from '../helpers/mockApi.js';
+import {
+  addMockApiApplication,
+  sessionUserFor,
+  setMockApiMode,
+  setMockApiScenario,
+} from '../helpers/mockApi.js';
 
 const MINH_ANH = 'ap-minhanh';
 const HAI_DANG = 'ap-haidang';
@@ -18,20 +23,28 @@ async function openTab(tab, options) {
   await screen.findByRole('tab', { selected: true });
 }
 
-function fillValidForm({ position = 'User Experience Design', sop = 'Em muốn tham gia câu lạc bộ.' } = {}) {
+function fillValidForm({
+  position = 'User Experience Design',
+  sop = 'Em muốn tham gia câu lạc bộ.',
+} = {}) {
   const positionSelect = screen.getByLabelText('Vị trí ứng tuyển');
   fireEvent.change(positionSelect, {
     target: { value: within(positionSelect).getByRole('option', { name: position }).value },
   });
   fireEvent.change(screen.getByLabelText('CV (PDF, tối đa 5 MB)'), { target: { files: [pdf()] } });
-  fireEvent.change(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)'), { target: { value: sop } });
+  fireEvent.change(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)'), {
+    target: { value: sop },
+  });
   fireEvent.click(screen.getByRole('checkbox', { name: '09:00–10:00' }));
 }
 
 describe('Applicant Portal', () => {
   it('requests the public campaign once when a saved applicant session is restored', async () => {
     // No StrictMode here: its double effects would hide a real second request.
-    window.sessionStorage.setItem('clubflow.demoSession', JSON.stringify({ token: 'mock-token-studentA', user: sessionUserFor(MINH_ANH) }));
+    window.sessionStorage.setItem(
+      'clubflow.demoSession',
+      JSON.stringify({ token: 'mock-token-studentA', user: sessionUserFor(MINH_ANH) }),
+    );
     render(
       <MemoryRouter initialEntries={['/']}>
         <DemoSessionProvider>
@@ -41,7 +54,9 @@ describe('Applicant Portal', () => {
     );
 
     await screen.findByRole('tab', { selected: true });
-    const campaignRequests = fetch.mock.calls.filter(([url]) => String(url).includes('/campaigns/current'));
+    const campaignRequests = fetch.mock.calls.filter(([url]) =>
+      String(url).includes('/campaigns/current'),
+    );
     expect(campaignRequests).toHaveLength(1);
   });
 
@@ -49,7 +64,9 @@ describe('Applicant Portal', () => {
     renderApp('/', { scenarioId: 'accepting' });
 
     await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' });
-    expect(await screen.findByText('Đang nhận hồ sơ', { selector: '.alert__title' })).toBeInTheDocument();
+    expect(
+      await screen.findByText('Đang nhận hồ sơ', { selector: '.alert__title' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Digital Product' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Apply Now' }));
@@ -92,7 +109,9 @@ describe('Applicant Portal', () => {
     expect(screen.getByText('Vui lòng chọn vị trí ứng tuyển.')).toBeInTheDocument();
     expect(screen.getByText('Tệp phải là PDF (.pdf).')).toBeInTheDocument();
     expect(screen.getByText('Chọn ít nhất một khung giờ có thể tham gia.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue('Nội dung hợp lệ.');
+    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue(
+      'Nội dung hợp lệ.',
+    );
     await waitFor(() => expect(screen.getByLabelText('Vị trí ứng tuyển')).toHaveFocus());
   });
 
@@ -104,7 +123,9 @@ describe('Applicant Portal', () => {
     expect(screen.getAllByText('300 / 300 từ').length).toBeGreaterThan(0);
     fireEvent.change(sop, { target: { value: Array(301).fill('từ').join(' ') } });
     expect(screen.getAllByText('301 / 300 từ').length).toBeGreaterThan(0);
-    fireEvent.change(screen.getByLabelText('CV (PDF, tối đa 5 MB)'), { target: { files: [pdf('cv.pdf', 6 * 1024 * 1024)] } });
+    fireEvent.change(screen.getByLabelText('CV (PDF, tối đa 5 MB)'), {
+      target: { files: [pdf('cv.pdf', 6 * 1024 * 1024)] },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
 
@@ -115,7 +136,9 @@ describe('Applicant Portal', () => {
   it('accepts the exact 5 MB PDF and 300-word boundaries', async () => {
     await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
     fillValidForm({ sop: Array(300).fill('từ').join(' ') });
-    fireEvent.change(screen.getByLabelText('CV (PDF, tối đa 5 MB)'), { target: { files: [pdf('boundary.pdf', 5 * 1024 * 1024)] } });
+    fireEvent.change(screen.getByLabelText('CV (PDF, tối đa 5 MB)'), {
+      target: { files: [pdf('boundary.pdf', 5 * 1024 * 1024)] },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
 
@@ -126,7 +149,9 @@ describe('Applicant Portal', () => {
     await openTab('apply', { scenarioId: 'accepting', accountId: HAI_DANG });
     fillValidForm();
 
-    expect(screen.getByText(/sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/sau khi gửi, bạn không thể sửa hồ sơ, đổi CV hay đổi khung giờ đã chọn/),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
 
     expect(await screen.findByText('Đã gửi hồ sơ CF-032')).toBeInTheDocument();
@@ -143,7 +168,9 @@ describe('Applicant Portal', () => {
     await openTab('apply', { scenarioId: 'accepting', accountId: MINH_ANH });
     const positionSelect = screen.getByLabelText('Vị trí ứng tuyển');
 
-    expect(within(positionSelect).getByRole('option', { name: 'User Experience Design (đã nộp)' })).toBeInTheDocument();
+    expect(
+      within(positionSelect).getByRole('option', { name: 'User Experience Design (đã nộp)' }),
+    ).toBeInTheDocument();
     fireEvent.change(positionSelect, { target: { value: 'pos-ux' } });
 
     expect(screen.getByText(/Bạn đã nộp hồ sơ CF-026 cho vị trí này/)).toBeInTheDocument();
@@ -166,7 +193,9 @@ describe('Applicant Portal', () => {
 
     expect(await screen.findByText('Hồ sơ cho vị trí này đã tồn tại')).toBeInTheDocument();
     expect(screen.getAllByText(/Bạn đã nộp hồ sơ CF-099 cho vị trí này/).length).toBeGreaterThan(0);
-    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue('Nội dung phải được giữ lại.');
+    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue(
+      'Nội dung phải được giữ lại.',
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Xem hồ sơ CF-099' }));
     const table = await screen.findByRole('table', { name: 'Hồ sơ của tôi' });
@@ -185,7 +214,9 @@ describe('Applicant Portal', () => {
 
   it('shows confirmed interviews, only the published result, and its notification', async () => {
     await openTab('mine', { scenarioId: 'confirmed', accountId: MINH_ANH });
-    const rows = within(await screen.findByRole('table', { name: 'Hồ sơ của tôi' })).getAllByRole('row').slice(1);
+    const rows = within(await screen.findByRole('table', { name: 'Hồ sơ của tôi' }))
+      .getAllByRole('row')
+      .slice(1);
     const cf026 = rows.find((row) => within(row).queryByText('CF-026'));
     const cf027 = rows.find((row) => within(row).queryByText('CF-027'));
 
@@ -197,7 +228,9 @@ describe('Applicant Portal', () => {
     const notificationsTab = screen.getByRole('tab', { name: /Notifications/ });
     expect(notificationsTab).toHaveTextContent('1');
     fireEvent.click(notificationsTab);
-    expect(screen.getByText('Kết quả hồ sơ CF-026 (User Experience Design) đã được công bố: Pass.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Kết quả hồ sơ CF-026 (User Experience Design) đã được công bố: Pass.'),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/CF-027/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Đánh dấu tất cả đã đọc' }));
@@ -224,17 +257,22 @@ describe('Applicant Portal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit Application' }));
 
     expect(await screen.findByText('Applications are closed.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue('Nội dung cần được giữ lại khi máy chủ từ chối.');
+    expect(screen.getByLabelText('Bài trình bày nguyện vọng (Statement of Purpose)')).toHaveValue(
+      'Nội dung cần được giữ lại khi máy chủ từ chối.',
+    );
   });
 
   it('shows retryable HTTP errors and recovers in place', async () => {
     setMockApiMode('error');
     renderApp('/', { scenarioId: 'accepting' });
-    expect(await screen.findByText('The mock is running in deterministic error mode.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('The mock is running in deterministic error mode.'),
+    ).toBeInTheDocument();
     setMockApiMode('normal');
     fireEvent.click(screen.getByRole('button', { name: /Thử lại/ }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' })).toBeInTheDocument();
-
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Applicant Portal' }),
+    ).toBeInTheDocument();
   });
 
   it('renders genuine empty HTTP collections without fixture fallbacks', async () => {

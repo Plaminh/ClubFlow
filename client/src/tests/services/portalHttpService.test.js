@@ -21,9 +21,14 @@ describe('public and Applicant HTTP adapters', () => {
   });
 
   it('loads the public campaign and maps a missing publication to an empty state', async () => {
-    await expect(portalService.getPublicCampaign()).resolves.toMatchObject({ phase: 'open', acceptingApplications: true });
+    await expect(portalService.getPublicCampaign()).resolves.toMatchObject({
+      phase: 'open',
+      acceptingApplications: true,
+    });
     setMockApiScenario('draft');
-    await expect(portalService.getPublicCampaign()).resolves.toEqual(expect.objectContaining({ campaign: null, positions: [] }));
+    await expect(portalService.getPublicCampaign()).resolves.toEqual(
+      expect.objectContaining({ campaign: null, positions: [] }),
+    );
   });
 
   it('adds campaignId to multipart submissions and lists only the token owner records', async () => {
@@ -38,17 +43,25 @@ describe('public and Applicant HTTP adapters', () => {
   it('preserves duplicate and closed contract details', async () => {
     await portalService.submitApplication(validForm());
     await expect(portalService.submitApplication(validForm())).rejects.toMatchObject({
-      kind: 'conflict', code: 'DUPLICATE_APPLICATION', details: { existingApplicationId: expect.any(String) },
+      kind: 'conflict',
+      code: 'DUPLICATE_APPLICATION',
+      details: { existingApplicationId: expect.any(String) },
     });
     setMockApiScenario('screening');
-    await expect(portalService.submitApplication(validForm())).rejects.toMatchObject({ kind: 'conflict', code: 'APPLICATIONS_CLOSED' });
+    await expect(portalService.submitApplication(validForm())).rejects.toMatchObject({
+      kind: 'conflict',
+      code: 'APPLICATIONS_CLOSED',
+    });
   });
 
   it('maps confirmed interviews, published-only results, and owned notifications', async () => {
     setAuthTokenProvider(() => 'mock-token-studentA');
     setMockApiScenario('confirmed');
     const applications = await portalService.listMyApplications();
-    expect(applications.find((item) => item.id === 'CF-026')).toMatchObject({ interview: expect.any(Object), result: { decision: 'pass' } });
+    expect(applications.find((item) => item.id === 'CF-026')).toMatchObject({
+      interview: expect.any(Object),
+      result: { decision: 'pass' },
+    });
     expect(applications.find((item) => item.id === 'CF-027').result).toBeNull();
     expect(await portalService.listNotifications()).toHaveLength(1);
     await expect(portalService.markNotificationsRead()).resolves.toBeNull();

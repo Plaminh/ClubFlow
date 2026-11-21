@@ -10,7 +10,17 @@ import { formatTimeRange } from '../../../utils/format.js';
  * schedule view (sessions in the window, interviewers assigned to the
  * position, available rooms); the service re-checks the result.
  */
-export default function ScheduleRowDialog({ row, sessionStarts, slotMinutes, interviewers, rooms, busy, error, onSubmit, onClose }) {
+export default function ScheduleRowDialog({
+  row,
+  sessionStarts,
+  slotMinutes,
+  interviewers,
+  rooms,
+  busy,
+  error,
+  onSubmit,
+  onClose,
+}) {
   const [values, setValues] = useState({
     start: row.start ?? sessionStarts[0] ?? '',
     interviewerId: row.interviewerId ?? interviewers[0]?.id ?? '',
@@ -25,11 +35,16 @@ export default function ScheduleRowDialog({ row, sessionStarts, slotMinutes, int
       formRef.current?.querySelector('[aria-invalid="true"]')?.focus();
     }
   }, [error]);
-  const set = (field) => (event) => setValues((previous) => ({ ...previous, [field]: event.target.value }));
+  const set = (field) => (event) =>
+    setValues((previous) => ({ ...previous, [field]: event.target.value }));
   const endOf = (start) => new Date(new Date(start).getTime() + slotMinutes * 60000).toISOString();
 
   return (
-    <Modal open title={`${row.status === 'unassigned' ? 'Gán khung giờ' : 'Sửa phân công'} · ${row.applicationId}`} onClose={onClose}>
+    <Modal
+      open
+      title={`${row.status === 'unassigned' ? 'Gán khung giờ' : 'Sửa phân công'} · ${row.applicationId}`}
+      onClose={onClose}
+    >
       <p>
         {row.applicantName} · {row.positionName} · giờ rảnh {row.availabilityText || '—'}
       </p>
@@ -89,7 +104,10 @@ export default function ScheduleRowDialog({ row, sessionStarts, slotMinutes, int
             </select>
           )}
         </FormField>
-        <p className="hint">Sau khi lưu, hệ thống kiểm tra lại giờ rảnh, người phỏng vấn và phòng của toàn bộ lịch nháp.</p>
+        <p className="hint">
+          Sau khi lưu, hệ thống kiểm tra lại giờ rảnh, người phỏng vấn và phòng của toàn bộ lịch
+          nháp.
+        </p>
         <div className="button-row button-row--end">
           <Button variant="secondary" onClick={onClose}>
             Hủy

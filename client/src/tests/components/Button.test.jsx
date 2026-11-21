@@ -19,7 +19,10 @@ describe('Button', () => {
       </>,
     );
 
-    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toHaveClass('button', 'button--secondary');
+    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toHaveClass(
+      'button',
+      'button--secondary',
+    );
     expect(screen.getByRole('button', { name: 'Loại hồ sơ' })).toHaveClass('button--danger');
   });
 
@@ -30,7 +33,10 @@ describe('Button', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: 'Mở Application Review →' })).toHaveAttribute('href', '/executive/review');
+    expect(screen.getByRole('link', { name: 'Mở Application Review →' })).toHaveAttribute(
+      'href',
+      '/executive/review',
+    );
   });
 });
 

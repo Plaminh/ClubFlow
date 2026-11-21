@@ -13,10 +13,12 @@ describe('post-sign-in destination (role-safe)', () => {
   });
 
   it('restores an intended destination the role may open, with its query string', () => {
-    expect(postSignInDestination('executive', { pathname: '/executive/review', search: '?tab=results' })).toBe(
-      '/executive/review?tab=results',
+    expect(
+      postSignInDestination('executive', { pathname: '/executive/review', search: '?tab=results' }),
+    ).toBe('/executive/review?tab=results');
+    expect(postSignInDestination('applicant', { pathname: '/', search: '?tab=apply' })).toBe(
+      '/?tab=apply',
     );
-    expect(postSignInDestination('applicant', { pathname: '/', search: '?tab=apply' })).toBe('/?tab=apply');
     expect(postSignInDestination('interviewer', { pathname: '/profile' })).toBe('/profile');
   });
 
@@ -29,13 +31,16 @@ describe('post-sign-in destination (role-safe)', () => {
     expect(postSignInDestination(role, { pathname })).toBe(home);
   });
 
-  it.each(['/login', '/unknown', '//evil.example', 'https://evil.example/profile', '/profile/../executive/campaign'])(
-    'ignores the unknown or external destination %s',
-    (pathname) => {
-      expect(postSignInDestination('applicant', { pathname })).toBe('/');
-      expect(canAccessProtectedPath('applicant', pathname)).toBe(false);
-    },
-  );
+  it.each([
+    '/login',
+    '/unknown',
+    '//evil.example',
+    'https://evil.example/profile',
+    '/profile/../executive/campaign',
+  ])('ignores the unknown or external destination %s', (pathname) => {
+    expect(postSignInDestination('applicant', { pathname })).toBe('/');
+    expect(canAccessProtectedPath('applicant', pathname)).toBe(false);
+  });
 
   it('grants nothing to visitors or unknown roles', () => {
     expect(canAccessProtectedPath('visitor', '/profile')).toBe(false);

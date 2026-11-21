@@ -9,7 +9,15 @@ const FOCUSABLE =
  * Accessible modal dialog: focus moves inside on open, Tab is trapped,
  * Escape and the backdrop close it, and focus returns to the opener.
  */
-export default function Modal({ open, title, onClose, children, footer, size = 'small', closeLabel = 'Đóng' }) {
+export default function Modal({
+  open,
+  title,
+  onClose,
+  children,
+  footer,
+  size = 'small',
+  closeLabel = 'Đóng',
+}) {
   const titleId = useId();
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
