@@ -1587,3 +1587,23 @@ Changed: Nothing in code behaviour: build 393 kB, client tests 287/287, mock tes
 Rejected: Rewriting history records that mention `backend/`, Cloudinary or the root `.env` (`AI-LOG.md`, `brief.md`, meeting notes, `specs/001`–`002`): they record what was true then, and PA#5 compares this log with the earlier hand-ins. Changing `mock-token-…` in the PA#3 mock and its client tests: the mock is still the PA#3 hand-in. Rewriting `server/src/middleware/upload.middleware.js`: it belongs to Nguyệt's S5 task (T044).
 
 By hand: The team asked for the clean-up and decides on the local root `.env` file, which is ignored and was not read.
+
+---
+
+## 2026-11-21 — PA#4 — CI red since its first run
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Find out why every CI run on `feature/pa4` (#1–#16) was red, and fix it.
+
+Kept: `e2e1d58` (client tests), `ba4df09` (actions v5), `6844266` (build before server tests).
+
+Changed: The two client tests assert a CV download with a realm-independent check: `[object Blob]`, type `application/pdf`, and now its content (`%PDF`), read through `client/src/tests/helpers/blob.js`. Not loosened: the old assertions are kept in another form and the content check is new.
+
+Rejected: Pinning CI to Node 26 to match the developer machine: the PA#4 marker uses Node 22, so CI must too. Reading the job log by making the repository public was the team's choice; the failing step and test names came from the public check-run annotations.
+
+By hand: The team made the repository public so the run results could be read.
+
+Verified: Client 287/287 and mock 17/17 under Node 22.23.5 (`npx node@22`) and Node 26. Run #17 (`ba4df09`): format, lint, client/mock tests and `npm ci --ignore-scripts` in `server/` green; server tests red only on the 5 intentional `auth-401.test.js` tests (waiting for `GET /api/auth/me`, T041).
+
+Incident: The CI gate caught it, not reading. Since `88fe9d6` every run failed in "Tests (client, …)" on `apiClient.test.js:67` and `applicationHttpService.test.js:40`: `expected Blob { type: 'application/pdf' } to be an instance of Blob`. Under jsdom, `fetch()` returns Node's `Blob` on Node 22 but jsdom's on Node 26, so `instanceof Blob` held only locally. Because that step failed first, the mock and server tests had never run in CI until #17. Rule kept: CI runs Node 22, the marker's version (`AGENTS.md`, stack line).
