@@ -119,9 +119,9 @@ If the API returns a different shape, **map it inside the service** so pages sta
 
 - Upload boundary: `ApplicationForm` builds `FormData` with `positionId`, `email`, `faculty`, `sop`, repeated `slotIds`, and `cv` (the `File`). `apiClient` sends it without a JSON content type.
 - Client checks (`.pdf`, ≤ 5 MB) are for feedback only. Express/Multer must accept one file with a 5 MB limit and the backend must inspect the actual PDF signature/content rather than trust the extension or MIME header.
-- Upload the validated file to a non-public/protected Cloudinary delivery/access mode supported by the team's account. Store the asset/public identifier, version, resource/delivery type, format, byte size and safe original name against the application. Never store a permanent public URL as the authorization boundary.
-- Viewing: the demo links to one fictional file, `/demo/fictional-sample-cv.pdf` (`SAMPLE_CV_URL` in `mocks/fixtures.js`). A real retrieval endpoint authenticates with JWT and authorizes the Executive or the interviewer assigned to the application, then streams the file or returns a short-lived signed/authenticated delivery URL. Verify the exact Cloudinary delivery mode and account capability during backend integration (Q-07, §12.7).
-- Keep Cloudinary API secret/key material server-side. Do not introduce a `VITE_` Cloudinary secret. If upload succeeds but the application transaction fails, delete the orphaned asset.
+- **Storage (changed for PA#4, 2026-11-21: no Cloudinary).** The server stores the validated file on disk in `UPLOAD_DIR` (`server/.env`), under a name it makes up, never the uploaded name, and stores that name, the byte size and the safe original name against the application. Marking runs offline and the PA#4 rubric (S5) requires this; the product owners' Q-07 answer leaves the technology open. If the application transaction fails, delete the written file.
+- Viewing: the demo links to one fictional file, `/demo/fictional-sample-cv.pdf` (`SAMPLE_CV_URL` in `mocks/fixtures.js`). The real `GET /api/applications/{applicationId}/cv` authenticates with JWT, lets through only the owner applicant, the interviewer assigned to the application and the Executive (any other caller gets `404`), and streams the file as `application/pdf` with `X-Content-Type-Options: nosniff` (`docs/api/03-review-files.md`).
+- No storage secret exists; nothing about CV storage goes in a `VITE_` variable.
 
 ## 8. Mock-only logic — do not reuse as business rules
 
@@ -147,7 +147,7 @@ Page tests (`src/tests/pages/`) currently exercise the mock services. When a ser
 | Q-04 | Assessment fields | Team-selected: required notes + optional advisory recommendation (`pass` / `fail` / `null`); no scores, no criteria, no editing. See §12.4 |
 | Q-05 | Notification UI and email | Canonical scope requires in-app notification and excludes email/SMS/push. The mock implements only the in-app list. The team's Brevo proposal conflicts with that scope and must not be implemented without Product Owner confirmation. See §12.5 |
 | Q-06 | Editing submissions / availability | Not offered. See §12.6 |
-| Q-07 | Private CV delivery | Demo uses one fictional file; backend uses Multer + protected Cloudinary storage + authorized short-lived retrieval. See §7 and §12.7 |
+| Q-07 | Private CV delivery | Demo uses one fictional file; the PA#4 server uses Multer + files on disk in `UPLOAD_DIR` + an authorized streaming endpoint (no Cloudinary). See §7 and §12.7 |
 | — | Screening reversal | Only Pending Review applications can be decided (WORKFLOWS §3 does not settle reversal) |
 
 ## 11. Integration checklist (per service)
@@ -231,15 +231,15 @@ Use explicit `ORDER BY`; database row order and JavaScript array insertion order
 
 ### 12.7 Protected CV upload and retrieval (Q-07)
 
-```text
-React FileField → FormData → Express/Multer limit → PDF content validation
-  → protected Cloudinary upload → PostgreSQL asset metadata linked to Application
+Changed for PA#4 (2026-11-21): files on disk in `UPLOAD_DIR`, no Cloudinary.
 
-Authorized CV request → JWT role/assignment check → short-lived signed URL or backend stream
+```text
+React FileField → FormData → Express/Multer 5 MB limit → file starts with %PDF-
+  → written to UPLOAD_DIR under a server-made name → name, size, original name in PostgreSQL
+
+CV request → JWT → owner / assigned interviewer / Executive check → stream as application/pdf
 ```
 
-- Upload request fields stay exactly as the current `portalService.submitApplication(formData)` contract. Respond with application data, not Cloudinary credentials or a permanent public URL.
-- Enforce one file, PDF-only content and `bytes <= 5 * 1024 * 1024` on the server. Return `UiError(validation)`-compatible `fieldErrors.cv` for rejected files.
-- The metadata record needs enough information to address and verify the asset without treating its URL as permission: asset/public ID, version, resource type, delivery/access type, format, bytes and safe original filename.
-- Retrieval authorization is record-level: Executive access or the interviewer assigned to that application's confirmed interview. The frontend's hidden controls are not security. Applicant-owner retrieval is not in the current UI contract and needs an explicit decision if added.
-- Verify Cloudinary protected/authenticated PDF delivery, signed-URL support and account restrictions before fixing an implementation. If short-lived URLs are used, keep expiry brief and do not expose them in logs; proxy streaming is the fallback when account delivery features are insufficient.
+- Upload request fields stay exactly as the current `portalService.submitApplication(formData)` contract. Respond with application data, never a file path.
+- Enforce one file, PDF content (`%PDF-` signature, not the name or declared type) and `bytes <= 5 * 1024 * 1024` on the server. Return `fieldErrors.cv` for rejected files (`413` or `400`, contract error shape) and store nothing.
+- Retrieval authorization is record-level and follows the product owners' Q-07 answer: the owner applicant, the interviewer assigned to that application, the Executive; any other caller gets `404` (`docs/api/README.md`, Access Rule). The frontend's hidden controls are not security.

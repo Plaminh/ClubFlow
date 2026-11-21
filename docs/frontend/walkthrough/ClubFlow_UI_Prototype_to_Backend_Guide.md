@@ -53,7 +53,7 @@ Frontend hiện là một **prototype React được chuẩn bị để tích h�
 | Lớp | Công nghệ (theo `AGENTS.md`) |
 |---|---|
 | Frontend | React, Vite, React Router, Atomic Design, Vitest, React Testing Library, ESLint |
-| Backend | Node.js, Express, PostgreSQL (`pg`), JWT, Multer, Cloudinary, Vitest |
+| Backend | Node.js, Express, PostgreSQL (`pg`), JWT, Multer, Vitest (PA#4: thư mục `server/`, CV lưu trên đĩa trong `UPLOAD_DIR`, không dùng Cloudinary) |
 | Phát triển | Docker (PostgreSQL), GitHub Spec Kit, Jira; một file `.env` duy nhất ở thư mục gốc |
 
 ## 1.4 Cái gì là mock, cái gì là thật
@@ -731,7 +731,7 @@ Chưa có lược đồ CSDL được duyệt (`database/migrations/` mới có 
 | Lưu đánh giá | Validation, khóa sau gửi | Một đánh giá/buổi đã xong (Q-04) | UNIQUE `assessment.interview_id` |
 | Công bố kết quả, thông báo | Hộp thoại xác nhận | Công bố + tạo thông báo cùng giao dịch; ẩn kết quả chưa công bố | `published_at` nullable |
 
-Scaffold backend hiện có: `routes/health.routes.js` → `controllers/health.controller.js` → `services/health.service.js` → `repositories/health.repository.js` → `db/pool.js`; `middleware/errorHandler.js` trả `{ error: message }`; `middleware/upload.middleware.js` (Multer, nhận JPEG/PNG/WebP/PDF — endpoint CV phải giới hạn chỉ PDF); `services/cloudinary.service.js`. Các phần này cần được giữ và dùng khi triển khai API.
+Scaffold server hiện có (PA#4, thư mục `server/`; cập nhật 2026-11-21): `routes/health.routes.js` → `controllers/health.controller.js` → `services/health.service.js` → `repositories/health.repository.js` → `db/pool.js`; `middleware/errorHandler.js` trả đúng error shape của contract `{ error, code, fieldErrors?, details? }`; `middleware/validate.middleware.js` (zod); `middleware/auth.middleware.js` (`authenticate`, `requireRole`); `middleware/upload.middleware.js` (Multer, hiện còn nhận JPEG/PNG/WebP/PDF — endpoint CV phải giới hạn chỉ PDF và kiểm tra chữ ký `%PDF-`). Cloudinary đã bị gỡ: CV lưu trên đĩa trong `UPLOAD_DIR`. Cách dùng: `specs/003-pa4-express-server/tasks.md`, mục "Using the skeleton".
 
 # Chương 13 — Thay mock service bằng API thật {#ch13}
 
@@ -880,7 +880,7 @@ Nguồn: `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`. Cả Q-01…Q-07 �
 | Q-04 | Interviewer đánh giá; field/edit policy còn mở | Notes bắt buộc, recommendation tùy chọn, submit một lần | Đã triển khai và khóa sau submit | Ownership, ended-time, uniqueness; chờ PO xác nhận fields |
 | Q-05 | Canonical scope yêu cầu in-app notification và loại email/SMS/push | Nhóm đề xuất in-app + Brevo common-template outbox | Chỉ in-app, không email | **Xung đột cần PO xác nhận trước khi thêm email**; publication/notification phải idempotent |
 | Q-06 | Nguồn không cấp quyền edit ngoại lệ | Không sửa/withdraw application, availability hay assessment; transition bất biến | Đã ẩn/chặn các thao tác đó | Không thêm endpoint override nếu chưa được duyệt |
-| Q-07 | CV riêng tư; phương thức kỹ thuật chưa xác định | Multer + protected Cloudinary + stream/short-lived URL có authorization | Một PDF hư cấu dùng chung | Validate PDF ≤5 MB, metadata, cleanup orphan, kiểm role/assignment; xác minh khả năng Cloudinary |
+| Q-07 | CV riêng tư; phương thức kỹ thuật chưa xác định | Multer + file trên đĩa trong `UPLOAD_DIR` (tên do server đặt) + endpoint stream có authorization (PA#4, không Cloudinary) | Một PDF hư cấu dùng chung | Validate chữ ký `%PDF-` và ≤5 MB, lưu metadata, xóa file nếu transaction lỗi, kiểm owner/assignment/Executive (người khác nhận `404`) |
 
 ## Phụ lục A — Giao diện 360 px
 
