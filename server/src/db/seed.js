@@ -1,37 +1,45 @@
-import { readdir, readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { mkdir, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { env } from '../config/env.js';
 import pool from './pool.js';
 import { withTransaction } from './transaction.js';
+import { runMigrations } from './migrate.js';
 
-const seedsDirectory = fileURLToPath(new URL('../../../database/seeds/', import.meta.url));
+const seedsDirectory = fileURLToPath(new URL('./seeds/', import.meta.url));
 
-async function seed() {
-  const filenames = (await readdir(seedsDirectory))
-    .filter((filename) => filename.endsWith('.sql'))
-    .sort();
+// Drops the public schema, applies every migration, then runs every seed module in file-name
+// order, all in one transaction: the result is the same on an empty and on a seeded database.
+export async function resetAndSeed() {
+  const uploadDir = path.resolve(env.uploadDir);
+  await mkdir(uploadDir, { recursive: true });
 
-  if (filenames.length === 0) {
-    console.log('No seed files found.');
-    return;
-  }
+  const modules = (await readdir(seedsDirectory)).filter((name) => name.endsWith('.js')).sort();
 
-  for (const filename of filenames) {
-    const sql = await readFile(path.join(seedsDirectory, filename), 'utf8');
+  await withTransaction(async (client) => {
+    await client.query('DROP SCHEMA IF EXISTS public CASCADE');
+    await client.query('CREATE SCHEMA public');
+    await runMigrations(client);
 
-    await withTransaction(async (client) => {
-      await client.query(sql);
-    });
-
-    console.log(`Executed ${filename}`);
-  }
+    for (const name of modules) {
+      const { default: seed } = await import(pathToFileURL(path.join(seedsDirectory, name)).href);
+      await seed(client, { uploadDir, appToday: env.appToday });
+    }
+  });
+  return modules;
 }
 
-seed()
-  .catch((error) => {
-    console.error('Seeding failed:', error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await pool.end();
-  });
+// `npm run seed`
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  resetAndSeed()
+    .then((modules) => {
+      console.log(
+        `Seeded${modules.length ? `: ${modules.join(', ')}` : ' (no seed modules yet)'}.`,
+      );
+    })
+    .catch((error) => {
+      console.error('Seeding failed:', error.message);
+      process.exitCode = 1;
+    })
+    .finally(() => pool.end());
+}
