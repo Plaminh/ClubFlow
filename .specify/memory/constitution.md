@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 -> 1.0.1
-- Modified principles: None (title renamed from "Web Application Development Constitution" to "ClubFlow Constitution"; no principle or rule changed)
+- Version change: 1.0.1 -> 1.1.0
+- Modified principles: VI. Environment Configuration (the one env file moves from the repository root to server/.env, PA#4)
 - Added sections: N/A
 - Removed sections: N/A
-- Templates requiring updates: ✅ None pending.
+- Templates requiring updates: ✅ None pending (AGENTS.md changed in db1676f).
 - Follow-up TODOs: None.
 -->
 # ClubFlow Constitution
@@ -56,7 +56,7 @@ Models act as domain objects rather than a sequential processing layer.
 - **Restriction**: DO NOT generate tests only to increase test count or coverage.
 
 ### VI. Environment Configuration
-- **Files**: The repository uses ONE root `.env` file only. DO NOT create `client/.env`, `backend/.env`, `.env.test`, `.env.development`, or `.env.production`.
+- **Files**: The repository uses ONE `.env` file only: `server/.env`, copied from `server/.env.example` (amended 2026-11-21 for PA#4: the marker copies `server/.env.example` and sets only `PORT`, `DATABASE_URL` and `JWT_SECRET`). DO NOT create a root `.env`, `client/.env`, `.env.test`, `.env.development`, or `.env.production`.
 - **Visibility**: Browser-visible configuration MUST use the `VITE_` prefix.
 - **Security**: Secrets MUST NEVER be exposed through `VITE_` variables.
 - **Git Safety**: `.env` MUST NOT be committed.
@@ -90,4 +90,4 @@ Amendments require documentation, team approval, and a migration plan if applica
 
 All changes MUST be reviewed for constitution compliance before being considered complete. Pull requests, when used, MUST verify constitution compliance before merging.
 
-**Version**: 1.0.1 | **Ratified**: 2026-10-04 | **Last Amended**: 2026-11-14
+**Version**: 1.1.0 | **Ratified**: 2026-10-04 | **Last Amended**: 2026-11-21
