@@ -14,7 +14,14 @@ const REQUIRED_FILES = [
   '07-campaign-management.md',
 ];
 
-const ALLOWED_TOKENS = new Set(['exec', 'studentA', 'studentB', 'int-content', 'int-comms']);
+const ALLOWED_TOKENS = new Set([
+  'exec',
+  'studentA',
+  'studentB',
+  'studentC',
+  'int-content',
+  'int-comms',
+]);
 
 function normalizePath(value) {
   return value.split('?')[0];
