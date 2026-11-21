@@ -10,12 +10,11 @@ vi.mock('../../../src/repositories/health.repository.js', () => ({
 const { default: app } = await import('../../../src/app.js');
 
 describe('GET /api/health', () => {
-  it('returns API and database health', async () => {
+  // docs/api/README.md, Health Example (Changes 2026-11-19): the answer is { "status": "ok" } only.
+  it('Contract returns exactly { status: ok } once the database answers', async () => {
     const response = await request(app).get('/api/health');
 
     expect(response.status).toBe(200);
-    expect(response.body.status).toBe('ok');
-    expect(response.body.database).toBe('reachable');
-    expect(response.body.databaseTime).toBe('2026-10-04T00:00:00.000Z');
+    expect(response.body).toEqual({ status: 'ok' });
   });
 });
