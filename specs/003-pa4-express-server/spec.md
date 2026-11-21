@@ -53,7 +53,17 @@ Out of scope:
 
 - **FR-11** R1–R8 hold for requests sent straight to the API (PA#4 rubric, "Rules the server enforces"), each refusal giving the reason in the error shape.
 - **FR-12** S1–S5 are closed (PA#4 rubric, "The five security flaws").
-- **FR-13** **R8 timing (conflict resolved by the team, 2026-11-21):** an assessment may be submitted once the schedule is confirmed. The product owners' decision Q-04 says "only after the interview has taken place", but with `APP_TODAY` fixed before the interview date that would make step C10 impossible in the marker's run. The rubric is what is marked, so the server follows R8. This difference is recorded in the contract `## Changes` and in `BACKEND.md`, and the question is posted to the product owners.
+- **FR-13** **R8 timing (conflict resolved by the team, 2026-11-21):** an assessment may be submitted once the schedule is confirmed. The product owners' decision Q-04 says "only after the interview has taken place", but with `APP_TODAY` fixed before the interview date that would make step C10 impossible in the marker's run. The rubric is what is marked, so the server follows R8. This difference is recorded in the contract `## Changes` and in `BACKEND.md`. The product owners' answer of 2026-11-21 ([post](https://www.facebook.com/share/p/1DHPpDkB2n/)) says "one assessment per interviewed slot" without requiring a clock check; a follow-up question is posted in the same thread.
+
+### Product owner answers that shape the server
+
+From the [product owners' post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded in `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`:
+
+- **FR-18 (Q-01)** Draft generation is first-fit in a fixed order: Shortlisted applications by `submittedAt`, then Application ID; for each, the earliest slot first; within a slot, interviewers then rooms by stable ID. No backtracking. An application that fits nowhere is *Unassigned* with its reason.
+- **FR-19 (Q-02)** Business time zone UTC+7. A campaign accepts applications when `opensOn <= APP_TODAY <= closesOn` (the closing day is included).
+- **FR-20 (Q-03)** A published campaign stays editable until the schedule is confirmed, as `docs/api/07-campaign-management.md` already says: a position with applications cannot be deleted; the interview setup locks at the first valid application.
+- **FR-21 (Q-05)** Results produce an in-app notification only; no email.
+- **FR-22 (Q-07)** CV access: the owner applicant, the interviewer assigned to that application, the Executive — also when the CV URL is opened directly.
 
 ### Errors
 

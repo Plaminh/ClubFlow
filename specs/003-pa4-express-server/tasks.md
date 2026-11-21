@@ -60,6 +60,8 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 - [ ] T012 `02-public-applicant.md`: A01, A02 and studentB's application come from the seed; new applications start at the next id; duplicate Content → `409` with A01
 - [ ] T013 `03`–`07`: mark each file's needed starting state; the owner writes its preamble requests before coding that file (Hoàng: 03, 04, 06 results, 07; Nguyệt: 05, 06 notifications)
 - [ ] T014 `AGENTS.md`: point the plan line at this folder
+- [x] T015 `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`: record the product owners' answers to Q-01–Q-07 with the [post link](https://www.facebook.com/share/p/1DHPpDkB2n/); Q-03, Q-05 and Q-07 superseded
+- [ ] T016 Post the Q-04 follow-up (assessment timing vs. a fixed `APP_TODAY`) in the same thread; update spec FR-13 with the answer
 
 ## Phase 2 — Server skeleton (Minh)
 
@@ -85,7 +87,7 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 - [ ] T040 `010` users migration and seed (5 demo accounts, `bcryptjs` hashes)
 - [ ] T041 `POST /api/auth/login` (same `401` for wrong password and unknown e-mail, `exp` ≤ 24 h), `GET /api/auth/me`, `POST /api/auth/logout`, `GET`/`PATCH /api/me/profile` (a `role` field is ignored)
 - [ ] T042 Front end: `401` clears the session and opens sign-in with a message
-- [ ] T043 C1 `GET /api/campaigns/current`
+- [ ] T043 C1 `GET /api/campaigns/current`; "open" means `opensOn <= APP_TODAY <= closesOn` (spec FR-19)
 - [ ] T044 `050` applications; C5 `POST /api/applications` — **R2**, **R3**, **S5** (PDF magic bytes, 5 MB, server-made name)
 - [ ] T045 C6 `GET /api/me/applications` — **S4** (own applications only)
 - [ ] T046 `GET /api/applications/{id}/cv` — owner, assigned interviewer, executive; served as `application/pdf` — **S4**
@@ -100,7 +102,7 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 - [ ] T051 `040` rooms, slots, assignments; C4 `PATCH …/interview-setup`
 - [ ] T052 `POST …/close-applications`
 - [ ] T053 `060` notes and decisions; C7 list (search, filter, sort, pagination), detail, CSV, private note, screening decision — **R4**, **S1** (sort/filter field names from a list), **S4**
-- [ ] T054 `070` schedule; C8 generate, row edit, save, CSV — **R5**, **R6**
+- [ ] T054 `070` schedule; C8 generate, row edit, save, CSV — **R5**, **R6**. Generation is first-fit in the product owners' order (spec FR-18): applications by `submittedAt` then ID, earliest slot first, interviewers then rooms by stable ID, no backtracking; the conflict check covers applicant, interviewer and room
 - [ ] T055 C9 `POST …/schedule/confirm` and the lock on campaign, applications and schedule — **R7**
 - [ ] T056 `090` final results; C11 results, assessment view, final result, publish (creates notifications) — **R8**
 
@@ -111,3 +113,7 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 - [ ] T062 `brief.md` for PA#4 (the prompts actually given), `SELF_ASSESSMENT_REPORT.md`
 - [ ] T063 Clean-copy run of the acceptance steps in spec.md; zip with `.git` and `client/dist/`, without `node_modules/`, `server/.env` and uploads
 - [ ] T064 PA#5: `HARNESS.md`, `checks/gates-final.txt`, `checks/ci-runs.png`, `git tag final`
+
+## Optional — "beyond the brief" for PA#6 B5 (only if time allows)
+
+- [ ] T070 Candidate: an applicant withdraws their own application while the campaign accepts applications and before it is reviewed (allowed as optional by the product owners, Q-06). Contract first, with a `## Changes` line; then tests and code. Owner to be decided. Not self-registration (excluded by D-10).
