@@ -65,14 +65,14 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 
 ## Phase 2 — Server skeleton (Minh)
 
-- [ ] T020 `git mv backend server`; remove it from the root workspaces; own `package-lock.json`; scripts `start`, `seed`, `test` (`vitest run`); `"engines": { "node": ">=22" }`; `npm start` never seeds or wipes data (spec FR-23)
-- [ ] T021 Dependencies: remove `cors`, `cloudinary`; add `bcryptjs`, `zod`
-- [ ] T022 `server/.env.example` and `config/env.js` (D1); delete the root `.env.example`; update `docker-compose.yml` (`postgres:17`, `--env-file server/.env`); `UPLOAD_DIR=./uploads` (outside `src/`) and `server/uploads/` in `.gitignore`, so the zip carries no uploaded file
-- [ ] T023 Test (red): **S2 server stops with a message when JWT_SECRET is missing**; then code
-- [ ] T024 Test (red): **S3 no Access-Control-Allow-Origin for any origin**; then remove `cors`
-- [ ] T025 `AppError`, error handler, not-found handler: the error shape, broken JSON → 400, no stack trace (tests first)
-- [ ] T026 `validate()` middleware on `zod`: `fieldErrors` per field, unknown fields dropped (tests first)
-- [ ] T027 `authenticate` (HS256 only) and `requireRole` middleware; `routes/index.js` mounting one router per screen area
+- [x] T020 `git mv backend server`; remove it from the root workspaces; own `package-lock.json`; scripts `start`, `seed`, `test` (`vitest run`); `"engines": { "node": ">=22" }`; `npm start` never seeds or wipes data (spec FR-23)
+- [x] T021 Dependencies: remove `cors`, `cloudinary`; add `bcryptjs`, `zod`
+- [x] T022 `server/.env.example` and `config/env.js` (D1); delete the root `.env.example`; update `docker-compose.yml` (`postgres:17`, `--env-file server/.env`); `UPLOAD_DIR=./uploads` (outside `src/`) and `server/uploads/` in `.gitignore`, so the zip carries no uploaded file
+- [x] T023 Test (red): **S2 server stops with a message when JWT_SECRET is missing**; then code
+- [x] T024 Test (red): **S3 no Access-Control-Allow-Origin for any origin**; then remove `cors`
+- [x] T025 `AppError`, error handler, not-found handler: the error shape, broken JSON → 400, no stack trace (tests first)
+- [x] T026 `validate()` middleware on `zod`: `fieldErrors` per field, unknown fields dropped (tests first)
+- [x] T027 `authenticate` (HS256 only) and `requireRole` middleware; `routes/index.js` mounting one router per screen area
 
 ## Phase 3 — Database skeleton (Minh)
 

@@ -1529,3 +1529,25 @@ By hand: The team chose the seed contents (A01–A03 as in the PA#3 examples, a 
 Verified: `node tools/validate-api-docs.mjs` passes (9 files, 37 endpoints, 59 request examples); mock tests 17/17 still pass; no client test reads `docs/api/`.
 
 Incident: The team's validator rejected `{{token:studentC}}` as an unknown alias; caught by running it after the README change, fixed in `1fd3a4c`.
+
+---
+
+## 2026-11-21 — PA#4 Phase 2 — Server skeleton, S2 and S3
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Build the server skeleton (tasks T020–T027): move `backend/` to a standalone `server/`, one env module, drop `cors` and Cloudinary, add `bcryptjs` and `zod`, one error handler, `validate()`, `authenticate`/`requireRole`; S2 and S3 test-first.
+
+Kept: `59b1981` move to `server/` with its own lock; `372a56d` CI installs and tests `server/` alone; S3 `0c08d0b` (red) → `359981f`; S2 `ae60b9f` (red) → `03a0745`; `6587148` bcryptjs and zod; error convention `948d446` (red) → `77bf5f2`; health body `64caad3` (red) → `3efdd6a`; `validate()` `4bb744a` (red) → `12d1cd8`; auth middleware `a04c8e5` (red) → `23b028e`. Each red commit was run and failed for the reason in its message before the code commit.
+
+Changed: `dotenv` replaced by Node's `--env-file-if-exists` in the npm scripts: with `dotenv` inside `env.js`, the S2 test "start without JWT_SECRET" would silently pick the secret up again from a developer's `server/.env`. `docker-compose.yml` uses trust authentication on 127.0.0.1 so no password is written anywhere (S2 scans every commit for connection strings with passwords); the `.env.example` placeholder was first drafted as `postgres://user:password@…` and changed for the same reason before commit.
+
+Rejected: Keeping `cors()` restricted to the dev origin: the S3 test showed it still answers `Access-Control-Allow-Origin` for `http://localhost:5173`, and the app needs no CORS behind the Vite proxy.
+
+By hand: None; the team reviews the commits.
+
+Verified: After every code commit, `git diff -- server/test` was empty (tests unchanged since their red commit). Server tests 36/36, `npm run lint` clean, `format:check` clean.
+
+Tests changed on purpose (not to make them pass): `test/unit/utils/jwt.test.js` (`03a0745`) read `process.env`, which S2 now forbids outside `env.js`; its four assertions are kept with the secret from `env.js`, the "missing JWT_SECRET" case moved to the process-level S2 test, and an `alg: none` case was added. `test/integration/api/health.test.js` (`64caad3`) asserted fields the contract does not have; it now asserts the exact contract body, which is stricter. `test/unit/middleware/auth.middleware.test.js` (`a04c8e5`) asserted the old `{ error }` body; all five old cases are kept with real tokens and the contract's `{ error, code }`, plus six new cases.
+
+Incident: Broken JSON answered `500` (Express's parse error reached the generic handler) — caught by the red error-convention test in `948d446`; PA#4 criterion 1 asks for `400`. Fixed in `77bf5f2`.
