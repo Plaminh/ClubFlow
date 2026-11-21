@@ -9,9 +9,24 @@ jobs:
   gates:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      # The marker's database image. Trust auth: no password is written anywhere, and the
+      # database exists only inside this CI run. Server tests start from an empty database.
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: clubflow
+          POSTGRES_DB: clubflow_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U clubflow -d clubflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       # The server's variables (server/.env.example). JWT_SECRET is generated per run below.
-      # No database yet: the pool connects lazily; a postgres service comes with the database skeleton.
       NODE_ENV: test
       PORT: '3001'
       DATABASE_URL: postgres://clubflow@127.0.0.1:5432/clubflow_test
