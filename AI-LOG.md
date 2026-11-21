@@ -1471,3 +1471,21 @@ By hand: The team chose the branch base, approved the env change, the dependency
 Verified: `format:check` red at `a397a0f` ("Code style issues found in 254 files"), green after `dfecaba`. After formatting: `npm run lint` clean; tests 287 + 18 + 17 pass; `node tools/contract-check.mjs` 56/56 on a fresh mock.
 
 Incident: Prettier's default `endOfLine: "lf"` would make `format:check` red on every Windows clone (`core.autocrlf=true` checks files out with CRLF) while CI on Linux stayed green. Caught by the git CRLF warnings while staging; fixed with `endOfLine: "auto"` in `a35a5eb`.
+
+---
+
+## 2026-11-21 — PA#4 Step 2 — Spec, plan and tasks with team ownership
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Discuss the shared foundation and the split of work for PA#4, then write the agreed result in English as `specs/003-pa4-express-server/` (spec, plan, tasks).
+
+Kept: `spec.md` (requirements FR-01–FR-17 and the acceptance run), `plan.md` (decisions D1–D12, server and database structure, test setup), `tasks.md` (owners, migration/seed numbers `010`–`090` in dependency order, tasks T001–T064), commit `29eeb3c`.
+
+Changed: The split of work, after discussion: Minh owns the harness, contract, server skeleton and database skeleton only; Nguyệt owns sign-in and the Visitor/Applicant/Interviewer screens end to end; Hoàng owns the Executive screens end to end, database included. The assistant's proposal to put the core tables into the shared skeleton was dropped (it would make one member a bottleneck); a second review asked for migration numbers by dependency rather than by person, which was taken. `authenticate`/`requireRole` and `tokenFor` stay in the skeleton so Hoàng is not blocked by sign-in. Validation with `zod` instead of hand-written validators.
+
+Rejected: Self-registration as the PA#6 "beyond the brief" feature: a second review recommended it, but `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md` D-10 records it as excluded by the brief. Choosing the R8 timing by guess: the assistant checked the sources first.
+
+By hand: The team chose the owners and decided every open point (env file, dependencies, workspace split, zod, 403/404 rule, migration numbering, no registration, R8 timing).
+
+Incident: Conflict between product-owner decision Q-04 (assessment "only after the interview has taken place", server clock) and the PA#4 rubric R8 ("after the schedule is confirmed"). With `APP_TODAY=2026-11-18` and interviews on 2026-12-02, Q-04 would make C10 impossible in the marker's run. Found by reading `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md` against the rubric; the team follows R8 (spec FR-13, plan D9) and will post the question to the product owners.
