@@ -17,9 +17,9 @@ export default [
       'pgdata/**',
       'postgres-data/**',
       'client/dist/**',
-      'backend/dist/**',
+      'server/uploads/**',
       'client/coverage/**',
-      'backend/coverage/**',
+      'server/coverage/**',
       // Static HTML UI reference package (browser demo scripts), not application code.
       'docs/reference/ui/assets/**',
     ],
@@ -44,7 +44,7 @@ export default [
 
   // 3. Backend Configuration
   {
-    files: ['backend/**/*.js'],
+    files: ['server/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -97,10 +97,10 @@ export default [
   // 5. Backend Test Configuration
   {
     files: [
-      'backend/**/*.test.js',
-      'backend/**/*.test.jsx',
-      'backend/**/*.spec.js',
-      'backend/**/*.spec.jsx',
+      'server/**/*.test.js',
+      'server/**/*.test.jsx',
+      'server/**/*.spec.js',
+      'server/**/*.spec.jsx',
     ],
     languageOptions: {
       globals: {

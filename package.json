@@ -3,16 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "client",
-    "backend"
+    "client"
   ],
   "scripts": {
     "dev:frontend": "npm run dev --workspace client",
-    "dev:backend": "npm run dev --workspace backend",
     "build": "npm run build --workspace client",
-    "test": "npm run test:run --workspace client && npm run test:run --workspace backend && npm run test:mock",
+    "test": "npm run test:run --workspace client && npm run test:mock",
     "test:frontend": "npm run test --workspace client",
-    "test:backend": "npm run test --workspace backend",
     "test:mock": "vitest run --config mock/vitest.config.mjs",
     "mock": "node mock/server.mjs",
     "verify:mock-http": "node tools/verify-pa3-http.mjs",
@@ -21,10 +18,10 @@
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
-    "db:migrate": "npm run db:migrate --workspace backend",
-    "db:seed": "npm run db:seed --workspace backend",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "dev:server": "npm --prefix server run dev",
+    "test:server": "npm --prefix server test"
   },
   "engines": {
     "node": ">=22.12.0"
