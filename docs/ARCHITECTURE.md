@@ -50,10 +50,11 @@ Models represent domain data/behavior. Repositories are the only application lay
 
 ## Environment policy
 
-There is one `.env` at repository root for local development.
+There is one environment file, `server/.env`, copied from `server/.env.example` (changed in PA#4; see `AGENTS.md`).
 
-- Vite reads it through `envDir: '..'`.
-- Express reads it through `backend/src/config/env.js`.
-- Docker Compose reads it automatically.
+- The server's npm scripts load it with Node's `--env-file-if-exists=.env`.
+- `server/src/config/env.js` is the only module that reads `process.env`; a missing value stops the server with a message, and no secret has a fallback.
+- The front end needs no variables; it calls relative `/api` paths through the Vite proxy.
+- `docker-compose.yml` needs no variables (local PostgreSQL 17, no password, bound to 127.0.0.1).
 
 Only variables prefixed with `VITE_` are exposed to frontend code. Never prefix secrets with `VITE_`.
