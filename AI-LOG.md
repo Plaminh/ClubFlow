@@ -1489,3 +1489,21 @@ Rejected: Self-registration as the PA#6 "beyond the brief" feature: a second rev
 By hand: The team chose the owners and decided every open point (env file, dependencies, workspace split, zod, 403/404 rule, migration numbering, no registration, R8 timing).
 
 Incident: Conflict between product-owner decision Q-04 (assessment "only after the interview has taken place", server clock) and the PA#4 rubric R8 ("after the schedule is confirmed"). With `APP_TODAY=2026-11-18` and interviews on 2026-12-02, Q-04 would make C10 impossible in the marker's run. Found by reading `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md` against the rubric; the team follows R8 (spec FR-13, plan D9) and will post the question to the product owners.
+
+---
+
+## 2026-11-21 — PA#4 Step 2 — Product owner answers applied
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Read the product owners' answers to Q-01–Q-07 (pasted from their post), say what they change for PA#4, and record them with the post link.
+
+Kept: The answers with the [post link](https://www.facebook.com/share/p/1DHPpDkB2n/) under each question in `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md` (`76b2d2e`); spec FR-18–FR-22 and tasks T015, T016, T070 (`f9220f3`).
+
+Changed: Nothing of the earlier team text was rewritten; each answer is a new line with an "Outcome". Q-03, Q-05 and Q-07 are marked superseded (published edits allowed; no email; no Cloudinary), Q-01, Q-02 and the Q-04 form confirmed.
+
+Rejected: Treating the Q-04 answer as settling the assessment timing: it says "per interviewed slot" but nothing about the server clock, so FR-13 keeps rubric R8 and a follow-up is to be posted (T016).
+
+By hand: The team posted the questions and pasted the answers and the link.
+
+Verified: `docs/api/07-campaign-management.md` (lines 196, 250, 287) already allows published edits, refuses deleting a position with applications and locks the interview setup at the first application, as Q-03's answer says; no contract change was needed for Q-03.
