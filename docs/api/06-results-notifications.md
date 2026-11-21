@@ -2,6 +2,8 @@
 
 These endpoints cover C11. Interviewer recommendations are advisory; only the Executive records a Pass/Fail Final Result. Applicants see only published own results.
 
+**Starting state (PA#4).** Runs alone on a fresh seed. Results need a confirmed schedule and submitted assessments, so the file must start with requests that, through the API, close applications, shortlist A01–A03, generate, resolve, save and confirm the schedule, and submit the assessments of A01 and A02. Those opening requests are written by the owners of this file before the server code (tasks.md T013, T049, T056).
+
 ## GET /api/campaigns/{campaignId}/results
 
 **Purpose**: Return the Executive result workspace for reviewed Applications after Schedule confirmation.
@@ -276,5 +278,6 @@ HTTP/1.1 204 No Content
 
 ## Changes
 
+- 2026-11-21 (PA#4): Added the PA#4 starting state (confirmed schedule and assessments of A01 and A02 created through the API first; opening requests still to be written by the file's owners, tasks.md T013). Notifications are in-app only (product-owner answer Q-05). Why: PA#4 runs each contract file on a fresh seed.
 - 2026-11-19: The `GET /api/me/applications` example now ends each item with `…`; the mock also returns `campaignId`, `campaignName` and `submittedAt`, which the example did not show.
 - 2026-11-18: Defined Executive result workspace, nullable assessment read, assessed-only decisions, idempotent atomic publication, published-only Applicant visibility, notification ownership, and mark-all-read semantics.
