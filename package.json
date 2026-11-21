@@ -14,7 +14,7 @@
     "mock": "node mock/server.mjs",
     "verify:mock-http": "node tools/verify-pa3-http.mjs",
     "lint": "eslint .",
-    "verify": "npm run lint && npm run test && npm run build",
+    "verify": "npm run format:check && npm run lint && npm test && npm run test:server && npm run build",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",

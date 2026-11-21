@@ -14,11 +14,13 @@ npm run verify
 
 It runs these commands in order:
 
-1. `npm run lint` — ESLint checks JavaScript/JSX correctness and project lint rules.
-2. `npm test` — Vitest runs the frontend and backend automated tests.
-3. `npm run build` — Vite verifies that the frontend production build succeeds.
+1. `npm run format:check` — Prettier checks that code is formatted.
+2. `npm run lint` — ESLint checks JavaScript/JSX correctness and project lint rules.
+3. `npm test` — Vitest runs the client and mock tests.
+4. `npm run test:server` — Vitest runs the server tests against PostgreSQL (`server/.env`; set `TEST_DATABASE_URL` to keep your dev data).
+5. `npm run build` — Vite verifies that the frontend production build succeeds.
 
-This quality gate currently runs locally. No GitHub Actions or CI pipeline is required for the current course scope.
+GitHub Actions (`.github/workflows/ci.yml`) runs the same commands on every push, with a PostgreSQL 17 service, and installs `server/` with `npm ci --ignore-scripts` as the PA#4 marker does.
 
 ## Non-Automated Checks
 

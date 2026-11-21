@@ -24,9 +24,9 @@ The notes describe the shared framework at the time:
 - Frontend: **React + Vite**, Atomic Design; API calls in `src/services` via `apiClient`.
 - Backend: **Node.js + Express**, Route → Validator/Middleware → Controller → Service → Repository → PostgreSQL.
 - Database: PostgreSQL, domain SQL in repositories; the notes recommend avoiding an ORM without approval.
-- Authentication: JWT. Upload: Multer, with Cloudinary described as the framework's storage service.
-- Lint/tests: ESLint and Vitest; `npm run verify` runs lint → test → build.
-- Environment: one root `.env`; frontend variables prefixed `VITE_`; no secrets exposed to frontend.
+- Authentication: JWT. Upload: Multer, files on disk in `UPLOAD_DIR`.
+- Format/lint/tests: Prettier, ESLint and Vitest; `npm run verify` runs them and the build; CI runs the same on every push.
+- Environment: one `server/.env`; frontend variables prefixed `VITE_`; no secrets exposed to frontend.
 - Git/AI: shared conventions, AI-assisted code review, `AI-LOG.md` records.
 
 **Important:** This is a **description or development direction**, not proof that login, upload endpoints, or any ClubFlow domain feature works. Inspect current source and run tests to verify implementation.
