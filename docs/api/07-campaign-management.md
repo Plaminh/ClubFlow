@@ -2,6 +2,8 @@
 
 These Executive endpoints cover C3 and C4. Campaign preview is intentionally client-side because it renders unsaved form values; no preview endpoint is needed. `GET /campaigns/{campaignId}` returns the composite read model, so a redundant `GET /interview-setup` endpoint is not exposed.
 
+**Starting state (PA#4).** Runs alone on a fresh seed and needs nothing more: `cmp-2026-hk1` is seeded published with A01–A03, so its interview setup is already locked (`409 INTERVIEW_SETUP_LOCKED`) and its positions with applications cannot be deleted; the create/publish/edit examples work on the new draft `cmp-2027-hk1` that this file creates.
+
 ## Campaign Write Fields
 
 | Field | Type | Rules |
@@ -420,6 +422,7 @@ Content-Type: application/json
 
 ## Changes
 
+- 2026-11-21 (PA#4): Added the PA#4 starting state: the fresh seed is enough; `cmp-2026-hk1` has seeded applications, so its interview setup is locked from the start. No endpoint, field or status changed. Why: PA#4 runs each contract file on a fresh seed.
 - 2026-11-19: Example values aligned with the mock's data: position description and requirements in the `GET` example, `departmentId` `dep-communications` and slot ids `slot-0900`, `slot-1000`, `slot-1100` in the `POST /api/campaigns` example. Values only; no field or status changed.
 - 2026-11-19: Campaign write and publish examples now end with `…` in the campaign, position and top-level objects, because the mock returns the full composite view. The Event Operations position id in the `PATCH`/`DELETE` examples is now `pos-2027-event-operations`, the id the mock assigns from the position name; the old `pos-2027-operations` made the following `DELETE` answer 404 and the `publish` example answer 400.
 - 2026-11-18: Defined minimized composite Campaign/setup reads, draft creation/save/publish, Position upsert/removal, exact C4 validation, constrained Q-03 published edits, first-Application setup lock, and confirmed lock.
