@@ -1,6 +1,6 @@
 # Authentication and Profile
 
-These endpoints support C2 and the existing Sign In/My Profile screens. PA#3 uses deterministic mock credentials and bearer tokens; it does not claim production JWT, password hashing, or server-side token revocation.
+These endpoints support C2 and the existing Sign In/My Profile screens. Accounts come from the seed (README, Seed State); there is no self-registration (brief decision D-10). Passwords are stored as bcrypt hashes. Tokens are JWTs signed with HS256 by the server's `JWT_SECRET` and expire at most 24 hours after sign-in; the server does not revoke tokens.
 
 ## POST /api/auth/login
 
@@ -10,12 +10,12 @@ Request fields:
 
 | Field | Type | Rules |
 | --- | --- | --- |
-| `username` | string | Required; one documented `Name in examples` value. |
-| `password` | string | Required; exact deterministic demo password. |
+| `username` | string | Required, non-blank; the account's `Name in examples` (`handle`). |
+| `password` | string | Required, non-blank. |
 
-Success: `200` with exactly `token` and `user`. Errors: `400 INVALID_REQUEST`; `401 INVALID_CREDENTIALS`.
+Success: `200` with exactly `token` and `user`. Errors: `400 VALIDATION_ERROR` with `fieldErrors.username` or `fieldErrors.password`; `401 INVALID_CREDENTIALS`.
 
-The repeated login examples initialize every token alias used later.
+A wrong password and an unknown username get the same `401 INVALID_CREDENTIALS` answer, so the answer does not reveal which accounts exist. A `role` field in the body is ignored. Example token values are shown as `"…"`.
 
 ```http
 POST /api/auth/login HTTP/1.1
@@ -33,7 +33,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "token": "mock-token-exec",
+  "token": "…",
   "user": {
     "id": "exec-recruitment",
     "handle": "exec",
@@ -61,7 +61,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "token": "mock-token-studentA",
+  "token": "…",
   "user": {
     "id": "ap-minhanh",
     "handle": "studentA",
@@ -91,7 +91,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "token": "mock-token-studentB",
+  "token": "…",
   "user": {
     "id": "ap-quocbao",
     "handle": "studentB",
@@ -121,7 +121,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "token": "mock-token-int-content",
+  "token": "…",
   "user": {
     "id": "iv-giahuy",
     "handle": "int-content",
@@ -149,7 +149,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "token": "mock-token-int-comms",
+  "token": "…",
   "user": {
     "id": "iv-comms",
     "handle": "int-comms",
@@ -158,6 +158,82 @@ Content-Type: application/json
     "email": "linh.tran@clubflow.demo.example",
     "description": "Communications"
   }
+}
+```
+
+Student C has no application in the seed:
+
+```http
+POST /api/auth/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "studentC",
+  "password": "ClubFlowDemo!"
+}
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "token": "…",
+  "user": {
+    "id": "ap-lanchi",
+    "handle": "studentC",
+    "role": "applicant",
+    "displayName": "Tran Lan Chi",
+    "email": "lan.chi@demo.example",
+    "studentId": "26DEMO0193",
+    "faculty": "Business Administration",
+    "year": "Year 1"
+  }
+}
+```
+
+A wrong password and an unknown username get the same answer:
+
+```http
+POST /api/auth/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "studentA",
+  "password": "wrong-password"
+}
+```
+
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "error": "The username or password is incorrect.",
+  "code": "INVALID_CREDENTIALS"
+}
+```
+
+```http
+POST /api/auth/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "nobody",
+  "password": "ClubFlowDemo!"
+}
+```
+
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "error": "The username or password is incorrect.",
+  "code": "INVALID_CREDENTIALS"
 }
 ```
 
@@ -218,7 +294,7 @@ Content-Type: application/json
 
 ## PATCH /api/me/profile
 
-Any authenticated role. Accepts only `displayName` and `email`; all other profile fields are read-only. Updating a profile does not rewrite the `studentInfo` snapshots already stored on applications.
+Any authenticated role. Accepts only `displayName` and `email`; all other profile fields are read-only, and any other body field — `role` included — is ignored, never stored. Updating a profile does not rewrite the `studentInfo` snapshots already stored on applications.
 
 | Field | Type | Rules |
 | --- | --- | --- |
@@ -256,7 +332,7 @@ Content-Type: application/json
 
 ## POST /api/auth/logout
 
-Any authenticated role. Ends the current client session. The PA#3 mock may use deterministic stateless tokens, so the required observable behavior is that the client discards its token; production revocation is outside this contract.
+Any authenticated role. Ends the current client session. Tokens are stateless JWTs, so the required observable behavior is that the client discards its token; the server does not revoke it before its `exp`.
 
 Success: `204`. Error: `401 INVALID_TOKEN`.
 
@@ -288,7 +364,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "token": "mock-token-exec",
+  "token": "…",
   "user": {
     "id": "exec-recruitment",
     "handle": "exec",
@@ -302,5 +378,6 @@ Content-Type: application/json
 
 ## Changes
 
+- 2026-11-21 (PA#4): Tokens are JWTs (HS256, at most 24 hours) and examples show them as `"…"` instead of the mock's `mock-token-<name>`. Passwords stored hashed; no self-registration (D-10). Login validation error is `400 VALIDATION_ERROR` with field messages (was `400 INVALID_REQUEST`); a wrong password and an unknown username give the same `401 INVALID_CREDENTIALS`, with two examples. Added the seed account `studentC` (no application) and its login example. `role` and other undocumented fields are ignored by login and `PATCH /api/me/profile`. Logout: the server does not revoke a token before `exp`. Why: the PA#4 rubric (criterion 5) and the seed state in README.
 - 2026-11-18: Finalized canonical account examples, deterministic token aliases, username/password request fields, current-user/profile projections, logout semantics, and applicable errors for the reviewed contract.
 - 2026-11-17: Added the initial login, current-user, logout, and own-profile contract using checker-compatible `username` credentials.
