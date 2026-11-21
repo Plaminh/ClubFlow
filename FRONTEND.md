@@ -67,7 +67,7 @@ npm run preview --workspace client
 
 Vite preview serves `client/dist/` at `http://localhost:4173`, also proxying `/api` to `http://localhost:3001`.
 
-Build pitfall: if the root `.env` sets `NODE_ENV=development` (the value in `.env.example`), Vite builds a development bundle (about 676 kB, with React StrictMode sending every request twice). Delete that line from your local `.env` or run `NODE_ENV=production npm run build`, and check that `client/dist/assets/index-*.js` is about 400 kB before you zip.
+Build with `NODE_ENV=production npm run build` and check that `client/dist/assets/index-*.js` is about 400 kB before you zip: a development bundle is about 676 kB and sends every request twice.
 
 ### Verification Commands
 
