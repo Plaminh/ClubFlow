@@ -39,8 +39,9 @@ Out of scope:
 ### Seed and time
 
 - **FR-04** `npm run seed` gives the same state on an empty and on a seeded database.
-- **FR-05** The seed has the accounts `exec`, `studentA` (with A01 Content and A02 Communications), `studentB` (with one application of their own), `int-content` and `int-comms`, and an internal screening note on A01 whose text is written in `BACKEND.md`. No person is both an applicant and an interviewer.
-- **FR-06** "Today" is read from `APP_TODAY` (example value `2026-11-18`, inside the campaign's open period 2026-11-10 to 2026-11-30). The server never reads the machine clock for a business rule.
+- **FR-05** The seed has the accounts `exec`, `studentA` (with A01 Content and A02 Communications), `studentB` (with one application of their own), `int-content` and `int-comms`, and an internal screening note on A01 whose text is written in `BACKEND.md`. No person is both an applicant and an interviewer. The seed also has `studentC`, an applicant with no application: the PA#6 demo must create the example's two applications live, which `studentA` cannot do because A01 and A02 already exist (PA#4 requires them in the seed).
+- **FR-06** "Today" is read from `APP_TODAY` (example value `2026-11-18`, inside the campaign's open period 2026-11-10 to 2026-11-30). The marker keeps the example's value. The server never reads the machine clock for a business rule.
+- **FR-23** `npm start` never migrates destructively, seeds or wipes data: the marker restarts the server without seeding and looks for what the walk created.
 
 ### Sign-in and access
 
@@ -53,7 +54,7 @@ Out of scope:
 
 - **FR-11** R1–R8 hold for requests sent straight to the API (PA#4 rubric, "Rules the server enforces"), each refusal giving the reason in the error shape.
 - **FR-12** S1–S5 are closed (PA#4 rubric, "The five security flaws").
-- **FR-13** **R8 timing (conflict resolved by the team, 2026-11-21):** an assessment may be submitted once the schedule is confirmed. The product owners' decision Q-04 says "only after the interview has taken place", but with `APP_TODAY` fixed before the interview date that would make step C10 impossible in the marker's run. The rubric is what is marked, so the server follows R8. This difference is recorded in the contract `## Changes` and in `BACKEND.md`. The product owners' answer of 2026-11-21 ([post](https://www.facebook.com/share/p/1DHPpDkB2n/)) says "one assessment per interviewed slot" without requiring a clock check; a follow-up question is posted in the same thread.
+- **FR-13** **R8 timing (conflict resolved by the team, 2026-11-21):** an assessment may be submitted once the schedule is confirmed. The team's earlier reading of Q-04 was "only after the interview has taken place", but no single fixed `APP_TODAY` can be both inside the application period (2026-11-10 to 2026-11-30, needed by C5 and R2) and after the interview date (2026-12-02, needed by that reading of C10). The rubric is what is marked, so the server follows R8. This difference is recorded in the contract `## Changes` and in `BACKEND.md`. The product owners' answer of 2026-11-21 ([post](https://www.facebook.com/share/p/1DHPpDkB2n/)) says "one assessment per interviewed slot" without requiring a clock check; a follow-up question is posted in the same thread.
 
 ### Product owner answers that shape the server
 
@@ -67,7 +68,7 @@ From the [product owners' post](https://www.facebook.com/share/p/1DHPpDkB2n/), r
 
 ### Errors
 
-- **FR-14** Every non-2xx answer uses `{ "error", "code", "fieldErrors"?, "details"? }` from `docs/api/README.md`. Broken JSON gets `400`, an unknown path `404`, an unexpected failure `500`; no answer carries a stack trace.
+- **FR-14** Every non-2xx answer uses `{ "error", "code", "fieldErrors"?, "details"? }` from `docs/api/README.md`. Broken JSON gets `400`, an unknown path or a missing id `404`, an unexpected failure `500`; no answer carries a stack trace.
 - **FR-15** An unknown body field is ignored, never stored.
 
 ### Front end
@@ -94,3 +95,5 @@ Then, before each file and each check, seed again and restart:
 - `client/dist/` through `npx vite preview` with the network off: C1–C11 with the demo accounts, then restart the server without seeding and check that what the walk created is still there.
 
 Root gates stay green: `npm run format:check`, `npm run lint`, `npm test`, and CI on every push.
+
+Before hand-in, also run the install and the tests once in a `node:22-slim` container next to `postgres:17`, with the network cut after `npm ci --ignore-scripts`: the lock file is made on Windows and must carry the Linux builds of Vitest's native dependencies; developers run Node 26, the marker Node 22.

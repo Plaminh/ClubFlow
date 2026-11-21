@@ -61,13 +61,13 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 - [ ] T013 `03`–`07`: mark each file's needed starting state; the owner writes its preamble requests before coding that file (Hoàng: 03, 04, 06 results, 07; Nguyệt: 05, 06 notifications)
 - [ ] T014 `AGENTS.md`: point the plan line at this folder
 - [x] T015 `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`: record the product owners' answers to Q-01–Q-07 with the [post link](https://www.facebook.com/share/p/1DHPpDkB2n/); Q-03, Q-05 and Q-07 superseded
-- [ ] T016 Post the Q-04 follow-up (assessment timing vs. a fixed `APP_TODAY`) in the same thread; update spec FR-13 with the answer
+- [ ] T016 Post the Q-04 follow-up (assessment timing vs. a fixed `APP_TODAY`) in the same thread. Does not block: the server follows R8 meanwhile; record the answer in FR-13 and `BACKEND.md`
 
 ## Phase 2 — Server skeleton (Minh)
 
-- [ ] T020 `git mv backend server`; remove it from the root workspaces; own `package-lock.json`; scripts `start`, `seed`, `test` (`vitest run`)
+- [ ] T020 `git mv backend server`; remove it from the root workspaces; own `package-lock.json`; scripts `start`, `seed`, `test` (`vitest run`); `"engines": { "node": ">=22" }`; `npm start` never seeds or wipes data (spec FR-23)
 - [ ] T021 Dependencies: remove `cors`, `cloudinary`; add `bcryptjs`, `zod`
-- [ ] T022 `server/.env.example` and `config/env.js` (D1); delete the root `.env.example`; update `docker-compose.yml` (`postgres:17`, `--env-file server/.env`)
+- [ ] T022 `server/.env.example` and `config/env.js` (D1); delete the root `.env.example`; update `docker-compose.yml` (`postgres:17`, `--env-file server/.env`); `UPLOAD_DIR=./uploads` (outside `src/`) and `server/uploads/` in `.gitignore`, so the zip carries no uploaded file
 - [ ] T023 Test (red): **S2 server stops with a message when JWT_SECRET is missing**; then code
 - [ ] T024 Test (red): **S3 no Access-Control-Allow-Origin for any origin**; then remove `cors`
 - [ ] T025 `AppError`, error handler, not-found handler: the error shape, broken JSON → 400, no stack trace (tests first)
@@ -78,19 +78,19 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 
 - [ ] T030 Move migrations to `server/migrations/`; `migrate.js` reads `DATABASE_URL`
 - [ ] T031 Seed runner: drop schema, migrate, run `src/db/seeds/*.js` in order, one transaction; same result when run twice
-- [ ] T032 Test helpers: global setup, `resetDatabase`, `tokenFor` (secret from `env.js`), `loginAs`; `fileParallelism: false`
+- [ ] T032 Test helpers: global setup, `resetDatabase`, `tokenFor` (secret from `env.js`), `loginAs`; `fileParallelism: false`. Keep `npm test` under 5 minutes on one CPU (bcryptjs cost 10)
 - [ ] T033 Shared 401 tests (red until Nguyệt's `/api/auth/me` exists): no token, other secret, `alg: none`, expired, edited payload — each test also sends one request that must succeed
 - [ ] T034 CI: `postgres:17` service, `npm ci --ignore-scripts` and `npm test` in `server/`; drop the temporary `DB_*` variables
 
 ## Phase 4 — Sign-in and Applicant/Interviewer screens (Nguyệt)
 
-- [ ] T040 `010` users migration and seed (5 demo accounts, `bcryptjs` hashes)
+- [ ] T040 `010` users migration and seed (the 5 demo accounts plus `studentC`, an applicant with no application for the PA#6 live demo; `bcryptjs` hashes, cost 10)
 - [ ] T041 `POST /api/auth/login` (same `401` for wrong password and unknown e-mail, `exp` ≤ 24 h), `GET /api/auth/me`, `POST /api/auth/logout`, `GET`/`PATCH /api/me/profile` (a `role` field is ignored)
 - [ ] T042 Front end: `401` clears the session and opens sign-in with a message
 - [ ] T043 C1 `GET /api/campaigns/current`; "open" means `opensOn <= APP_TODAY <= closesOn` (spec FR-19)
 - [ ] T044 `050` applications; C5 `POST /api/applications` — **R2**, **R3**, **S5** (PDF magic bytes, 5 MB, server-made name)
 - [ ] T045 C6 `GET /api/me/applications` — **S4** (own applications only)
-- [ ] T046 `GET /api/applications/{id}/cv` — owner, assigned interviewer, executive; served as `application/pdf` — **S4**
+- [ ] T046 `GET /api/applications/{id}/cv` — owner, assigned interviewer, executive; served as `application/pdf` with `X-Content-Type-Options: nosniff`, never as HTML — **S4**, **S5**
 - [ ] T047 C10 `GET /api/me/interviews`, `GET /api/interviews/{id}` — **S4**, no screening note
 - [ ] T048 `080` assessments; `POST /api/interviews/{id}/assessment` — **R8** (assigned interviewer, once, after confirmation)
 - [ ] T049 `090` notifications; `GET`/`PATCH /api/me/notifications`
@@ -109,9 +109,9 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 ## Phase 6 — Integration and hand-in (all, led by Minh)
 
 - [ ] T060 Rebuild `client/dist/` on the server; walk C1–C11 with the demo accounts; restart without seeding and check persistence
-- [ ] T061 `BACKEND.md`: team, how to run, demo accounts, data model, rules and checks (each owner writes their rows), uploads, sign-in, product owner decisions (with links), not done
-- [ ] T062 `brief.md` for PA#4 (the prompts actually given), `SELF_ASSESSMENT_REPORT.md`
-- [ ] T063 Clean-copy run of the acceptance steps in spec.md; zip with `.git` and `client/dist/`, without `node_modules/`, `server/.env` and uploads
+- [ ] T061 `BACKEND.md`: team, how to run, demo accounts, data model, rules and checks (each owner writes their rows), uploads, sign-in, product owner decisions (with links), not done. In the S2 row, say that `DB_PASSWORD: ci-only-not-a-secret` in `.github/workflows/ci.yml` history is a throwaway CI value for a database that exists only inside the CI run
+- [ ] T062 `brief.md` for PA#4: the prompts actually given, pasted in order. **Every member saves their prompts as they go** — they cannot be rebuilt at the end. `SELF_ASSESSMENT_REPORT.md`
+- [ ] T063 Clean-copy run of the acceptance steps in spec.md, including the `node:22-slim` + `postgres:17` run with the network off; zip with `.git` and `client/dist/`, without `node_modules/`, `server/.env` and uploads
 - [ ] T064 PA#5: `HARNESS.md`, `checks/gates-final.txt`, `checks/ci-runs.png`, `git tag final`
 
 ## Optional — "beyond the brief" for PA#6 B5 (only if time allows)
