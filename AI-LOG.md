@@ -1571,3 +1571,19 @@ By hand: None; the team reviews the commits.
 Verified: Server tests 39/39 on a local PostgreSQL 18 (throwaway cluster on 127.0.0.1:55432, trust auth) before `2b5dc14`, which adds the 5 intentionally red 401 tests. `npm run seed` run twice and `npm run migrate` by hand. `git diff -- server/test` empty after `c9522fc`. CI uses `postgres:17`, as the marker does.
 
 Incident: The old `seed.js` ran its command and ended the pool as soon as it was imported, so no test could call it ("Cannot use a pool after calling end on the pool"); caught by the red seed tests in `85ed73f`.
+
+---
+
+## 2026-11-21 — PA#4 — Clean-up of leftovers from before the server move
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Search the repository for parts not updated after the PA#4 changes and remove them.
+
+Kept: Deleted `backend/` leftovers in the main checkout (only an ignored `node_modules` and empty folders, no tracked file). README and ARCHITECTURE point at `server/` (`a29f78c`); constitution principle VI amended to `server/.env`, 1.1.0 (`a3cea2d`); the two obsolete pre-PA3 integration guides under `docs/frontend/` removed (`61348bd`; their Cloudinary sections had been rewritten minutes before in `a8d404b`, then the whole guides turned out to describe in-browser mocks that PA#3 already removed); Vite no longer reads the removed root `.env` (`c4b249c`); `npm run verify` and QUALITY-GATE run every gate, as CI does (`6f66cc1`); T022 note fixed (`8903f56`).
+
+Changed: Nothing in code behaviour: build 393 kB, client tests 287/287, mock tests 17/17, format and lint clean.
+
+Rejected: Rewriting history records that mention `backend/`, Cloudinary or the root `.env` (`AI-LOG.md`, `brief.md`, meeting notes, `specs/001`–`002`): they record what was true then, and PA#5 compares this log with the earlier hand-ins. Changing `mock-token-…` in the PA#3 mock and its client tests: the mock is still the PA#3 hand-in. Rewriting `server/src/middleware/upload.middleware.js`: it belongs to Nguyệt's S5 task (T044).
+
+By hand: The team asked for the clean-up and decides on the local root `.env` file, which is ignored and was not read.
