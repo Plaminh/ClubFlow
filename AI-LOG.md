@@ -1447,3 +1447,27 @@ By hand: None. The team relayed the review and asked for the fixes.
 
 Verified: `grep` finds no "Verified" in `FRONTEND.md`; 15 translation blocks in `brief.md`, each directly under its prompt; `npm run lint` clean.
 
+
+---
+
+## PA#4
+
+Entries below this heading belong to PA#4. The PA#2 and PA#3 entries above are unchanged.
+
+## 2026-11-21 — PA#4 Step 0–1 — Branch, rules file, Prettier and CI
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Read the PA#4, PA#5 and PA#6 rubrics, check whether PA#3 is ready to build on, merge `pa3-finalize` into `dev`, branch `feature/pa4`, then set up the harness: update `AGENTS.md` for the server, add a formatter gate and a CI workflow, one commit each.
+
+Kept: Fast-forward of `dev` to `8f34dd0` and the new branch `feature/pa4`. `AGENTS.md` server section, env rule and never list (`db1676f`). Prettier 3.10.1 with `format` / `format:check` (`a397a0f`). Formatting-only commit (`dfecaba`). GitHub Actions workflow running `npm ci --ignore-scripts`, `format:check`, `lint`, `npm test`, production build (`e46301c`).
+
+Changed: The team agreed to three proposals after asking why: one env file `server/.env` instead of the root `.env` (the marker copies `server/.env.example` and sets only `PORT`, `DATABASE_URL`, `JWT_SECRET`); drop `cors` and `cloudinary` (offline marking, S3, no real keys); take `server/` out of the npm workspaces so it has its own `package-lock.json`. The branch is named `feature/pa4` rather than `pa4` to follow the naming rule in `AGENTS.md`. The assistant's first suggestion to tag the PA#3 submission was withdrawn: PA#3 is due 2026-11-30 and no rubric asks for that tag.
+
+Rejected: Formatting Markdown with Prettier: it would rewrite `AI-LOG.md`, `brief.md` and the contract examples, which must keep saying what they said (`.prettierignore` skips `*.md`, `docs/`, `specs/`, `.specify/`). A JWT secret written into the CI file: it is generated per run with `openssl rand`.
+
+By hand: The team chose the branch base, approved the env change, the dependency changes (add Prettier and `bcryptjs`, remove `cors` and `cloudinary`) and the workspace split.
+
+Verified: `format:check` red at `a397a0f` ("Code style issues found in 254 files"), green after `dfecaba`. After formatting: `npm run lint` clean; tests 287 + 18 + 17 pass; `node tools/contract-check.mjs` 56/56 on a fresh mock.
+
+Incident: Prettier's default `endOfLine: "lf"` would make `format:check` red on every Windows clone (`core.autocrlf=true` checks files out with CRLF) while CI on Linux stayed green. Caught by the git CRLF warnings while staging; fixed with `endOfLine: "auto"` in `a35a5eb`.
