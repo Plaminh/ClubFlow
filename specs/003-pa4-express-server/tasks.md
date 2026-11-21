@@ -61,7 +61,7 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 - [ ] T013 `03`–`07`: mark each file's needed starting state; the owner writes its preamble requests before coding that file (Hoàng: 03, 04, 06 results, 07; Nguyệt: 05, 06 notifications)
 - [ ] T014 `AGENTS.md`: point the plan line at this folder
 - [x] T015 `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`: record the product owners' answers to Q-01–Q-07 with the [post link](https://www.facebook.com/share/p/1DHPpDkB2n/); Q-03, Q-05 and Q-07 superseded
-- [ ] T016 Post the Q-04 follow-up (assessment timing vs. a fixed `APP_TODAY`) in the same thread. Does not block: the server follows R8 meanwhile; record the answer in FR-13 and `BACKEND.md`
+- [x] T016 Q-04 follow-up: not posted (team decision, 2026-11-21). The server follows R8; `BACKEND.md` explains why (spec FR-13)
 
 ## Phase 2 — Server skeleton (Minh)
 

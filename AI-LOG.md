@@ -1507,3 +1507,5 @@ Rejected: Treating the Q-04 answer as settling the assessment timing: it says "p
 By hand: The team posted the questions and pasted the answers and the link.
 
 Verified: `docs/api/07-campaign-management.md` (lines 196, 250, 287) already allows published edits, refuses deleting a position with applications and locks the interview setup at the first application, as Q-03's answer says; no contract change was needed for Q-03.
+
+Correction (2026-11-21): the Q-04 follow-up mentioned above as "to be posted" was not posted; the team decided the server follows R8 without it (task T016).
