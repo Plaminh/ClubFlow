@@ -2,6 +2,8 @@
 
 These endpoints cover C10. Every response is assignment-scoped and omits Executive private notes and unpublished final decisions.
 
+**Starting state (PA#4).** Runs alone on a fresh seed. Interviews exist only after confirmation, so the file must start with requests that, through the API, close applications, shortlist A01–A03, generate, resolve, save and confirm the schedule (as in [04-scheduling.md](04-scheduling.md)). Interview ids are those that the confirmation creates. An Interviewer asking for an interview not assigned to them gets `404 INTERVIEW_NOT_FOUND` (README, Access Rule). Those opening requests are written by the owner of this file before the server code (tasks.md T013, T047).
+
 ## GET /api/me/interviews
 
 **Purpose**: List confirmed Interviews assigned to the authenticated Interviewer.
@@ -55,7 +57,7 @@ Content-Type: application/json
 
 **Visibility**: `privateNote`, sibling Applications, other Interviewers' details, and final result are absent.
 
-**Success**: `200`. Errors: `401 INVALID_TOKEN`; `403 ROLE_FORBIDDEN`; `403 INTERVIEW_NOT_ASSIGNED`; `404 INTERVIEW_NOT_FOUND`.
+**Success**: `200`. Errors: `401 INVALID_TOKEN`; `403 ROLE_FORBIDDEN`; `404 INTERVIEW_NOT_FOUND`.
 
 ```http
 GET /api/interviews/int-A01 HTTP/1.1
@@ -98,7 +100,7 @@ Content-Type: application/json
 
 ## POST /api/interviews/{interviewId}/assessment
 
-**Purpose**: Submit the one immutable Assessment for an assigned completed Interview.
+**Purpose**: Submit the one immutable Assessment for an assigned Interview, once the schedule is confirmed (rule R8; README, Business Date).
 
 **Allowed roles**: Assigned Interviewer only.
 
@@ -107,7 +109,7 @@ Content-Type: application/json
 | `notes` | string | Required trimmed value, 1-2000 characters. |
 | `recommendation` | string or null | Optional `pass`, `fail`, or `null`. |
 
-**Success**: `201` Assessment. Errors: `400 VALIDATION_ERROR`; `401`; `403 ROLE_FORBIDDEN`; `403 INTERVIEW_NOT_ASSIGNED`; `404 INTERVIEW_NOT_FOUND`; `409 SCHEDULE_NOT_CONFIRMED`; `409 INTERVIEW_NOT_COMPLETED`; `409 ASSESSMENT_ALREADY_SUBMITTED`.
+**Success**: `201` Assessment. Errors: `400 VALIDATION_ERROR`; `401`; `403 ROLE_FORBIDDEN`; `404 INTERVIEW_NOT_FOUND`; `409 SCHEDULE_NOT_CONFIRMED`; `409 ASSESSMENT_ALREADY_SUBMITTED`.
 
 Submitting an Assessment does not create or change a Final Result.
 
@@ -202,4 +204,5 @@ Content-Type: application/json
 
 ## Changes
 
+- 2026-11-21 (PA#4): Added the PA#4 starting state (close, shortlist, generate, resolve, save and confirm through the API first; opening requests still to be written by the file's owner, tasks.md T013). An unassigned Interviewer now gets `404 INTERVIEW_NOT_FOUND` instead of `403 INTERVIEW_NOT_ASSIGNED` (README, Access Rule). Assessment is allowed once the schedule is confirmed; removed `409 INTERVIEW_NOT_COMPLETED` (rule R8; README, Business Date). Why: PA#4 seed state, S4 and R8.
 - 2026-11-18: Defined assignment-scoped list/detail DTOs, explicit private-field omissions, completed-interview state, assessment limits, immutable submission, and A01/A02 deterministic examples.
