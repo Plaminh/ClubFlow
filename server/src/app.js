@@ -1,6 +1,4 @@
-import cors from 'cors';
 import express from 'express';
-import { env } from './config/env.js';
 import apiRouter from './routes/index.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -8,11 +6,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 const app = express();
 
 app.disable('x-powered-by');
-app.use(
-  cors({
-    origin: env.frontendOrigin,
-  }),
-);
+// No CORS middleware (S3): the front end calls relative /api paths through the Vite proxy,
+// so every request is same-origin and no Access-Control-Allow-Origin header is ever sent.
 app.use(express.json());
 
 app.use('/api', apiRouter);
