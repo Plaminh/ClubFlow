@@ -26,6 +26,15 @@ description: "Dependency-ordered tasks for the PA#4 Express server, with owners"
 4. Add an entry under `## PA#4` in `AI-LOG.md` (tool, request, kept, changed, rejected, by hand).
 5. Commit from your own machine, under your own `git config user.name` / `user.email`.
 
+## Using the skeleton (ready since 2026-11-21)
+
+- **Setup:** `docker compose up -d` (PostgreSQL 17, no password, `clubflow` and `clubflow_test`); `cp server/.env.example server/.env`, set a long random `JWT_SECRET`, and add `TEST_DATABASE_URL=postgres://clubflow@localhost:5433/clubflow_test` so `npm test` does not wipe your dev data. In `server/`: `npm ci --ignore-scripts`, `npm run seed`, `npm start`, `npm test`.
+- **Schema:** `server/migrations/NNN-name.sql` with your number from the table below; rows in `server/src/db/seeds/NNN-name.js` (see the README in each folder).
+- **Routes:** your own `server/src/routes/<area>.routes.js`, mounted with one line in `routes/index.js`. Protect with `authenticate` and `requireRole('executive')` from `middleware/auth.middleware.js`; check input with `validate({ params, query, body })` (zod schemas) from `middleware/validate.middleware.js` and read `req.validated`, never `req.body`.
+- **Refusals:** `throw new AppError(status, CODE, message, { fieldErrors, details })` from `errors/AppError.js`; the error handler writes the contract's shape. Codes are the ones in `docs/api/`.
+- **Settings:** import `env` from `config/env.js` (`env.appToday`, `env.uploadDir`, …); nothing else reads `process.env`.
+- **Tests:** `resetDatabase()` from `test/helpers/db.js` in `beforeAll`; `tokenForSeedUser('exec')` from `test/helpers/tokens.js` for a signed token; after T041, `loginAs('studentA')` from `test/helpers/auth.js`.
+
 ## Migration and seed numbers
 
 Numbers follow the order of dependencies, not the person. Seed modules use the same number as their migration. Leave gaps; ask before taking a number not in this table.
@@ -76,16 +85,16 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 
 ## Phase 3 — Database skeleton (Minh)
 
-- [ ] T030 Move migrations to `server/migrations/`; `migrate.js` reads `DATABASE_URL`
-- [ ] T031 Seed runner: drop schema, migrate, run `src/db/seeds/*.js` in order, one transaction; same result when run twice
-- [ ] T032 Test helpers: global setup, `resetDatabase`, `tokenFor` (secret from `env.js`), `loginAs`; `fileParallelism: false`. Keep `npm test` under 5 minutes on one CPU (bcryptjs cost 10)
-- [ ] T033 Shared 401 tests (red until Nguyệt's `/api/auth/me` exists): no token, other secret, `alg: none`, expired, edited payload — each test also sends one request that must succeed
-- [ ] T034 CI: `postgres:17` service, `npm ci --ignore-scripts` and `npm test` in `server/`; drop the temporary `DB_*` variables
+- [x] T030 Move migrations to `server/migrations/`; `migrate.js` reads `DATABASE_URL`
+- [x] T031 Seed runner: drop schema, migrate, run `src/db/seeds/*.js` in order, one transaction; same result when run twice
+- [x] T032 Test helpers: global setup, `resetDatabase`, `tokenFor` (secret from `env.js`), `loginAs`; `fileParallelism: false`. Keep `npm test` under 5 minutes on one CPU (bcryptjs cost 10)
+- [x] T033 Shared 401 tests (red until Nguyệt's `/api/auth/me` exists): no token, other secret, `alg: none`, expired, edited payload — each test also sends one request that must succeed
+- [x] T034 CI: `postgres:17` service, `npm ci --ignore-scripts` and `npm test` in `server/`; drop the temporary `DB_*` variables
 
 ## Phase 4 — Sign-in and Applicant/Interviewer screens (Nguyệt)
 
 - [ ] T040 `010` users migration and seed (the 5 demo accounts plus `studentC`, an applicant with no application for the PA#6 live demo; `bcryptjs` hashes, cost 10)
-- [ ] T041 `POST /api/auth/login` (same `401` for wrong password and unknown e-mail, `exp` ≤ 24 h), `GET /api/auth/me`, `POST /api/auth/logout`, `GET`/`PATCH /api/me/profile` (a `role` field is ignored)
+- [ ] T041 Turns `server/test/security/auth-401.test.js` green (red since `2b5dc14`). Issue tokens with `signUserToken(user)` from `src/utils/jwt.js`. `POST /api/auth/login` (same `401` for wrong password and unknown e-mail, `exp` ≤ 24 h), `GET /api/auth/me`, `POST /api/auth/logout`, `GET`/`PATCH /api/me/profile` (a `role` field is ignored)
 - [ ] T042 Front end: `401` clears the session and opens sign-in with a message
 - [ ] T043 C1 `GET /api/campaigns/current`; "open" means `opensOn <= APP_TODAY <= closesOn` (spec FR-19)
 - [ ] T044 `050` applications; C5 `POST /api/applications` — **R2**, **R3**, **S5** (PDF magic bytes, 5 MB, server-made name)

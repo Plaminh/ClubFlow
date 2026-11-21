@@ -1551,3 +1551,23 @@ Verified: After every code commit, `git diff -- server/test` was empty (tests un
 Tests changed on purpose (not to make them pass): `test/unit/utils/jwt.test.js` (`03a0745`) read `process.env`, which S2 now forbids outside `env.js`; its four assertions are kept with the secret from `env.js`, the "missing JWT_SECRET" case moved to the process-level S2 test, and an `alg: none` case was added. `test/integration/api/health.test.js` (`64caad3`) asserted fields the contract does not have; it now asserts the exact contract body, which is stricter. `test/unit/middleware/auth.middleware.test.js` (`a04c8e5`) asserted the old `{ error }` body; all five old cases are kept with real tokens and the contract's `{ error, code }`, plus six new cases.
 
 Incident: Broken JSON answered `500` (Express's parse error reached the generic handler) — caught by the red error-convention test in `948d446`; PA#4 criterion 1 asks for `400`. Fixed in `77bf5f2`.
+
+---
+
+## 2026-11-21 — PA#4 Phase 3 — Database skeleton and test infrastructure
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Build the database skeleton (tasks T030–T034): migrations in `server/migrations/`, a seed runner that gives the same state twice, test helpers, the shared 401 tests, PostgreSQL in CI.
+
+Kept: seed tests `85ed73f` (red) → runners `c9522fc`; CI `postgres:17` service `22452e6`; shared 401 tests on `GET /api/auth/me` `2b5dc14` (red until sign-in exists); "Using the skeleton" section in `tasks.md` for the screen owners.
+
+Changed: The first plan was a Vitest global setup that migrates once; replaced by `resetDatabase()` in each file's `beforeAll`, because each file must start from the seed state and files already run one at a time. `TEST_DATABASE_URL` added (read only by `vitest.config.js`) so a developer's `npm test` does not wipe the dev database, while the marker's run still uses `DATABASE_URL`.
+
+Rejected: Deleting the files in `UPLOAD_DIR` at each seed: a mistyped `UPLOAD_DIR` (for example `.`) would delete server files. Seed modules overwrite their own file names instead. Skipping the 401 tests until sign-in exists: `.skip` is not allowed; they stay red on purpose and are Nguyệt's first target (T041).
+
+By hand: None; the team reviews the commits.
+
+Verified: Server tests 39/39 on a local PostgreSQL 18 (throwaway cluster on 127.0.0.1:55432, trust auth) before `2b5dc14`, which adds the 5 intentionally red 401 tests. `npm run seed` run twice and `npm run migrate` by hand. `git diff -- server/test` empty after `c9522fc`. CI uses `postgres:17`, as the marker does.
+
+Incident: The old `seed.js` ran its command and ended the pool as soon as it was imported, so no test could call it ("Cannot use a pool after calling end on the pool"); caught by the red seed tests in `85ed73f`.
