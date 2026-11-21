@@ -55,11 +55,11 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 
 ## Phase 1 — Contract update (Minh) — blocks everything
 
-- [ ] T010 `docs/api/README.md`: seed state, `APP_TODAY`, each file runs alone on a fresh seed, access rule (403 wrong role / 404 not theirs), JWT and token placeholders, R8 timing (spec FR-13), with `## Changes` lines
-- [ ] T011 `01-auth-profile.md`: tokens shown as `"…"`, JWT expiry, logout clears the client only
-- [ ] T012 `02-public-applicant.md`: A01, A02 and studentB's application come from the seed; new applications start at the next id; duplicate Content → `409` with A01
-- [ ] T013 `03`–`07`: mark each file's needed starting state; the owner writes its preamble requests before coding that file (Hoàng: 03, 04, 06 results, 07; Nguyệt: 05, 06 notifications)
-- [ ] T014 `AGENTS.md`: point the plan line at this folder
+- [x] T010 `docs/api/README.md`: seed state, `APP_TODAY`, each file runs alone on a fresh seed, access rule (403 wrong role / 404 not theirs), JWT and token placeholders, R8 timing (spec FR-13), with `## Changes` lines
+- [x] T011 `01-auth-profile.md`: tokens shown as `"…"`, JWT expiry, logout clears the client only
+- [x] T012 `02-public-applicant.md`: A01, A02 and studentB's application come from the seed; new applications start at the next id; duplicate Content → `409` with A01
+- [x] T013 `03`–`07`: each file states its needed starting state and the access-rule codes (done 2026-11-21). **Still open, per owner before coding that file:** the opening requests that create the state, and the updated example rows (Hoàng: 03, 04, 06 results, 07; Nguyệt: 05, 06 notifications)
+- [x] T014 `AGENTS.md`: point the plan line at this folder
 - [x] T015 `docs/requirements/DECISIONS_AND_OPEN_QUESTIONS.md`: record the product owners' answers to Q-01–Q-07 with the [post link](https://www.facebook.com/share/p/1DHPpDkB2n/); Q-03, Q-05 and Q-07 superseded
 - [x] T016 Q-04 follow-up: not posted (team decision, 2026-11-21). The server follows R8; `BACKEND.md` explains why (spec FR-13)
 

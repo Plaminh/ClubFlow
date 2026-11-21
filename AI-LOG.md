@@ -1509,3 +1509,23 @@ By hand: The team posted the questions and pasted the answers and the link.
 Verified: `docs/api/07-campaign-management.md` (lines 196, 250, 287) already allows published edits, refuses deleting a position with applications and locks the interview setup at the first application, as Q-03's answer says; no contract change was needed for Q-03.
 
 Correction (2026-11-21): the Q-04 follow-up mentioned above as "to be posted" was not posted; the team decided the server follows R8 without it (task T016).
+
+---
+
+## 2026-11-21 — PA#4 Phase 1 — Contract update for the server
+
+Tool: Claude Code (Claude Opus 5.5).
+
+Asked for: Update `docs/api/` for PA#4 (tasks T010–T014): seed state, business date, each file runnable alone on a fresh seed, the access rule, JWT tokens, studentC; one commit per file with a `## Changes` line.
+
+Kept: README (`35d5d74`), validator alias for `studentC` (`1fd3a4c`), `01` auth (`ce8861a`), `02` applicant (`64e5f54`), `03` review (`5e8e2bb`), `04` scheduling (`84fbb12`), `05` interviewer (`0f4d90f`), `06` results (`d05c9f2`), `07` campaign management (`d09b29e`), `AGENTS.md` plan pointer (`c8f399a`).
+
+Changed: The first README draft used `401 UNAUTHENTICATED` and `403 FORBIDDEN`; a grep of the existing contract showed `INVALID_TOKEN` (15 uses) and `ROLE_FORBIDDEN` (13 uses), so the README uses those. The first draft also said 20-minute slots; `mock/data/campaigns.json` has `slotMinutes: 30`, corrected before commit. Files `04`–`06` only state the starting state they need; the opening requests and updated example rows are left to the owners of those screens (Hoàng, Nguyệt) before they code them.
+
+Rejected: Changing the mock to follow the PA#4 contract: PA#3 is handed in from `pa3-finalize`, and the mock is not marked in PA#4.
+
+By hand: The team chose the seed contents (A01–A03 as in the PA#3 examples, a note on A01, `studentC` with no application).
+
+Verified: `node tools/validate-api-docs.mjs` passes (9 files, 37 endpoints, 59 request examples); mock tests 17/17 still pass; no client test reads `docs/api/`.
+
+Incident: The team's validator rejected `{{token:studentC}}` as an unknown alias; caught by running it after the README change, fixed in `1fd3a4c`.
