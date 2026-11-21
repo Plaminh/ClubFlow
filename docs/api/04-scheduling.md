@@ -2,6 +2,8 @@
 
 These Executive endpoints cover C8 and C9. Generate Draft, Edit/Resolve, Save Changes, export, and Confirm are distinct actions.
 
+**Starting state (PA#4).** Runs alone on a fresh seed. The seed has A01–A03 pending review and applications still open, so the file must start with requests that, through the API, close applications (`POST /api/campaigns/cmp-2026-hk1/close-applications`) and shortlist A01, A02 and A03 (`POST …/applications/{id}/screening-decision`). Those opening requests are written by the owner of this file before the server code (tasks.md T013, T054).
+
 ## Schedule View Shape
 
 The canonical `GET` schedule view contains:
@@ -99,7 +101,7 @@ Content-Type: application/json
 | `interviewWindow` | object `{ start, end }` | Required; `start` and `end` are `HH:MM` (24-hour), `start` before `end`, and the window fits at least one interview of `slotMinutes`. Errors use the key `interviewWindow`. |
 | `slotMinutes` | integer | Required; `15`, `20` or `30`. |
 
-**Behavior**: Only shortlisted Applications enter. PA#3 may use fixed deterministic generation; the endpoint does not claim a production first-fit optimizer. The chosen values become the draft's `settings`; row edits must then fall inside that date and window, and every interview lasts `slotMinutes`. The Campaign's own interview configuration is not changed. The PA#3 mock places the first two shortlisted Applications at the window's start and leaves the others Unassigned; a placed Application whose Applicant or Interviewer is not available at that time is left Unassigned with that reason.
+**Behavior**: Only shortlisted Applications enter. Generation is first-fit in the product owners' order (Q-01): Applications by `submittedAt`, then Application ID; for each, the earliest start time in the window first; at that time, Interviewers assigned to the Application's Position, then Rooms, each by stable ID; the first combination where the Applicant, the Interviewer and the Room are all free and none overlaps an interview already placed is taken. No backtracking. An Application that fits nowhere is `Unassigned` with its reason, never rejected. The chosen values become the draft's `settings`; row edits must then fall inside that date and window, and every interview lasts `slotMinutes`. The Campaign's own interview configuration is not changed.
 
 **Success**: `200` canonical schedule view with recalculated rows, summary, readiness, and timestamps. Errors: `400 VALIDATION_ERROR` with `fieldErrors` keyed `interviewDate`, `interviewWindow`, `slotMinutes`; `401`; `403`; `404`; `409 APPLICATIONS_STILL_OPEN`; `409 UNREVIEWED_APPLICATIONS`; `409 SCHEDULE_CONFIRMED`; `409 NO_SHORTLISTED_APPLICATIONS`. The `409` checks run before the body is validated.
 
@@ -482,6 +484,7 @@ Content-Type: application/json
 
 ## Changes
 
+- 2026-11-21 (PA#4): Added the PA#4 starting state: this file runs alone on a fresh seed and must first close applications and shortlist A01–A03 through the API (opening requests still to be written by the file's owner, tasks.md T013). Generation is now first-fit in the product owners' Q-01 order with no backtracking, replacing the PA#3 mock's fixed placement; the example rows will be updated with the opening requests. Why: PA#4 runs each contract file on a fresh seed, and rule R5.
 - 2026-11-20: `POST .../schedule/draft/generate` now takes a required body `{ interviewDate, interviewWindow: { start, end }, slotMinutes }`, validated field by field (`400 VALIDATION_ERROR`). Before, it took no body and the draft always used the Campaign's date, window and duration, so the Executive could not choose them on the Scheduling screen as step C8 requires. The chosen values are kept as the draft's `settings` (row edits are checked against them); the Campaign's configuration, which Q-03 locks and Applicants' availability depends on, is unchanged. Added error examples: two `400` for generate (missing fields, impossible values), `409 SCHEDULE_NOT_READY` for a confirmation refused on the fresh draft, and `409 SCHEDULE_CONFIRMED` for a generate after confirmation. Requested by the team (2026-11-20); the front end is changed in the same commit.
 
 - 2026-11-19: Schedule rows now carry `availabilityText` (the Applicant's chosen slots, for example `09:00-10:00, 10:00-11:00`). The Scheduling screen has a column for it that was always empty because the contract and the mock did not send it; the Executive needs it to place an interview inside the Applicant's availability.
