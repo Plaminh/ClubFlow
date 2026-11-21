@@ -118,7 +118,7 @@ Content-Type: application/json
     "downloadPath": "/api/applications/A01/cv"
   },
   "reviewedAt": null,
-  "privateNote": "",
+  "privateNote": "Internal screening note: strong writing sample; ask about weekly availability.",
   "siblingIds": ["A02"],
   "locked": false
 }
@@ -266,9 +266,9 @@ A03,Pham Quoc Bao,26DEMO0177,quoc.bao@demo.example,Communications,2026-11-17T09:
 
 **Purpose**: Return protected PDF CV content.
 
-**Allowed roles**: Owning Applicant; Executive for an Application in the Campaign; assigned Interviewer after confirmation. The endpoint returns `403 CV_FORBIDDEN` for a known but unauthorized record and never returns Executive private notes.
+**Allowed roles**: Owning Applicant; Executive for an Application in the Campaign; assigned Interviewer after confirmation. Any other caller gets `404 APPLICATION_NOT_FOUND`, as if the record did not exist (README, Access Rule); nothing about the application, including the Executive private note, is returned. The file is served as `application/pdf` with `X-Content-Type-Options: nosniff`, never as HTML.
 
-**Success**: `200 application/pdf` with safe `Content-Disposition`. Errors: `401 INVALID_TOKEN`; `403 CV_FORBIDDEN`; `404 APPLICATION_NOT_FOUND`.
+**Success**: `200 application/pdf` with safe `Content-Disposition`. Errors: `401 INVALID_TOKEN`; `404 APPLICATION_NOT_FOUND` (unknown, or not the caller's).
 
 ```http
 GET /api/applications/A01/cv HTTP/1.1
@@ -280,12 +280,12 @@ Accept: application/pdf
 HTTP/1.1 200 OK
 Content-Type: application/pdf
 Content-Disposition: inline; filename="cv.pdf"
-Content-Length: 204800
 ```
 
 The body of that answer is the PDF itself, so the answer block above has no body for the checker.
 
 ## Changes
 
+- 2026-11-21 (PA#4): Starting state: this file runs alone on a fresh seed (README, Seed State) and needs nothing more: A01–A03 are seeded pending review, and A01 already carries the seeded private note, so the A01 detail example now shows that note (was `""`) before the PATCH example replaces it. CV access follows the README Access Rule: a caller who may not see the CV gets `404 APPLICATION_NOT_FOUND` (was `403 CV_FORBIDDEN`); the PDF is sent with `X-Content-Type-Options: nosniff`; the example no longer fixes `Content-Length`, which depends on the seeded file. Why: PA#4 seed state and rules S4/S5.
 - 2026-11-19: The CSV and PDF examples no longer carry their body inside the `http` answer block, because the course contract-check reads that block as JSON; the CSV text is shown in a `text` block after the answer. The answers themselves did not change.
 - 2026-11-18: Added composite list/statistics semantics, exact query limits, independent A01/A02/A03 decisions, note limits, permitted CSV fields, protected CV authorization, and deterministic examples.
