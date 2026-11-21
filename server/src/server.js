@@ -2,8 +2,9 @@ import app from './app.js';
 import { env } from './config/env.js';
 import pool from './db/pool.js';
 
+// No host argument: listen on every interface, as the marker's container needs.
 const server = app.listen(env.port, () => {
-  console.log(`Backend listening on http://localhost:${env.port}`);
+  console.log(`ClubFlow server listening on port ${server.address().port}`);
 });
 
 async function shutdown(signal) {

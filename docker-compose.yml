@@ -1,21 +1,27 @@
 name: clubflow
 
+# Local development database only. The marker uses its own postgres:17 and never this file.
+# No password: the port is bound to 127.0.0.1, so only this machine can connect.
+# server/.env: DATABASE_URL=postgres://clubflow@localhost:5433/clubflow
+# Tests wipe their database; run them against clubflow_test, created on first start.
+
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: clubflow_postgres
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: ${DB_NAME:?DB_NAME is required}
-      POSTGRES_USER: ${DB_USER:?DB_USER is required}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: clubflow
+      POSTGRES_USER: clubflow
+      POSTGRES_HOST_AUTH_METHOD: trust
 
     ports:
-      - '127.0.0.1:${DB_PORT:-5433}:5432'
+      - '127.0.0.1:5433:5432'
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # New volume name: a PostgreSQL 16 data folder cannot be opened by PostgreSQL 17.
+      - postgres17_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
 
     healthcheck:
@@ -28,4 +34,4 @@ services:
       start_period: 10s
 
 volumes:
-  postgres_data:
+  postgres17_data:

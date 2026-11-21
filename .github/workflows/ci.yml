@@ -10,15 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      # Placeholders for the current backend config module; replaced by DATABASE_URL in PA#4 step 3.
+      # The server's variables (server/.env.example). JWT_SECRET is generated per run below.
+      # No database yet: the pool connects lazily; a postgres service comes with the database skeleton.
       NODE_ENV: test
-      BACKEND_PORT: '3001'
-      FRONTEND_ORIGIN: http://localhost:5173
-      DB_HOST: localhost
-      DB_PORT: '5432'
-      DB_NAME: clubflow_ci
-      DB_USER: clubflow_ci
-      DB_PASSWORD: ci-only-not-a-secret
+      PORT: '3001'
+      DATABASE_URL: postgres://clubflow@127.0.0.1:5432/clubflow_test
+      JWT_EXPIRES_IN: 8h
+      UPLOAD_DIR: ./uploads
+      APP_TODAY: '2026-11-18'
     steps:
       - uses: actions/checkout@v4
 

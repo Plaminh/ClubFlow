@@ -1,8 +1,5 @@
--- Docker-only bootstrap.
--- Application schema belongs in versioned files under database/migrations/.
+-- Docker-only bootstrap for the local development database (docker-compose.yml).
+-- The schema itself comes from the server's migrations (npm run seed / npm run migrate).
 
-CREATE TABLE IF NOT EXISTS schema_migrations (
-  id BIGSERIAL PRIMARY KEY,
-  filename VARCHAR(255) UNIQUE NOT NULL,
-  applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- A second database for `npm test`, which wipes the database it runs against.
+CREATE DATABASE clubflow_test OWNER clubflow;

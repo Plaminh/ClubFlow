@@ -3,16 +3,11 @@ import { env } from '../config/env.js';
 
 const { Pool } = pg;
 
-const pool = new Pool({
-  host: env.db.host,
-  port: env.db.port,
-  database: env.db.name,
-  user: env.db.user,
-  password: env.db.password,
-});
+// DATABASE_URL is the only setting used to find the database.
+const pool = new Pool({ connectionString: env.databaseUrl });
 
 pool.on('error', (error) => {
-  console.error('Unexpected PostgreSQL pool error:', error);
+  console.error('Unexpected PostgreSQL pool error:', error.message);
 });
 
 export default pool;

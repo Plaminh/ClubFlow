@@ -1,17 +1,10 @@
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
 
-export const generateToken = (payload) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is missing');
-  }
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
-  });
-};
+// HS256 only: verify() refuses `alg: none` and any other algorithm.
+const ALGORITHM = 'HS256';
 
-export const verifyToken = (token) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is missing');
-  }
-  return jwt.verify(token, process.env.JWT_SECRET);
-};
+export const generateToken = (payload) =>
+  jwt.sign(payload, env.jwtSecret, { algorithm: ALGORITHM, expiresIn: env.jwtExpiresIn });
+
+export const verifyToken = (token) => jwt.verify(token, env.jwtSecret, { algorithms: [ALGORITHM] });

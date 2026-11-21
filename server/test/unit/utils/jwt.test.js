@@ -1,28 +1,23 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { generateToken, verifyToken } from '../../../src/utils/jwt.js';
+import { env } from '../../../src/config/env.js';
 import jwt from 'jsonwebtoken';
 
+// The secret comes from config/env.js, the only module that reads the environment (S2).
+// A missing JWT_SECRET now stops the whole server; that is tested in test/security/S2-secrets.test.js.
+
 describe('JWT Utility', () => {
-  beforeEach(() => {
-    vi.stubEnv('JWT_SECRET', 'test-secret');
-    vi.stubEnv('JWT_EXPIRES_IN', '1h');
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it('should generate a valid token', () => {
     const payload = { userId: 1 };
     const token = generateToken(payload);
     expect(typeof token).toBe('string');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, env.jwtSecret);
     expect(decoded.userId).toBe(1);
   });
 
   it('should verify a valid token', () => {
     const payload = { userId: 2 };
-    const token = jwt.sign(payload, process.env.JWT_SECRET);
+    const token = jwt.sign(payload, env.jwtSecret);
     const decoded = verifyToken(token);
     expect(decoded.userId).toBe(2);
   });
@@ -33,15 +28,12 @@ describe('JWT Utility', () => {
 
   it('should throw an error for an expired token', () => {
     const payload = { userId: 3 };
-    const expiredToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '-1s' });
+    const expiredToken = jwt.sign(payload, env.jwtSecret, { expiresIn: '-1s' });
     expect(() => verifyToken(expiredToken)).toThrow('jwt expired');
   });
 
-  it('should throw an error if JWT_SECRET is missing', () => {
-    vi.stubEnv('JWT_SECRET', '');
-    expect(() => generateToken({ userId: 1 })).toThrow(
-      'JWT_SECRET environment variable is missing',
-    );
-    expect(() => verifyToken('token')).toThrow('JWT_SECRET environment variable is missing');
+  it('should refuse a token whose header says alg: none', () => {
+    const unsigned = jwt.sign({ userId: 4 }, null, { algorithm: 'none' });
+    expect(() => verifyToken(unsigned)).toThrow();
   });
 });
