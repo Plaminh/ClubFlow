@@ -12,7 +12,7 @@ Start here to find the right document for your task. This page only links to exi
 | Understand the frontend/backend architecture | [Architecture](ARCHITECTURE.md) |
 | Know what "done" means and how to run checks | [Quality Gate](QUALITY-GATE.md) |
 | Find API contracts | [API documentation](api/README.md) |
-| Connect the React UI to the backend | [Frontend integration guide](frontend/INTEGRATION.md) |
+| Build a server endpoint (PA#4) | [PA#4 tasks, "Using the skeleton"](../specs/003-pa4-express-server/tasks.md), [API contract](api/README.md) |
 | Work on a Spec Kit feature (spec, plan, tasks) | [`specs/`](../specs/README.md) |
 | Record AI-assisted work | [`AI-LOG.md`](../AI-LOG.md) |
 
