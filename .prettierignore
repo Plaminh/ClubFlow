@@ -1,0 +1,15 @@
+# Generated or vendored
+node_modules/
+**/dist/
+**/coverage/
+package-lock.json
+**/package-lock.json
+
+# Prose is written by hand and reviewed as history (AI-LOG, brief, contract examples)
+*.md
+
+# Reference material and tooling not owned by the team
+docs/
+.specify/
+.agents/
+specs/
