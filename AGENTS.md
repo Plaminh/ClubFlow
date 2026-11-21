@@ -5,7 +5,8 @@
 Use the existing stack:
 
 - Frontend: React, Vite, Atomic Design, Vitest, React Testing Library, and ESLint
-- Backend: Node.js, Express, PostgreSQL, and Vitest
+- Backend (`server/`, renamed from `backend/` in PA#4): Node.js 22, Express 5, PostgreSQL 17 through `pg` (no ORM), `jsonwebtoken`, `bcryptjs`, Multer, Vitest and supertest
+- Formatting and linting: Prettier and ESLint
 - Development: Docker, GitHub Spec Kit (Speckit), and Jira
 
 Do NOT replace or introduce alternative frameworks, databases, ORMs, or test frameworks without explicit approval.
@@ -14,18 +15,18 @@ Do NOT replace or introduce alternative frameworks, databases, ORMs, or test fra
 
 ## Environment Configuration
 
-Use exactly one local environment file:
+Use exactly one local environment file: `server/.env`, copied from `server/.env.example`.
+(Changed in PA#4: the marker copies `server/.env.example` to `server/.env` and sets only `PORT`, `DATABASE_URL` and `JWT_SECRET`, so the server cannot depend on a root `.env`.)
 
-`.env`
-
-Do NOT create additional environment files inside `client/`, `backend/`, or for separate environments.
+Do NOT create other environment files in the repository root, `client/`, or for separate environments.
 
 Rules:
 
-- Browser-visible variables MUST use the `VITE_` prefix.
-- Secrets MUST NOT use the `VITE_` prefix.
+- The server reads the environment in one module (`server/src/config/env.js`) and finds the database through `DATABASE_URL` only.
+- Every variable has a placeholder in `server/.env.example`; the example values of `UPLOAD_DIR` and `APP_TODAY` must work as they are.
+- A missing `JWT_SECRET` stops the server with a message. No fallback value for any secret.
+- Browser-visible variables MUST use the `VITE_` prefix; secrets MUST NOT.
 - `.env` MUST remain ignored by Git.
-- Update `.env.example` whenever a new environment variable is introduced.
 
 ---
 
@@ -84,6 +85,29 @@ Rules:
 - Do NOT introduce an ORM without explicit approval.
 
 Database infrastructure MAY execute SQL required for migrations, initialization, transactions, and infrastructure-level operations.
+
+### PA#4 Server Delivery Constraints
+
+- `server/` is a standalone npm project (not a root workspace) with its own committed `package-lock.json`. It must install with `npm ci --ignore-scripts`.
+- The server implements `docs/api/` as written. When the server needs something different, change the contract first, add a dated line to its `## Changes`, and commit that before the code.
+- Every rule R1–R8 and flaw S1–S5 gets a test named with its id first (`R3 second application for the same position returns 409`) that sends real HTTP requests. Commit the test red, then the code that makes it green. Read `git diff -- server/test` after every assistant request.
+- `npm test` in `server/` runs offline against an empty `DATABASE_URL`; tests create what they need.
+- `npm run seed` gives the same state on an empty and on a seeded database.
+- Uploaded CVs: PDF only (file starts with `%PDF-`), at most 5 MB, stored under a server-made name in `UPLOAD_DIR`, served as `application/pdf`.
+
+Commands (in `server/`): `npm ci --ignore-scripts`, `npm run seed`, `npm start`, `npm test`.
+Commands (root): `npm run lint`, `npm run format:check`, `npm test`.
+
+### Never
+
+- Never commit `.env`, a real password, key or connection string.
+- Never call `cors()` with no options, or answer `Access-Control-Allow-Origin: *`.
+- Never build SQL with template strings or `+`; request data goes in `$1` placeholders, and sort/filter field names are checked against a list.
+- Never read the role from the request body; it comes from the verified token.
+- Never edit, skip, loosen or delete a test, the contract or the seed to make something pass — stop and say so.
+- Never add a package that needs an install script (`bcrypt`, `sharp`, `better-sqlite3`, ORMs that download engines).
+- Never change the database schema outside a migration.
+- Never put a real student's CV or personal data in a prompt, a test or the seed.
 
 ---
 
