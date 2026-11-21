@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
 
       - name: Generate a throwaway JWT secret
         run: echo "JWT_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
@@ -39,7 +42,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Tests (client, backend, mock)
+      - name: Tests (client, mock)
+        run: npm test
+
+      - name: Install server (as the marker does)
+        working-directory: server
+        run: npm ci --ignore-scripts
+
+      - name: Server tests
+        working-directory: server
         run: npm test
 
       - name: Production build
