@@ -94,16 +94,18 @@ Content-Type: application/json
 
 **Errors**: `400 VALIDATION_ERROR` with field keys above; `401 INVALID_TOKEN`; `403 ROLE_FORBIDDEN`; `404 CAMPAIGN_NOT_FOUND` or `POSITION_NOT_FOUND`; `409 APPLICATIONS_CLOSED`; `409 DUPLICATE_APPLICATION` with `details.existingApplicationId`.
 
-The first successful Application locks interview date/window/duration and Campaign slots.
+The first successful Application locks interview date/window/duration and Campaign slots; in the seed, A01–A03 already exist, so the setup is locked from the start.
+
+These examples start from the seed (README, Seed State): Student C has no application, so their Content application gets the next id, `A04`. `submittedAt` is the server's time of submission and is shown as `"…"`.
 
 ```sh
 curl -i -X POST http://localhost:3001/api/applications \
-  -H "Authorization: Bearer {{token:studentA}}" \
+  -H "Authorization: Bearer {{token:studentC}}" \
   -F "campaignId=cmp-2026-hk1" \
   -F "positionId=pos-content" \
-  -F "email=minh.anh@demo.example" \
-  -F "faculty=Information Technology" \
-  -F "sop=I want to contribute clear and useful recruitment content for the club." \
+  -F "email=lan.chi@demo.example" \
+  -F "faculty=Business Administration" \
+  -F "sop=I would like to write clear posts that help new members find the right team." \
   -F "slotIds=slot-0900" \
   -F "slotIds=slot-1000" \
   -F "cv=@{{file:cv.pdf:200KB}};type=application/pdf"
@@ -114,14 +116,14 @@ HTTP/1.1 201 Created
 Content-Type: application/json
 
 {
-  "id": "A01",
+  "id": "A04",
   "campaignId": "cmp-2026-hk1",
-  "applicantId": "ap-minhanh",
+  "applicantId": "ap-lanchi",
   "positionId": "pos-content",
   "positionName": "Content",
-  "submittedAt": "2026-11-17T09:10:00+07:00",
+  "submittedAt": "…",
   "slotIds": ["slot-0900", "slot-1000"],
-  "sop": "I want to contribute clear and useful recruitment content for the club.",
+  "sop": "I would like to write clear posts that help new members find the right team.",
   "cv": { "fileName": "cv.pdf", "sizeBytes": 204800 },
   "screeningStatus": "pendingReview",
   "confirmedInterview": null,
@@ -133,13 +135,12 @@ The same Applicant may create an independent Application for another Position:
 
 ```sh
 curl -i -X POST http://localhost:3001/api/applications \
-  -H "Authorization: Bearer {{token:studentA}}" \
+  -H "Authorization: Bearer {{token:studentC}}" \
   -F "campaignId=cmp-2026-hk1" \
   -F "positionId=pos-comms" \
-  -F "email=minh.anh@demo.example" \
-  -F "faculty=Information Technology" \
-  -F "sop=I can coordinate messages and work with different recruitment teams." \
-  -F "slotIds=slot-0900" \
+  -F "email=lan.chi@demo.example" \
+  -F "faculty=Business Administration" \
+  -F "sop=I can keep announcements consistent across the club's channels." \
   -F "slotIds=slot-1000" \
   -F "cv=@{{file:cv.pdf:200KB}};type=application/pdf"
 ```
@@ -149,14 +150,14 @@ HTTP/1.1 201 Created
 Content-Type: application/json
 
 {
-  "id": "A02",
+  "id": "A05",
   "campaignId": "cmp-2026-hk1",
-  "applicantId": "ap-minhanh",
+  "applicantId": "ap-lanchi",
   "positionId": "pos-comms",
   "positionName": "Communications",
-  "submittedAt": "2026-11-17T09:12:00+07:00",
-  "slotIds": ["slot-0900", "slot-1000"],
-  "sop": "I can coordinate messages and work with different recruitment teams.",
+  "submittedAt": "…",
+  "slotIds": ["slot-1000"],
+  "sop": "I can keep announcements consistent across the club's channels.",
   "cv": { "fileName": "cv.pdf", "sizeBytes": 204800 },
   "screeningStatus": "pendingReview",
   "confirmedInterview": null,
@@ -164,37 +165,28 @@ Content-Type: application/json
 }
 ```
 
-Student B creates A03 for ownership and scheduling coverage:
+Student A already has A01 for Content (seed); a second Content application is refused, names A01 and stores nothing:
 
 ```sh
 curl -i -X POST http://localhost:3001/api/applications \
-  -H "Authorization: Bearer {{token:studentB}}" \
+  -H "Authorization: Bearer {{token:studentA}}" \
   -F "campaignId=cmp-2026-hk1" \
-  -F "positionId=pos-comms" \
-  -F "email=quoc.bao@demo.example" \
-  -F "faculty=Design" \
-  -F "sop=I want to support visual and written communications for recruitment." \
-  -F "slotIds=slot-1000" \
+  -F "positionId=pos-content" \
+  -F "email=minh.anh@demo.example" \
+  -F "faculty=Information Technology" \
+  -F "sop=I want to contribute clear and useful recruitment content for the club." \
+  -F "slotIds=slot-0900" \
   -F "cv=@{{file:cv.pdf:200KB}};type=application/pdf"
 ```
 
 ```http
-HTTP/1.1 201 Created
+HTTP/1.1 409 Conflict
 Content-Type: application/json
 
 {
-  "id": "A03",
-  "campaignId": "cmp-2026-hk1",
-  "applicantId": "ap-quocbao",
-  "positionId": "pos-comms",
-  "positionName": "Communications",
-  "submittedAt": "2026-11-17T09:14:00+07:00",
-  "slotIds": ["slot-1000"],
-  "sop": "I want to support visual and written communications for recruitment.",
-  "cv": { "fileName": "cv.pdf", "sizeBytes": 204800 },
-  "screeningStatus": "pendingReview",
-  "confirmedInterview": null,
-  "result": null
+  "error": "You have already applied for this position.",
+  "code": "DUPLICATE_APPLICATION",
+  "details": { "existingApplicationId": "A01" }
 }
 ```
 
@@ -275,7 +267,7 @@ Content-Type: application/json
     "id": "cmp-2026-hk1",
     "name": "ClubFlow 2026 Recruitment",
     "status": "published",
-    "applicationsClosedAt": "2026-11-17T10:00:00+07:00"
+    "applicationsClosedAt": "…"
   },
   "phase": "closed",
   "acceptingApplications": false
@@ -284,4 +276,5 @@ Content-Type: application/json
 
 ## Changes
 
+- 2026-11-21 (PA#4): This file runs alone on a fresh seed, where A01 and A02 (Student A) and A03 (Student B) already exist. The submission examples now use Student C: Content creates `A04` and Communications `A05` (was Student A creating A01 and A02 and Student B creating A03). Added the refused duplicate: Student A applying for Content again gets `409 DUPLICATE_APPLICATION` with `details.existingApplicationId: "A01"` (rule R3). `submittedAt` and `applicationsClosedAt` are server times, shown as `"…"`. `GET /api/me/applications` for Student A still lists the seeded A01 and A02. Why: the PA#4 seed state and the rule that each contract file runs on its own.
 - 2026-11-18: Added the final public campaign projection, three coherent multipart examples with supported token/file placeholders, own-application visibility rules, duplicate/closed errors, and the Executive early-close bridge used by the main flow.
