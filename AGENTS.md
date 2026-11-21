@@ -45,18 +45,16 @@ Rules:
 - Components MUST NOT contain unrelated data-access logic.
 - Do NOT introduce Redux or another global state library without an approved requirement.
 
-### PA#3 Frontend Delivery Constraints
+### Frontend Delivery Constraints (PA#4; PA#3 was handed in)
 
-- React source MUST remain in `client/`, and existing UI behavior and business logic MUST be preserved during structural or integration work.
-- PA#3 work MUST follow contract-first, then HTTP mock-first delivery: define and review `docs/api/` before implementing `mock/`, and implement/review the HTTP mock before connecting domain services.
-- Runtime domain requests MUST use relative `/api` paths. Do not hardcode hosts, ports, or absolute API URLs in application source.
-- Main-flow business data MUST NOT be hardcoded in components. API-backed screens MUST provide loading, error with Retry, empty, and successful states.
-- Do not add or change API contract endpoints, mock behavior/data, or dependencies without explicit approval and coordinated review.
-- Call only endpoints that exist in `docs/api/`. If a screen needs one that is missing, stop and say so; do not call it, and do not edit `docs/api/` or `mock/` to make it exist.
-- When a change to `docs/api/` or `mock/` is approved, add a dated line to that file's `## Changes` section, and read `git diff -- docs/api mock` after every assistant request; reject any change nobody asked for.
-- Stack for PA#3: React Router (`BrowserRouter`), plain CSS bundled by Vite, no form library, no other framework. Adding any dependency needs explicit approval.
-- Before a hand-in: build with `NODE_ENV=production` (a development bundle sends every request twice), start `node mock/server.mjs` fresh, run `node tools/contract-check.mjs`, then open every route as each demo account at 360, 768 and 1280 px in the `normal`, `slow`, `error` and `empty` modes.
-- C1-C11 flows, the `normal`/`slow`/`error`/`empty` HTTP mock modes, direct-route access, and responsive checks at 360 px, 768 px, and 1280 px are PA#3 acceptance gates.
+- React source stays in `client/`; existing UI behavior and business logic are preserved during integration work.
+- Runtime domain requests use relative `/api` paths only. Never hardcode hosts, ports, or absolute API URLs in application source; `client/vite.config.js` proxies `/api` to the server on port 3001.
+- Main-flow business data is never hardcoded in components. API-backed screens provide loading, error with Retry, empty, and successful states.
+- Call only endpoints that exist in `docs/api/`. If a screen needs one that is missing, stop and say so; do not call it, and do not edit `docs/api/` to make it exist.
+- A `401` from the server clears the session and opens sign-in with a message. The server's refusal reasons (an Unassigned reason, a Conflict, a refused confirmation, field errors) appear on the screen, not a generic error.
+- Stack: React Router (`BrowserRouter`), plain CSS bundled by Vite, no form library, no other framework. Adding any dependency needs explicit approval.
+- `mock/` (the PA#3 HTTP mock) is kept only for front-end work until the screens run on the server; it is not kept in step with PA#4 contract changes and is not marked.
+- Before a hand-in: build with `NODE_ENV=production` (a development bundle sends every request twice), seed and start the server fresh, then walk C1–C11 from `client/dist/` (`npx vite preview`) with the demo accounts at 360, 768 and 1280 px, and check that what the walk created is still there after restarting the server without seeding.
 - Preserve semantic HTML, one `h1` per screen, labeled form controls, link/button semantics, 44 px mobile targets, and no horizontal page scroll.
 
 ---
