@@ -86,6 +86,7 @@ How to read this section:
 ### Q-01 — Deterministic first-fit scheduling
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): Schedule only Shortlisted applications; take applications by submission time, earliest first, Application ID breaking ties; for each, try the earliest slot first, then interviewers and rooms in a fixed order; if nothing fits, mark it Unassigned with its reason for the Executive. No global optimisation. **Outcome:** the selected decision below is confirmed.
 - **Selected decision:**
   1. Consider Shortlisted applications by `submittedAt` ascending; break an equal timestamp by Application ID ascending.
   2. Consider valid session start times chronologically.
@@ -105,6 +106,7 @@ How to read this section:
 ### Q-02 — Date, time and time zone convention
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): Use Vietnam time (UTC+7). Applications are accepted before the closing moment and refused from that moment on; when the screen only picks a closing date, the whole chosen day is accepted and applications close at 00:00 the next day. **Outcome:** confirmed; for PA#4 a campaign is open when `opensOn <= APP_TODAY <= closesOn`.
 - **Selected decision:**
   - Business time zone: `Asia/Ho_Chi_Minh` (UTC+7, no daylight saving).
   - An absolute instant is stored and sent in UTC as an ISO 8601 string, for example `2026-11-05T02:00:00.000Z`. PostgreSQL target type: `TIMESTAMPTZ`.
@@ -131,6 +133,7 @@ How to read this section:
 ### Q-03 — Lock the campaign configuration when the campaign is published
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): After Published the Executive may still edit the campaign: while applications are open, add positions, change quotas, extend or close early. Positions that already have applications are kept. The interview date and the availability slots are locked from the first valid application. After the schedule is Confirmed, campaign configuration, submitted applications and the official schedule are read-only. **Outcome:** supersedes "published = read-only" below. The PA#3 contract (`docs/api/07-campaign-management.md`: published edits, `POSITION_HAS_APPLICATIONS`, `INTERVIEW_SETUP_LOCKED`) already follows this answer.
 - **Selected decision:**
   - `Draft`: the Executive edits the whole configuration; Save Draft and Preview are available; Publish is available after validation (BR-01) and asks for confirmation.
   - `Published`: the campaign configuration is read-only. The Executive still reviews applications, enters interviewer availability, chooses rooms and prepares the draft schedule.
@@ -157,6 +160,7 @@ How to read this section:
 ### Q-04 — Minimal interview assessment
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): The assigned Interviewer submits one assessment per interviewed slot. The brief sets no required fields, so a simple comment form is enough; criteria scores and a Pass/Fail recommendation are optional; the Executive decides the final result. Editing a submitted assessment is optional (see Q-06). **Outcome:** confirms the form below. The answer does not say the server must compare with the clock; with `APP_TODAY` fixed before the interview date, PA#4 follows rubric R8 (submission allowed once the schedule is Confirmed), see `specs/003-pa4-express-server/spec.md` FR-13. A follow-up question is posted in the same thread.
 - **Selected decision:**
   - Required: interview notes (free-text feedback).
   - Optional: the interviewer's recommendation, `Pass` or `Fail`. It is advice only; the Executive keeps the final Pass/Fail authority and may decide differently.
@@ -178,6 +182,7 @@ How to read this section:
 ### Q-05 — In-app notification and Brevo result email
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): Publishing results sends an in-app notification to the applicant; that is what the brief requires. Automatic email is outside the common business scope; whether a Brevo integration fits the assignment is a question for the lecturer. **Outcome:** supersedes the Brevo email below. PA#4 builds the in-app notification only (marking runs offline).
 - **Selected decision:** Publishing final results is the only notification trigger. It creates an in-app notification and queues one transactional result email per published application. The backend sends email through Brevo using one common template. There is no realtime requirement and no SMS, push or marketing workflow.
 - **Business rationale:** Applicants need one clear result notice, while a single transactional template keeps delivery simple and consistent. Tying both channels to publication prevents premature disclosure of recorded but unpublished decisions.
 - **Implementation scope:** Existing in-app frontend behavior, mock-mode wording, tests and the future backend/Brevo contract. React does not call Brevo and no credential or environment variable was added.
@@ -190,6 +195,7 @@ How to read this section:
 ### Q-06 — No exceptional editing or override workflows
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): Applicant edit or withdraw of a submitted application is optional; if supported, only while the campaign accepts applications and before the application is reviewed. Interviewer edit of a submitted assessment is optional; if supported, only the assigned Interviewer, before final results are published. A Confirmed schedule is read-only; the Executive edits the draft before confirming, and later changes are handled outside the system. **Outcome:** the selected decision below stays the baseline; an optional withdraw action is a candidate "beyond the brief" feature for PA#6, added to the contract first if built.
 - **Selected decision:**
   - A submitted application, including its CV and selected availability, is read-only. There is no edit or withdraw action.
   - A saved `Shortlisted` or `Rejected` screening decision is final. There is no reverse, undo or override action.
@@ -211,6 +217,7 @@ How to read this section:
 ### Q-07 — Protected Cloudinary CV storage and retrieval
 
 - **Status:** TEAM-SELECTED — PENDING PRODUCT OWNER CONFIRMATION.
+- **Product Owner answer** ([post](https://www.facebook.com/share/p/1DHPpDkB2n/), recorded 2026-11-21): The CV must be a PDF of at most 5 MB. The Applicant sees only their own CV, the Interviewer only CVs of assigned applications, the Executive CVs of the campaigns they manage — also when the file URL is opened directly. The brief does not prescribe a storage technology; check the assignment and ask the lecturer for technical constraints. **Outcome:** supersedes Cloudinary below. The PA#4 rubric requires files on disk in `UPLOAD_DIR` under server-made names, served only through the authorised `GET /api/applications/{applicationId}/cv`.
 - **Selected decision:** The React application submits the CV in `FormData`; Express/Multer accepts one PDF up to 5 MB; the backend uploads it to non-public/protected Cloudinary storage and stores only application-linked metadata in PostgreSQL. CV retrieval always passes through an authorized backend decision based on role and the interview/application assignment. A public Cloudinary `secure_url` is not an access-control mechanism.
 - **Business rationale:** CVs contain private applicant information. Keeping credentials and authorization on the server prevents a browser user from bypassing ClubFlow permissions with a copied permanent URL.
 - **Implementation scope:** Existing `FileField`, FormData/api-client behavior, client/mock validation, tests and the future backend/Cloudinary contract. No real upload, Cloudinary SDK, secret, endpoint or database change was added.
