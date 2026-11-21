@@ -1,0 +1,48 @@
+name: CI
+
+# Runs the same gate commands as AGENTS.md and HARNESS.md, on every push and pull request.
+on:
+  push:
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Placeholders for the current backend config module; replaced by DATABASE_URL in PA#4 step 3.
+      NODE_ENV: test
+      BACKEND_PORT: '3001'
+      FRONTEND_ORIGIN: http://localhost:5173
+      DB_HOST: localhost
+      DB_PORT: '5432'
+      DB_NAME: clubflow_ci
+      DB_USER: clubflow_ci
+      DB_PASSWORD: ci-only-not-a-secret
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Generate a throwaway JWT secret
+        run: echo "JWT_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests (client, backend, mock)
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+        env:
+          NODE_ENV: production
