@@ -3510,3 +3510,92 @@ Update the format of the AI log and the self-assessment.
 
 **Summary (non-verbatim):** The pasted review found the package, the mock modes, contract-check (56/56) and the commit order correct, and proposed four fixes: an English version of the Vietnamese prompts in `brief.md`; the "Not recorded at the time" lines in `AI-LOG.md` (no change proposed); `FRONTEND.md` still saying 52 of 52 and a "Verified" status column in its team table; and the stale `.git/.MERGE_MSG.swp`. It ended by offering to fix items 1 and 3.
 
+## PA#4
+
+Entries below this heading belong to PA#4. The PA#3 entries above are unchanged. The record policy above still applies.
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 1 - Implement the issue brief
+
+**Record type:** Exact prompt. The file it names is the team's own Vietnamese brief for issue #13 (kept in `internal_notes/`, which git ignores); it is summarised, not reproduced.
+
+**Summary (non-verbatim):** Read `issue-13.md` and implement it. The brief asks for: contract first (`docs/api/07-campaign-management.md`: opening requests, PA#4 seed example, draft date order); migrations `020`, `030` and their seeds; `GET`/`POST`/`PATCH /api/campaigns…`, `DELETE …/positions/{id}` and `POST …/publish` (R1) in the skeleton's layers; R1 tests committed red before the code; the C3 check; and the issue's "Done when" list. It says to ask the team before deciding its open points. Asked through the assistant's question form, the team chose: PR 1 now and the "publish succeeds" test in PR 2 after migration `040`; slots computed per hour of the window; a published campaign active from `opensOn` through `interviewDate`; local commits only.
+
+**Exact prompt (verbatim):**
+
+`````text
+Read the issue-13.md and implement it.
+`````
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 2 - Suggest the open decisions from the requirements
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Before answering the last two questions (which dates make a campaign "active", and how far to go with git), read `docs/requirements` and suggest the decisions.
+
+**Exact prompt (verbatim):**
+
+`````text
+Read docs/requirements clarify and suggest for me the decisions.
+`````
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 3 - Check the "Done when" list
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Check the work against the issue's "Done when" list and say what is left.
+
+**Exact prompt (verbatim):**
+
+`````text
+Does this satisfied the "done means". What is left back.
+`````
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 4 - Write BACKEND.md and check again
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** For "Done when" item 7, write `BACKEND.md` with this issue's rows. For item 6, count `npm test` for this issue's scope only. Then check again whether the issue is complete.
+
+**Exact prompt (verbatim):**
+
+`````text
+  #7 (Done means) Write a BACKEND.md and noted in that
+  6. npm test cover the scope for this issue, not all. 
+Then verify again this issue complete?
+`````
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 5 - Explain "one publish that succeeds"
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Explain what the issue means by "one publish that succeeds", without adding an `AI-LOG.md` entry for this question.
+
+**Exact prompt (verbatim):**
+
+`````text
+What is "one publish that succeeds", no log AI on this.
+`````
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 6 - Next steps
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Say what to do next.
+
+**Exact prompt (verbatim):**
+
+`````text
+What to do next
+`````
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Request 7 - Close out PR 1
+
+**Record type:** Exact prompt.
+
+**Summary (non-verbatim):** Save this session's prompts in `brief.md`, then push the branch and open PR 1 into `feature/pa4`.
+
+**Exact prompt (verbatim):**
+
+`````text
+Close out PR1 and save this prompt into brief.
+`````
