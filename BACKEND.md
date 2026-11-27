@@ -153,3 +153,4 @@ To be written (T061).
 | `POST /api/campaigns/{campaignId}/publish` never succeeds: it always reports `roomIds` and `assignments` (R1 "publish succeeds" has no test yet). | Rooms and interviewer assignments arrive with migration `040`. | T051 |
 | `GET /api/campaigns/{campaignId}` returns `applicationCount: 0`, an empty, unlocked `interviewSetup`, and `locked: false`; `DELETE …/positions/{positionId}` never answers `409 POSITION_HAS_APPLICATIONS`. | Applications arrive with migration `050`. | T044, then T050 |
 | `409 CAMPAIGN_CONFIRMED` is never answered by `PATCH`/`DELETE` on a campaign. | The schedule and its confirmation do not exist yet. | T055 |
+| `POST /api/campaigns/{campaignId}/close-applications` never answers `409 CAMPAIGN_LOCKED`. | The schedule and its confirmation do not exist yet. | T055 |
