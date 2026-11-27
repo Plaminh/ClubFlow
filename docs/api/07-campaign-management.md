@@ -4,6 +4,8 @@ These Executive endpoints cover C3 and C4. Campaign preview is intentionally cli
 
 **Starting state (PA#4).** Runs alone on a fresh seed and needs nothing more: `cmp-2026-hk1` is seeded published with A01–A03, so its interview setup is already locked (`409 INTERVIEW_SETUP_LOCKED`) and its positions with applications cannot be deleted; the create/publish/edit examples work on the new draft `cmp-2027-hk1` that this file creates.
 
+**Opening requests.** Run from top to bottom, the requests below build their own state on the fresh seed: `POST /api/campaigns` creates the draft `cmp-2027-hk1` with `pos-2027-content`; `PATCH /api/campaigns/cmp-2027-hk1` adds `pos-2027-event-operations`; `DELETE …/positions/pos-2027-event-operations` removes it again; `PATCH …/interview-setup` selects rooms and an Interviewer for Content; `POST …/publish` publishes the draft; the last `PATCH` edits the published campaign.
+
 ## Campaign Write Fields
 
 | Field | Type | Rules |
@@ -13,7 +15,7 @@ These Executive endpoints cover C3 and C4. Campaign preview is intentionally cli
 | `description` | string | Required to publish; trimmed 1-4000 characters. |
 | `instructions` | string | Required to publish; trimmed 1-2000 characters. |
 | `opensOn` | date | Required to publish. |
-| `closesOn` | date | Required to publish; `opensOn <= closesOn < interviewDate`. |
+| `closesOn` | date | Required to publish; `opensOn <= closesOn < interviewDate`. The date order is checked when the Campaign is published and when a published Campaign is edited; a draft is saved with any date order. |
 | `positions` | array | Required to publish with at least one Position. |
 
 Position input fields are optional stable `id` for update, required `departmentName` (1-120), required `name` (1-120), positive integer `quota`, required `description` (1-2000), and required `requirements` (1-2000). A draft may temporarily contain incomplete values, but publish validates all fields.
@@ -45,14 +47,14 @@ Content-Type: application/json
     "instructions": "Submit one application per position.",
     "opensOn": "2026-11-10",
     "closesOn": "2026-11-30",
-    "applicationsClosedAt": "2026-11-17T10:00:00+07:00",
+    "applicationsClosedAt": null,
     "interviewDate": "2026-12-02",
     "interviewWindow": { "start": "09:00", "end": "12:00" },
     "slotMinutes": 30,
     "status": "published",
     "publishedAt": "2026-11-09T09:00:00+07:00"
   },
-  "phase": "closed",
+  "phase": "open",
   "positions": [
     {
       "id": "pos-content",
@@ -77,7 +79,8 @@ Content-Type: application/json
   ],
   "slots": [
     { "id": "slot-0900", "start": "2026-12-02T09:00:00+07:00", "end": "2026-12-02T10:00:00+07:00" },
-    { "id": "slot-1000", "start": "2026-12-02T10:00:00+07:00", "end": "2026-12-02T11:00:00+07:00" }
+    { "id": "slot-1000", "start": "2026-12-02T10:00:00+07:00", "end": "2026-12-02T11:00:00+07:00" },
+    { "id": "slot-1100", "start": "2026-12-02T11:00:00+07:00", "end": "2026-12-02T12:00:00+07:00" }
   ],
   "interviewSetup": {
     "interviewers": [
@@ -94,10 +97,10 @@ Content-Type: application/json
     ],
     "roomIds": ["room-a201", "room-b105"],
     "locked": true,
-    "lockReason": "scheduleConfirmed"
+    "lockReason": "applicationExists"
   },
-  "locked": true,
-  "lockReason": "scheduleConfirmed"
+  "locked": false,
+  "lockReason": null
 }
 ```
 
@@ -109,7 +112,7 @@ Content-Type: application/json
 
 **Request fields**: Campaign Write Fields. Initial `interviewDate`, `interviewWindow`, and `slotMinutes` are also required so availability slots can be previewed; Interviewer/room selections are configured by the setup endpoint.
 
-**Success**: `201` composite Campaign view. Errors: `400 VALIDATION_ERROR`; `401`; `403`; `409 ACTIVE_CAMPAIGN_CONFLICT` only if dates would create two simultaneously active published Campaigns.
+**Success**: `201` composite Campaign view. Errors: `400 VALIDATION_ERROR`; `401`; `403`; `409 ACTIVE_CAMPAIGN_CONFLICT` only if dates would create two simultaneously active published Campaigns. A published Campaign counts as active from `opensOn` through `interviewDate`.
 
 ```http
 POST /api/campaigns HTTP/1.1
@@ -161,7 +164,7 @@ Content-Type: application/json
   },
   "phase": "draft",
   "positions": [
-    { "id": "pos-2027-content", "departmentId": "dep-communications", "departmentName": "Communications", "name": "Content", "quota": 2, "description": "Create useful club content.", "requirements": "Clear writing.", "applicationCount": 0 }
+    { "id": "pos-2027-content", "departmentId": "dep-comms", "departmentName": "Communications", "name": "Content", "quota": 2, "description": "Create useful club content.", "requirements": "Clear writing.", "applicationCount": 0 }
   ],
   "slots": [
     { "id": "slot-0900", "start": "2027-02-01T09:00:00+07:00", "end": "2027-02-01T10:00:00+07:00" },
@@ -421,6 +424,8 @@ Content-Type: application/json
 ```
 
 ## Changes
+
+- 2026-11-28 (PA#4): Added the opening requests. The `GET cmp-2026-hk1` example now shows the PA#4 seed (applications open, so `applicationsClosedAt: null`, `phase: "open"`, the three slots of the `09:00`–`12:00` window, interview setup locked by `applicationExists`, no confirmed schedule). The `POST` example's `departmentId` is `dep-comms`, because a Position reuses the existing department with the same name and the seed already has `dep-comms` (Communications). `closesOn`: the date order is checked at publish and when a published Campaign is edited; a draft is saved with any date order. A published Campaign counts as active from `opensOn` through `interviewDate` for `409 ACTIVE_CAMPAIGN_CONFLICT`. No endpoint, field or code changed. Why: rule R1 refuses at publish a campaign whose closing date is before its opening date, and the contract says a draft may hold incomplete values, so that draft must be savable. Business Description §2 keeps a published campaign active until recruitment completes, which cannot come before its interview day.
 
 - 2026-11-21 (PA#4): Added the PA#4 starting state: the fresh seed is enough; `cmp-2026-hk1` has seeded applications, so its interview setup is locked from the start. No endpoint, field or status changed. Why: PA#4 runs each contract file on a fresh seed.
 - 2026-11-19: Example values aligned with the mock's data: position description and requirements in the `GET` example, `departmentId` `dep-communications` and slot ids `slot-0900`, `slot-1000`, `slot-1100` in the `POST /api/campaigns` example. Values only; no field or status changed.
