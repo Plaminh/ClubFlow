@@ -1627,3 +1627,19 @@ By hand: The team chose the PR split, the computed slots, the active period and 
 Verified: `npm test` in `server/`: 47 passed, 1 todo, 5 failed, the same 5 intentional `auth-401.test.js` tests as before (waiting for `GET /api/auth/me`, T041). Seed test: same state on an empty and a seeded database. Root `npm run lint` and `npm run format:check` clean. Extra probes through the app: unknown body fields are dropped, blank strings are stored as missing, a second 2027 draft gets `cmp-2027-hk2`, duplicate position names get `-2`/`-3`, Vietnamese names are slugged (`pos-2027-noi-dung`), a published position keeps its name and department. Not done: the C3 browser walk, because sign-in (T041) does not exist on the server yet.
 
 Follow-up (same day): asked to write `BACKEND.md` with the T050 rows and to check `npm test` for this issue's scope only. Kept: `BACKEND.md` with the rubric's nine sections, of which this issue fills section 4 (rows for `departments`, `campaigns`, `positions`), section 5 (R1 row and its check, requests and answers captured from the running app on a fresh seed) and section 9 (what waits for T044, T051, T055); the other sections say "To be written (T061)" for their owners. Verified: `npm test -- test/integration/api/campaigns.test.js test/db` 11 passed, 1 todo; root lint and format clean.
+
+## 2026-11-28 - PA#4 T052 (issue #15) - Close applications early
+
+Tool: Claude Code (Sonnet, subagent).
+
+Asked for: Implement issue #15 from the team's brief: `POST /api/campaigns/{campaignId}/close-applications`, tests committed red before the code, following the planner's recommendation for each open point and marking each one as provisional.
+
+Kept: `fafc6bb` (red test: `server/test/integration/api/close-applications.test.js`, 6 tests, all failing because the route did not exist: five with `404` where `200`, `403` or `409` was expected, one with `NOT_FOUND` where `CAMPAIGN_NOT_FOUND` was expected), `d237c6d` (route, controller, service `closeApplications`, repository `markApplicationsClosed`). The service locks the campaign row, refuses with `409 CAMPAIGN_NOT_ACCEPTING` unless `phaseOf` is `open` (draft, not yet open, past `closesOn`, or already closed early), sets `applications_closed_at = NOW()` and answers the three contract fields.
+
+Changed: Nothing in the contract, migrations or seed (the column from `020` already exists). Provisional choices, pending the team: no test calls `POST /api/applications` (T044 owns it; the refusal after closing belongs in its R2 test), `phaseOf` stays private to `campaign.service.js`, `applicationsClosedAt` is `NOW()` and is only ever tested for null, the error after confirmation stays `CAMPAIGN_LOCKED` as in the contract (a `shortcut:` comment, not tested before T055), test names start with `Close`/`Access` instead of an R id, and T052 is ticked in `tasks.md`.
+
+Rejected: A test for `409 CAMPAIGN_LOCKED` and an `it.todo` for the apply-after-close case (the rubric forbids `todo`). Exporting `phaseOf` for T043/T044 (not asked for). Comparing `applicationsClosedAt` with `APP_TODAY`.
+
+By hand: Posting the suggested comment to issue #6, opening the PR after T050 merges, and the decisions above.
+
+Verified: `npm test` in `server/`: 53 passed, 1 todo, 5 failed, the same 5 intentional `auth-401.test.js` tests (waiting for T041). Root `npm run lint` and `npm run format:check` clean. `git diff -- server/test docs/api` after the code commit: empty. Not done: the contract-check run and the C3 browser walk, because sign-in (T041) does not exist on the server yet.
