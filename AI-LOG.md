@@ -1607,3 +1607,21 @@ By hand: The team made the repository public so the run results could be read.
 Verified: Client 287/287 and mock 17/17 under Node 22.23.5 (`npx node@22`) and Node 26. Run #17 (`ba4df09`): format, lint, client/mock tests and `npm ci --ignore-scripts` in `server/` green; server tests red only on the 5 intentional `auth-401.test.js` tests (waiting for `GET /api/auth/me`, T041).
 
 Incident: The CI gate caught it, not reading. Since `88fe9d6` every run failed in "Tests (client, …)" on `apiClient.test.js:67` and `applicationHttpService.test.js:40`: `expected Blob { type: 'application/pdf' } to be an instance of Blob`. Under jsdom, `fetch()` returns Node's `Blob` on Node 22 but jsdom's on Node 26, so `instanceof Blob` held only locally. Because that step failed first, the mock and server tests had never run in CI until #17. Rule kept: CI runs Node 22, the marker's version (`AGENTS.md`, stack line).
+
+---
+
+## 2026-11-28 - PA#4 T050 (issue #13) - Campaigns, departments, positions; C3 (R1), PR 1
+
+Tool: Claude Code (Claude Sonnet 5.5).
+
+Asked for: Read the issue #13 brief and implement it.
+
+Kept: `de5ed11` (contract: opening requests, PA#4 seed `GET` example, draft date order, active period), `7b00612` (migrations `020`, `030` and their seed modules), `f7365d3` (red test: 8 failing with `404`, one `todo`), `ffb5640` (route, validators, controller, service, repository for `GET`/`POST`/`PATCH /api/campaigns…`, `DELETE …/positions/{id}`, `POST …/publish`).
+
+Changed: The team decided the open points of the brief before any code: PR 1 now, and the "publish succeeds" test in PR 2 after `040` (T051); until then publish always reports `roomIds` and `assignments`, `applicationCount` is 0 and the setup is unlocked, each marked `shortcut:` in `campaign.service.js`. Slots are computed per hour from the window, so the seed has `slot-0900`, `slot-1000`, `slot-1100` (the mock data had two). A published campaign is active from `opensOn` through `interviewDate` (closest date stand-in for Business Description §2, which keeps it active until results are published; the strict reading would refuse the contract's own publish example). The assistant's first route draft protected the whole router with `router.use(authenticate)`; changed to per-route auth so the public `GET /api/campaigns/current` (T042) is not refused by this router. The `POST` example's `departmentId` is now `dep-comms`, because positions reuse the seeded department with the same name.
+
+Rejected: Returning `409 ACTIVE_CAMPAIGN_CONFLICT` when a draft's id `cmp-<year>-hk1` is taken, as the mock did: a draft is never active, so the second campaign of a year gets `hk2`. Building the campaign SELECT from a column constant with `${}`: rewritten as plain literals to keep to the "no template-string SQL" rule. Ticking T050 in `tasks.md`: the publish-success part waits for `040`.
+
+By hand: The team chose the PR split, the computed slots, the active period and local commits only (no push or PR by the assistant).
+
+Verified: `npm test` in `server/`: 47 passed, 1 todo, 5 failed, the same 5 intentional `auth-401.test.js` tests as before (waiting for `GET /api/auth/me`, T041). Seed test: same state on an empty and a seeded database. Root `npm run lint` and `npm run format:check` clean. Extra probes through the app: unknown body fields are dropped, blank strings are stored as missing, a second 2027 draft gets `cmp-2027-hk2`, duplicate position names get `-2`/`-3`, Vietnamese names are slugged (`pos-2027-noi-dung`), a published position keeps its name and department. Not done: the C3 browser walk, because sign-in (T041) does not exist on the server yet.
