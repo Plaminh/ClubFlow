@@ -121,6 +121,11 @@ export async function markPublished(id, db = pool) {
   ]);
 }
 
+// Q-03 early close: the moment the Executive closed applications.
+export async function markApplicationsClosed(id, db = pool) {
+  await db.query('UPDATE campaigns SET applications_closed_at = NOW() WHERE id = $1', [id]);
+}
+
 export async function findPositions(campaignId, db = pool) {
   const { rows } = await db.query(
     `SELECT p.id, p.department_id, d.name AS department_name, p.name, p.quota, p.description,

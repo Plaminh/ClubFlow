@@ -40,6 +40,12 @@ router.post(
   validate({ params: campaignParams }),
   asyncHandler(controller.publishCampaign),
 );
+router.post(
+  '/:campaignId/close-applications',
+  executive,
+  validate({ params: campaignParams }),
+  asyncHandler(controller.closeApplications),
+);
 router.delete(
   '/:campaignId/positions/:positionId',
   executive,

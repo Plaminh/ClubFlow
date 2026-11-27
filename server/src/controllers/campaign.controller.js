@@ -29,3 +29,8 @@ export async function publishCampaign(req, res) {
   const view = await campaignService.publishCampaign(req.validated.params.campaignId);
   res.status(HTTP_STATUS.OK).json(view);
 }
+
+export async function closeApplications(req, res) {
+  const summary = await campaignService.closeApplications(req.validated.params.campaignId);
+  res.status(HTTP_STATUS.OK).json(summary);
+}

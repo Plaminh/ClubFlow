@@ -280,3 +280,33 @@ export function publishCampaign(id) {
     return viewOf(await campaigns.findCampaign(id, db), db);
   });
 }
+
+// docs/api/02-public-applicant.md (Q-03 early close). applicationsClosedAt is the real time of the
+// action; every check only asks whether it is null, never compares it with env.appToday.
+export function closeApplications(id) {
+  return withTransaction(async (db) => {
+    const campaign = await lockedCampaign(id, db);
+    // shortcut: schedule confirmation (T055) is not stored yet, so 409 CAMPAIGN_LOCKED cannot
+    // happen; refuse it here, before the phase check, once it is.
+    if (phaseOf(campaign) !== 'open') {
+      throw new AppError(
+        HTTP_STATUS.CONFLICT,
+        'CAMPAIGN_NOT_ACCEPTING',
+        'Campaign is not accepting applications.',
+      );
+    }
+    await campaigns.markApplicationsClosed(id, db);
+    const closed = await campaigns.findCampaign(id, db);
+    const phase = phaseOf(closed);
+    return {
+      campaign: {
+        id: closed.id,
+        name: closed.name,
+        status: closed.status,
+        applicationsClosedAt: closed.applicationsClosedAt,
+      },
+      phase,
+      acceptingApplications: phase === 'open',
+    };
+  });
+}
