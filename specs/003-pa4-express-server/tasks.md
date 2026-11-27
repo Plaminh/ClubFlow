@@ -109,7 +109,7 @@ Order of work that follows from it: Hoàng starts with `020`–`030`, Nguyệt w
 
 - [ ] T050 `020`, `030` campaigns, departments, positions; C3 `GET`/`POST`/`PATCH /api/campaigns…`, `DELETE …/positions/{id}`, `POST …/publish` — **R1**
 - [ ] T051 `040` rooms, slots, assignments; C4 `PATCH …/interview-setup`
-- [ ] T052 `POST …/close-applications`
+- [x] T052 `POST …/close-applications`
 - [ ] T053 `060` notes and decisions; C7 list (search, filter, sort, pagination), detail, CSV, private note, screening decision — **R4**, **S1** (sort/filter field names from a list), **S4**
 - [ ] T054 `070` schedule; C8 generate, row edit, save, CSV — **R5**, **R6**. Generation is first-fit in the product owners' order (spec FR-18): applications by `submittedAt` then ID, earliest slot first, interviewers then rooms by stable ID, no backtracking; the conflict check covers applicant, interviewer and room
 - [ ] T055 C9 `POST …/schedule/confirm` and the lock on campaign, applications and schedule — **R7**
