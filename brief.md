@@ -3599,3 +3599,9 @@ What to do next
 `````text
 Close out PR1 and save this prompt into brief.
 `````
+
+## 2026-11-28 - PA#4 T052 (issue #15) - Request 1 - Implement the issue brief
+
+**Record type:** Delegated prompt (written by the coordinating assistant for a subagent, not typed by the team); summarised, not reproduced.
+
+**Summary (non-verbatim):** Implement issue #15 (T052, close applications early) in the `ClubFlow-t052` worktree, stacked on the T050 branch, from the team's Vietnamese brief in `internal_notes/issue-15.md`. Read the issue, the docs, the rubric and the T050 code first. Follow the planner's recommendation for each open point of the brief only where it is reversible, and mark it provisional in the brief. Commit order: tests first and seen failing, then the code, then the docs (`BACKEND.md`, `AI-LOG.md`, `brief.md`, `tasks.md`). Do not push, open a PR or comment on GitHub; stage files by name only; do not edit tests, the contract or the seed to make something pass.
