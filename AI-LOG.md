@@ -1607,3 +1607,30 @@ By hand: The team made the repository public so the run results could be read.
 Verified: Client 287/287 and mock 17/17 under Node 22.23.5 (`npx node@22`) and Node 26. Run #17 (`ba4df09`): format, lint, client/mock tests and `npm ci --ignore-scripts` in `server/` green; server tests red only on the 5 intentional `auth-401.test.js` tests (waiting for `GET /api/auth/me`, T041).
 
 Incident: The CI gate caught it, not reading. Since `88fe9d6` every run failed in "Tests (client, …)" on `apiClient.test.js:67` and `applicationHttpService.test.js:40`: `expected Blob { type: 'application/pdf' } to be an instance of Blob`. Under jsdom, `fetch()` returns Node's `Blob` on Node 22 but jsdom's on Node 26, so `instanceof Blob` held only locally. Because that step failed first, the mock and server tests had never run in CI until #17. Rule kept: CI runs Node 22, the marker's version (`AGENTS.md`, stack line).
+
+---
+
+## 2026-11-28 — PA#4 T041 — Authentication and profile API
+
+Tool: OpenCode (GPT-6 Luna Fast).
+
+Asked for: Implement T041 authentication, current-user, logout and own-profile endpoints with Supertest integration coverage, without changing the contract, T040 files, or protected 401 tests.
+
+Kept: Existing API contract, `authenticate`, `validate()`, `signUserToken(user)`, user migration/seed, stateless logout semantics, and `server/test/security/auth-401.test.js` unchanged.
+
+Changed: Added auth/profile routes, controllers, service and repository operations, Zod request validation, integration tests for successful and invalid login/profile/auth flows, and mounted the routers in `routes/index.js`. Ran Prettier on the three reported files. No API contract or T040 file changed.
+
+Rejected: Adding token revocation, accepting email as a login name, accepting client-selected roles, or persisting undocumented profile fields.
+
+By hand: Not recorded at the time; the team must review and understand the implementation before accepting it.
+
+Verified: `npm run format:check`, `npm run lint`, `git diff --check`,
+server validator middleware unit tests (6/6), root `npm test`
+(client 287/287; mock 17/17), and full server test suite
+(13 files passed; 55/55 tests passed) passed with PostgreSQL
+available. This includes T040 users migration/seed (3/3),
+T041 auth/profile integration (8/8), and protected endpoint
+token checks (5/5). The ECONNREFUSED message in errors.test.js
+was intentionally simulated; that test passed.
+
+Limitations: Re-run auth integration tests, `auth-401.test.js`, and full `server` tests with PostgreSQL available. T041 is not marked complete in `tasks.md` until its required tests pass.

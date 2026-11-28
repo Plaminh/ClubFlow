@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import healthRouter from './health.routes.js';
+import authRouter from './auth.routes.js';
+import profileRouter from './profile.routes.js';
 
 // Mounts one router per screen area and nothing else: no endpoint, check or SQL lives here.
 // Each owner adds their own file and one line below (specs/003-pa4-express-server/tasks.md):
@@ -10,5 +12,7 @@ import healthRouter from './health.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
+router.use('/auth', authRouter);
+router.use('/me', profileRouter);
 
 export default router;
