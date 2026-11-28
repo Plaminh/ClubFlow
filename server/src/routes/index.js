@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import campaignRouter from './campaign.routes.js';
 import healthRouter from './health.routes.js';
 
 // Mounts one router per screen area and nothing else: no endpoint, check or SQL lives here.
@@ -10,5 +11,8 @@ import healthRouter from './health.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
+// Mount routers with static /campaigns paths (GET /campaigns/current) above this line:
+// GET /campaigns/:campaignId would otherwise answer them with 401.
+router.use('/campaigns', campaignRouter);
 
 export default router;
